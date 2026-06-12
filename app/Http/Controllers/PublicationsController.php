@@ -301,10 +301,51 @@ class PublicationsController extends Controller
         ]);
     }
 
+    /**
+     * Append the next page of publication cards for infinite-scroll search results.
+     */
+    public function searchPublicationsPage(Request $request)
+    {
+        if (! $this->searchInfiniteScrollEnabled()) {
+            return response()->json(['ok' => false, 'error' => 'infinite_scroll_disabled'], 403);
+        }
+
+        $this->prepareRecordsSearchRequest($request);
+        $this->validateRecordsSearchRequest($request);
+
+        $publicationRequest = $this->recordsSearch->preparePublicationSearchRequest($request);
+        $publications = $this->publicationsRepo->get($publicationRequest);
+
+        $page = (int) $publications->currentPage();
+        $perPage = (int) $publications->perPage();
+        $listOffset = max(0, ($page - 1) * $perPage);
+        $loadedCount = min($publications->total(), $listOffset + $publications->count());
+
+        return response()->json([
+            'ok' => true,
+            'html' => view('publications.partials.publications_list_items', [
+                'publications' => $publications,
+                'listOffset' => $listOffset,
+            ])->render(),
+            'current_page' => $page,
+            'last_page' => (int) $publications->lastPage(),
+            'has_more' => $publications->hasMorePages(),
+            'total' => (int) $publications->total(),
+            'loaded_count' => $loadedCount,
+        ]);
+    }
+
+    protected function searchInfiniteScrollEnabled(): bool
+    {
+        return (settings()->search_pagination_mode ?? 'pagination') === 'infinite_scroll';
+    }
+
     protected function prepareRecordsSearchRequest(Request $request): void
     {
         $request->merge([
-            'term' => is_string($request->term) ? strip_tags(trim($request->term)) : null,
+            'term' => is_string($request->term)
+                ? \App\Support\PublicationSearchQuery::normalizeTerm($request->term)
+                : null,
         ]);
     }
 
@@ -378,6 +419,10 @@ class PublicationsController extends Controller
             'thematic_area_id' => $request->theme ?? $request->thematic_area_id,
         ]);
 
+        if ($this->searchInfiniteScrollEnabled()) {
+            $request->merge(['page' => 1]);
+        }
+
         $startTime = microtime(true);
 
         $data['sub_themes'] = ($request->thematic_area_id) ? $this->publicationsRepo->get_subthemes($request) : [];
@@ -435,6 +480,7 @@ class PublicationsController extends Controller
         $data['jsonLdFlags'] = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
         $data['aiSearchInsights'] = null;
         $data['aiSearchEnabled'] = (bool) (settings()->enable_ai_search ?? false);
+        $data['searchInfiniteScroll'] = $this->searchInfiniteScrollEnabled();
 
         $searchTerm = trim((string) ($request->input('term', '')));
         if ($data['aiSearchEnabled'] && mb_strlen($searchTerm) >= 2) {

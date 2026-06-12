@@ -113,8 +113,15 @@
         <script>
         (function () {
             var FRAGMENT_URL = @json(url('records/search/fragment'));
+            var PUBLICATIONS_PAGE_URL = @json(route('records.search.publications-page'));
+            var INFINITE_SCROLL_ENABLED = @json((settings()->search_pagination_mode ?? 'pagination') === 'infinite_scroll');
+            var INFINITE_STATUS_LOADING = @json(__('publications.search.loading_more'));
+            var INFINITE_STATUS_COMPLETE = @json(__('publications.search.all_results_loaded'));
+            var INFINITE_STATUS_ERROR = @json(__('publications.search.load_more_error'));
             var mainEl = document.getElementById('records-search-main');
             var sideDyn = document.getElementById('records-search-sidebar-dynamic');
+            var infiniteObserver = null;
+            var infiniteLoading = false;
             if (!mainEl) {
                 return;
             }
@@ -239,6 +246,186 @@
                 });
             }
 
+            function formatInfiniteStatus(loaded, total) {
+                return 'Showing ' + Number(loaded).toLocaleString() + ' of ' + Number(total).toLocaleString() + ' publications';
+            }
+
+            function disconnectInfiniteScroll() {
+                if (infiniteObserver) {
+                    infiniteObserver.disconnect();
+                    infiniteObserver = null;
+                }
+                infiniteLoading = false;
+            }
+
+            function updateInfiniteFooter(root, data) {
+                var wrap = (root || mainEl).querySelector('#records-search-publications');
+                var footer = (root || mainEl).querySelector('#records-search-infinite-footer');
+                if (!wrap || !footer) {
+                    return;
+                }
+
+                wrap.setAttribute('data-current-page', String(data.current_page || 1));
+                wrap.setAttribute('data-last-page', String(data.last_page || 1));
+                wrap.setAttribute('data-total', String(data.total || 0));
+                wrap.setAttribute('data-loaded', String(data.loaded_count || 0));
+
+                var status = footer.querySelector('#records-search-infinite-status');
+                if (status) {
+                    status.textContent = formatInfiniteStatus(data.loaded_count || 0, data.total || 0);
+                }
+
+                var loader = footer.querySelector('#records-search-infinite-loader');
+                if (loader) {
+                    loader.classList.add('d-none');
+                }
+
+                var complete = footer.querySelector('#records-search-infinite-complete');
+                var sentinel = footer.querySelector('#records-search-infinite-sentinel');
+
+                if (data.has_more) {
+                    if (complete) {
+                        complete.remove();
+                    }
+                    if (!sentinel) {
+                        sentinel = document.createElement('div');
+                        sentinel.id = 'records-search-infinite-sentinel';
+                        sentinel.className = 'records-search-infinite-sentinel';
+                        sentinel.setAttribute('aria-hidden', 'true');
+                        footer.appendChild(sentinel);
+                    }
+                } else {
+                    if (sentinel) {
+                        sentinel.remove();
+                    }
+                    if (!complete) {
+                        complete = document.createElement('p');
+                        complete.id = 'records-search-infinite-complete';
+                        complete.className = 'text-muted small mb-0';
+                        complete.textContent = INFINITE_STATUS_COMPLETE;
+                        footer.appendChild(complete);
+                    }
+                }
+            }
+
+            function loadNextSearchPage(root) {
+                if (!INFINITE_SCROLL_ENABLED || infiniteLoading) {
+                    return;
+                }
+
+                var scope = root || mainEl;
+                var wrap = scope.querySelector('#records-search-publications');
+                if (!wrap || wrap.getAttribute('data-infinite-scroll') !== '1') {
+                    return;
+                }
+
+                var currentPage = parseInt(wrap.getAttribute('data-current-page') || '1', 10);
+                var lastPage = parseInt(wrap.getAttribute('data-last-page') || '1', 10);
+                if (currentPage >= lastPage) {
+                    return;
+                }
+
+                var footer = scope.querySelector('#records-search-infinite-footer');
+                var loader = footer ? footer.querySelector('#records-search-infinite-loader') : null;
+                var list = scope.querySelector('#records-search-publications-list');
+                if (!list) {
+                    return;
+                }
+
+                infiniteLoading = true;
+                if (loader) {
+                    loader.classList.remove('d-none');
+                }
+
+                var params = new URLSearchParams(window.location.search);
+                params.delete('page');
+                params.set('page', String(currentPage + 1));
+                normalizeFacetArrayQueryKeys(params);
+
+                fetch(PUBLICATIONS_PAGE_URL + '?' + params.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                })
+                    .then(function (r) {
+                        if (!r.ok) {
+                            throw new Error('page failed');
+                        }
+                        return r.json();
+                    })
+                    .then(function (data) {
+                        if (!data.ok || !data.html) {
+                            throw new Error('invalid payload');
+                        }
+
+                        list.insertAdjacentHTML('beforeend', data.html);
+                        updateInfiniteFooter(scope, data);
+
+                        if (data.has_more) {
+                            window.initRecordsSearchInfiniteScroll(scope);
+                        } else {
+                            disconnectInfiniteScroll();
+                        }
+                    })
+                    .catch(function () {
+                        if (footer && !footer.querySelector('#records-search-infinite-retry')) {
+                            var retry = document.createElement('button');
+                            retry.type = 'button';
+                            retry.id = 'records-search-infinite-retry';
+                            retry.className = 'btn btn-sm btn-outline-secondary mt-2';
+                            retry.textContent = INFINITE_STATUS_ERROR;
+                            retry.addEventListener('click', function () {
+                                retry.remove();
+                                loadNextSearchPage(scope);
+                            });
+                            footer.appendChild(retry);
+                        }
+                    })
+                    .finally(function () {
+                        infiniteLoading = false;
+                        if (loader) {
+                            loader.classList.add('d-none');
+                        }
+                    });
+            }
+
+            window.initRecordsSearchInfiniteScroll = function (scope) {
+                if (!INFINITE_SCROLL_ENABLED) {
+                    disconnectInfiniteScroll();
+                    return;
+                }
+
+                disconnectInfiniteScroll();
+
+                var root = scope || mainEl;
+                var wrap = root.querySelector('#records-search-publications');
+                var sentinel = root.querySelector('#records-search-infinite-sentinel');
+                if (!wrap || wrap.getAttribute('data-infinite-scroll') !== '1' || !sentinel) {
+                    return;
+                }
+
+                if (!('IntersectionObserver' in window)) {
+                    sentinel.addEventListener('click', function () {
+                        loadNextSearchPage(root);
+                    });
+                    sentinel.style.height = '24px';
+                    sentinel.style.cursor = 'pointer';
+                    return;
+                }
+
+                infiniteObserver = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) {
+                            loadNextSearchPage(root);
+                        }
+                    });
+                }, { root: null, rootMargin: '240px 0px', threshold: 0.01 });
+
+                infiniteObserver.observe(sentinel);
+            };
+
             function runRecordsSearchAjax(fullUrl, opts) {
                 opts = opts || {};
                 var push = opts.push !== false;
@@ -297,8 +484,13 @@
                         }
                         window.initSearchSidebarFacets();
                         updateSidebarTagActiveState();
-                        if (typeof window.initAiSearchChat === 'function') {
+                        if (typeof window.initKhubSearchAssistant === 'function') {
+                            window.initKhubSearchAssistant(mainEl);
+                        } else if (typeof window.initAiSearchChat === 'function') {
                             window.initAiSearchChat(mainEl);
+                        }
+                        if (typeof window.initRecordsSearchInfiniteScroll === 'function') {
+                            window.initRecordsSearchInfiniteScroll(mainEl);
                         }
                     })
                     .catch(function () {
@@ -356,6 +548,9 @@
             document.addEventListener('DOMContentLoaded', function () {
                 window.initSearchSidebarFacets();
                 updateSidebarTagActiveState();
+                if (typeof window.initRecordsSearchInfiniteScroll === 'function') {
+                    window.initRecordsSearchInfiniteScroll(mainEl);
+                }
                 var side = document.getElementById('records-search-sidebar');
                 if (side) {
                     side.addEventListener('change', function (e) {

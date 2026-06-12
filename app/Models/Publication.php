@@ -24,24 +24,42 @@ class Publication extends Model
   
     public function toSearchableArray()
     {
-        if (! $this->relationLoaded('sub_theme')) {
-            $this->loadMissing('sub_theme:id,thematic_area_id');
-        }
-        if (! $this->relationLoaded('tags')) {
-            $this->loadMissing('tags:publication_id,tag_id');
-        }
-        if (! $this->relationLoaded('author')) {
-            $this->loadMissing('author:id,name');
-        }
+        $this->loadMissing([
+            'sub_theme:id,thematic_area_id,description',
+            'sub_theme.theme:id,description',
+            'tags.tag:id,tag_text',
+            'author:id,name',
+            'countries:id,name',
+            'data_category:id,name',
+        ]);
 
         $dateCreated = $this->date_created ?? $this->created_at;
+        $tagNames = $this->tags
+            ->map(fn ($publicationTag) => strip_tags((string) optional($publicationTag->tag)->tag_text))
+            ->filter()
+            ->unique()
+            ->values()
+            ->implode(', ');
+        $countryNames = $this->countries
+            ->pluck('name')
+            ->map(fn ($name) => strip_tags((string) $name))
+            ->filter()
+            ->unique()
+            ->values()
+            ->implode(', ');
 
         return [
             'title' => strip_tags((string) ($this->title ?? '')),
             'description' => plain_text_excerpt_from_html((string) ($this->description ?? ''), 8000),
             'associated_authors' => strip_tags((string) ($this->associated_authors ?? '')),
+            'author_affiliation' => strip_tags((string) ($this->author_affiliation ?? '')),
             'author_id' => (int) ($this->author_id ?? 0) ?: null,
             'author_name' => strip_tags((string) optional($this->author)->name),
+            'tag_names' => $tagNames,
+            'country_names' => $countryNames,
+            'thematic_area' => strip_tags((string) optional(optional($this->sub_theme)->theme)->description),
+            'sub_thematic_area' => strip_tags((string) optional($this->sub_theme)->description),
+            'data_category_name' => strip_tags((string) optional($this->data_category)->category_name),
             'sub_thematic_area_id' => (int) ($this->sub_thematic_area_id ?? 0) ?: null,
             'thematic_area_id' => (int) optional($this->sub_theme)->thematic_area_id ?: null,
             'publication_catgory_id' => (int) ($this->publication_catgory_id ?? 0) ?: null,
@@ -410,34 +428,7 @@ class Publication extends Model
 
     public function scopeSearchTerm($query, $term)
     {
-        $term = trim((string) $term);
-        if ($term !== '') {
-            // Escape LIKE wildcards so literal % and _ don't break search intent
-            $safeTerm = addcslashes($term, '%_');
-            $query->where(function ($q) use ($term, $safeTerm) {
-                $q->where('title', 'like', '%' . $safeTerm . '%')
-                    ->orWhere('description', 'like', '%' . $safeTerm . '%')
-                    ->orWhereIn('author_id', Author::where('name', 'like', '%' . $safeTerm . '%')->pluck('id'))
-                    // Search in associated authors (full phrase, e.g. "Beyande Raissa")
-                    ->orWhere('associated_authors', 'like', '%' . $safeTerm . '%');
-
-                // Multi-word author search: match when all words appear in associated_authors (any order)
-                $words = array_filter(preg_split('/\s+/u', trim($term), -1, PREG_SPLIT_NO_EMPTY), function ($w) {
-                    return strlen($w) > 1;
-                });
-                if (count($words) > 1) {
-                    $q->orWhere(function ($sub) use ($words) {
-                        foreach ($words as $w) {
-                            $sub->where('associated_authors', 'like', '%' . $w . '%');
-                        }
-                    });
-                }
-
-                if (states_enabled()) {
-                    $q->orWhereIn('geographical_coverage_id', GeoCoverage::where('name', 'like', '%' . $safeTerm . '%')->pluck('id'));
-                }
-            });
-        }
+        \App\Support\PublicationSearchQuery::apply($query, $term);
     }
 
     public function scopeFeatured($query, $subthemes)

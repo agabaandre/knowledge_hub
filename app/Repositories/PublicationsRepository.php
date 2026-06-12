@@ -2884,58 +2884,7 @@ public function togglePublicationActive(int $id): ?Publication
 
     private function applyDashboardResourceSearch($query, string $term): void
     {
-        $safeTerm = addcslashes($term, '%_');
-        $query->where(function ($q) use ($term, $safeTerm) {
-            $q->where('title', 'like', '%'.$safeTerm.'%')
-                ->orWhere('description', 'like', '%'.$safeTerm.'%')
-                ->orWhere('author_affiliation', 'like', '%'.$safeTerm.'%')
-                ->orWhere('associated_authors', 'like', '%'.$safeTerm.'%')
-                ->orWhereHas('author', function ($aq) use ($safeTerm) {
-                    $aq->where('name', 'like', '%'.$safeTerm.'%');
-                })
-                ->orWhereHas('country', function ($cq) use ($safeTerm) {
-                    $cq->where('name', 'like', '%'.$safeTerm.'%');
-                })
-                ->orWhereHas('countries', function ($cq) use ($safeTerm) {
-                    $cq->where('name', 'like', '%'.$safeTerm.'%');
-                })
-                ->orWhereIn('id', PublicationCountry::query()
-                    ->whereIn('country_id', Country::query()
-                        ->whereHas('region', function ($rq) use ($safeTerm) {
-                            $rq->where('region_name', 'like', '%'.$safeTerm.'%');
-                        })
-                        ->pluck('id'))
-                    ->pluck('publication_id'))
-                ->orWhereHas('sub_theme', function ($sq) use ($safeTerm) {
-                    $sq->where('description', 'like', '%'.$safeTerm.'%')
-                        ->orWhereHas('theme', function ($tq) use ($safeTerm) {
-                            $tq->where('description', 'like', '%'.$safeTerm.'%');
-                        });
-                })
-                ->orWhereHas('data_category', function ($dq) use ($safeTerm) {
-                    $dq->where('name', 'like', '%'.$safeTerm.'%');
-                })
-                ->orWhereIn('id', PublicationTag::query()
-                    ->whereIn('tag_id', Tag::query()->where('name', 'like', '%'.$safeTerm.'%')->pluck('id'))
-                    ->pluck('publication_id'));
-
-            if (function_exists('states_enabled') && states_enabled()) {
-                $q->orWhereIn('geographical_coverage_id', GeoCoverage::query()
-                    ->where('name', 'like', '%'.$safeTerm.'%')
-                    ->pluck('id'));
-            }
-
-            $words = array_filter(preg_split('/\s+/u', trim($term), -1, PREG_SPLIT_NO_EMPTY), function ($w) {
-                return strlen($w) > 1;
-            });
-            if (count($words) > 1) {
-                $q->orWhere(function ($sub) use ($words) {
-                    foreach ($words as $w) {
-                        $sub->where('associated_authors', 'like', '%'.$w.'%');
-                    }
-                });
-            }
-        });
+        \App\Support\PublicationSearchQuery::apply($query, $term);
     }
 
     public function adminDashboardRecentDatatable(Request $request): array

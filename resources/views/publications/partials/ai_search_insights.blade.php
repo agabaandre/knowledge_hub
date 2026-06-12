@@ -1,11 +1,17 @@
 @if(\App\Services\AiSearchInsightsService::isDisplayable($aiSearchInsights ?? null))
 @php
     $insights = $aiSearchInsights;
+    $embedded = !empty($embedded);
     $searchTerm = trim((string) ($insights['query'] ?? request('term', '')));
     $hubMatches = (int) ($insights['hub_matches'] ?? 0);
     $scholarlySources = $insights['scholarly_sources'] ?? $insights['internet_results'] ?? [];
     $hasTaxonomy = !empty($insights['thematic_areas']) || !empty($insights['sub_thematic_areas']) || !empty($insights['contributors']);
+    $allDocuments = $insights['document_highlights'] ?? [];
+    $docLimit = isset($limitDocuments) && $limitDocuments ? (int) $limitDocuments : null;
+    $visibleDocuments = $docLimit ? array_slice($allDocuments, 0, $docLimit) : $allDocuments;
+    $hiddenDocuments = $docLimit && count($allDocuments) > $docLimit ? array_slice($allDocuments, $docLimit) : [];
 @endphp
+@if(!$embedded)
 <style>
     .ai-brief {
         border: 1px solid #e2e8f0;
@@ -187,24 +193,44 @@
         .ai-brief__highlight-type { display: none; }
     }
 </style>
+@else
+<style>
+    .ai-brief { border: 1px solid #eef2f6; border-radius: 0.35rem; background: #fff; margin-bottom: 0.75rem !important; font-size: 0.84rem; color: #334155; }
+    .ai-brief__head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.5rem 0.75rem; border-bottom: 1px solid #eef2f6; }
+    .ai-brief__title-wrap { display: flex; align-items: center; gap: 0.45rem; min-width: 0; }
+    .ai-brief__icon { width: 1.5rem; height: 1.5rem; border-radius: 0.3rem; display: inline-flex; align-items: center; justify-content: center; background: var(--theme-color-primary, #119A48); color: #fff; font-size: 0.72rem; flex-shrink: 0; }
+    .ai-brief__title { margin: 0; font-size: 0.82rem; font-weight: 700; color: #0f172a; line-height: 1.2; }
+    .ai-brief__meta { display: flex; flex-wrap: wrap; gap: 0.25rem; justify-content: flex-end; }
+    .ai-brief__chip { font-size: 0.65rem; font-weight: 600; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 999px; padding: 0.12rem 0.4rem; white-space: nowrap; }
+    .ai-brief__body { padding: 0.55rem 0.75rem 0.35rem; }
+    .ai-brief__summary { margin: 0 0 0.45rem; color: #475569; line-height: 1.5; font-size: 0.84rem; }
+    .ai-brief__label { margin: 0 0 0.25rem; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #94a3b8; }
+    .ai-brief__highlights { list-style: none; margin: 0 0 0.45rem; padding: 0; border: 1px solid #eef2f6; border-radius: 0.2rem; overflow: hidden; }
+    .ai-brief__highlight-link { display: flex; align-items: center; gap: 0.45rem; padding: 0.38rem 0.5rem; border-top: 1px solid #eef2f6; color: inherit; text-decoration: none; }
+    .ai-brief__highlights > li:first-child .ai-brief__highlight-link { border-top: 0; }
+    .ai-brief__highlight-link:hover { background: #f8fafc; color: var(--theme-color-primary, #119A48); }
+    .ai-brief__highlight-icon { width: 1.25rem; text-align: center; color: var(--theme-color-primary, #119A48); font-size: 0.72rem; flex-shrink: 0; }
+    .ai-brief__highlight-text { flex: 1; min-width: 0; line-height: 1.35; color: #1e293b; font-weight: 500; }
+    .ai-brief__highlight-type { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; white-space: nowrap; }
+    .ai-brief__foot { padding: 0.35rem 0.75rem 0.45rem; border-top: 1px solid #eef2f6; font-size: 0.64rem; color: #94a3b8; line-height: 1.3; }
+    .ai-brief__more-docs { margin: 0.35rem 0 0.5rem; }
+</style>
+@endif
 
 <div class="ai-brief">
+    @if(!$embedded)
     <header class="ai-brief__head">
         <div class="ai-brief__title-wrap">
             <span class="ai-brief__icon" aria-hidden="true"><i class="fa-solid fa-microchip"></i></span>
-            <h2 class="ai-brief__title">{{ __('publications.search.ai_overview') }}</h2>
+            <h2 class="ai-brief__title">{{ __('publications.search.ai_brief_heading') }}</h2>
         </div>
         <div class="ai-brief__meta">
             @if($searchTerm !== '')
                 <span class="ai-brief__chip">{{ $searchTerm }}</span>
             @endif
-            @if($hubMatches > 0)
-                <span class="ai-brief__chip ai-brief__chip--accent">
-                    {{ $hubMatches === 1 ? __('publications.search.ai_hub_matches_one') : __('publications.search.ai_hub_matches', ['count' => number_format($hubMatches)]) }}
-                </span>
-            @endif
         </div>
     </header>
+    @endif
 
     <div class="ai-brief__body">
         @if(!empty($insights['overview']))
@@ -216,10 +242,10 @@
             <p class="ai-brief__summary">{{ $insights['analysis_summary'] }}</p>
         @endif
 
-        @if(!empty($insights['document_highlights']))
+        @if(!empty($visibleDocuments))
             <p class="ai-brief__label">{{ __('publications.search.ai_documents_heading') }}</p>
-            <ul class="ai-brief__highlights">
-                @foreach($insights['document_highlights'] as $doc)
+            <ul class="ai-brief__highlights" id="khubSearchAiDocsVisible">
+                @foreach($visibleDocuments as $doc)
                     @if(!empty($doc['url']))
                         <li>
                             <a href="{{ $doc['url'] }}" class="ai-brief__highlight-link">
@@ -238,6 +264,45 @@
                     @endif
                 @endforeach
             </ul>
+            @if(!empty($hiddenDocuments))
+                <ul class="ai-brief__highlights" id="khubSearchAiDocsHidden" hidden>
+                    @foreach($hiddenDocuments as $doc)
+                        @if(!empty($doc['url']))
+                            <li>
+                                <a href="{{ $doc['url'] }}" class="ai-brief__highlight-link">
+                                    <span class="ai-brief__highlight-icon"><i class="fa {{ ($doc['type'] ?? '') === 'forum' ? 'fa-comments' : 'fa-file-lines' }}" aria-hidden="true"></i></span>
+                                    <span class="ai-brief__highlight-text">
+                                        <strong>{{ $doc['title'] ?? '' }}</strong>
+                                        @if(!empty($doc['description']))
+                                            <span style="display:block;font-weight:400;color:#64748b;margin-top:0.15rem;">{{ Str::limit($doc['description'], 220) }}</span>
+                                        @endif
+                                    </span>
+                                    @if(!empty($doc['meta']))
+                                        <span class="ai-brief__highlight-type">{{ Str::limit($doc['meta'], 40) }}</span>
+                                    @endif
+                                </a>
+                            </li>
+                        @endif
+                    @endforeach
+                </ul>
+                <div class="ai-brief__more-docs">
+                    <button type="button" class="btn btn-sm btn-link px-0" id="khubSearchAiShowAllDocs" data-show-label="{{ __('publications.search.ai_show_all_resources') }}" data-hide-label="{{ __('publications.search.ai_show_fewer_resources') }}">
+                        {{ __('publications.search.ai_show_all_resources', ['count' => count($allDocuments)]) }}
+                    </button>
+                </div>
+                <script>
+                (function () {
+                    var btn = document.getElementById('khubSearchAiShowAllDocs');
+                    var hidden = document.getElementById('khubSearchAiDocsHidden');
+                    if (!btn || !hidden) return;
+                    btn.addEventListener('click', function () {
+                        var showing = hidden.hidden;
+                        hidden.hidden = !showing;
+                        btn.textContent = showing ? (btn.getAttribute('data-hide-label') || btn.textContent) : (btn.getAttribute('data-show-label') || btn.textContent);
+                    });
+                })();
+                </script>
+            @endif
         @endif
 
         @if(!empty($insights['key_points']))

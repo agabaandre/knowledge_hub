@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Publication;
 use App\Repositories\PublicationsRepository;
+use App\Support\PublicationSearchQuery;
 use App\Support\MetricsCache;
 use App\Support\SearchCache;
 use Illuminate\Http\Request;
@@ -30,10 +31,12 @@ class HybridRecordsSearchService
         $prepared = clone $request;
         $prepared->merge(['search_listing' => true]);
 
-        $term = trim((string) ($request->term ?? ''));
+        $term = PublicationSearchQuery::normalizeTerm((string) ($request->term ?? ''));
         if ($term === '' || mb_strlen($term) < 2) {
             return $prepared;
         }
+
+        $prepared->merge(['term' => $term]);
 
         $prepared->merge(['skip_random_order' => true]);
 
@@ -115,7 +118,7 @@ class HybridRecordsSearchService
      */
     public function resolvePublicationIdPool(Request $request, int $limit = self::ID_POOL_LIMIT): array
     {
-        $term = trim((string) ($request->term ?? ''));
+        $term = PublicationSearchQuery::normalizeTerm((string) ($request->term ?? ''));
         if ($term === '' || $limit < 1) {
             return [];
         }
@@ -145,7 +148,12 @@ class HybridRecordsSearchService
         }
 
         try {
-            $builder = Publication::search($term);
+            $builder = Publication::search($term, function ($meilisearch, $query, $options) {
+                $options['matchingStrategy'] = 'last';
+                $options['showRankingScore'] = false;
+
+                return $meilisearch->search($query, $options);
+            });
 
             $subThemeId = (int) ($request->input('sub_thematic_area_id') ?: $request->input('subtheme') ?: 0);
             if ($subThemeId > 0) {
@@ -259,7 +267,7 @@ class HybridRecordsSearchService
     private function idPoolCacheKey(Request $request): string
     {
         return 'records_search_ids:v'.SearchCache::hybridVersion().':'.md5(
-            mb_strtolower(trim((string) ($request->term ?? ''))).'|'.$this->filterFingerprint($request)
+            mb_strtolower(PublicationSearchQuery::normalizeTerm((string) ($request->term ?? ''))).'|'.$this->filterFingerprint($request)
         );
     }
 

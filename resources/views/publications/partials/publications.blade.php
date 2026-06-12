@@ -160,16 +160,27 @@
         .publication-title-mobile {
             display: none !important;
         }
-        
+
         .publication-title-desktop {
             display: block;
         }
     }
+
+    .records-search-infinite-sentinel {
+        height: 1px;
+        width: 100%;
+    }
+    .records-search-infinite-loader {
+        color: #64748b;
+        font-size: 0.875rem;
+        padding: 0.5rem 0;
+    }
 </style>
 
  @php
-     $i = 0;
      $federatedPublications = $federatedPublications ?? collect();
+     $searchInfiniteScroll = (bool) ($searchInfiniteScroll ?? false);
+     $loadedCount = (($publications->currentPage() - 1) * $publications->perPage()) + $publications->count();
  @endphp
 
  @if($federatedPublications->count() > 0)
@@ -190,139 +201,40 @@
      </p>
  @endif
 
- @foreach ($publications as $row)
-     @php
-         $i++;
-         $likes = count($row->favourited);
-     @endphp
+ @endif
 
-    <div class="card col-lg-12 single-border mb-2 publication-list-card pub-card-file-type-corner-wrap" data-aos="{{ $i > 2 ? 'zoom-in' : '' }}" data-aos-delay="100">
-        <div class="card-body text-left">
-            @include('partials.publications.file_type_corner_badge', ['row' => $row])
-            <!-- Title for Mobile (shown only on mobile, above image) -->
-            <h5 class="text-bold text-lg publication-title-mobile" style="display: none;">
-                <a href="{{ publication_url($row)}}">
-                    {!! truncate(clean_unicode($row->title), 500) !!}
-                </a>
-            </h5>
-            
-            <div class="row publication-card-row" style="display: flex; flex-wrap: nowrap; align-items: stretch;">
-                 @php
-                     // Get raw cover value before accessor processes it
-                     $raw_cover = $row->getRawOriginal('cover');
-                     $cover_is_external = $row->cover_is_exteranl ?? false;
-                     
-                     // Determine image link
-                     if (!empty($raw_cover)) {
-                         if ($cover_is_external) {
-                             // External URL - use as is
-                             $image_link = $raw_cover;
-                         } else {
-                             // Local file - build storage path
-                             $image_link = storage_link('uploads/publications/' . $raw_cover);
-                         }
-                     } else {
-                         // No cover - use default
-                         $image_link = null;
-                     }
-                     
-                     // Default image
-                     $default_image = asset('assets/images/cover.png');
-                     
-                     // Final image to use
-                     $final_image = (!empty($image_link) && filter_var($image_link, FILTER_VALIDATE_URL)) 
-                         ? $image_link 
-                         : $default_image;
-                 @endphp
-                 <div class="col-md-3 publication-image-col" style="min-height: 150px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: transparent; width: 35%; flex: 0 0 35%; max-width: 35%; padding-right: 0; position: relative; border: none;">
-                     <a href="{{ publication_url($row)}}" class="publication-image-link" style="display: block; width: 100%; height: 100%; cursor: pointer;">
-                         <img src="{{ $final_image }}" 
-                              alt="{{ clean_unicode($row->title) }}" 
-                              class="publication-image"
-                              style="width: 100%; height: 100%; min-height: 150px; object-fit: contain; transition: transform 0.3s ease; background-color: transparent;"
-                              onerror="this.onerror=null; this.src='{{ $default_image }}';"
-                              onmouseover="this.style.transform='scale(1.05)'"
-                              onmouseout="this.style.transform='scale(1)'">
-                     </a>
-                 </div>
-                 <div class="col-md-9 publication-content-col" style="width: 65%; flex: 1 1 65%; max-width: 65%; padding-left: 1rem;">
-                     <!-- Title for Desktop/Tablet (shown on tablets and desktops, hidden on mobile) -->
-                     <h5 class="text-bold text-lg publication-title-desktop">
-                         <a href="{{ publication_url($row)}}">
-                             {!! truncate(clean_unicode($row->title), 500) !!}
-                         </a>
-                     </h5>
-                     
-                         <a href="{{ publication_url($row)}}" style="text-align: justify; overflow-wrap: break-word; white-space: normal !important; justify-content: center; margin-bottom: 10px;">
-                             {!! Str::words(strip_tags(clean_unicode(publication_description_for_list($row->description ?? ''))), 40, '...') !!}
-                         </a>
-                     
-                     
-
-                     <span class="muted medium ml-2 theme-cl"><br>
-                         <i class="lni lni-briefcase mr-1"></i>Theme: {!! clean_unicode($row->theme->description ?? '') !!}</span>
-                     <span class="muted medium ml-1 theme-cl"><br>
-                         <i class="lni lni-archive mr-1"></i>Sub Theme: {!! clean_unicode($row->sub_theme->description ?? '') !!}</span>
-                     @if(!empty($row->associated_authors))
-                     <span class="muted medium ml-1 theme-cl"><br>
-                         <i class="fa fa-users mr-1"></i>Associated Authors: <span class="notranslate" translate="no">{{ clean_unicode($row->associated_authors) }}</span></span>
-                     @endif
-                     @if ($likes > 0)
-                         <span><i class="lni lni-heart mr-1"></i> {{ $likes }} Like{{ $likes > 1 ? 's' : '' }}
-                         </span>
-                     @endif
-                     <span class="muted medium ml-1 text-muted mt-1 "><br>
-                         <i class="lni lni-empty-file mr-1"></i>Category:
-                         {{ @$row->data_category->category_name }}</span>
-
-                     <span class="text-muted medium d-block mt-1">
-                         @include('partials.publications.card_timestamps', ['row' => $row])
-                         <a href="{{ publication_url($row)}}">
-                             <span class=" mr-2"><i class="fa fa-eye mr-1"></i>{{ $row->visits ?? 0 }} Visits</span>
-                             <span class=" mr-1 ml-2 comments{{ $i }}" data-bs-toggle="popover"
-                                 data-bs-placement="bottom"><i class="fa fa-comments"></i>
-                                 {{ count($row->comments) }} Comments</span>
-                         </a>
-                         @include ('home.partials.comments')
-                     </span>
-                     
-                     <div class="d-flex align-items-center mt-2 publication-card-actions" style="flex-wrap: wrap; gap: 4px;" onclick="event.stopPropagation();">
-                         @php
-                             $auGold = settings()->au_gold ?? '#B4A269';
-                             $goldTextColor = '#5a4d2e';
-                         @endphp
-                         @auth
-                             <button type="button"
-                                 class="btn btn-sm btn-outline-danger js-favourite-pub-btn"
-                                 data-publication-id="{{ $row->id }}"
-                                 data-favourited="{{ $row->is_favourite ? '1' : '0' }}"
-                                 style="border-color: #ef4444; color: #ef4444; background-color: transparent; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer;"
-                                 onclick="if(window.handlePubFavourite){event.preventDefault();event.stopPropagation();window.handlePubFavourite(this);}">
-                                 <i class="fa fa-heart{{ $row->is_favourite ? '' : '-o' }} mr-1" style="{{ $row->is_favourite ? 'color: #ef4444;' : 'color: inherit;' }}"></i>
-                                 <span class="js-fav-label">{{ $row->is_favourite ? 'Favorite' : 'Add favorite' }}</span>
-                             </button>
-                         @else
-                             <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}"
-                                class="btn btn-sm btn-outline-danger"
-                                style="border-color: #ef4444; color: #ef4444; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease; background-color: transparent;">
-                                 <i class="fa fa-heart-o mr-1"></i> Add favorite
-                             </a>
-                         @endauth
-                         <a href="{{ publication_url($row)}}" 
-                            class="btn btn-sm btn-primary" 
-                            style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease;">
-                             <i class="fa fa-eye mr-1"></i> Read more
-                         </a>
-                         @include('common.khub_ai_publication_button', ['publication' => $row])
-                     </div>
-
-                 </div>
-             </div>
-         </div>
+ <div id="records-search-publications"
+      @if($searchInfiniteScroll)
+      data-infinite-scroll="1"
+      data-current-page="{{ $publications->currentPage() }}"
+      data-last-page="{{ $publications->lastPage() }}"
+      data-total="{{ $publications->total() }}"
+      data-loaded="{{ $loadedCount }}"
+      @endif>
+     <div id="records-search-publications-list">
+         @include('publications.partials.publications_list_items', ['listOffset' => ($publications->currentPage() - 1) * $publications->perPage()])
      </div>
- @endforeach
 
- <div class="py-4"> {{ $publications->links() }}</div>
+     @if($searchInfiniteScroll && $publications->total() > 0)
+         <div class="records-search-infinite-footer py-3 text-center" id="records-search-infinite-footer">
+             <p class="text-muted small mb-2" id="records-search-infinite-status">
+                 @if($publications->total() > 0)
+                     Showing {{ number_format($loadedCount) }} of {{ number_format($publications->total()) }} publications
+                 @endif
+             </p>
+             @if($publications->hasMorePages())
+                 <div id="records-search-infinite-sentinel" class="records-search-infinite-sentinel" aria-hidden="true"></div>
+                 <div id="records-search-infinite-loader" class="records-search-infinite-loader d-none" aria-live="polite">
+                     <i class="fa fa-spinner fa-spin me-1"></i>{{ __('publications.search.loading_more') }}
+                 </div>
+             @else
+                 <p class="text-muted small mb-0" id="records-search-infinite-complete">{{ __('publications.search.all_results_loaded') }}</p>
+             @endif
+         </div>
+     @else
+         <div class="py-4 records-search-classic-pagination">{{ $publications->links() }}</div>
+     @endif
+ </div>
 
  @if (count($publications) == 0 && ($federatedPublications ?? collect())->count() == 0)
      <div class="row justify-content-center py-5">

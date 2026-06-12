@@ -1,4 +1,5 @@
 @php
+    $embedded = !empty($embedded);
     $aiChatTerm = trim((string) request('term', ''));
     $aiChatQuery = request()->except('page');
 @endphp
@@ -87,14 +88,10 @@
     }
 </style>
 
-<div class="ai-search-chat" id="aiSearchChatPanel"
-     data-chat-url="{{ route('records.search.ai-chat') }}"
-     data-reset-url="{{ route('records.search.ai-chat.reset') }}"
-     data-term="{{ e($aiChatTerm) }}"
-     data-query='@json($aiChatQuery)'>
+<div class="ai-search-chat" id="aiSearchChatPanel">
     <div class="ai-search-chat__head">
         <div>
-            <h3 class="ai-search-chat__title">{{ __('publications.search.ai_chat_title') }}</h3>
+            <h3 class="ai-search-chat__title">{{ __('publications.search.ai_chat_heading') }}</h3>
             <p class="ai-search-chat__subtitle">{{ __('publications.search.ai_chat_subtitle') }}</p>
         </div>
         <button type="button" class="btn btn-sm btn-outline-secondary" id="aiSearchChatReset">{{ __('publications.search.ai_chat_reset') }}</button>
@@ -113,22 +110,26 @@
 
 <script>
 (function () {
-    function initAiSearchChat(root) {
-        if (!root || root.dataset.initialized === '1') return;
-        root.dataset.initialized = '1';
+    function mountAiSearchChatPanel(scope) {
+        var container = scope || document;
+        var panel = container.querySelector ? container.querySelector('#aiSearchChatPanel') : null;
+        if (!panel || panel.dataset.initialized === '1') return;
+        panel.dataset.initialized = '1';
 
-        var chatUrl = root.getAttribute('data-chat-url');
-        var resetUrl = root.getAttribute('data-reset-url');
-        var term = root.getAttribute('data-term') || '';
+        var dataRoot = panel.closest('#khubSearchAiAssistant') || panel;
+        var chatUrl = dataRoot.getAttribute('data-chat-url');
+        var resetUrl = dataRoot.getAttribute('data-reset-url');
+        var term = dataRoot.getAttribute('data-term') || '';
         var baseQuery = {};
-        try { baseQuery = JSON.parse(root.getAttribute('data-query') || '{}'); } catch (e) { baseQuery = {}; }
+        try { baseQuery = JSON.parse(dataRoot.getAttribute('data-query') || '{}'); } catch (e) { baseQuery = {}; }
 
-        var messagesEl = root.querySelector('#aiSearchChatMessages');
-        var emptyEl = root.querySelector('#aiSearchChatEmpty');
-        var form = root.querySelector('#aiSearchChatForm');
-        var input = root.querySelector('#aiSearchChatInput');
-        var sendBtn = root.querySelector('#aiSearchChatSend');
-        var resetBtn = root.querySelector('#aiSearchChatReset');
+        var messagesEl = panel.querySelector('#aiSearchChatMessages');
+        var emptyEl = panel.querySelector('#aiSearchChatEmpty');
+        var form = panel.querySelector('#aiSearchChatForm');
+        var input = panel.querySelector('#aiSearchChatInput');
+        var sendBtn = panel.querySelector('#aiSearchChatSend');
+        var resetBtn = panel.querySelector('#aiSearchChatReset');
+        if (!form || !input || !sendBtn || !resetBtn || !chatUrl || !resetUrl) return;
         var conversationId = sessionStorage.getItem('khubAiSearchChatId') || '';
         var csrf = document.querySelector('meta[name="csrf-token"]');
         var csrfToken = csrf ? csrf.getAttribute('content') : '';
@@ -236,12 +237,13 @@
     }
 
     window.initAiSearchChat = function (scope) {
-        var root = (scope || document).querySelector('#aiSearchChatPanel');
-        initAiSearchChat(root);
+        mountAiSearchChatPanel(scope || document);
     };
 
     document.addEventListener('DOMContentLoaded', function () {
-        window.initAiSearchChat(document);
+        if (!document.querySelector('#khubSearchAiAssistant')) {
+            window.initAiSearchChat(document);
+        }
     });
 })();
 </script>

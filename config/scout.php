@@ -34,6 +34,12 @@ return [
                     'description',
                     'associated_authors',
                     'author_name',
+                    'author_affiliation',
+                    'tag_names',
+                    'country_names',
+                    'thematic_area',
+                    'sub_thematic_area',
+                    'data_category_name',
                 ],
                 'filterableAttributes' => [
                     'sub_thematic_area_id',
@@ -56,6 +62,15 @@ return [
                     'attribute',
                     'sort',
                     'exactness',
+                ],
+                'typoTolerance' => [
+                    'enabled' => true,
+                    'minWordSizeForTypos' => [
+                        'oneTypo' => 4,
+                        'twoTypos' => 8,
+                    ],
+                    'disableOnWords' => [],
+                    'disableOnAttributes' => [],
                 ],
             ],
         ],

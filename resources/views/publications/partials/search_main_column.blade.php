@@ -4,6 +4,8 @@
             {{ $searchHeading ?? 'Browse public health resources' }}
         </h1>
 
+        @include('publications.partials.ai_search_assistant')
+
         {{-- Search Results Info Card --}}
         @if(isset($results_count) || isset($search_time))
         <div class="sidebar-content mb-3" style="background:#fff;border:1px solid #e2e8f0;border-radius:0.25rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
@@ -24,14 +26,6 @@
                 @endif
             </div>
         </div>
-        @endif
-
-        @if(\App\Services\AiSearchInsightsService::isDisplayable($aiSearchInsights ?? null))
-            @include('publications.partials.ai_search_insights')
-        @endif
-
-        @if(($aiSearchEnabled ?? false) && mb_strlen(trim((string) request('term', ''))) >= 2)
-            @include('publications.partials.ai_search_chat')
         @endif
 
         @if(($federationBrowseEnabled ?? false) && !request()->filled('term'))

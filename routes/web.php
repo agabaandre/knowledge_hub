@@ -197,6 +197,8 @@ Route::group(["prefix" => "records"], function () {
     Route::get("/resource/{slug}", [PublicationsController::class, 'show'])->where('slug', '[\w\-]+');
     Route::get("/resource", [PublicationsController::class, 'show']);
     Route::get("/search/fragment", [PublicationsController::class, 'searchFragment']);
+    Route::get("/search/publications-page", [PublicationsController::class, 'searchPublicationsPage'])
+        ->name('records.search.publications-page');
     Route::get("/search", [PublicationsController::class, 'search']);
     Route::post("/search/ai-chat", [\App\Http\Controllers\AiSearchChatController::class, 'chat'])
         ->middleware('throttle:40,1')
