@@ -10,6 +10,7 @@ use App\Repositories\QuotesRepository;
 use App\Repositories\ThemesRepository;
 use Illuminate\Http\Request;
 use App\Models\Event;
+use App\Services\HomeTopSearchesService;
 
 class HomeController extends Controller
 {
@@ -28,13 +29,11 @@ class HomeController extends Controller
     }
     
     public function index(Request $request){
-        $topSearchesRequest = clone $request;
-        $topSearchesRequest->merge([
-            'rows' => 6,
-            'order_by_visits' => true,
-            'skip_random_order' => true,
-        ]);
-        $data['recent'] = collect($this->publicationsRepo->get($topSearchesRequest)->items());
+        $topSearches = app(HomeTopSearchesService::class);
+        $data['recent'] = $topSearches->publications($request, 0, HomeTopSearchesService::INITIAL_LIMIT);
+        $data['topSearchesTotal'] = $topSearches->total($request);
+        $data['topSearchesInitial'] = HomeTopSearchesService::INITIAL_LIMIT;
+        $data['topSearchesPageSize'] = HomeTopSearchesService::LOAD_MORE_LIMIT;
         $data['authors']       = $this->authorsRepo->get($request);
         $data['categories']   = $this->get_categories();
         // Recommended: strict featured pool + (when logged in) preference & tag-based picks,
@@ -70,6 +69,37 @@ class HomeController extends Controller
             ->values();
 
         return view('home.index',$data);
+    }
+
+    public function topSearchesPage(Request $request)
+    {
+        if (! (settings()->show_top_searches ?? false)) {
+            return response()->json(['ok' => false, 'error' => 'disabled'], 403);
+        }
+
+        $offset = max(0, (int) $request->input('offset', HomeTopSearchesService::INITIAL_LIMIT));
+        $limit = max(1, min(20, (int) $request->input('limit', HomeTopSearchesService::LOAD_MORE_LIMIT)));
+
+        $service = app(HomeTopSearchesService::class);
+        $items = $service->publications($request, $offset, $limit);
+        $total = $service->total($request);
+        $loadedCount = min($total, $offset + $items->count());
+
+        $theme = trim((string) site_theme());
+        $itemsView = ($theme === 'theme1.')
+            ? 'home.partials.theme1.top_searches_list_items'
+            : 'home.partials.top_searches_list_items';
+
+        return response()->json([
+            'ok' => true,
+            'html' => view($itemsView, [
+                'recent' => $items,
+                'listOffset' => $offset,
+            ])->render(),
+            'loaded_count' => $loadedCount,
+            'total' => $total,
+            'has_more' => $loadedCount < $total,
+        ]);
     }
 
 

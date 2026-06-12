@@ -94,6 +94,8 @@
             color: #0d5034;
             text-decoration: underline;
         }
+        .records-search-infinite-sentinel { height: 1px; width: 100%; }
+        .records-search-infinite-loader { color: #64748b; font-size: 0.875rem; padding: 0.5rem 0; }
         @media (max-width: 575.98px) {
             .theme1-resource-card .forum-thread-image {
                 width: 100px;
@@ -110,63 +112,31 @@
                 </div>
             </div>
         </div>
-        <div class="row g-0" id="top_searches">
-            @foreach ($recent as $row)
-                @php
-                    $default_image = asset('assets/images/cover.png');
-                    $image_link = resolve_publication_card_cover($row);
-                @endphp
-                <div class="col-12 col-md-6 mb-3 px-2 px-md-3 d-flex">
-                    <div class="theme1-resource-card forum-post-card w-100 pub-card-file-type-corner-wrap">
-                        @include('partials.publications.file_type_corner_badge', ['row' => $row])
-                        <div class="forum-header">
-                            <div class="forum-author-name-container">
-                                <span class="forum-author-name notranslate" translate="no">{{ $row->author->name ?? '—' }}</span>
-                                <span class="forum-post-time">
-                                    <i class="fa fa-clock me-1"></i>Updated {{ publication_content_updated_ago($row) }}
-                                    @if(publication_last_visited_at($row))
-                                        · Last visit {{ time_ago(publication_last_visited_at($row)) }}
-                                    @endif
-                                </span>
-                            </div>
-                        </div>
-                        <div class="forum-content">
-                            <a href="{{ publication_url($row)}}">
-                                <img src="{{ $image_link }}" alt="" class="forum-thread-image" loading="lazy" onerror="this.src='{{ $default_image }}';">
-                            </a>
-                            <h3 class="forum-title">
-                                <a href="{{ publication_url($row)}}">{{ $row->title }}</a>
-                            </h3>
-                            <p class="mb-0" style="text-align: justify;">{{ Str::words(strip_tags($row->description ?? 'No description.'), 40) }}</p>
-                            <div class="forum-actions">
-                                @auth
-                                <button type="button"
-                                    class="btn btn-sm btn-outline-danger js-favourite-pub-btn me-2"
-                                    data-publication-id="{{ $row->id }}"
-                                    data-favourited="{{ ($row->is_favourite ?? false) ? '1' : '0' }}"
-                                    style="border-color: #ef4444; color: #ef4444; background: transparent; padding: 0.25rem 0.5rem; font-size: 0.875rem; cursor: pointer;"
-                                    onclick="if(window.handlePubFavourite){event.preventDefault();event.stopPropagation();window.handlePubFavourite(this);}">
-                                    <i class="fa fa-heart{{ ($row->is_favourite ?? false) ? '' : '-o' }} me-1" style="{{ ($row->is_favourite ?? false) ? 'color: #ef4444;' : 'color: inherit;' }}"></i>
-                                    <span class="js-fav-label">{{ ($row->is_favourite ?? false) ? 'Favorite' : 'Add favorite' }}</span>
-                                </button>
-                                @else
-                                <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}" class="forum-action-btn me-2" style="color: #ef4444;"><i class="fa fa-heart-o me-1"></i> Add favorite</a>
-                                @endauth
-                                <a href="{{ publication_url($row)}}" class="forum-action-btn">
-                                    Read More <i class="fa fa-arrow-right"></i>
-                                </a>
-                                <a href="{{ publication_url($row)}}" class="forum-action-btn">
-                                    <i class="fa-solid fa-microchip me-1"></i> Khub AI
-                                </a>
-                                <span class="text-muted small"><i class="fa fa-eye me-1"></i>{{ $row->visits ?? 0 }} Visits</span>
-                                @if(method_exists($row, 'comments') && $row->relationLoaded('comments'))
-                                <span class="text-muted small"><i class="fa fa-comments me-1"></i>{{ $row->comments->count() }} Comments</span>
-                                @endif
-                            </div>
-                        </div>
+        @php
+            $topSearchesTotal = (int) ($topSearchesTotal ?? count($recent));
+            $topSearchesLoaded = count($recent);
+        @endphp
+        <div id="home-top-searches"
+             data-initial="{{ (int) ($topSearchesInitial ?? 6) }}"
+             data-page-size="{{ (int) ($topSearchesPageSize ?? 10) }}"
+             data-loaded="{{ $topSearchesLoaded }}"
+             data-total="{{ $topSearchesTotal }}">
+            <div class="row g-0" id="home-top-searches-list">
+                @include('home.partials.theme1.top_searches_list_items', ['listOffset' => 0])
+            </div>
+            @if($topSearchesLoaded < $topSearchesTotal)
+                <div class="records-search-infinite-footer py-3 text-center" id="home-top-searches-footer">
+                    <p class="text-muted small mb-2" id="home-top-searches-status">
+                        Showing {{ number_format($topSearchesLoaded) }} of {{ number_format($topSearchesTotal) }} resources
+                    </p>
+                    <div id="home-top-searches-sentinel" class="records-search-infinite-sentinel" aria-hidden="true"></div>
+                    <div id="home-top-searches-loader" class="records-search-infinite-loader d-none" aria-live="polite">
+                        <i class="fa fa-spinner fa-spin me-1"></i>{{ __('publications.search.loading_more') }}
                     </div>
                 </div>
-            @endforeach
+            @else
+                <p class="text-muted small text-center py-2 mb-0" id="home-top-searches-complete">{{ __('publications.search.all_results_loaded') }}</p>
+            @endif
         </div>
         <div class="row justify-content-center mt-4">
             <div class="col-12 text-center">

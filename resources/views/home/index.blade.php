@@ -179,6 +179,9 @@
 
 @section('scripts')
     @include('common.select2')
+    @if(settings()->show_top_searches ?? false)
+        @include('home.partials.top_searches_infinite_scroll')
+    @endif
 
     @if ((!get_cookie('CDC_Tour_Finished') && !get_cookie('CDC_Tour_Declined')) || !env('SITE_LIVE'))
         @include('partials.tour.js')

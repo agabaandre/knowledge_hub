@@ -118,43 +118,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
     }
 
     $pubs->when(!is_admin(), function ($query) use ($request) {
-        $query->where('is_admin_only_access', 0)
-            ->where('is_active', 'Active')
-            ->where('is_approved', 1);
-
-        if (auth()->user()) {
-            // Optimized: Cache user communities
-            $user = auth()->user();
-            $cacheKey = "user_communities_{$user->id}";
-            $userCommunities = cache()->remember($cacheKey, 1800, function() use ($user) {
-                return CommunityOfPracticeMembers::where('user_id', $user->id)
-                    ->where('is_approved', 1)
-                    ->pluck('community_of_practice_id');
-            });
-
-            $query->when(!$request->community_id, function ($query) use ($userCommunities, $user) {
-                $query->where(function ($q) use ($userCommunities, $user) {
-                    if ($userCommunities->count() > 0) {
-                        $q->whereHas('communities', function ($q) use ($userCommunities) {
-                            $q->whereIn('community_of_practice_id', $userCommunities);
-                        });
-                    }
-                    $q->orWhereDoesntHave('communities')
-                      ->orWhere('also_public_on_hub', 1)
-                      ->orWhere('user_id', $user->id);
-                });
-            }, function ($query) use ($request) {
-                $query->whereHas('communities', function ($q) use ($request) {
-                    $q->where('community_of_practice_id', $request->community_id);
-                });
-            });
-        } 
-        else {
-            $query->where(function ($q) {
-                $q->whereDoesntHave('communities')
-                    ->orWhere('also_public_on_hub', 1);
-            });
-        }
+        $this->applyHubListingVisibility($query, $request);
     }, function ($query) {
         $this->access_filter($query);
     });
@@ -3047,6 +3011,111 @@ public function togglePublicationActive(int $id): ?Publication
             'recordsFiltered' => $recordsFiltered,
             'data' => $data,
         ];
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder  $query
+     */
+    private function applyHubListingVisibility($query, Request $request): void
+    {
+        $query->where('is_admin_only_access', 0)
+            ->where('is_active', 'Active')
+            ->where('is_approved', 1);
+
+        if (auth()->user()) {
+            $user = auth()->user();
+            $cacheKey = "user_communities_{$user->id}";
+            $userCommunities = cache()->remember($cacheKey, 1800, function () use ($user) {
+                return CommunityOfPracticeMembers::where('user_id', $user->id)
+                    ->where('is_approved', 1)
+                    ->pluck('community_of_practice_id');
+            });
+
+            $query->when(! $request->community_id, function ($query) use ($userCommunities, $user) {
+                $query->where(function ($q) use ($userCommunities, $user) {
+                    if ($userCommunities->count() > 0) {
+                        $q->whereHas('communities', function ($q) use ($userCommunities) {
+                            $q->whereIn('community_of_practice_id', $userCommunities);
+                        });
+                    }
+                    $q->orWhereDoesntHave('communities')
+                        ->orWhere('also_public_on_hub', 1)
+                        ->orWhere('user_id', $user->id);
+                });
+            }, function ($query) use ($request) {
+                $query->whereHas('communities', function ($q) use ($request) {
+                    $q->where('community_of_practice_id', $request->community_id);
+                });
+            });
+        } else {
+            $query->where(function ($q) {
+                $q->whereDoesntHave('communities')
+                    ->orWhere('also_public_on_hub', 1);
+            });
+        }
+    }
+
+    public function countTopSearches(Request $request): int
+    {
+        return (int) $this->topSearchesBaseQuery($request)->count();
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function getTopSearchesIds(Request $request, int $offset, int $limit): array
+    {
+        if ($limit < 1 || $offset < 0) {
+            return [];
+        }
+
+        return $this->topSearchesBaseQuery($request)
+            ->skip($offset)
+            ->take($limit)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id) => $id > 0)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  list<int>  $ids
+     */
+    public function getTopSearchesByIds(Request $request, array $ids): Collection
+    {
+        $ids = array_values(array_filter(array_map('intval', $ids), fn (int $id) => $id > 0));
+        if ($ids === []) {
+            return collect();
+        }
+
+        $sliceRequest = clone $request;
+        $sliceRequest->merge([
+            'restrict_publication_ids' => $ids,
+            'skip_random_order' => true,
+            'skip_sql_search_term' => true,
+            'rows' => count($ids),
+            'page' => 1,
+        ]);
+
+        return collect($this->get($sliceRequest)->items());
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    private function topSearchesBaseQuery(Request $request)
+    {
+        $pubs = Publication::query()->where('is_version', 0);
+        $pubs->orderBy('visits', 'desc')->orderBy('id', 'desc');
+
+        if (is_admin()) {
+            $this->access_filter($pubs);
+        } else {
+            $this->applyHubListingVisibility($pubs, $request);
+        }
+
+        return $pubs;
     }
 
 }

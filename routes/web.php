@@ -145,6 +145,7 @@ Route::get('/sitemaps/{name}.xml', [SitemapController::class, 'section'])->where
 Route::post('/locale/apply', [LocaleSwitchController::class, 'apply'])->name('locale.apply');
 Route::get('/locale/{locale}', [LocaleSwitchController::class, 'switch'])->where('locale', '[a-z]{2}')->name('locale.switch');
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/home/top-searches-page', [HomeController::class, 'topSearchesPage'])->name('home.top-searches-page');
 Route::post('/endtour', [CommonController::class, 'endtour'])->name('endtour');
 Route::get('/endtour', [CommonController::class, 'endtour'])->name('endtour.get'); // Backward compatibility
 

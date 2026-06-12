@@ -10,6 +10,8 @@ final class SearchCache
 
     public const AI_INSIGHTS_VERSION_KEY = 'search_cache:ai_insights_version';
 
+    public const HOME_TOP_SEARCHES_VERSION_KEY = 'search_cache:home_top_searches_version';
+
     public static function store(): Repository
     {
         return MetricsCache::store();
@@ -25,6 +27,11 @@ final class SearchCache
         return max(1, (int) self::store()->get(self::AI_INSIGHTS_VERSION_KEY, 1));
     }
 
+    public static function homeTopSearchesVersion(): int
+    {
+        return max(1, (int) self::store()->get(self::HOME_TOP_SEARCHES_VERSION_KEY, 1));
+    }
+
     /**
      * Invalidate hybrid Meilisearch+SQL ID cache and AI insight payloads.
      */
@@ -38,6 +45,7 @@ final class SearchCache
 
         self::bumpHybrid();
         self::bumpAiInsights();
+        self::bumpHomeTopSearches();
     }
 
     public static function bumpHybrid(): void
@@ -48,6 +56,11 @@ final class SearchCache
     public static function bumpAiInsights(): void
     {
         self::incrementVersion(self::AI_INSIGHTS_VERSION_KEY);
+    }
+
+    public static function bumpHomeTopSearches(): void
+    {
+        self::incrementVersion(self::HOME_TOP_SEARCHES_VERSION_KEY);
     }
 
     private static function incrementVersion(string $key): void

@@ -18,6 +18,7 @@ use App\Repositories\ForumsRepository;
 use App\Repositories\CommsOfPracticeRepository;
 use App\Models\SearchLog;
 use App\Services\FederatedContentService;
+use App\Services\HomeTopSearchesService;
 use App\Services\HybridRecordsSearchService;
 use Illuminate\Support\Facades\Log;
 
@@ -312,6 +313,7 @@ class PublicationsController extends Controller
 
         $this->prepareRecordsSearchRequest($request);
         $this->validateRecordsSearchRequest($request);
+        $request->merge(['rows' => HomeTopSearchesService::SEARCH_INFINITE_ROWS]);
 
         $publicationRequest = $this->recordsSearch->preparePublicationSearchRequest($request);
         $publications = $this->publicationsRepo->get($publicationRequest);
@@ -420,7 +422,10 @@ class PublicationsController extends Controller
         ]);
 
         if ($this->searchInfiniteScrollEnabled()) {
-            $request->merge(['page' => 1]);
+            $request->merge([
+                'page' => 1,
+                'rows' => HomeTopSearchesService::SEARCH_INFINITE_ROWS,
+            ]);
         }
 
         $startTime = microtime(true);
