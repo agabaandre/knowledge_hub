@@ -24,13 +24,37 @@ class Publication extends Model
   
     public function toSearchableArray()
     {
+        if (! $this->relationLoaded('sub_theme')) {
+            $this->loadMissing('sub_theme:id,thematic_area_id');
+        }
+        if (! $this->relationLoaded('tags')) {
+            $this->loadMissing('tags:publication_id,tag_id');
+        }
+        if (! $this->relationLoaded('author')) {
+            $this->loadMissing('author:id,name');
+        }
+
+        $dateCreated = $this->date_created ?? $this->created_at;
+
         return [
-            'title' => $this->title,
-            'description' => $this->description,
-            'associated_authors' => $this->associated_authors,
-            'sub_thematic_area_id' => $this->sub_thematic_area_id,
-            'publication_catgory_id' => $this->publication_catgory_id,
-            'data_category_id' => $this->data_category_id,
+            'title' => strip_tags((string) ($this->title ?? '')),
+            'description' => plain_text_excerpt_from_html((string) ($this->description ?? ''), 8000),
+            'associated_authors' => strip_tags((string) ($this->associated_authors ?? '')),
+            'author_id' => (int) ($this->author_id ?? 0) ?: null,
+            'author_name' => strip_tags((string) optional($this->author)->name),
+            'sub_thematic_area_id' => (int) ($this->sub_thematic_area_id ?? 0) ?: null,
+            'thematic_area_id' => (int) optional($this->sub_theme)->thematic_area_id ?: null,
+            'publication_catgory_id' => (int) ($this->publication_catgory_id ?? 0) ?: null,
+            'data_category_id' => (int) ($this->data_category_id ?? 0) ?: null,
+            'file_type_id' => (int) ($this->file_type_id ?? 0) ?: null,
+            'tag_ids' => $this->tags
+                ->pluck('tag_id')
+                ->map(fn ($id) => (int) $id)
+                ->filter(fn (int $id) => $id > 0)
+                ->values()
+                ->all(),
+            'is_featured' => (int) ($this->is_featured ?? 0) === 1,
+            'date_created' => $dateCreated ? strtotime((string) $dateCreated) : null,
         ];
     }
 

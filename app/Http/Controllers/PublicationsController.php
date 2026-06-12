@@ -18,11 +18,12 @@ use App\Repositories\ForumsRepository;
 use App\Repositories\CommsOfPracticeRepository;
 use App\Models\SearchLog;
 use App\Services\FederatedContentService;
+use App\Services\HybridRecordsSearchService;
 use Illuminate\Support\Facades\Log;
 
 class PublicationsController extends Controller
 {
-    private $publicationsRepo,$authorsRepo,$quotesRepo,$forumsRepo,$commsRepo,$federationContent;
+    private $publicationsRepo,$authorsRepo,$quotesRepo,$forumsRepo,$commsRepo,$federationContent,$recordsSearch;
 
     public function __construct(
         PublicationsRepository $publicationsRepo,
@@ -30,7 +31,8 @@ class PublicationsController extends Controller
         QuotesRepository $quotesRepo,
         ForumsRepository $forumsRepo,
         CommsOfPracticeRepository $commsRepo,
-        FederatedContentService $federationContent
+        FederatedContentService $federationContent,
+        HybridRecordsSearchService $recordsSearch
     ) {
         $this->publicationsRepo = $publicationsRepo;
         $this->authorsRepo      = $authorsRepo;
@@ -38,6 +40,7 @@ class PublicationsController extends Controller
         $this->forumsRepo       = $forumsRepo;
         $this->commsRepo        = $commsRepo;
         $this->federationContent = $federationContent;
+        $this->recordsSearch    = $recordsSearch;
     }
 
     public function show(Request $request, ?string $slug = null){
@@ -379,7 +382,8 @@ class PublicationsController extends Controller
 
         $data['sub_themes'] = ($request->thematic_area_id) ? $this->publicationsRepo->get_subthemes($request) : [];
 
-        $data['publications'] = $this->publicationsRepo->get($request);
+        $publicationRequest = $this->recordsSearch->preparePublicationSearchRequest($request);
+        $data['publications'] = $this->publicationsRepo->get($publicationRequest);
         $data['search'] = (object) $request->all();
 
         $data['searchForums'] = (settings()->search_show_forums ?? true)
@@ -645,7 +649,10 @@ class PublicationsController extends Controller
 
     public function autocomplete(Request $request){
 
-        $searches     = $this->publicationsRepo->get($request,true);
+        $searches = $this->publicationsRepo->get(
+            $this->recordsSearch->preparePublicationSearchRequest($request),
+            true
+        );
         return response()->json($searches);
     }
 

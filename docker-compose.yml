@@ -136,6 +136,10 @@ services:
       CACHE_DRIVER: redis
       SESSION_DRIVER: redis
       QUEUE_CONNECTION: redis
+      SCOUT_DRIVER: meilisearch
+      SCOUT_QUEUE: "true"
+      MEILISEARCH_HOST: http://meilisearch:7700
+      MEILISEARCH_KEY: ${MEILISEARCH_KEY:-masterKey}
     depends_on:
       mysql:
         condition: service_healthy

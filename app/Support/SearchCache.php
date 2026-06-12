@@ -30,6 +30,12 @@ final class SearchCache
      */
     public static function bumpAll(): void
     {
+        try {
+            MetricsCache::store()->forget('meilisearch_health_ok');
+        } catch (\Throwable $e) {
+            // Non-fatal when cache store is unavailable.
+        }
+
         self::bumpHybrid();
         self::bumpAiInsights();
     }

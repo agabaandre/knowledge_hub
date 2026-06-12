@@ -41,6 +41,9 @@ public function get(Request $request, $return_array = false, $featured = false,$
     $rows_count = $request->rows ?? 20;
 
     $with = ['file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent', 'attachments'];
+    if ($request->boolean('search_listing')) {
+        $with = ['file_type', 'author', 'sub_theme', 'category', 'country'];
+    }
     if (!empty($request->approved_only)) {
         $with[] = 'approver';
         $with[] = 'rejector';
@@ -54,7 +57,9 @@ public function get(Request $request, $return_array = false, $featured = false,$
     } else {
         $pubs->orderBy('id', 'desc');
     }
-    $pubs->searchTerm($request->term);
+    if (! $request->boolean('skip_sql_search_term')) {
+        $pubs->searchTerm($request->term);
+    }
 
     if ($featured && current_user() && !$request->boolean('homepage_featured_strict')) {
         $user = current_user();
@@ -98,7 +103,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pubs->where('is_featured', 1);
     }
 
-    if (!$featured && !$request->boolean('skip_random_order') && ! $request->filled('restrict_publication_ids')) {
+    if (!$featured && !$request->boolean('skip_random_order') && ! $request->filled('restrict_publication_ids') && trim((string) ($request->term ?? '')) === '') {
         $pubs->inRandomOrder();
     }
 
@@ -163,9 +168,92 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pubs->where('is_approved', 1)->where('is_rejected', 0);
     }
 
+    if ($request->filled('search_total_override')) {
+        $total = max(0, (int) $request->search_total_override);
+        $page = max(1, (int) $request->input('page', 1));
+        $items = $pubs->get();
+
+        $results = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $total,
+            $rows_count,
+            $page,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+        );
+
+        return $return_array ? $results : $results->appends($request->except('page'));
+    }
+
     $results = $pubs->paginate($rows_count)->appends($request->all());
 
     return $return_array ? $results : $results;
+}
+
+/**
+ * Lightweight ID lookup for hybrid Meilisearch + SQL recall.
+ *
+ * @return list<int>
+ */
+public function getPublicationIds(Request $request, int $limit = 80): array
+{
+    $request = clone $request;
+    $request->merge([
+        'skip_random_order' => true,
+        'search_listing' => true,
+        'rows' => $limit,
+        'page' => 1,
+    ]);
+
+    $pubs = Publication::query()->where('is_version', 0);
+    $pubs->searchTerm($request->term);
+
+    if (!$request->boolean('skip_random_order')) {
+        $pubs->orderByDesc('id');
+    }
+
+    $this->applyFilters($pubs, $request);
+
+    $pubs->when(!is_admin(), function ($query) use ($request) {
+        $query->where('is_admin_only_access', 0)
+            ->where('is_active', 'Active')
+            ->where('is_approved', 1);
+
+        if (auth()->user()) {
+            $user = auth()->user();
+            $cacheKey = "user_communities_{$user->id}";
+            $userCommunities = cache()->remember($cacheKey, 1800, function () use ($user) {
+                return CommunityOfPracticeMembers::where('user_id', $user->id)
+                    ->where('is_approved', 1)
+                    ->pluck('community_of_practice_id');
+            });
+
+            $query->when(! $request->community_id, function ($query) use ($userCommunities, $user) {
+                $query->where(function ($q) use ($userCommunities, $user) {
+                    if ($userCommunities->count() > 0) {
+                        $q->whereHas('communities', function ($q) use ($userCommunities) {
+                            $q->whereIn('community_of_practice_id', $userCommunities);
+                        });
+                    }
+                    $q->orWhereDoesntHave('communities')
+                        ->orWhere('also_public_on_hub', 1)
+                        ->orWhere('user_id', $user->id);
+                });
+            }, function ($query) use ($request) {
+                $query->whereHas('communities', function ($q) use ($request) {
+                    $q->where('community_of_practice_id', $request->community_id);
+                });
+            });
+        } else {
+            $query->where(function ($q) {
+                $q->whereDoesntHave('communities')
+                    ->orWhere('also_public_on_hub', 1);
+            });
+        }
+    }, function ($query) {
+        $this->access_filter($query);
+    });
+
+    return $pubs->orderByDesc('id')->limit($limit)->pluck('id')->map(fn ($id) => (int) $id)->all();
 }
 
 
