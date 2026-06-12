@@ -42,6 +42,8 @@ final class MetricsCache
         return match ($bucket) {
             'live' => 45,
             'filtered' => 60,
+            'ai_search' => self::redisAvailable() ? 300 : 120,
+            'ai_search_chat' => self::redisAvailable() ? 7200 : 1800,
             'rcc' => self::redisAvailable() ? 900 : 180,
             'rcc_meta' => self::redisAvailable() ? 3600 : 1800,
             'map_context' => self::redisAvailable() ? 3600 : 1800,

@@ -297,6 +297,9 @@
                         }
                         window.initSearchSidebarFacets();
                         updateSidebarTagActiveState();
+                        if (typeof window.initAiSearchChat === 'function') {
+                            window.initAiSearchChat(mainEl);
+                        }
                     })
                     .catch(function () {
                         window.location.assign(u.href);

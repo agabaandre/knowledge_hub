@@ -46,6 +46,16 @@ class ResourcesController extends Controller
         return view('admin.publications.pending', $data);
     }
 
+    public function rejected(Request $request){
+        if ($request->ajax() && $request->boolean('datatable')) {
+            return response()->json($this->publicationsRepo->adminRejectedDatatable($request));
+        }
+
+        $data['search'] = (object) $request->all();
+        $data['publication_stats'] = $this->publicationsRepo->adminPublicationIndexStats();
+        return view('admin.publications.rejected', $data);
+    }
+
     public function create(Request $request){
         $data['publication'] = null;
         $data['title']       = 'New Public Health Resource';

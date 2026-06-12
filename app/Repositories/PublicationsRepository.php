@@ -2141,6 +2141,7 @@ public function togglePublicationActive(int $id): ?Publication
         return [
             'approved' => (clone $base)->where('is_approved', 1)->where('is_rejected', 0)->count(),
             'pending' => (clone $base)->where('is_approved', 0)->where('is_rejected', 0)->count(),
+            'rejected' => (clone $base)->where('is_rejected', 1)->count(),
             'featured' => (clone $base)->where('is_approved', 1)->where('is_rejected', 0)->where('is_featured', 1)->count(),
             'inactive' => (clone $base)
                 ->where('is_approved', 1)
@@ -2514,6 +2515,117 @@ public function togglePublicationActive(int $id): ?Publication
                 'affiliation' => e($publication->author_affiliation ?: '-'),
                 'member_state' => e($publication->country->name ?? ''),
                 'status' => e(get_publication_state($publication->is_approved, $publication->is_rejected)),
+                'date_created' => $dateCreated,
+                'actions' => $actions,
+            ];
+        }
+
+        return [
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ];
+    }
+
+    public function buildAdminRejectedQuery(Request $request)
+    {
+        $pubs = Publication::query()
+            ->with(['author', 'country', 'rejector'])
+            ->where('is_version', 0)
+            ->where('is_rejected', 1)
+            ->orderByDesc('rejected_at')
+            ->orderByDesc('id');
+
+        if ($request->filled('term')) {
+            $pubs->searchTerm($request->term);
+        }
+
+        $this->applyFilters($pubs, $request);
+        $this->access_filter($pubs);
+
+        $search = trim((string) $request->input('search.value', ''));
+        if ($search !== '') {
+            $pubs->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%'.$search.'%')
+                    ->orWhere('description', 'like', '%'.$search.'%')
+                    ->orWhere('rejected_reason', 'like', '%'.$search.'%')
+                    ->orWhereHas('author', function ($aq) use ($search) {
+                        $aq->where('name', 'like', '%'.$search.'%');
+                    });
+            });
+        }
+
+        return $pubs;
+    }
+
+    public function adminRejectedDatatable(Request $request): array
+    {
+        $draw = (int) $request->input('draw', 1);
+        $start = max(0, (int) $request->input('start', 0));
+        $length = min(max(1, (int) $request->input('length', 20)), 100);
+
+        $base = $this->buildAdminRejectedQuery($request);
+        $recordsTotal = Publication::query()
+            ->where('is_version', 0)
+            ->where('is_rejected', 1)
+            ->count();
+        $recordsFiltered = (clone $base)->count();
+
+        $orderColIndex = (int) $request->input('order.0.column', 1);
+        $orderDir = strtolower((string) $request->input('order.0.dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $orderMap = [1 => 'id', 2 => 'title', 3 => 'description', 8 => 'rejected_at', 9 => 'date_created'];
+        $orderCol = $orderMap[$orderColIndex] ?? 'rejected_at';
+        if ($orderCol === 'date_created') {
+            $base->reorder()->orderByRaw('COALESCE(date_created, created_at) '.$orderDir);
+        } elseif ($orderCol === 'rejected_at') {
+            $base->reorder()->orderByRaw('COALESCE(rejected_at, updated_at) '.$orderDir);
+        } else {
+            $base->reorder()->orderBy($orderCol, $orderDir);
+        }
+
+        $rows = $base->skip($start)->take($length)->get();
+        $currentUserId = current_user() ? current_user()->id : null;
+        $isAdmin = is_admin();
+
+        $data = [];
+        $index = $start + 1;
+        foreach ($rows as $publication) {
+            $dateCreated = '-';
+            if ($publication->date_created) {
+                $dateCreated = Carbon::parse($publication->date_created)->format('M d, Y');
+            } elseif ($publication->created_at) {
+                $dateCreated = Carbon::parse($publication->created_at)->format('M d, Y');
+            }
+
+            $rejectedAt = '-';
+            if (!empty($publication->rejected_at)) {
+                $rejectedAt = Carbon::parse($publication->rejected_at)->format('M d, Y');
+            } elseif ($publication->updated_at) {
+                $rejectedAt = Carbon::parse($publication->updated_at)->format('M d, Y');
+            }
+
+            $rejectorName = $publication->rejector->name ?? ($publication->rejected_by ? 'User #'.$publication->rejected_by : '-');
+            $reason = trim((string) ($publication->rejected_reason ?? ''));
+            $reasonCell = $reason !== '' ? e(truncate($reason, 60)) : '<span class="text-muted">—</span>';
+
+            $actions = '<a href="'.url('admin/publications/details').'?id='.$publication->id.'" class="btn btn-sm btn-outline-primary mr-1" title="View"><i class="fa fa-eye"></i></a>';
+            if ($publication->user_id == $currentUserId || $isAdmin) {
+                $actions .= '<a href="'.url('admin/publications/edit').'?id='.$publication->id.'" class="btn btn-sm btn-outline-dark mr-1" title="Edit"><i class="fa fa-edit"></i></a>';
+            }
+
+            $data[] = [
+                'checkbox' => '<input type="checkbox" name="publication_ids[]" value="'.$publication->id.'" class="rejected-pub-cb">',
+                'index' => '<span class="text-muted">'.$index++.'</span>',
+                'title' => '<a href="'.e($publication->publication).'" target="_blank" rel="noopener">'.truncate($publication->title, 30).'</a>',
+                'description' => truncate(html_to_text($publication->description), 50),
+                'author' => e($publication->author->name ?? ''),
+                'affiliation' => e($publication->author_affiliation ?: '-'),
+                'member_state' => e($publication->country->name ?? ''),
+                'status' => e(get_publication_state($publication->is_approved, $publication->is_rejected)),
+                'rejected_reason' => $reasonCell,
+                'rejected_by' => e($rejectorName),
+                'rejected_at' => $rejectedAt,
                 'date_created' => $dateCreated,
                 'actions' => $actions,
             ];

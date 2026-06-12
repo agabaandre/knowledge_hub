@@ -80,6 +80,14 @@
                                     @endif
                                 </a>
                             </li>
+                            <li aria-haspopup="true">
+                                <a href="{{ url('admin/publications/rejected') }}" class="slide-item" style="position: relative; display: inline-block; width: 100%;">
+                                    Rejected Resources
+                                    @if(isset($rejected_publications_count) && $rejected_publications_count > 0)
+                                        <span class="badge badge-secondary badge-pill" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $rejected_publications_count }}</span>
+                                    @endif
+                                </a>
+                            </li>
                             <li aria-haspopup="true"><a href="{{ url('admin/publications/summaries') }}"
                                     class="slide-item">Resource Sumaries & Abstracts</a></li>
                             <li aria-haspopup="true">

@@ -45,6 +45,7 @@
                 <li class="nav-item"><a href="{{ url('admin/publications/create') }}" class="nav-link">{{ __('admin_nav.publish_a_resource') }}</a></li>
                 <li class="nav-item"><a href="{{ url('admin/publications') }}" class="nav-link">{{ __('admin_nav.manage_resources') }}</a></li>
                 <li class="nav-item"><a href="{{ url('admin/publications/pending') }}" class="nav-link">{{ __('admin_nav.pending_approval') }} @if(isset($pending_publications_count) && $pending_publications_count > 0)<span class="badge bg-danger ms-1">{{ $pending_publications_count }}</span>@endif</a></li>
+                <li class="nav-item"><a href="{{ url('admin/publications/rejected') }}" class="nav-link">{{ __('admin_nav.rejected_resources') }} @if(isset($rejected_publications_count) && $rejected_publications_count > 0)<span class="badge bg-secondary ms-1">{{ $rejected_publications_count }}</span>@endif</a></li>
                 <li class="nav-item"><a href="{{ url('admin/publications/summaries') }}" class="nav-link">{{ __('admin_nav.summaries_abstracts') }}</a></li>
                 <li class="nav-item"><a href="{{ url('admin/publications/moderate') }}" class="nav-link">{{ __('admin_nav.moderate_comments') }} @if(isset($pending_publication_comments_count) && $pending_publication_comments_count > 0)<span class="badge bg-danger ms-1">{{ $pending_publication_comments_count }}</span>@endif</a></li>
                 <li class="nav-item"><a href="{{ route('admin.rss_feeds.index') }}" class="nav-link">{{ __('admin_nav.rss_feeds') }}</a></li>

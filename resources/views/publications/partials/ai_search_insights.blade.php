@@ -211,6 +211,35 @@
             <p class="ai-brief__summary">{{ $insights['overview'] }}</p>
         @endif
 
+        @if(!empty($insights['analysis_summary']))
+            <p class="ai-brief__label">{{ __('publications.search.ai_analysis_heading') }}</p>
+            <p class="ai-brief__summary">{{ $insights['analysis_summary'] }}</p>
+        @endif
+
+        @if(!empty($insights['document_highlights']))
+            <p class="ai-brief__label">{{ __('publications.search.ai_documents_heading') }}</p>
+            <ul class="ai-brief__highlights">
+                @foreach($insights['document_highlights'] as $doc)
+                    @if(!empty($doc['url']))
+                        <li>
+                            <a href="{{ $doc['url'] }}" class="ai-brief__highlight-link">
+                                <span class="ai-brief__highlight-icon"><i class="fa {{ ($doc['type'] ?? '') === 'forum' ? 'fa-comments' : 'fa-file-lines' }}" aria-hidden="true"></i></span>
+                                <span class="ai-brief__highlight-text">
+                                    <strong>{{ $doc['title'] ?? '' }}</strong>
+                                    @if(!empty($doc['description']))
+                                        <span style="display:block;font-weight:400;color:#64748b;margin-top:0.15rem;">{{ Str::limit($doc['description'], 220) }}</span>
+                                    @endif
+                                </span>
+                                @if(!empty($doc['meta']))
+                                    <span class="ai-brief__highlight-type">{{ Str::limit($doc['meta'], 40) }}</span>
+                                @endif
+                            </a>
+                        </li>
+                    @endif
+                @endforeach
+            </ul>
+        @endif
+
         @if(!empty($insights['key_points']))
             <p class="ai-brief__label">{{ __('publications.search.key_takeaways') }}</p>
             <ul class="ai-brief__highlights">

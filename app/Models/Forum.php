@@ -92,4 +92,16 @@ class Forum extends Model
 
         return CustomAttachment::where('model','forums')->where('record_id',$this->id)->get();
     }
+
+    protected static function booted()
+    {
+        static::saved(function (Forum $forum) {
+            \App\Jobs\RefreshSearchIndexCachesJob::dispatch(null)
+                ->delay(now()->addSeconds(15));
+        });
+
+        static::deleted(function (Forum $forum) {
+            \App\Jobs\RefreshSearchIndexCachesJob::dispatch(null);
+        });
+    }
 }

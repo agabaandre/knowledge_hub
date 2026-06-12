@@ -64,6 +64,7 @@
             border-top: 3px solid var(--theme-color-primary, #119A48);
         }
         .pub-stat-card--pending { border-top-color: #d97706; }
+        .pub-stat-card--rejected { border-top-color: #dc3545; }
         .pub-stat-card--featured { border-top-color: #eab308; }
         .pub-stat-card--inactive { border-top-color: #64748b; }
         .pub-stat-card__label {
@@ -107,9 +108,9 @@
         </div>
     </div>
 
-    @php $pubStats = $publication_stats ?? ['approved' => 0, 'pending' => 0, 'featured' => 0, 'inactive' => 0]; @endphp
+    @php $pubStats = $publication_stats ?? ['approved' => 0, 'pending' => 0, 'rejected' => 0, 'featured' => 0, 'inactive' => 0]; @endphp
     <div class="row mb-3">
-        <div class="col-md-3 col-sm-6 mb-2">
+        <div class="col-md-2 col-sm-6 mb-2">
             <div class="card pub-stat-card h-100 shadow-sm">
                 <div class="card-body py-3">
                     <div class="pub-stat-card__label">Approved Publications</div>
@@ -117,11 +118,19 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3 col-sm-6 mb-2">
+        <div class="col-md-2 col-sm-6 mb-2">
             <a href="{{ url('admin/publications/pending') }}" class="card pub-stat-card pub-stat-card--pending h-100 shadow-sm text-decoration-none">
                 <div class="card-body py-3">
                     <div class="pub-stat-card__label">Pending Review</div>
                     <div class="pub-stat-card__value">{{ number_format((int) ($pubStats['pending'] ?? 0)) }}</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-2 col-sm-6 mb-2">
+            <a href="{{ url('admin/publications/rejected') }}" class="card pub-stat-card pub-stat-card--rejected h-100 shadow-sm text-decoration-none">
+                <div class="card-body py-3">
+                    <div class="pub-stat-card__label">Rejected</div>
+                    <div class="pub-stat-card__value">{{ number_format((int) ($pubStats['rejected'] ?? 0)) }}</div>
                 </div>
             </a>
         </div>

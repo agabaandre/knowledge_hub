@@ -59,7 +59,7 @@ return [
             'chat' => true,
             'icon' => 'fa-brain',
             'color' => '#10a37f',
-            'capabilities' => ['forums', 'insights', 'translation', 'chat', 'title_formatting', 'ai_search'],
+            'capabilities' => ['forums', 'insights', 'translation', 'chat', 'title_formatting', 'ai_search', 'ai_search_chat'],
         ],
         'chatpdf' => [
             'label' => 'ChatPDF',
@@ -77,7 +77,7 @@ return [
             'chat' => true,
             'icon' => 'fa-gem',
             'color' => '#4285f4',
-            'capabilities' => ['forums', 'insights', 'translation', 'chat', 'title_formatting', 'ai_search'],
+            'capabilities' => ['forums', 'insights', 'translation', 'chat', 'title_formatting', 'ai_search', 'ai_search_chat'],
         ],
         'deepseek' => [
             'label' => 'DeepSeek',
@@ -86,7 +86,7 @@ return [
             'chat' => true,
             'icon' => 'fa-bolt',
             'color' => '#4d6bfe',
-            'capabilities' => ['forums', 'insights', 'translation', 'chat', 'title_formatting', 'ai_search'],
+            'capabilities' => ['forums', 'insights', 'translation', 'chat', 'title_formatting', 'ai_search', 'ai_search_chat'],
         ],
         'custom' => [
             'label' => 'Custom endpoint',
@@ -95,7 +95,7 @@ return [
             'chat' => true,
             'icon' => 'fa-code',
             'color' => '#6c757d',
-            'capabilities' => ['forums', 'insights', 'translation', 'chat', 'title_formatting', 'ai_search'],
+            'capabilities' => ['forums', 'insights', 'translation', 'chat', 'title_formatting', 'ai_search', 'ai_search_chat'],
         ],
     ],
 
@@ -146,6 +146,12 @@ return [
             'default_provider' => 'openai',
             'provider_types' => ['chat'],
         ],
+        'ai_search_chat' => [
+            'label' => 'AI search chat',
+            'description' => 'Follow-up questions on search results using publication and forum descriptions.',
+            'default_provider' => 'openai',
+            'provider_types' => ['chat'],
+        ],
     ],
 
     'default_feature_routing' => [
@@ -156,6 +162,7 @@ return [
         'pdf_documents' => 'chatpdf',
         'title_formatting' => 'openai',
         'ai_search' => 'openai',
+        'ai_search_chat' => 'openai',
     ],
 
     /*

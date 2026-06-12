@@ -22,6 +22,10 @@ class AdminStatsViewComposer{
             ->where('is_rejected', 0)
             ->count();
 
+        $rejected_publications_count = Publication::where('is_version', 0)
+            ->where('is_rejected', 1)
+            ->count();
+
         // Count pending forum comments (not approved - excluding 'approved' status)
         $pending_forum_comments_count = ForumComment::where(function($query) {
                 $query->where('status', '!=', 'approved')
@@ -194,6 +198,7 @@ class AdminStatsViewComposer{
             // New unified notification variables
             'pending_forums_count' => $pending_forums_count,
             'pending_publications_count' => $pending_publications_count,
+            'rejected_publications_count' => $rejected_publications_count,
             'pending_cop_approvals_count' => $pending_cop_approvals_count,
             'pending_content_requests_count' => $pending_content_requests_count,
             'processed_content_requests_count' => $processed_content_requests_count,

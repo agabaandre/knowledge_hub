@@ -3,7 +3,6 @@
 namespace App\Support;
 
 use Illuminate\Contracts\Cache\Repository;
-use Illuminate\Support\Facades\Cache;
 
 final class SearchCache
 {
@@ -31,12 +30,6 @@ final class SearchCache
      */
     public static function bumpAll(): void
     {
-        try {
-            Cache::flush();
-        } catch (\Throwable $e) {
-            // Non-fatal when the default store cannot flush.
-        }
-
         self::bumpHybrid();
         self::bumpAiInsights();
     }

@@ -198,6 +198,12 @@ Route::group(["prefix" => "records"], function () {
     Route::get("/resource", [PublicationsController::class, 'show']);
     Route::get("/search/fragment", [PublicationsController::class, 'searchFragment']);
     Route::get("/search", [PublicationsController::class, 'search']);
+    Route::post("/search/ai-chat", [\App\Http\Controllers\AiSearchChatController::class, 'chat'])
+        ->middleware('throttle:40,1')
+        ->name('records.search.ai-chat');
+    Route::post("/search/ai-chat/reset", [\App\Http\Controllers\AiSearchChatController::class, 'reset'])
+        ->middleware('throttle:20,1')
+        ->name('records.search.ai-chat.reset');
     Route::get("/subtheme", [PublicationsController::class, 'subtheme_pubs']);
     Route::get("/autocomplete", [PublicationsController::class, 'autocomplete']);
     Route::get("/shortened", [PublicationsController::class, 'shortened']);
@@ -385,6 +391,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
         Route::get("/", [ResourcesController::class, 'index']);
         Route::get("/pending", [ResourcesController::class, 'pending']);
+        Route::get("/rejected", [ResourcesController::class, 'rejected']);
         Route::get("/create", [ResourcesController::class, 'create']);
         Route::get("/edit", [ResourcesController::class, 'edit']);
         Route::get("/details", [ResourcesController::class, 'details']);

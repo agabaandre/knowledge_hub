@@ -13,10 +13,10 @@ use App\Models\ThemeticArea;
 use App\Repositories\GraphsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Support\AiConfig;
+use App\Support\MetricsCache;
 use App\Support\SearchCache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -51,9 +51,10 @@ class AiSearchInsightsService
         }
 
         $cacheKey = 'ai_search_insights:v'.SearchCache::aiInsightsVersion().':'.md5($term.'|'.$this->filterFingerprint($request));
+        $cacheStore = SearchCache::store();
 
         try {
-            $cached = Cache::get($cacheKey);
+            $cached = $cacheStore->get($cacheKey);
             if (is_array($cached) && self::isDisplayable($cached)) {
                 return $cached;
             }
@@ -68,7 +69,7 @@ class AiSearchInsightsService
             );
 
             if (self::isDisplayable($built)) {
-                Cache::put($cacheKey, $built, now()->addMinutes(15));
+                $cacheStore->put($cacheKey, $built, MetricsCache::ttl('ai_search'));
             }
 
             return $built;
@@ -94,7 +95,7 @@ class AiSearchInsightsService
         foreach ([
             'overview', 'key_points', 'publications', 'forums', 'communities',
             'health_topics', 'indicators', 'scholarly_sources', 'internet_results', 'external_resources',
-            'thematic_areas', 'sub_thematic_areas', 'contributors',
+            'thematic_areas', 'sub_thematic_areas', 'contributors', 'document_highlights',
         ] as $key) {
             if (! empty($insights[$key])) {
                 return true;
@@ -148,18 +149,21 @@ class AiSearchInsightsService
         $allowedSiteLabels = AiConfig::allowedSearchSiteLabels();
 
         $system = 'You are Khub AI, the search assistant for the Africa CDC Knowledge Hub—a professional public health knowledge platform for Africa. '
-            .'Produce a concise research brief for the user query. Tone: authoritative, neutral, and precise—suitable for public health professionals and policymakers. '
+            .'Produce a concise research brief for the user query. Read each publication description and forum excerpt in the catalog before summarizing—ground every claim in that text. '
+            .'Tone: authoritative, neutral, and precise—suitable for public health professionals and policymakers. '
             .'Avoid filler, marketing language, hedging, and first-person voice. Use plain text only (no markdown, HTML, or bullet characters in strings). '
             .'Use ONLY the catalog data provided for on-platform resources. Never invent titles, URLs, counts, or authors. '
             .'Health topics, thematic areas, sub-themes, and contributors are context—reference them when directly relevant. '
             .'Internet search results come from '.$allowedSiteLabels.'; cite them only as external scholarly evidence, not as Khub resources. '
             .'For external_resources, use '.$allowedSiteLabels.' links only—never suggest WHO, Africa CDC, or other general websites. '
             .'Never include private contact details (emails, phone numbers, postal addresses). '
-            .'overview: exactly 2 sentences, max 65 words. Sentence 1 defines the topic in public-health terms (Africa context when appropriate). '
-            .'Sentence 2 states what Khub holds for this query using total_publications_matching when > 0; do not list individual resource titles. '
-            .'key_points: exactly 3 objects {text, hub_url}. text: 8-14 words, directly about the search query. '
+            .'overview: exactly 3 sentences, max 95 words. Sentence 1 defines the topic in public-health terms (Africa context when appropriate). '
+            .'Sentence 2 synthesizes themes from publication descriptions and forum excerpts in the catalog. '
+            .'Sentence 3 states what Khub holds for this query using total_publications_matching when > 0; do not list individual resource titles. '
+            .'analysis_summary: 2-4 sentences (max 120 words) explaining how catalog descriptions relate to the query—mention specific themes, interventions, or evidence types found in excerpts. '
+            .'key_points: exactly 3 objects {text, hub_url}. text: 8-14 words, directly about the search query and grounded in catalog descriptions. '
             .'hub_url: MUST be copied exactly from publications[].url, forums[].url, health_topics[].url, communities[].url, or member_state_indicators[].url in the catalog. Never use internet_results or external URLs. Use each hub URL at most once. '
-            .'Return strict JSON with keys: overview (string), key_points (array of 3 {text, hub_url}), '
+            .'Return strict JSON with keys: overview (string), analysis_summary (string), key_points (array of 3 {text, hub_url}), '
             .'featured_publication_ids (array of int, max 3 from catalog), featured_forum_ids (array of int, max 2), '
             .'featured_community_ids (array of int, max 2), featured_health_topic_ids (array of int, max 3), '
             .'featured_indicator_ids (array of int, max 3 from member_state_indicators), '
@@ -353,13 +357,14 @@ class AiSearchInsightsService
             if (! $pub instanceof Publication) {
                 continue;
             }
-            $desc = strip_tags((string) ($pub->description ?? ''));
-            $desc = html_entity_decode($desc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $desc = $this->plainPublicationDescription($pub);
             $author = $pub->author;
             $catalog[] = [
                 'id' => (int) $pub->id,
                 'title' => Str::limit(strip_tags((string) ($pub->title ?? '')), 160),
-                'excerpt' => Str::limit(trim($desc), 220),
+                'description' => Str::limit($desc, 1200),
+                'excerpt' => Str::limit($desc, 400),
+                'associated_authors' => Str::limit(strip_tags((string) ($pub->associated_authors ?? '')), 120),
                 'category' => optional($pub->data_category)->name ?? optional($pub->category)->category_name ?? null,
                 'theme' => optional($pub->sub_theme)->description ?? optional($pub->theme)->description ?? null,
                 'thematic_area_id' => (int) (optional($pub->sub_theme)->thematic_area_id ?? optional($pub->theme)->id ?? 0) ?: null,
@@ -437,11 +442,12 @@ class AiSearchInsightsService
             if (! $forum instanceof Forum) {
                 continue;
             }
-            $desc = strip_tags((string) ($forum->forum_description ?? ''));
+            $desc = $this->plainForumDescription($forum);
             $catalog[] = [
                 'id' => (int) $forum->id,
                 'title' => Str::limit(strip_tags((string) ($forum->forum_title ?? '')), 140),
-                'excerpt' => Str::limit(html_entity_decode($desc, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 180),
+                'description' => Str::limit($desc, 800),
+                'excerpt' => Str::limit($desc, 350),
                 'comments' => (int) ($forum->total_comments ?? 0),
                 'url' => forum_thread_url($forum),
             ];
@@ -771,6 +777,11 @@ class AiSearchInsightsService
             );
         }
 
+        $analysisSummary = Str::limit(trim((string) ($decoded['analysis_summary'] ?? '')), 800);
+        if ($analysisSummary === '' && $hasDisplayableContent) {
+            $analysisSummary = $this->composeFallbackAnalysisSummary($publicationCatalog, $forumCatalog, $term);
+        }
+
         if ($keyPoints === [] && $hasDisplayableContent) {
             $keyPoints = $this->composeFallbackKeyPoints($hubLinkCatalog, $term);
         }
@@ -787,12 +798,14 @@ class AiSearchInsightsService
             'query' => $term,
             'hub_matches' => $totalPublications,
             'overview' => $overview,
+            'analysis_summary' => $analysisSummary,
             'key_points' => array_slice($keyPoints, 0, 3),
             'publications' => array_slice($pickPublications, 0, 3),
             'forums' => array_slice($pickForums, 0, 2),
             'communities' => array_slice($pickCommunities, 0, 2),
             'health_topics' => $healthTopics,
             'indicators' => array_slice($pickIndicators, 0, 4),
+            'document_highlights' => $this->buildDocumentHighlights($publicationCatalog, $forumCatalog),
             'scholarly_sources' => array_slice($scholarlySources, 0, 4),
             'internet_results' => array_slice($scholarlySources, 0, 4),
             'thematic_areas' => array_slice($themeCatalog, 0, 6),
@@ -1169,6 +1182,29 @@ class AiSearchInsightsService
         return Str::limit(implode(' ', $sentences), 480);
     }
 
+    /**
+     * @param  list<array<string, mixed>>  $publicationCatalog
+     * @param  list<array<string, mixed>>  $forumCatalog
+     */
+    private function composeFallbackAnalysisSummary(array $publicationCatalog, array $forumCatalog, string $term): string
+    {
+        $parts = [];
+        if ($publicationCatalog !== []) {
+            $sample = collect($publicationCatalog)->take(2)->pluck('title')->filter()->implode('; ');
+            if ($sample !== '') {
+                $parts[] = __('publications.search.ai_analysis_publications', ['sample' => Str::limit($sample, 160)]);
+            }
+        }
+        if ($forumCatalog !== []) {
+            $parts[] = __('publications.search.ai_analysis_forums', ['count' => count($forumCatalog)]);
+        }
+        if ($parts === [] && $term !== '') {
+            $parts[] = __('publications.search.ai_analysis_generic', ['term' => $term]);
+        }
+
+        return Str::limit(implode(' ', $parts), 800);
+    }
+
     private function isAllowedExternalUrl(string $url): bool
     {
         $host = strtolower((string) parse_url($url, PHP_URL_HOST));
@@ -1197,5 +1233,168 @@ class AiSearchInsightsService
         }
 
         return implode(';', $parts);
+    }
+
+    public function requestFingerprint(Request $request): string
+    {
+        $term = trim((string) ($request->term ?? ''));
+
+        return md5(mb_strtolower($term).'|'.$this->filterFingerprint($request));
+    }
+
+    /**
+     * Shared catalog payload for AI insights and follow-up chat.
+     *
+     * @return array<string, mixed>
+     */
+    public function buildCatalogPayload(
+        Request $request,
+        Collection $searchForums,
+        Collection $searchCommunities,
+        Collection $federatedPublications = new Collection,
+        int $publicationLimit = 20
+    ): array {
+        return [
+            'filters' => $this->filterFingerprint($request),
+            'publications' => $this->publicationCatalogForAi($request, $publicationLimit),
+            'forums' => $this->forumCatalog($searchForums),
+            'communities' => $this->communityCatalog($searchCommunities),
+            'partner_hub_publications' => $this->federatedPublicationCatalog($federatedPublications),
+            'health_topics' => $this->healthTopicCatalog(trim((string) ($request->term ?? ''))),
+            'indicators' => $this->indicatorCatalogForAi(trim((string) ($request->term ?? ''))),
+            'thematic_areas' => $this->themeCatalog(trim((string) ($request->term ?? ''))),
+            'sub_thematic_areas' => $this->subThemeCatalog(trim((string) ($request->term ?? ''))),
+            'contributors' => $this->authorCatalog(
+                trim((string) ($request->term ?? '')),
+                $this->publicationCatalogForAi($request, min($publicationLimit, 15))
+            ),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $catalog
+     * @return list<array<string, mixed>>
+     */
+    public function resolveDocumentsFromIds(
+        array $catalog,
+        array $publicationIds,
+        array $forumIds,
+        array $communityIds,
+        array $indicatorIds
+    ): array {
+        $documents = [];
+        $pubById = collect($catalog['publications'] ?? [])->keyBy('id');
+        $forumById = collect($catalog['forums'] ?? [])->keyBy('id');
+        $communityById = collect($catalog['communities'] ?? [])->keyBy('id');
+        $indicatorById = collect($catalog['indicators'] ?? [])->keyBy('id');
+
+        foreach ($publicationIds as $id) {
+            $row = $pubById->get((int) $id);
+            if (! is_array($row)) {
+                continue;
+            }
+            $documents[] = [
+                'type' => 'publication',
+                'id' => (int) $row['id'],
+                'title' => (string) ($row['title'] ?? ''),
+                'excerpt' => (string) ($row['excerpt'] ?? $row['description'] ?? ''),
+                'url' => (string) ($row['url'] ?? ''),
+            ];
+        }
+
+        foreach ($forumIds as $id) {
+            $row = $forumById->get((int) $id);
+            if (! is_array($row)) {
+                continue;
+            }
+            $documents[] = [
+                'type' => 'forum',
+                'id' => (int) $row['id'],
+                'title' => (string) ($row['title'] ?? ''),
+                'excerpt' => (string) ($row['excerpt'] ?? $row['description'] ?? ''),
+                'url' => (string) ($row['url'] ?? ''),
+            ];
+        }
+
+        foreach ($communityIds as $id) {
+            $row = $communityById->get((int) $id);
+            if (! is_array($row)) {
+                continue;
+            }
+            $documents[] = [
+                'type' => 'community',
+                'id' => (int) $row['id'],
+                'title' => (string) ($row['name'] ?? ''),
+                'excerpt' => (string) ($row['excerpt'] ?? ''),
+                'url' => (string) ($row['url'] ?? ''),
+            ];
+        }
+
+        foreach ($indicatorIds as $id) {
+            $row = $indicatorById->get((int) $id);
+            if (! is_array($row)) {
+                continue;
+            }
+            $documents[] = [
+                'type' => 'indicator',
+                'id' => (int) $row['id'],
+                'title' => (string) ($row['name'] ?? ''),
+                'excerpt' => (string) ($row['excerpt'] ?? ''),
+                'url' => (string) ($row['url'] ?? ''),
+            ];
+        }
+
+        return array_slice($documents, 0, 8);
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $publicationCatalog
+     * @param  list<array<string, mixed>>  $forumCatalog
+     * @return list<array<string, mixed>>
+     */
+    private function buildDocumentHighlights(array $publicationCatalog, array $forumCatalog): array
+    {
+        $highlights = [];
+
+        foreach (array_slice($publicationCatalog, 0, 5) as $row) {
+            $highlights[] = [
+                'type' => 'publication',
+                'id' => (int) ($row['id'] ?? 0),
+                'title' => (string) ($row['title'] ?? ''),
+                'description' => (string) ($row['excerpt'] ?? $row['description'] ?? ''),
+                'url' => (string) ($row['url'] ?? ''),
+                'meta' => trim(implode(' · ', array_filter([
+                    (string) ($row['theme'] ?? ''),
+                    (string) ($row['category'] ?? ''),
+                ]))),
+            ];
+        }
+
+        foreach (array_slice($forumCatalog, 0, 3) as $row) {
+            $highlights[] = [
+                'type' => 'forum',
+                'id' => (int) ($row['id'] ?? 0),
+                'title' => (string) ($row['title'] ?? ''),
+                'description' => (string) ($row['excerpt'] ?? $row['description'] ?? ''),
+                'url' => (string) ($row['url'] ?? ''),
+                'meta' => __('publications.search.forum_discussion'),
+            ];
+        }
+
+        return $highlights;
+    }
+
+    private function plainPublicationDescription(Publication $publication): string
+    {
+        $desc = strip_tags((string) ($publication->description ?? ''));
+
+        return trim(html_entity_decode($desc, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+    }
+
+    private function plainForumDescription(Forum $forum): string
+    {
+        $desc = strip_tags((string) ($forum->forum_description ?? ''));
+
+        return trim(html_entity_decode($desc, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 }

@@ -30,6 +30,10 @@
             @include('publications.partials.ai_search_insights')
         @endif
 
+        @if(($aiSearchEnabled ?? false) && mb_strlen(trim((string) request('term', ''))) >= 2)
+            @include('publications.partials.ai_search_chat')
+        @endif
+
         @if(($federationBrowseEnabled ?? false) && !request()->filled('term'))
             <div class="alert alert-light border mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <span><i class="fa fa-globe-africa me-2" style="color:var(--theme-color-primary,#119A48);"></i>Browse resources synced from partner country knowledge hubs.</span>

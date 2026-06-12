@@ -16,6 +16,7 @@ return [
     'publish_a_resource' => 'Publish a Resource',
     'manage_resources' => 'Manage Resources',
     'pending_approval' => 'Pending Approval',
+    'rejected_resources' => 'Rejected Resources',
     'summaries_abstracts' => 'Summaries & Abstracts',
     'moderate_comments' => 'Moderate Comments',
     'rss_feeds' => 'RSS Feeds',
