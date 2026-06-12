@@ -138,10 +138,5 @@
                 <p class="text-muted small text-center py-2 mb-0" id="home-top-searches-complete">{{ __('publications.search.all_results_loaded') }}</p>
             @endif
         </div>
-        <div class="row justify-content-center mt-4">
-            <div class="col-12 text-center">
-                <a href="{{ url('records/search') }}" class="btn btn-outline-primary px-4 py-2 rounded" style="border-color: {{ $primary }}; color: {{ $primary }};">View more</a>
-            </div>
-        </div>
     </div>
 </section>
