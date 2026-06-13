@@ -15,6 +15,8 @@ class ForumsController extends Controller
 {
     private $forumsRepo;
 
+    public const FORUMS_INFINITE_ROWS = 10;
+
     /** Same allowed types as forum comments + forum thread attachments (office → PDF on server). */
     private const FORUM_THREAD_ATTACHMENTS_MIMES = 'jpeg,jpg,png,gif,webp,pdf,mp4,m4v,mov,avi,webm,mkv,wmv,flv,3gp,3gpp,mpeg,mpg,mp3,m4a,wav,aac,ogg,oga,opus,flac,wma,doc,docx,xls,xlsx,ppt,pptx,odt,ods,odp,rtf';
 
@@ -25,9 +27,17 @@ class ForumsController extends Controller
 
     public function index(Request $request)
     {
+        if ($this->forumsInfiniteScrollEnabled()) {
+            $request->merge([
+                'page' => max(1, (int) $request->input('page', 1)),
+                'rows' => self::FORUMS_INFINITE_ROWS,
+            ]);
+        }
+
         $data['forums']    = $this->forumsRepo->get($request, 1, null, false);
         $data['my_forums'] = $this->forumsRepo->getJoinedForums($request);
         $data['search']    = (object) $request->all();
+        $data['forumsInfiniteScroll'] = $this->forumsInfiniteScrollEnabled();
 
         // Get related content based on forum tags
         $forumTagTexts = [];
@@ -129,6 +139,44 @@ class ForumsController extends Controller
         $data['ogType'] = 'website';
 
         return view('forums.index', $data);
+    }
+
+    /**
+     * Append the next page of forum cards for infinite-scroll listing.
+     */
+    public function forumsPage(Request $request)
+    {
+        if (! $this->forumsInfiniteScrollEnabled()) {
+            return response()->json(['ok' => false, 'error' => 'infinite_scroll_disabled'], 403);
+        }
+
+        $request->merge(['rows' => self::FORUMS_INFINITE_ROWS]);
+        $forums = $this->forumsRepo->get($request, 1, null, false);
+        $myForums = $this->forumsRepo->getJoinedForums($request);
+
+        $page = (int) $forums->currentPage();
+        $perPage = (int) $forums->perPage();
+        $listOffset = max(0, ($page - 1) * $perPage);
+        $loadedCount = min($forums->total(), $listOffset + $forums->count());
+
+        return response()->json([
+            'ok' => true,
+            'html' => view('forums.partials.forum_list_items', [
+                'forums' => $forums,
+                'my_forums' => $myForums,
+            ])->render(),
+            'current_page' => $page,
+            'last_page' => (int) $forums->lastPage(),
+            'has_more' => $forums->hasMorePages(),
+            'total' => (int) $forums->total(),
+            'loaded_count' => $loadedCount,
+            'forum_ids' => $forums->getCollection()->pluck('id')->values()->all(),
+        ]);
+    }
+
+    protected function forumsInfiniteScrollEnabled(): bool
+    {
+        return (settings()->forums_pagination_mode ?? 'pagination') === 'infinite_scroll';
     }
 
     public function myForums(Request $request)

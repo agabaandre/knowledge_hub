@@ -340,6 +340,13 @@ class SettingsRepository
                 : 'pagination';
         }
 
+        if (Schema::hasColumn('setting', 'forums_pagination_mode')) {
+            $mode = (string) $request->input('forums_pagination_mode', 'pagination');
+            $settings->forums_pagination_mode = in_array($mode, ['pagination', 'infinite_scroll'], true)
+                ? $mode
+                : 'pagination';
+        }
+
         if (Schema::hasColumn('setting', 'enable_ai_chat_prune')) {
             if ($request->has('enable_ai_chat_prune')) {
                 $settings->enable_ai_chat_prune = (bool)$request->boolean('enable_ai_chat_prune', true);

@@ -1456,6 +1456,18 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
+                                <label for="forums_pagination_mode">Forums listing loading</label>
+                                <select class="form-control" id="forums_pagination_mode" name="forums_pagination_mode">
+                                    <option value="pagination" @if(($settings->forums_pagination_mode ?? 'pagination') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
+                                    <option value="infinite_scroll" @if(($settings->forums_pagination_mode ?? 'pagination') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
+                                </select>
+                                <small class="info-text">Controls how discussions load on the forums page. Infinite scroll loads 10 threads at a time and appends more as you scroll.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="enable_ai_chat_prune" name="enable_ai_chat_prune" value="1" @if($settings->enable_ai_chat_prune ?? 1) checked @endif>
                                     <label class="form-check-label" for="enable_ai_chat_prune">Enable scheduled AI chat cleanup</label>
