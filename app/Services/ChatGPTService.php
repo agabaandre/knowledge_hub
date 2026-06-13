@@ -51,12 +51,30 @@ class ChatGPTService implements AIModel{
     }
 
     /**
-     * @return array{driver: string, endpoint?: string, headers?: array<int, string>, model?: string, feature?: string}|null
+     * @return array{driver: string, endpoint?: string, headers?: array<int, string>, model?: string, feature?: string, provider?: string}|null
      */
-    private function resolveProviderTransport(string $feature): ?array
+    private function resolveProviderTransport(string $feature, ?string $providerId = null): ?array
     {
-        $provider = AiConfig::resolveChatProviderForFeature($feature);
-        if ($provider === null) {
+        $providers = $providerId !== null
+            ? [$providerId]
+            : AiConfig::chatProviderFallbackChain($feature);
+
+        foreach ($providers as $provider) {
+            $transport = $this->buildProviderTransport($provider, $feature);
+            if ($transport !== null) {
+                return $transport;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array{driver: string, endpoint?: string, headers?: array<int, string>, model?: string, feature?: string, provider?: string}|null
+     */
+    private function buildProviderTransport(string $provider, string $feature): ?array
+    {
+        if (! AiConfig::providerAvailable($provider)) {
             return null;
         }
 
@@ -66,7 +84,12 @@ class ChatGPTService implements AIModel{
         }
 
         if ($creds['driver'] === 'gemini') {
-            return ['driver' => 'gemini', 'feature' => $feature, 'model' => $creds['model']];
+            return [
+                'driver' => 'gemini',
+                'feature' => $feature,
+                'model' => $creds['model'],
+                'provider' => $provider,
+            ];
         }
 
         $baseUrl = rtrim($creds['base_url'], '/');
@@ -82,7 +105,20 @@ class ChatGPTService implements AIModel{
                 'Authorization: Bearer '.$creds['api_key'],
             ],
             'model' => $creds['model'],
+            'feature' => $feature,
+            'provider' => $provider,
         ];
+    }
+
+    private function notConfiguredHtml(string $feature): string
+    {
+        $features = AiConfig::chatProviderFallbackChain($feature) === []
+            ? 'forums, chat, or AI search'
+            : $feature;
+
+        return '<div class="alert alert-danger">AI is not configured for this feature. '
+            .'An administrator must enable a chat provider (OpenAI, Gemini, DeepSeek, or custom) '
+            .'under Admin → Settings → AI integrations and assign it to '.$features.'.</div>';
     }
 
     private function wrapContentAsOpenAiResponse(string $content): object
@@ -99,7 +135,7 @@ class ChatGPTService implements AIModel{
      */
     private function completeMessagesAsOpenAiResponse(string $feature, array $messages, int $maxTokens = 3096, bool $jsonMode = false): ?object
     {
-        $result = app(AiCompletionService::class)->completeForFeature($feature, $messages, $maxTokens, null, $jsonMode);
+        $result = app(AiCompletionService::class)->completeForFeatureWithFallback($feature, $messages, $maxTokens, null, $jsonMode);
         if (! ($result['ok'] ?? false)) {
             Log::warning('AI completion failed', ['feature' => $feature, 'error' => $result['error'] ?? 'unknown']);
 
@@ -114,21 +150,61 @@ class ChatGPTService implements AIModel{
      */
     private function streamMessagesForFeature(string $feature, array $messages, callable $onChunk, int $maxTokens = 3096): void
     {
-        $transport = $this->resolveProviderTransport($feature);
-        if ($transport === null) {
-            $onChunk('<div class="alert alert-danger">AI is not configured for this feature.</div>');
+        $providers = AiConfig::chatProviderFallbackChain($feature);
+        if ($providers === []) {
+            $onChunk($this->notConfiguredHtml($feature));
 
             return;
         }
 
-        if ($transport['driver'] === 'gemini') {
-            $response = $this->completeMessagesAsOpenAiResponse($feature, $messages, $maxTokens);
-            $content = $this->extractOpenAiMessageContent($response);
-            $onChunk($content !== null && $content !== '' ? $content : '<div class="alert alert-danger">No response from AI.</div>');
+        $errors = [];
+        foreach ($providers as $provider) {
+            $transport = $this->resolveProviderTransport($feature, $provider);
+            if ($transport === null) {
+                continue;
+            }
 
-            return;
+            if ($transport['driver'] === 'gemini') {
+                $response = $this->completeMessagesAsOpenAiResponse($feature, $messages, $maxTokens);
+                $content = $this->extractOpenAiMessageContent($response);
+                if ($content !== null && $content !== '') {
+                    $onChunk($content);
+
+                    return;
+                }
+                $errors[] = $provider.': empty response';
+
+                continue;
+            }
+
+            $streamError = null;
+            $this->streamOpenAiCompatibleTransport($transport, $messages, $onChunk, $maxTokens, $streamError);
+            if ($streamError === null) {
+                return;
+            }
+
+            $errors[] = $provider.': '.$streamError;
+            Log::warning('AI stream provider failed, trying fallback', [
+                'feature' => $feature,
+                'provider' => $provider,
+                'error' => $streamError,
+            ]);
         }
 
+        if ($errors !== []) {
+            Log::error('AI stream exhausted providers', ['feature' => $feature, 'errors' => $errors]);
+        }
+
+        $onChunk('<div class="alert alert-danger">Could not reach the AI service. Please try again in a moment.</div>');
+    }
+
+    /**
+     * @param  array{driver: string, endpoint?: string, headers?: array<int, string>, model?: string}  $transport
+     * @param  array<int, array{role: string, content: string}>  $messages
+     */
+    private function streamOpenAiCompatibleTransport(array $transport, array $messages, callable $onChunk, int $maxTokens, ?string &$error): void
+    {
+        $error = null;
         $payload = [
             'model' => $transport['model'],
             'messages' => $messages,
@@ -144,6 +220,8 @@ class ChatGPTService implements AIModel{
         curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 120);
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use ($onChunk) {
             $len = strlen($data);
             if ($len > 0) {
@@ -155,10 +233,19 @@ class ChatGPTService implements AIModel{
 
         curl_exec($ch);
         if (curl_errno($ch)) {
-            Log::error('AI stream error: '.curl_error($ch));
-            $onChunk('<div class="alert alert-danger">Stream error. Please try again.</div>');
+            $error = curl_error($ch);
+            Log::error('AI stream error: '.$error);
+            curl_close($ch);
+
+            return;
         }
+
+        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+
+        if ($httpCode >= 400) {
+            $error = 'HTTP '.$httpCode;
+        }
     }
 
     function prompt($question = null, string $feature = 'chat')

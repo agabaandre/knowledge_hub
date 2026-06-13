@@ -56,29 +56,7 @@ class AiCompletionService
      */
     private function providerFallbackChain(string $feature): array
     {
-        $candidates = [
-            AiConfig::featureProvider($feature),
-            AiConfig::featureProvider('ai_search'),
-            'openai',
-        ];
-        $candidates = array_merge($candidates, AiConfig::chatProviderIds());
-
-        $providers = [];
-        $seen = [];
-        foreach ($candidates as $provider) {
-            if (! is_string($provider) || $provider === '' || isset($seen[$provider])) {
-                continue;
-            }
-            $seen[$provider] = true;
-
-            if (! AiConfig::isChatCompletionProvider($provider) || ! AiConfig::providerAvailable($provider)) {
-                continue;
-            }
-
-            $providers[] = $provider;
-        }
-
-        return $providers;
+        return AiConfig::chatProviderFallbackChain($feature);
     }
 
     /**

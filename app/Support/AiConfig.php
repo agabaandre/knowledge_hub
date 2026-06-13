@@ -577,13 +577,31 @@ class AiConfig
     }
 
     /**
-     * First enabled + configured chat provider for a feature, with fallback chain.
+     * Ordered chat providers for a feature (assigned route + sensible cross-feature fallbacks).
+     *
+     * @return list<string>
      */
-    public static function resolveChatProviderForFeature(string $feature): ?string
+    public static function chatProviderFallbackChain(string $feature): array
     {
-        $candidates = [self::featureProvider($feature), 'openai'];
+        $featureKeys = match ($feature) {
+            'forums' => ['forums', 'chat', 'ai_search_chat', 'ai_search'],
+            'ai_search_chat' => ['ai_search_chat', 'ai_search', 'chat', 'forums'],
+            'ai_search' => ['ai_search', 'ai_search_chat', 'chat', 'forums'],
+            'chat' => ['chat', 'forums', 'ai_search_chat', 'ai_search'],
+            default => [$feature, 'chat'],
+        };
+
+        $candidates = [];
+        foreach ($featureKeys as $key) {
+            $assigned = self::featureProvider($key);
+            if ($assigned !== '') {
+                $candidates[] = $assigned;
+            }
+        }
+        $candidates[] = 'openai';
         $candidates = array_merge($candidates, self::chatProviderIds());
 
+        $providers = [];
         $seen = [];
         foreach ($candidates as $provider) {
             if (! is_string($provider) || $provider === '' || isset($seen[$provider])) {
@@ -591,16 +609,22 @@ class AiConfig
             }
             $seen[$provider] = true;
 
-            if (! self::isChatCompletionProvider($provider)) {
+            if (! self::isChatCompletionProvider($provider) || ! self::providerAvailable($provider)) {
                 continue;
             }
 
-            if (self::providerAvailable($provider)) {
-                return $provider;
-            }
+            $providers[] = $provider;
         }
 
-        return null;
+        return $providers;
+    }
+
+    /**
+     * First enabled + configured chat provider for a feature, with fallback chain.
+     */
+    public static function resolveChatProviderForFeature(string $feature): ?string
+    {
+        return self::chatProviderFallbackChain($feature)[0] ?? null;
     }
 
     public static function primaryChatProvider(): ?string

@@ -9,6 +9,7 @@ use App\Models\PdfChatSession;
 use App\Models\PdfChatMessage;
 use App\Services\ChatGPTService;
 use App\Services\ChatPDFService;
+use App\Support\AiConfig;
 use App\Support\ForumAssistantContext;
 use App\Support\ForumsListingAssistantContext;
 use App\Support\PublicationAssistantContext;
@@ -283,8 +284,23 @@ class PdfChatController extends Controller
         return array_values(array_unique(array_filter(array_map('intval', $raw))));
     }
 
+    private function forumAssistantUnavailableResponse()
+    {
+        if (AiConfig::chatProviderFallbackChain('forums') !== []) {
+            return null;
+        }
+
+        return response()->json([
+            'error' => 'AI is not configured for forum assistants. An administrator must enable a chat provider (OpenAI, Gemini, DeepSeek, or custom) under Admin → Settings → AI integrations.',
+        ], 503);
+    }
+
     private function sendForumsIndexMessage(?int $sessionId, ?int $userId, string $userMessage, bool $stream, array $forumIds)
     {
+        if ($response = $this->forumAssistantUnavailableResponse()) {
+            return $response;
+        }
+
         if ($sessionId) {
             $session = PdfChatSession::where('id', $sessionId)
                 ->where('assistant_mode', 'forums_index')
@@ -533,6 +549,10 @@ class PdfChatController extends Controller
 
     private function sendForumMessage(int $forumId, ?int $sessionId, ?int $userId, string $userMessage, bool $stream)
     {
+        if ($response = $this->forumAssistantUnavailableResponse()) {
+            return $response;
+        }
+
         $forum = Forum::query()->find($forumId);
         if (! $forum) {
             return response()->json(['error' => 'Forum thread not found.'], 404);
