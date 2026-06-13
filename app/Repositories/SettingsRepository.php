@@ -347,6 +347,13 @@ class SettingsRepository
                 : 'pagination';
         }
 
+        if (Schema::hasColumn('setting', 'communities_pagination_mode')) {
+            $mode = (string) $request->input('communities_pagination_mode', 'infinite_scroll');
+            $settings->communities_pagination_mode = in_array($mode, ['pagination', 'infinite_scroll'], true)
+                ? $mode
+                : 'infinite_scroll';
+        }
+
         if (Schema::hasColumn('setting', 'enable_ai_chat_prune')) {
             if ($request->has('enable_ai_chat_prune')) {
                 $settings->enable_ai_chat_prune = (bool)$request->boolean('enable_ai_chat_prune', true);

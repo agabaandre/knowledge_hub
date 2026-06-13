@@ -1468,6 +1468,18 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
+                                <label for="communities_pagination_mode">Communities listing loading</label>
+                                <select class="form-control" id="communities_pagination_mode" name="communities_pagination_mode">
+                                    <option value="pagination" @if(($settings->communities_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
+                                    <option value="infinite_scroll" @if(($settings->communities_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
+                                </select>
+                                <small class="info-text">Controls how communities load on the communities page. Infinite scroll loads 6 communities at a time and appends more as you scroll.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="enable_ai_chat_prune" name="enable_ai_chat_prune" value="1" @if($settings->enable_ai_chat_prune ?? 1) checked @endif>
                                     <label class="form-check-label" for="enable_ai_chat_prune">Enable scheduled AI chat cleanup</label>

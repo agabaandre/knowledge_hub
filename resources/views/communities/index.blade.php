@@ -355,6 +355,80 @@
         #filterForm .select2-container .select2-selection__arrow {
             height: calc(1.5em + 0.75rem + 2px) !important;
         }
+
+        .communities-nav-react { margin-bottom: 1.5rem; }
+        .communities-nav-jumps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            margin-bottom: 0.75rem;
+        }
+        .communities-nav-jump-btn {
+            border: 1px solid #dbe3ec;
+            background: #fff;
+            color: #334155;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+        .communities-nav-jump-btn:hover {
+            border-color: var(--theme-color-primary, #119A48);
+            color: var(--theme-color-primary, #119A48);
+            background: #f0fdf4;
+        }
+        .communities-filters--react {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            padding: 1.25rem;
+        }
+        .communities-search-bar { position: relative; margin-bottom: 0.75rem; }
+        .communities-search-bar input {
+            width: 100%;
+            padding: 0.65rem 1rem 0.65rem 2.5rem;
+            border: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+        }
+        .communities-search-icon {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+        .communities-filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .communities-filter-btn {
+            padding: 0.45rem 0.9rem;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            color: #64748b;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .communities-filter-btn.active,
+        .communities-filter-btn:hover {
+            background: var(--theme-color-primary, #119A48);
+            border-color: var(--theme-color-primary, #119A48);
+            color: #fff;
+        }
+        .communities-nav-status {
+            margin: 0.85rem 0 0;
+            font-size: 0.8125rem;
+            color: #64748b;
+        }
+        .communities-infinite-sentinel { height: 1px; width: 100%; }
+        .communities-infinite-loader { color: #64748b; font-size: 0.875rem; padding: 0.5rem 0; }
+        #communities-filters,
+        #communities-recommended,
+        #communities-all-heading {
+            scroll-margin-top: 6rem;
+        }
     </style>
 @endsection
 
@@ -365,9 +439,34 @@
             <p style="margin: 0.5rem 0 0 0; font-size: 1rem; color: #718096;">Join a community of practice to connect with peers, share knowledge, and participate in discussions.</p>
         </div>
 
+        @php
+            $communitiesInfiniteScroll = (bool) ($communitiesInfiniteScroll ?? false);
+            $loadedCommunityCount = ($communities instanceof \Illuminate\Pagination\AbstractPaginator)
+                ? (($communities->currentPage() - 1) * $communities->perPage()) + $communities->count()
+                : count($communities ?? []);
+            $navJumps = [];
+            if (!request()->routeIs('account.my-communities')) {
+                $navJumps[] = ['id' => 'communities-filters', 'label' => 'Filters'];
+                if (Auth::check() && isset($recommendedCommunities) && $recommendedCommunities->isNotEmpty()) {
+                    $navJumps[] = ['id' => 'communities-recommended', 'label' => 'Recommended'];
+                }
+            }
+            $navJumps[] = ['id' => 'communities-all-heading', 'label' => 'All communities'];
+        @endphp
+
+        <div id="communities-nav-root"></div>
+        <script type="application/json" id="communities-nav-config">{!! json_encode([
+            'totalCommunities' => $communities instanceof \Illuminate\Pagination\AbstractPaginator
+                ? $communities->total()
+                : count($communities ?? []),
+            'searchPlaceholder' => 'Search communities by name or description...',
+            'searchDebounceMs' => 220,
+            'jumps' => $navJumps,
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+
         <!-- Filter Section (main directory only) -->
         @if(!request()->routeIs('account.my-communities'))
-        <div class="row mb-4">
+        <div class="row mb-4" id="communities-filters">
             <div class="col-12">
                 <div class="card" style="border-radius: 0.25rem; border: 1px solid #e2e8f0;">
                     <div class="card-body">
@@ -450,7 +549,7 @@
         @endif
 
         @if(Auth::check() && isset($recommendedCommunities) && $recommendedCommunities->isNotEmpty() && !request()->routeIs('account.my-communities'))
-            <div class="mb-4 pb-2 border-bottom">
+            <div class="mb-4 pb-2 border-bottom" id="communities-recommended">
                 <h2 class="community-section-heading">Recommended for you</h2>
                 <p class="text-muted small mb-3 mb-md-4">Based on your profile health themes and tags from publications you have saved.</p>
                 <div class="row align-items-start">
@@ -464,31 +563,53 @@
         @endif
 
         @if(request()->routeIs('account.my-communities'))
-            <h2 class="community-section-heading mb-3">Your communities</h2>
+            <h2 class="community-section-heading mb-3" id="communities-all-heading">Your communities</h2>
         @else
-            <h2 class="community-section-heading mb-3">All communities</h2>
+            <h2 class="community-section-heading mb-3" id="communities-all-heading">All communities</h2>
         @endif
 
-        <div class="row align-items-start">
-            @forelse ($communities as $community)
-                <div class="col-md-6 col-lg-4 mb-3">
-                    @include('communities.partials.room_card', ['community' => $community, 'pinned' => false])
-                </div>
-            @empty
+        <div id="communities-list-wrap"
+             @if($communitiesInfiniteScroll && $communities instanceof \Illuminate\Pagination\AbstractPaginator)
+             data-infinite-scroll="1"
+             data-current-page="{{ $communities->currentPage() }}"
+             data-last-page="{{ $communities->lastPage() }}"
+             data-total="{{ $communities->total() }}"
+             data-loaded="{{ $loadedCommunityCount }}"
+             @endif>
+        <div class="row align-items-start" id="communities-list">
+            @if($communities->count() > 0)
+                @include('communities.partials.community_list_items', ['communities' => $communities])
+            @else
                 <div class="col-12">
                     <div class="alert alert-info text-center">
                         <i class="fa fa-info-circle mr-2"></i>No communities found.
                     </div>
                 </div>
-            @endforelse
+            @endif
         </div>
-        @if($communities->hasPages())
+
+        @if($communitiesInfiniteScroll && $communities instanceof \Illuminate\Pagination\AbstractPaginator && $communities->total() > 0)
+        <div class="communities-infinite-footer py-3 text-center" id="communities-infinite-footer">
+            <p class="text-muted small mb-2" id="communities-infinite-status">
+                Showing {{ number_format($loadedCommunityCount) }} of {{ number_format($communities->total()) }} communities
+            </p>
+            @if($communities->hasMorePages())
+                <div id="communities-infinite-sentinel" class="communities-infinite-sentinel" aria-hidden="true"></div>
+                <div id="communities-infinite-loader" class="communities-infinite-loader d-none" aria-live="polite">
+                    <i class="fa fa-spinner fa-spin me-1"></i>Loading more communities…
+                </div>
+            @else
+                <p class="text-muted small mb-0" id="communities-infinite-complete">All communities loaded</p>
+            @endif
+        </div>
+        @elseif($communities instanceof \Illuminate\Pagination\AbstractPaginator && $communities->hasPages())
         <div class="row">
             <div class="col-md-12">
                 {{ $communities->links() }}
             </div>
         </div>
         @endif
+        </div>
     </div>
 
     <!-- Join Modal -->
@@ -537,6 +658,19 @@
 @endsection
 
 @section('scripts')
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="{{ asset('js/communities-index-filters.js') }}?v={{ @filemtime(public_path('js/communities-index-filters.js')) }}"></script>
+    <script src="{{ asset('js/communities-index-nav.js') }}?v={{ @filemtime(public_path('js/communities-index-nav.js')) }}"></script>
+    <script>
+        window.communitiesInfiniteScrollConfig = {
+            enabled: @json((bool) ($communitiesInfiniteScroll ?? false)),
+            pageUrl: @json(route('community.page'))
+        };
+        window.COMMUNITIES_INFINITE_STATUS_COMPLETE = 'All communities loaded';
+        window.COMMUNITIES_INFINITE_STATUS_ERROR = 'Could not load more communities. Tap to retry.';
+    </script>
+    <script src="{{ asset('js/communities-index-infinite.js') }}?v={{ @filemtime(public_path('js/communities-index-infinite.js')) }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css" rel="stylesheet" />
@@ -572,10 +706,14 @@
             /* Participant strip: constant low-speed smooth scroll (rAF), pause on hover */
             var communityAvatarReduceMotion = window.matchMedia
                 && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            var communityAvatarScrollControllers = [];
+            var communityAvatarScrollControllers = window.__khCommunityAvatarScrollControllers
+                || (window.__khCommunityAvatarScrollControllers = []);
 
-            $('.community-room-card__avatar-carousel').each(function () {
+            window.initCommunityListingEnhancements = function (scope) {
+                var $scope = scope ? $(scope) : $(document);
+                $scope.find('.community-room-card__avatar-carousel:not([data-carousel-bound])').each(function () {
                 var $carousel = $(this);
+                $carousel.attr('data-carousel-bound', '1');
                 var $track = $carousel.find('.community-room-card__avatar-track');
                 var $slides = $track.find('.community-room-card__avatar-slides');
                 var $prev = $carousel.find('.community-room-card__avatar-nav--prev');
@@ -734,6 +872,9 @@
                 updateNav();
                 startContinuousScroll();
             });
+            };
+
+            window.initCommunityListingEnhancements(document.getElementById('communities-list'));
 
             if (communityAvatarScrollControllers.length && !window.__khCommunitiesAvatarVis) {
                 window.__khCommunitiesAvatarVis = true;
@@ -753,7 +894,7 @@
 
         let communityId;
 
-        $('.join-btn').on('click', function() {
+        $(document).on('click', '.join-btn', function() {
             communityId = $(this).data('community-id');
             @if (Auth::check())
                 $('#joinModal').modal('show');
@@ -788,7 +929,7 @@
             });
         });
 
-        $('.leave-btn').on('click', function() {
+        $(document).on('click', '.leave-btn', function() {
             communityId = $(this).data('community-id');
             $('#leaveModal').modal('show');
         });

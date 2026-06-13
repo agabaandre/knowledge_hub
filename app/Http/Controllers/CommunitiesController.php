@@ -14,6 +14,8 @@ use Illuminate\Support\Str;
 
 class CommunitiesController extends Controller
 {
+    public const COMMUNITIES_INFINITE_ROWS = 6;
+
     private $commsOfPracticeRepository;
     private $areasRepo;
 
@@ -25,9 +27,8 @@ class CommunitiesController extends Controller
 
     public function index()
     {
-        // Pass admin=false to ensure only public communities are shown
         $request = request();
-        $request->merge(['admin' => false]);
+        $this->prepareCommunitiesListingRequest($request);
         $communities = $this->commsOfPracticeRepository->get($request);
         
         // Get regions and countries for filter dropdowns
@@ -105,7 +106,58 @@ class CommunitiesController extends Controller
             'canonicalUrl',
             'ogType',
             'communitiesCollectionPageSchema'
-        ));
+        ) + [
+            'communitiesInfiniteScroll' => $this->communitiesInfiniteScrollEnabled(),
+        ]);
+    }
+
+    /**
+     * Append the next page of community cards for infinite-scroll listing.
+     */
+    public function communitiesPage(Request $request)
+    {
+        if (! $this->communitiesInfiniteScrollEnabled()) {
+            return response()->json(['ok' => false, 'error' => 'infinite_scroll_disabled'], 403);
+        }
+
+        $this->prepareCommunitiesListingRequest($request);
+        $request->merge(['rows' => self::COMMUNITIES_INFINITE_ROWS]);
+        $communities = $this->commsOfPracticeRepository->get($request);
+        $this->commsOfPracticeRepository->attachListingMeta($communities);
+
+        $page = (int) $communities->currentPage();
+        $perPage = (int) $communities->perPage();
+        $listOffset = max(0, ($page - 1) * $perPage);
+        $loadedCount = min($communities->total(), $listOffset + $communities->count());
+
+        return response()->json([
+            'ok' => true,
+            'html' => view('communities.partials.community_list_items', [
+                'communities' => $communities,
+            ])->render(),
+            'current_page' => $page,
+            'last_page' => (int) $communities->lastPage(),
+            'has_more' => $communities->hasMorePages(),
+            'total' => (int) $communities->total(),
+            'loaded_count' => $loadedCount,
+        ]);
+    }
+
+    protected function prepareCommunitiesListingRequest(Request $request): void
+    {
+        $request->merge(['admin' => false]);
+
+        if ($this->communitiesInfiniteScrollEnabled()) {
+            $request->merge([
+                'page' => max(1, (int) $request->input('page', 1)),
+                'rows' => self::COMMUNITIES_INFINITE_ROWS,
+            ]);
+        }
+    }
+
+    protected function communitiesInfiniteScrollEnabled(): bool
+    {
+        return (settings()->communities_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll';
     }
 
     public function myCommunities()

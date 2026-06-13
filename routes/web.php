@@ -866,6 +866,7 @@ Route::group(["prefix" => "courses"], function () {
 
 Route::group(["prefix" => "communities"], function () {
     Route::get('/', [CommunitiesController::class, 'index'])->name('community.index');
+    Route::get('/page', [CommunitiesController::class, 'communitiesPage'])->name('community.page');
     Route::post('/join', [CommunitiesController::class, 'join'])->name('community.join');
     Route::post('/leave', [CommunitiesController::class, 'leave'])->name('community.leave');
     Route::post('/detail/{id}/invite', [CommunitiesController::class, 'inviteColleagues'])->middleware('auth')->whereNumber('id')->name('community.invite');
