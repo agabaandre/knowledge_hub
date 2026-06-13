@@ -25,6 +25,66 @@ class AiCompletionService
      * @param  array<int, array{role: string, content: string}>  $messages
      * @return array{ok: true, content: string, provider: string}|array{ok: false, error: string}
      */
+    public function completeForFeatureWithFallback(
+        string $feature,
+        array $messages,
+        int $maxTokens = 2048,
+        ?string $model = null,
+        bool $jsonMode = false
+    ): array {
+        $providers = $this->providerFallbackChain($feature);
+
+        if ($providers === []) {
+            return ['ok' => false, 'error' => 'No AI provider is enabled and configured for '.$feature.'.'];
+        }
+
+        $errors = [];
+        foreach ($providers as $provider) {
+            $result = $this->completeWithProvider($provider, $messages, $maxTokens, $model, $jsonMode);
+            if ($result['ok'] ?? false) {
+                return $result;
+            }
+
+            $errors[] = (string) ($result['error'] ?? 'unknown');
+        }
+
+        return ['ok' => false, 'error' => implode('; ', array_slice($errors, 0, 3))];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function providerFallbackChain(string $feature): array
+    {
+        $candidates = [
+            AiConfig::featureProvider($feature),
+            AiConfig::featureProvider('ai_search'),
+            'openai',
+        ];
+        $candidates = array_merge($candidates, AiConfig::chatProviderIds());
+
+        $providers = [];
+        $seen = [];
+        foreach ($candidates as $provider) {
+            if (! is_string($provider) || $provider === '' || isset($seen[$provider])) {
+                continue;
+            }
+            $seen[$provider] = true;
+
+            if (! AiConfig::isChatCompletionProvider($provider) || ! AiConfig::providerAvailable($provider)) {
+                continue;
+            }
+
+            $providers[] = $provider;
+        }
+
+        return $providers;
+    }
+
+    /**
+     * @param  array<int, array{role: string, content: string}>  $messages
+     * @return array{ok: true, content: string, provider: string}|array{ok: false, error: string}
+     */
     public function complete(array $messages, int $maxTokens = 2048, ?string $model = null, bool $jsonMode = false): array
     {
         return $this->completeForFeature('chat', $messages, $maxTokens, $model, $jsonMode);

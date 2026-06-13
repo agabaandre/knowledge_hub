@@ -53,12 +53,14 @@ class AiSearchChatService
             $searchForums,
             $searchCommunities,
             $federatedPublications,
-            20
+            12
         );
 
-        if ($catalog['publications'] === [] && $catalog['forums'] === [] && $catalog['communities'] === []) {
+        if (! $this->hasChatCatalogContent($catalog)) {
             return ['ok' => false, 'error' => 'No hub resources matched your search. Try different keywords or filters.'];
         }
+
+        $compactCatalog = $this->compactCatalogForChat($catalog);
 
         $system = 'You are Khub AI, the Africa CDC Knowledge Hub search assistant. '
             .'Answer follow-up questions using ONLY the catalog JSON (publication descriptions, forum excerpts, communities, indicators). '
@@ -72,13 +74,7 @@ class AiSearchChatService
         $userPayload = [
             'search_query' => $term,
             'filters' => $catalog['filters'] ?? [],
-            'catalog' => [
-                'publications' => $catalog['publications'],
-                'forums' => $catalog['forums'],
-                'communities' => $catalog['communities'],
-                'health_topics' => $catalog['health_topics'],
-                'member_state_indicators' => $catalog['indicators'],
-            ],
+            'catalog' => $compactCatalog,
             'user_message' => $message,
         ];
 
@@ -93,14 +89,17 @@ class AiSearchChatService
 
         $messages[] = ['role' => 'user', 'content' => json_encode($userPayload, JSON_UNESCAPED_UNICODE)];
 
-        $result = $this->completion->completeForFeature('ai_search_chat', $messages, 1400, null, true);
+        $result = $this->completion->completeForFeatureWithFallback('ai_search_chat', $messages, 1400, null, true);
         if (! ($result['ok'] ?? false)) {
             Log::debug('ai_search_chat.failed', ['term' => $term, 'error' => $result['error'] ?? 'unknown']);
 
-            return ['ok' => false, 'error' => 'Khub AI is temporarily unavailable. Please try again shortly.'];
+            $decoded = $this->fallbackReply($message, $term, $catalog);
+            if ($decoded === null) {
+                return ['ok' => false, 'error' => 'Khub AI is temporarily unavailable. Please try again shortly.'];
+            }
+        } else {
+            $decoded = $this->decodePayload((string) ($result['content'] ?? ''));
         }
-
-        $decoded = $this->decodePayload((string) ($result['content'] ?? ''));
         $reply = trim((string) ($decoded['reply'] ?? ''));
         if ($reply === '') {
             return ['ok' => false, 'error' => 'Khub AI returned an empty response. Please rephrase your question.'];
@@ -206,5 +205,170 @@ class AiSearchChatService
         }
 
         return ['reply' => $content];
+    }
+
+    /**
+     * @param  array<string, mixed>  $catalog
+     */
+    private function hasChatCatalogContent(array $catalog): bool
+    {
+        foreach (['publications', 'forums', 'communities', 'health_topics', 'indicators', 'partner_hub_publications'] as $key) {
+            if (! empty($catalog[$key])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  array<string, mixed>  $catalog
+     * @return array<string, mixed>
+     */
+    private function compactCatalogForChat(array $catalog): array
+    {
+        return [
+            'publications' => $this->compactPublicationRows((array) ($catalog['publications'] ?? [])),
+            'forums' => $this->compactForumRows((array) ($catalog['forums'] ?? [])),
+            'communities' => $this->compactCommunityRows((array) ($catalog['communities'] ?? [])),
+            'partner_hub_publications' => $this->compactPublicationRows((array) ($catalog['partner_hub_publications'] ?? [])),
+            'health_topics' => array_slice((array) ($catalog['health_topics'] ?? []), 0, 6),
+            'member_state_indicators' => array_slice((array) ($catalog['indicators'] ?? []), 0, 6),
+        ];
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $rows
+     * @return list<array<string, mixed>>
+     */
+    private function compactPublicationRows(array $rows): array
+    {
+        $compact = [];
+        foreach (array_slice($rows, 0, 10) as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $compact[] = [
+                'id' => (int) ($row['id'] ?? 0),
+                'title' => Str::limit((string) ($row['title'] ?? ''), 160),
+                'excerpt' => Str::limit((string) ($row['excerpt'] ?? $row['description'] ?? ''), 320),
+                'theme' => (string) ($row['theme'] ?? ''),
+                'url' => (string) ($row['url'] ?? ''),
+            ];
+        }
+
+        return $compact;
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $rows
+     * @return list<array<string, mixed>>
+     */
+    private function compactForumRows(array $rows): array
+    {
+        $compact = [];
+        foreach (array_slice($rows, 0, 6) as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $compact[] = [
+                'id' => (int) ($row['id'] ?? 0),
+                'title' => Str::limit((string) ($row['title'] ?? ''), 160),
+                'excerpt' => Str::limit((string) ($row['excerpt'] ?? $row['description'] ?? ''), 320),
+                'url' => (string) ($row['url'] ?? ''),
+            ];
+        }
+
+        return $compact;
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $rows
+     * @return list<array<string, mixed>>
+     */
+    private function compactCommunityRows(array $rows): array
+    {
+        $compact = [];
+        foreach (array_slice($rows, 0, 4) as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $compact[] = [
+                'id' => (int) ($row['id'] ?? 0),
+                'name' => Str::limit((string) ($row['name'] ?? ''), 120),
+                'excerpt' => Str::limit((string) ($row['excerpt'] ?? ''), 240),
+                'url' => (string) ($row['url'] ?? ''),
+            ];
+        }
+
+        return $compact;
+    }
+
+    /**
+     * @param  array<string, mixed>  $catalog
+     * @return array<string, mixed>|null
+     */
+    private function fallbackReply(string $message, string $term, array $catalog): ?array
+    {
+        $publicationIds = [];
+        $forumIds = [];
+        $communityIds = [];
+        $indicatorIds = [];
+        $sentences = [__('publications.search.ai_fallback_for_term', ['term' => $term])];
+
+        foreach (array_slice((array) ($catalog['publications'] ?? []), 0, 3) as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $id = (int) ($row['id'] ?? 0);
+            if ($id <= 0) {
+                continue;
+            }
+            $publicationIds[] = $id;
+            $title = trim((string) ($row['title'] ?? ''));
+            $excerpt = Str::limit(trim((string) ($row['excerpt'] ?? $row['description'] ?? '')), 180);
+            if ($title !== '') {
+                $sentences[] = $excerpt !== '' ? $title.': '.$excerpt : $title;
+            }
+        }
+
+        foreach (array_slice((array) ($catalog['forums'] ?? []), 0, 2) as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $id = (int) ($row['id'] ?? 0);
+            if ($id <= 0) {
+                continue;
+            }
+            $forumIds[] = $id;
+            $title = trim((string) ($row['title'] ?? ''));
+            if ($title !== '') {
+                $sentences[] = __('publications.search.forum_discussion').': '.$title;
+            }
+        }
+
+        foreach (array_slice((array) ($catalog['health_topics'] ?? []), 0, 2) as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $name = trim((string) ($row['name'] ?? $row['title'] ?? ''));
+            if ($name !== '') {
+                $sentences[] = __('publications.search.ai_fallback_point_topic', ['topic' => $name]);
+            }
+        }
+
+        if (count($sentences) <= 1) {
+            return null;
+        }
+
+        $sentences[] = __('publications.search.ai_chat_fallback_hint');
+
+        return [
+            'reply' => Str::limit(implode(' ', $sentences), 1200),
+            'publication_ids' => $publicationIds,
+            'forum_ids' => $forumIds,
+            'community_ids' => $communityIds,
+            'indicator_ids' => $indicatorIds,
+        ];
     }
 }

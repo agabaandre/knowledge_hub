@@ -14,7 +14,7 @@
         var dataRoot = panel.closest('#khubSearchAiAssistant') || panel;
         var chatUrl = dataRoot.getAttribute('data-chat-url');
         var resetUrl = dataRoot.getAttribute('data-reset-url');
-        var term = dataRoot.getAttribute('data-term') || '';
+        var term = (dataRoot.getAttribute('data-term') || baseQuery.term || '').trim();
         var baseQuery = {};
         try {
             baseQuery = JSON.parse(dataRoot.getAttribute('data-query') || '{}');
@@ -107,13 +107,19 @@
                 body: JSON.stringify(payload)
             })
                 .then(function (r) {
+                    var contentType = r.headers.get('content-type') || '';
+                    if (contentType.indexOf('application/json') === -1) {
+                        return r.text().then(function () {
+                            throw new Error(strings.chatError || 'Could not reach Khub AI.');
+                        });
+                    }
                     return r.json().then(function (data) {
                         return { ok: r.ok, data: data };
                     });
                 })
                 .then(function (result) {
                     if (!result.ok || !result.data.ok) {
-                        throw new Error((result.data && result.data.error) || 'error');
+                        throw new Error((result.data && result.data.error) || (strings.chatError || 'Could not reach Khub AI.'));
                     }
                     conversationId = result.data.conversation_id || conversationId;
                     if (conversationId) {
@@ -121,8 +127,12 @@
                     }
                     appendBubble('assistant', result.data.reply || '', result.data.documents || []);
                 })
-                .catch(function () {
-                    appendBubble('assistant', strings.chatError || 'Could not reach Khub AI.');
+                .catch(function (err) {
+                    var message = (err && err.message) ? String(err.message) : '';
+                    if (!message || message === 'error') {
+                        message = strings.chatError || 'Could not reach Khub AI.';
+                    }
+                    appendBubble('assistant', message);
                 })
                 .finally(function () {
                     setLoading(false);

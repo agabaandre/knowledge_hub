@@ -95,6 +95,7 @@ return [
         'ai_chat_reset' => 'New conversation',
         'ai_chat_thinking' => 'Analyzing hub resources…',
         'ai_chat_error' => 'Could not reach Khub AI. Please try again.',
+        'ai_chat_fallback_hint' => 'Khub AI is briefly offline, so this answer is based on matching hub resources from your search.',
         'ai_chat_documents' => 'Related documents',
         'loading_more' => 'Loading more results…',
         'all_results_loaded' => 'All results loaded',
