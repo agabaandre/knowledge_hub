@@ -118,7 +118,35 @@ class ChatGPTService implements AIModel{
 
         return '<div class="alert alert-danger">AI is not configured for this feature. '
             .'An administrator must enable a chat provider (OpenAI, Gemini, DeepSeek, or custom) '
-            .'under Admin → Settings → AI integrations and assign it to '.$features.'.</div>';
+            .'under Admin → Settings → AI integrations and assign it to '.$features.'. '
+            .'If keys are only in <code>.env</code>, run <code>php artisan config:cache</code> after updating them.</div>';
+    }
+
+    private function providerErrorsHtml(array $errors): string
+    {
+        $last = (string) (end($errors) ?: '');
+        $message = $last;
+
+        if (preg_match('/:\s*(.+)$/s', $last, $m)) {
+            $message = trim($m[1]);
+        }
+
+        $lower = strtolower($message);
+        if (str_contains($lower, 'quota') || str_contains($lower, 'billing') || str_contains($lower, 'insufficient')) {
+            return '<div class="alert alert-danger">The configured AI provider has exceeded its quota or billing limit. '
+                .'Please ask an administrator to renew the API plan or switch provider in Admin → Settings → AI integrations.</div>';
+        }
+
+        if (str_contains($lower, 'api key') || str_contains($lower, 'incorrect api key') || str_contains($lower, 'invalid_api_key')) {
+            return '<div class="alert alert-danger">The AI API key is invalid or expired. '
+                .'Update it in Admin → Settings → AI integrations or in <code>.env</code> (<code>OPEN_API_KEY</code>), then run <code>php artisan config:cache</code>.</div>';
+        }
+
+        if ($message !== '') {
+            return '<div class="alert alert-danger">'.htmlspecialchars($message, ENT_QUOTES, 'UTF-8').'</div>';
+        }
+
+        return '<div class="alert alert-danger">Could not reach the AI service. Please try again in a moment.</div>';
     }
 
     private function wrapContentAsOpenAiResponse(string $content): object
@@ -178,12 +206,14 @@ class ChatGPTService implements AIModel{
             }
 
             $streamError = null;
-            $this->streamOpenAiCompatibleTransport($transport, $messages, $onChunk, $maxTokens, $streamError);
+            $streamBody = '';
+            $this->streamOpenAiCompatibleTransport($transport, $messages, $onChunk, $maxTokens, $streamError, $streamBody);
             if ($streamError === null) {
                 return;
             }
 
-            $errors[] = $provider.': '.$streamError;
+            $parsed = $this->parseApiErrorMessage($streamBody);
+            $errors[] = $provider.': '.($parsed ?: $streamError);
             Log::warning('AI stream provider failed, trying fallback', [
                 'feature' => $feature,
                 'provider' => $provider,
@@ -195,16 +225,44 @@ class ChatGPTService implements AIModel{
             Log::error('AI stream exhausted providers', ['feature' => $feature, 'errors' => $errors]);
         }
 
-        $onChunk('<div class="alert alert-danger">Could not reach the AI service. Please try again in a moment.</div>');
+        $onChunk($this->providerErrorsHtml($errors));
+    }
+
+    private function parseApiErrorMessage(string $raw): ?string
+    {
+        $raw = trim($raw);
+        if ($raw === '') {
+            return null;
+        }
+
+        $decoded = json_decode($raw, true);
+        if (is_array($decoded) && isset($decoded['error'])) {
+            $err = $decoded['error'];
+            if (is_array($err) && ! empty($err['message'])) {
+                return (string) $err['message'];
+            }
+            if (is_string($err)) {
+                return $err;
+            }
+        }
+
+        return null;
     }
 
     /**
      * @param  array{driver: string, endpoint?: string, headers?: array<int, string>, model?: string}  $transport
      * @param  array<int, array{role: string, content: string}>  $messages
      */
-    private function streamOpenAiCompatibleTransport(array $transport, array $messages, callable $onChunk, int $maxTokens, ?string &$error): void
-    {
+    private function streamOpenAiCompatibleTransport(
+        array $transport,
+        array $messages,
+        callable $onChunk,
+        int $maxTokens,
+        ?string &$error,
+        ?string &$responseBody = null
+    ): void {
         $error = null;
+        $responseBody = '';
         $payload = [
             'model' => $transport['model'],
             'messages' => $messages,
@@ -222,7 +280,12 @@ class ChatGPTService implements AIModel{
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20);
         curl_setopt($ch, CURLOPT_TIMEOUT, 120);
-        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use ($onChunk) {
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use ($onChunk, &$responseBody) {
+            $responseBody .= $data;
+            $trim = ltrim($responseBody);
+            if ($trim !== '' && $trim[0] === '{') {
+                return strlen($data);
+            }
             $len = strlen($data);
             if ($len > 0) {
                 $this->parseSSELine($data, $onChunk);
@@ -244,7 +307,17 @@ class ChatGPTService implements AIModel{
         curl_close($ch);
 
         if ($httpCode >= 400) {
-            $error = 'HTTP '.$httpCode;
+            $parsed = $this->parseApiErrorMessage($responseBody);
+            $error = $parsed ?: ('HTTP '.$httpCode);
+
+            return;
+        }
+
+        if (ltrim($responseBody) !== '' && ltrim($responseBody)[0] === '{') {
+            $parsed = $this->parseApiErrorMessage($responseBody);
+            if ($parsed !== null) {
+                $error = $parsed;
+            }
         }
     }
 
@@ -330,12 +403,14 @@ class ChatGPTService implements AIModel{
      */
     public function chatMessagesComplete(array $messages, string $feature = 'chat'): string
     {
-        $response = $this->completeMessagesAsOpenAiResponse($feature, $messages, 3096);
-        $content = $this->extractOpenAiMessageContent($response);
+        $result = app(AiCompletionService::class)->completeForFeatureWithFallback($feature, $messages, 3096);
+        if ($result['ok'] ?? false) {
+            return (string) ($result['content'] ?? '');
+        }
 
-        return $content !== null && $content !== ''
-            ? $content
-            : '<div class="alert alert-danger">No response from AI.</div>';
+        $error = (string) ($result['error'] ?? 'No response from AI.');
+
+        return $this->providerErrorsHtml(['error: '.$error]);
     }
 
     private function parseSSELine(string $data, callable $onChunk): void

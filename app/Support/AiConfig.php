@@ -95,6 +95,46 @@ class AiConfig
     }
 
     /**
+     * Read env values with config-cache fallback (env() is empty when config is cached).
+     *
+     * @return mixed
+     */
+    public static function envOrCachedConfig(string $envKey, ?string $configKey = null)
+    {
+        $envValue = env($envKey);
+        if ($envValue !== null && $envValue !== '') {
+            return $envValue;
+        }
+
+        $configKey = $configKey ?? self::configKeyForEnv($envKey);
+        if ($configKey === null) {
+            return null;
+        }
+
+        $cached = config($configKey);
+
+        return ($cached !== null && $cached !== '') ? $cached : null;
+    }
+
+    private static function configKeyForEnv(string $envKey): ?string
+    {
+        return match ($envKey) {
+            'OPEN_API_KEY' => 'ai.open_api_key',
+            'OPENAI_MODEL' => 'ai.openai_model',
+            'CHAT_PDF_API_KEY' => 'ai.chat_pdf_key',
+            'GEMINI_API_KEY' => 'ai.gemini_api_key',
+            'GEMINI_MODEL' => 'ai.gemini_model',
+            'DEEPSEEK_API_KEY' => 'ai.deepseek_api_key',
+            'DEEPSEEK_MODEL' => 'ai.deepseek_model',
+            'AI_CUSTOM_BASE_URL' => 'ai.custom_base_url',
+            'AI_CUSTOM_API_KEY' => 'ai.custom_api_key',
+            'AI_CUSTOM_MODEL' => 'ai.custom_model',
+            'SERPER_API_KEY' => 'ai.serper_api_key',
+            default => null,
+        };
+    }
+
+    /**
      * @param  mixed  $default
      * @return mixed
      */
@@ -109,7 +149,7 @@ class AiConfig
             }
         }
 
-        $envValue = env($envKey);
+        $envValue = self::envOrCachedConfig($envKey);
         $hasEnv = $envValue !== null && $envValue !== '';
 
         if (self::sourcePriority($provider) === 'env') {
@@ -139,7 +179,7 @@ class AiConfig
             && property_exists($db, $dbColumn)
             && trim((string) ($db->{$dbColumn} ?? '')) !== '';
 
-        $envValue = env($envKey);
+        $envValue = self::envOrCachedConfig($envKey);
         $hasEnv = $envValue !== null && $envValue !== '';
 
         if (self::sourcePriority($provider) === 'env') {
@@ -176,7 +216,7 @@ class AiConfig
             }
         }
 
-        $envValue = env($envKey);
+        $envValue = self::envOrCachedConfig($envKey);
         if ($envValue !== null && $envValue !== '') {
             return $envValue;
         }
@@ -508,7 +548,7 @@ class AiConfig
         }
 
         $meta = $map[$provider];
-        $envValue = env($meta['env']);
+        $envValue = self::envOrCachedConfig($meta['env']);
         $hasEnv = $envValue !== null && $envValue !== '';
         if (! $hasEnv) {
             return false;

@@ -750,7 +750,11 @@
       body: JSON.stringify(body)
     })
       .then(function (response) {
-        if (!response.ok) throw new Error('Request failed');
+        if (!response.ok) {
+          return response.json().catch(function () { return {}; }).then(function (data) {
+            throw new Error((data && data.error) ? data.error : 'Request failed');
+          });
+        }
         var reader = response.body.getReader();
         var decoder = new TextDecoder();
         var full = '';
@@ -773,8 +777,9 @@
           if (contentEl) finalizeStreamingMessage(contentEl);
         }
       })
-      .catch(function () {
-        setStreamingContent(contentEl, contentEl.textContent || 'Sorry, something went wrong. Please try again.');
+      .catch(function (err) {
+        var msg = (err && err.message) ? err.message : 'Sorry, something went wrong. Please try again.';
+        setStreamingContent(contentEl, msg);
       })
       .finally(function () {
         isStreaming = false;
