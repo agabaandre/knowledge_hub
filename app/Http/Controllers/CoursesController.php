@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 
 class CoursesController extends Controller
 {
+    public const COURSES_INFINITE_ROWS = 6;
+
     private $courseRepo;
 
     public function __construct(CoursesRepository $courseRepo)
@@ -20,10 +22,53 @@ class CoursesController extends Controller
 
     public function index(Request $request)
     {
+        $this->prepareCoursesListingRequest($request);
         $data['courses'] = $this->courseRepo->get($request);
         $data['canFetchCourses'] = $request->user() && $request->user()->can('view_forumns');
+        $data['coursesInfiniteScroll'] = $this->coursesInfiniteScrollEnabled();
 
         return view('courses.index', $data);
+    }
+
+    public function coursesPage(Request $request)
+    {
+        if (! $this->coursesInfiniteScrollEnabled()) {
+            return response()->json(['ok' => false, 'error' => 'infinite_scroll_disabled'], 403);
+        }
+
+        $this->prepareCoursesListingRequest($request);
+        $request->merge(['rows' => self::COURSES_INFINITE_ROWS]);
+        $courses = $this->courseRepo->get($request);
+
+        $page = (int) $courses->currentPage();
+        $perPage = (int) $courses->perPage();
+        $listOffset = max(0, ($page - 1) * $perPage);
+        $loadedCount = min($courses->total(), $listOffset + $courses->count());
+
+        return response()->json([
+            'ok' => true,
+            'html' => view('courses.partials.course_list_items', ['courses' => $courses])->render(),
+            'current_page' => $page,
+            'last_page' => (int) $courses->lastPage(),
+            'has_more' => $courses->hasMorePages(),
+            'total' => (int) $courses->total(),
+            'loaded_count' => $loadedCount,
+        ]);
+    }
+
+    protected function prepareCoursesListingRequest(Request $request): void
+    {
+        if ($this->coursesInfiniteScrollEnabled()) {
+            $request->merge([
+                'page' => max(1, (int) $request->input('page', 1)),
+                'rows' => self::COURSES_INFINITE_ROWS,
+            ]);
+        }
+    }
+
+    protected function coursesInfiniteScrollEnabled(): bool
+    {
+        return (settings()->courses_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll';
     }
 
     public function showDetails($id)

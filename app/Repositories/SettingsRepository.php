@@ -354,6 +354,20 @@ class SettingsRepository
                 : 'infinite_scroll';
         }
 
+        foreach ([
+            'courses_pagination_mode' => 'infinite_scroll',
+            'faqs_pagination_mode' => 'infinite_scroll',
+            'health_topics_pagination_mode' => 'infinite_scroll',
+            'home_events_pagination_mode' => 'infinite_scroll',
+        ] as $column => $default) {
+            if (Schema::hasColumn('setting', $column)) {
+                $mode = (string) $request->input($column, $default);
+                $settings->{$column} = in_array($mode, ['pagination', 'infinite_scroll'], true)
+                    ? $mode
+                    : $default;
+            }
+        }
+
         if (Schema::hasColumn('setting', 'enable_ai_chat_prune')) {
             if ($request->has('enable_ai_chat_prune')) {
                 $settings->enable_ai_chat_prune = (bool)$request->boolean('enable_ai_chat_prune', true);

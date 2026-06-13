@@ -11,25 +11,31 @@ use Illuminate\Support\Str;
 
 class HealthTopicsController extends Controller
 {
-    public function index()
+    public const HEALTH_TOPICS_INFINITE_ROWS = 6;
+
+    public function index(Request $request)
     {
-        // Get all tags that are marked as health topics
-        $tags = Tag::where(function ($q) {
-            if (DBSchema::hasColumn('tags', 'is_health_topic')) {
-                $q->where('is_health_topic', true);
-            } else {
-                $q->where('is_health_emergency', true);
-            }
-        })
-            ->orderBy('tag_text')
-            ->get();
+        $baseQuery = $this->healthTopicsBaseQuery();
+        $totalTopics = (clone $baseQuery)->count();
+        $letterCounts = $this->healthTopicLetterCounts($baseQuery);
+        $availableLetters = $letterCounts->keys()->sort()->values();
+        $healthTopicsInfiniteScroll = $this->healthTopicsInfiniteScrollEnabled();
 
-        // Group tags by first letter
-        $groupedTags = $tags->groupBy(function ($tag) {
-            return strtoupper(substr($tag->tag_text, 0, 1));
-        });
+        if ($healthTopicsInfiniteScroll) {
+            $this->prepareHealthTopicsListingRequest($request);
+            $topicsPage = (clone $baseQuery)->paginate(self::HEALTH_TOPICS_INFINITE_ROWS);
+            $groupedTags = null;
+            $topicsPaginator = $topicsPage;
+            $loadedTopicCount = (($topicsPage->currentPage() - 1) * $topicsPage->perPage()) + $topicsPage->count();
+        } else {
+            $tags = (clone $baseQuery)->get();
+            $groupedTags = $tags->groupBy(function ($tag) {
+                return strtoupper(substr($tag->tag_text, 0, 1));
+            });
+            $topicsPaginator = null;
+            $loadedTopicCount = $tags->count();
+        }
 
-        $totalTopics = $tags->count();
         $siteName = settings()->site_name ?? 'Africa CDC Knowledge Hub';
         $siteUrl = rtrim((string) config('app.url'), '/') ?: url('/');
 
@@ -54,7 +60,10 @@ class HealthTopicsController extends Controller
 
         $topicItemList = [];
         $pos = 1;
-        foreach ($tags->take(36) as $topicTag) {
+        $schemaTags = $healthTopicsInfiniteScroll
+            ? (clone $baseQuery)->limit(36)->get()
+            : (clone $baseQuery)->get()->take(36);
+        foreach ($schemaTags as $topicTag) {
             $topicItemList[] = [
                 '@type' => 'ListItem',
                 'position' => $pos++,
@@ -95,6 +104,11 @@ class HealthTopicsController extends Controller
         return view('health-topics.index', compact(
             'groupedTags',
             'totalTopics',
+            'availableLetters',
+            'letterCounts',
+            'topicsPaginator',
+            'loadedTopicCount',
+            'healthTopicsInfiniteScroll',
             'pageTitle',
             'pageDescription',
             'pageKeywords',
@@ -105,6 +119,85 @@ class HealthTopicsController extends Controller
             'healthBreadcrumbLd',
             'jsonLdFlags'
         ));
+    }
+
+    public function healthTopicsPage(Request $request)
+    {
+        if (! $this->healthTopicsInfiniteScrollEnabled()) {
+            return response()->json(['ok' => false, 'error' => 'infinite_scroll_disabled'], 403);
+        }
+
+        $baseQuery = $this->healthTopicsBaseQuery();
+        $letterCounts = $this->healthTopicLetterCounts($baseQuery);
+        $this->prepareHealthTopicsListingRequest($request);
+        $topicsPage = (clone $baseQuery)->paginate(self::HEALTH_TOPICS_INFINITE_ROWS);
+        $page = (int) $topicsPage->currentPage();
+        $perPage = (int) $topicsPage->perPage();
+        $listOffset = max(0, ($page - 1) * $perPage);
+        $loadedCount = min($topicsPage->total(), $listOffset + $topicsPage->count());
+
+        $mergeLetter = '';
+        if ($page > 1 && $topicsPage->count() > 0) {
+            $prevTag = (clone $baseQuery)->skip($listOffset - 1)->first();
+            $firstTag = $topicsPage->first();
+            if ($prevTag && $firstTag) {
+                $prevLetter = strtoupper(substr($prevTag->tag_text, 0, 1));
+                $firstLetter = strtoupper(substr($firstTag->tag_text, 0, 1));
+                if ($prevLetter === $firstLetter) {
+                    $mergeLetter = $firstLetter;
+                }
+            }
+        }
+
+        $viewName = $mergeLetter !== ''
+            ? 'health-topics.partials.topic_card_items'
+            : 'health-topics.partials.topic_list_items';
+
+        return response()->json([
+            'ok' => true,
+            'html' => view($viewName, [
+                'tags' => $topicsPage->getCollection(),
+                'letterCounts' => $letterCounts,
+            ])->render(),
+            'merge_letter' => $mergeLetter,
+            'current_page' => $page,
+            'last_page' => (int) $topicsPage->lastPage(),
+            'has_more' => $topicsPage->hasMorePages(),
+            'total' => (int) $topicsPage->total(),
+            'loaded_count' => $loadedCount,
+        ]);
+    }
+
+    protected function healthTopicsBaseQuery()
+    {
+        return Tag::where(function ($q) {
+            if (DBSchema::hasColumn('tags', 'is_health_topic')) {
+                $q->where('is_health_topic', true);
+            } else {
+                $q->where('is_health_emergency', true);
+            }
+        })->orderBy('tag_text');
+    }
+
+    protected function healthTopicLetterCounts($baseQuery): \Illuminate\Support\Collection
+    {
+        return (clone $baseQuery)->get()->groupBy(function ($tag) {
+            return strtoupper(substr($tag->tag_text, 0, 1));
+        })->map->count();
+    }
+
+    protected function prepareHealthTopicsListingRequest(Request $request): void
+    {
+        if ($this->healthTopicsInfiniteScrollEnabled()) {
+            $request->merge([
+                'page' => max(1, (int) $request->input('page', 1)),
+            ]);
+        }
+    }
+
+    protected function healthTopicsInfiniteScrollEnabled(): bool
+    {
+        return (settings()->health_topics_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll';
     }
 
     public function show($key)

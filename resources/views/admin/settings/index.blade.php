@@ -1478,6 +1478,50 @@
                         </div>
                     </div>
                     <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="courses_pagination_mode">Courses listing loading</label>
+                                <select class="form-control" id="courses_pagination_mode" name="courses_pagination_mode">
+                                    <option value="pagination" @if(($settings->courses_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
+                                    <option value="infinite_scroll" @if(($settings->courses_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
+                                </select>
+                                <small class="info-text">Infinite scroll loads 6 courses per batch on the courses page.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="faqs_pagination_mode">FAQs listing loading</label>
+                                <select class="form-control" id="faqs_pagination_mode" name="faqs_pagination_mode">
+                                    <option value="pagination" @if(($settings->faqs_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
+                                    <option value="infinite_scroll" @if(($settings->faqs_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
+                                </select>
+                                <small class="info-text">Infinite scroll loads 6 FAQs per batch.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="health_topics_pagination_mode">Health topics listing loading</label>
+                                <select class="form-control" id="health_topics_pagination_mode" name="health_topics_pagination_mode">
+                                    <option value="pagination" @if(($settings->health_topics_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
+                                    <option value="infinite_scroll" @if(($settings->health_topics_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
+                                </select>
+                                <small class="info-text">Infinite scroll loads 6 topics per batch while preserving A–Z letter groups.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="home_events_pagination_mode">Homepage events loading</label>
+                                <select class="form-control" id="home_events_pagination_mode" name="home_events_pagination_mode">
+                                    <option value="pagination" @if(($settings->home_events_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Fixed batch (first 12 events)</option>
+                                    <option value="infinite_scroll" @if(($settings->home_events_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
+                                </select>
+                                <small class="info-text">Infinite scroll loads 6 events per batch into the homepage events slider.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
                                 <div class="form-check">

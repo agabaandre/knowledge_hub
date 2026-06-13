@@ -41,22 +41,35 @@
     </div>
 
         <!-- Alphabetical Filter -->
-        @if($groupedTags->count() > 0)
+        @if(($availableLetters ?? collect())->count() > 0)
         <div class="alphabet-filter">
             <div class="filter-label">Filter by letter:</div>
             <div class="filter-letters">
-                @foreach($groupedTags->keys()->sort() as $letter)
+                @foreach($availableLetters as $letter)
                     <a href="#letter-{{ $letter }}" class="filter-letter" data-letter="{{ $letter }}">
                         {{ $letter }}
                     </a>
                 @endforeach
-                            </div>
-                                </div>
-                            @endif
+            </div>
+        </div>
+        @endif
 
         <!-- Health Topics Content -->
-        <div class="topics-content">
-            @if($groupedTags->count() > 0)
+        <div id="health-topics-list-wrap"
+             @if(($healthTopicsInfiniteScroll ?? false) && isset($topicsPaginator) && $topicsPaginator instanceof \Illuminate\Pagination\AbstractPaginator)
+             data-infinite-scroll="1"
+             data-current-page="{{ $topicsPaginator->currentPage() }}"
+             data-last-page="{{ $topicsPaginator->lastPage() }}"
+             data-total="{{ $topicsPaginator->total() }}"
+             data-loaded="{{ $loadedTopicCount ?? 0 }}"
+             @endif>
+        <div class="topics-content" id="health-topics-content">
+            @if(($healthTopicsInfiniteScroll ?? false) && isset($topicsPaginator) && $topicsPaginator->count() > 0)
+                @include('health-topics.partials.topic_list_items', [
+                    'tags' => $topicsPaginator->getCollection(),
+                    'letterCounts' => $letterCounts ?? collect(),
+                ])
+            @elseif(isset($groupedTags) && $groupedTags->count() > 0)
                 @foreach($groupedTags->sortKeys() as $letter => $tags)
                     <div class="letter-group" id="letter-{{ $letter }}" data-letter="{{ $letter }}">
                         <div class="letter-header">
@@ -85,13 +98,13 @@
                                         <div class="topic-action">
                                             <span class="action-btn">
                                                 View <i class="fa fa-arrow-right"></i>
-                            </span>
-                        </div>
-                    </div>
-                </a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
                             @endforeach
                         </div>
-            </div>
+                    </div>
                 @endforeach
             @else
                 <div class="empty-state">
@@ -102,7 +115,24 @@
                     <p>There are currently no health emergency topics configured in the system.</p>
                 </div>
             @endif
+        </div>
+
+        @if(($healthTopicsInfiniteScroll ?? false) && isset($topicsPaginator) && $topicsPaginator instanceof \Illuminate\Pagination\AbstractPaginator && $topicsPaginator->total() > 0)
+            <div class="health-topics-infinite-footer py-3 text-center" id="health-topics-infinite-footer">
+                <p class="text-muted small mb-2" id="health-topics-infinite-status">
+                    Showing {{ number_format($loadedTopicCount ?? 0) }} of {{ number_format($topicsPaginator->total()) }} topics
+                </p>
+                @if($topicsPaginator->hasMorePages())
+                    <div id="health-topics-infinite-sentinel" class="health-topics-infinite-sentinel" aria-hidden="true"></div>
+                    <div id="health-topics-infinite-loader" class="health-topics-infinite-loader d-none" aria-live="polite">
+                        <i class="fa fa-spinner fa-spin me-1"></i>Loading more topics…
+                    </div>
+                @else
+                    <p class="text-muted small mb-0" id="health-topics-infinite-complete">All topics loaded</p>
+                @endif
             </div>
+        @endif
+        </div>
     </div>
 </div>
 
@@ -454,8 +484,19 @@
 .topic-card.hidden {
     display: none;
     }
+.health-topics-infinite-sentinel { height: 1px; width: 100%; }
+.health-topics-infinite-loader { color: #64748b; font-size: 0.875rem; }
 </style>
 
+<script>
+    window.healthTopicsInfiniteScrollConfig = {
+        enabled: @json((bool) ($healthTopicsInfiniteScroll ?? false)),
+        pageUrl: @json(route('health-topics.page'))
+    };
+    window.HEALTH_TOPICS_INFINITE_STATUS_COMPLETE = 'All topics loaded';
+    window.HEALTH_TOPICS_INFINITE_STATUS_ERROR = 'Could not load more topics. Tap to retry.';
+</script>
+<script src="{{ asset('js/health-topics-infinite.js') }}?v={{ @filemtime(public_path('js/health-topics-infinite.js')) }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('topic-search');

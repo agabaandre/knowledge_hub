@@ -14,6 +14,8 @@ use App\Services\HomeTopSearchesService;
 
 class HomeController extends Controller
 {
+    public const HOME_EVENTS_INFINITE_ROWS = 6;
+
     private $publicationsRepo,$authorsRepo,$quotesRepo,$areasRepo,$forumsRepo,$themesRepo;
 
     public function __construct(PublicationsRepository $publicationsRepo, 
@@ -50,19 +52,24 @@ class HomeController extends Controller
         $data['initiatives'] = $this->publicationsRepo->get($initiativesRequest);
         // Active events only: events where enddate has not passed
         $today = \Carbon\Carbon::today()->startOfDay();
-        $data['events'] = Event::query()
-            ->where(function($w){
+        $eventsQuery = Event::query()
+            ->where(function ($w) {
                 $w->where('status', 'active')
                   ->orWhereNull('status');
             })
-            ->where(function($q) use ($today){
-                // Event is active if enddate is null or enddate has not passed (enddate >= today)
+            ->where(function ($q) use ($today) {
                 $q->whereNull('enddate')
                   ->orWhereDate('enddate', '>=', $today);
             })
-            ->orderBy('startdate', 'asc')
-            ->take(12)
-            ->get();
+            ->orderBy('startdate', 'asc');
+
+        $data['homeEventsInfiniteScroll'] = $this->homeEventsInfiniteScrollEnabled();
+        $data['eventsTotal'] = (clone $eventsQuery)->count();
+        if ($data['homeEventsInfiniteScroll']) {
+            $data['events'] = (clone $eventsQuery)->take(self::HOME_EVENTS_INFINITE_ROWS)->get();
+        } else {
+            $data['events'] = (clone $eventsQuery)->take(12)->get();
+        }
         $data['is_home']      = true;
         $data['healthEmergencies'] = collect($data['tags'] ?? [])
             ->filter(fn ($tag) => ! empty($tag->is_health_emergency))
@@ -100,6 +107,50 @@ class HomeController extends Controller
             'total' => $total,
             'has_more' => $loadedCount < $total,
         ]);
+    }
+
+    public function eventsPage(Request $request)
+    {
+        if (! (settings()->show_events ?? false) || ! $this->homeEventsInfiniteScrollEnabled()) {
+            return response()->json(['ok' => false, 'error' => 'disabled'], 403);
+        }
+
+        $offset = max(0, (int) $request->input('offset', self::HOME_EVENTS_INFINITE_ROWS));
+        $limit = max(1, min(20, (int) $request->input('limit', self::HOME_EVENTS_INFINITE_ROWS)));
+
+        $today = \Carbon\Carbon::today()->startOfDay();
+        $eventsQuery = Event::query()
+            ->where(function ($w) {
+                $w->where('status', 'active')
+                  ->orWhereNull('status');
+            })
+            ->where(function ($q) use ($today) {
+                $q->whereNull('enddate')
+                  ->orWhereDate('enddate', '>=', $today);
+            })
+            ->orderBy('startdate', 'asc');
+
+        $total = (clone $eventsQuery)->count();
+        $events = (clone $eventsQuery)->skip($offset)->take($limit)->get();
+        $loadedCount = min($total, $offset + $events->count());
+
+        $theme = trim((string) site_theme());
+        $itemsView = ($theme === 'theme1.')
+            ? 'home.partials.theme1.event_list_items'
+            : 'home.partials.theme1.event_list_items';
+
+        return response()->json([
+            'ok' => true,
+            'html' => view($itemsView, ['events' => $events])->render(),
+            'loaded_count' => $loadedCount,
+            'total' => $total,
+            'has_more' => $loadedCount < $total,
+        ]);
+    }
+
+    protected function homeEventsInfiniteScrollEnabled(): bool
+    {
+        return (settings()->home_events_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll';
     }
 
 

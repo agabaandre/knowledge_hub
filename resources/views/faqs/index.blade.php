@@ -192,6 +192,8 @@
     html[data-bs-theme="dark"] .faqs-container .page-link { background: #242628 !important; border-color: #3e4348 !important; color: #e4e6eb !important; }
     html[data-bs-theme="dark"] .faqs-container .page-item.active .page-link { background: var(--theme-color-primary, #119A48) !important; border-color: var(--theme-color-primary, #119A48) !important; color: #fff !important; }
     html[data-bs-theme="dark"] .faqs-container .page-link:hover { background: #3e4348 !important; border-color: #4b5262 !important; color: #e4e6eb !important; }
+    .faqs-infinite-sentinel { height: 1px; width: 100%; }
+    .faqs-infinite-loader { color: #64748b; font-size: 0.875rem; padding: 0.5rem 0; }
 </style>
 @endsection
 
@@ -235,30 +237,51 @@
         </div>
 
         <!-- FAQs List -->
+        <div id="faqs-list-wrap"
+             @if(($faqsInfiniteScroll ?? false) && $faqs instanceof \Illuminate\Pagination\AbstractPaginator)
+             data-infinite-scroll="1"
+             data-current-page="{{ $faqs->currentPage() }}"
+             data-last-page="{{ $faqs->lastPage() }}"
+             data-total="{{ $faqs->total() }}"
+             data-loaded="{{ (($faqs->currentPage() - 1) * $faqs->perPage()) + $faqs->count() }}"
+             @endif>
         <div id="faqsList">
-            @php $index = 1; @endphp
-            @forelse($faqs as $faq)
-                <div class="faq-item" data-faq-index="{{ $index }}">
-                    <div class="faq-question" onclick="toggleFaq(this)">
-                        <div style="display: flex; align-items: center; flex: 1;">
-                            <span class="faq-question-number">{{ $index++ }}.</span>
-                            <span class="faq-question-text">{{ $faq->question }}</span>
-                        </div>
-                        <i class="fa fa-chevron-down faq-toggle-icon"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            {!! $faq->answer !!}
-                        </div>
-                    </div>
-                </div>
-            @empty
+            @if($faqs->count() > 0)
+                @include('faqs.partials.faq_list_items', [
+                    'faqs' => $faqs,
+                    'listOffset' => ($faqs instanceof \Illuminate\Pagination\AbstractPaginator)
+                        ? (($faqs->currentPage() - 1) * $faqs->perPage())
+                        : 0,
+                ])
+            @else
                 <div class="no-results">
                     <i class="fa fa-inbox"></i>
                     <h3>No FAQs Found</h3>
                     <p>There are currently no frequently asked questions available.</p>
                 </div>
-            @endforelse
+            @endif
+        </div>
+
+        @if(($faqsInfiniteScroll ?? false) && $faqs instanceof \Illuminate\Pagination\AbstractPaginator && $faqs->total() > 0)
+            @php $loadedFaqCount = (($faqs->currentPage() - 1) * $faqs->perPage()) + $faqs->count(); @endphp
+            <div class="faqs-infinite-footer py-3 text-center" id="faqs-infinite-footer">
+                <p class="text-muted small mb-2" id="faqs-infinite-status">
+                    Showing {{ number_format($loadedFaqCount) }} of {{ number_format($faqs->total()) }} FAQs
+                </p>
+                @if($faqs->hasMorePages())
+                    <div id="faqs-infinite-sentinel" class="faqs-infinite-sentinel" aria-hidden="true"></div>
+                    <div id="faqs-infinite-loader" class="faqs-infinite-loader d-none" aria-live="polite">
+                        <i class="fa fa-spinner fa-spin me-1"></i>Loading more FAQs…
+                    </div>
+                @else
+                    <p class="text-muted small mb-0" id="faqs-infinite-complete">All FAQs loaded</p>
+                @endif
+            </div>
+        @elseif($faqs instanceof \Illuminate\Pagination\AbstractPaginator && $faqs->hasPages())
+            <div class="mt-4">
+                {{ $faqs->links() }}
+            </div>
+        @endif
         </div>
 
         <!-- No Results Message -->
@@ -268,18 +291,21 @@
             <p>Try adjusting your search terms or browse all FAQs.</p>
         </div>
 
-        <!-- Pagination -->
-        @if($faqs->hasPages())
-            <div class="mt-4">
-                {{ $faqs->links() }}
-            </div>
-        @endif
     </div>
 </div>
 
 @endsection
 
 @section('scripts')
+<script>
+    window.faqsInfiniteScrollConfig = {
+        enabled: @json((bool) ($faqsInfiniteScroll ?? false)),
+        pageUrl: @json(route('faqs.page'))
+    };
+    window.FAQS_INFINITE_STATUS_COMPLETE = 'All FAQs loaded';
+    window.FAQS_INFINITE_STATUS_ERROR = 'Could not load more FAQs. Tap to retry.';
+</script>
+<script src="{{ asset('js/faqs-index-infinite.js') }}?v={{ @filemtime(public_path('js/faqs-index-infinite.js')) }}"></script>
 <script>
     // Toggle FAQ accordion
     function toggleFaq(element) {

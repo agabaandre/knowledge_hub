@@ -146,6 +146,7 @@ Route::post('/locale/apply', [LocaleSwitchController::class, 'apply'])->name('lo
 Route::get('/locale/{locale}', [LocaleSwitchController::class, 'switch'])->where('locale', '[a-z]{2}')->name('locale.switch');
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/home/top-searches-page', [HomeController::class, 'topSearchesPage'])->name('home.top-searches-page');
+Route::get('/home/events-page', [HomeController::class, 'eventsPage'])->name('home.events-page');
 Route::post('/endtour', [CommonController::class, 'endtour'])->name('endtour');
 Route::get('/endtour', [CommonController::class, 'endtour'])->name('endtour.get'); // Backward compatibility
 
@@ -236,6 +237,7 @@ Route::group(["prefix" => "healthassets"], function () {
 
 Route::group(["prefix" => "faqs"], function () {
     Route::get("/", [FaqsController::class, 'index']);
+    Route::get('/page', [FaqsController::class, 'faqsPage'])->name('faqs.page');
 });
 
 
@@ -266,6 +268,7 @@ Route::middleware(['auth', 'web'])->group(function () {
 // Health Topics routes
 Route::group(["prefix" => "health-topics"], function () {
     Route::get("/", [HealthTopicsController::class, 'index'])->name('health-topics.index');
+    Route::get('/page', [HealthTopicsController::class, 'healthTopicsPage'])->name('health-topics.page');
     Route::get("/{key}", [HealthTopicsController::class, 'show'])->where('key', '[\w\-]+')->name('health-topics.show');
 });
 
@@ -859,6 +862,7 @@ Route::post('/image-upload', [App\Http\Controllers\CommonController::class, 'ima
 
 Route::group(["prefix" => "courses"], function () {
     Route::get("/",  [CoursesController::class, 'index']);
+    Route::get('/page', [CoursesController::class, 'coursesPage'])->name('courses.page');
     Route::get('/details/{id}', [CoursesController::class, 'showDetails'])->name('courses.details');
     Route::post('/fetch', [CoursesController::class, 'startFetch'])->middleware('auth')->name('courses.fetch');
     Route::get('/fetch/{id}', [CoursesController::class, 'fetchStatus'])->middleware('auth')->name('courses.fetch.status');

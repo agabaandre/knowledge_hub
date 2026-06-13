@@ -158,8 +158,20 @@
             </div>
         </div>
 
+        <div id="home-events-wrap"
+             @if($homeEventsInfiniteScroll ?? false)
+             data-infinite-scroll="1"
+             data-loaded="{{ count($events) }}"
+             data-total="{{ $eventsTotal ?? count($events) }}"
+             data-page-size="{{ \App\Http\Controllers\HomeController::HOME_EVENTS_INFINITE_ROWS }}"
+             @endif>
         {{-- Events slider below header --}}
-        @include('home.partials.' . $theme . 'events_slider', ['events' => $events])
+        @include('home.partials.' . $theme . 'events_slider', [
+            'events' => $events,
+            'homeEventsInfiniteScroll' => $homeEventsInfiniteScroll ?? false,
+            'eventsTotal' => $eventsTotal ?? count($events),
+        ])
+        </div>
     @endif
 
     @include('home.partials.' . $theme . 'top_categories')
@@ -181,6 +193,18 @@
     @include('common.select2')
     @if(settings()->show_top_searches ?? false)
         @include('home.partials.top_searches_infinite_scroll')
+    @endif
+
+    @if(($homeEventsInfiniteScroll ?? false) && (settings()->show_events ?? false))
+        <script>
+            window.homeEventsInfiniteScrollConfig = {
+                enabled: true,
+                pageUrl: @json(route('home.events-page'))
+            };
+            window.HOME_EVENTS_INFINITE_STATUS_COMPLETE = 'All events loaded';
+            window.HOME_EVENTS_INFINITE_STATUS_ERROR = 'Could not load more events. Tap to retry.';
+        </script>
+        <script src="{{ asset('js/home-events-infinite.js') }}?v={{ @filemtime(public_path('js/home-events-infinite.js')) }}"></script>
     @endif
 
     @if ((!get_cookie('CDC_Tour_Finished') && !get_cookie('CDC_Tour_Declined')) || !env('SITE_LIVE'))
