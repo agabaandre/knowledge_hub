@@ -16,6 +16,8 @@ use App\Models\Region;
 
 class CountriesController extends Controller
 {
+    public const COUNTRY_PUBLICATIONS_INFINITE_ROWS = 5;
+
     private $publicationsRepo,$authorsRepo,$quotesRepo,$areasRepo,$forumsRepo,$themesRepo,$dashRepo;
 
     public function __construct(PublicationsRepository $publicationsRepo, 
@@ -106,31 +108,26 @@ class CountriesController extends Controller
 
 	public function country(Request $request, ?string $slug = null){
 
-        if ($slug) {
-            $data['country'] = $this->areasRepo->member_state_by_slug($slug);
-            if (! $data['country']) {
+        if (! $slug && $request->filled('state')) {
+            $legacyCountry = $this->areasRepo->member_state((int) $request->state);
+            if (! $legacyCountry) {
                 abort(404);
             }
-            $countryId = (int) $data['country']->id;
-        } else {
-            if (! $request->filled('state')) {
-                abort(404);
-            }
-
-            $countryId = (int) $request->state;
-            $data['country'] = $this->areasRepo->member_state($countryId);
-            if (! $data['country']) {
-                abort(404);
-            }
-
-            if (seo_friendly_urls_enabled() && ! empty($data['country']->slug)) {
-                return redirect()->to(country_detail_url($data['country']), 301);
+            if (seo_friendly_urls_enabled() && ! empty($legacyCountry->slug)) {
+                return redirect()->to(country_detail_url($legacyCountry), 301);
             }
         }
 
+        $country = $this->resolveMemberState($request, $slug);
+        $countryId = (int) $country->id;
+        $data['country'] = $country;
+
         $request['area'] = $countryId;
         $request['state'] = $countryId;
+        $this->prepareCountryPublicationsListingRequest($request);
 		$data['publications']   = $this->publicationsRepo->getLightweight($request);
+        $data['countryPublicationsInfiniteScroll'] = $this->countryPublicationsInfiniteScrollEnabled();
+        $data['listingInfiniteScroll'] = $data['countryPublicationsInfiniteScroll'];
         $kpiRows = $this->dashRepo->get_country_kpis(['country_id' => $countryId], false, true);
         $kpiIds = collect($kpiRows)->pluck('kpi_id')->unique()->filter()->map(fn ($id) => (int) $id)->all();
         $seriesMap = $this->dashRepo->get_country_kpi_time_series($countryId, $kpiIds, true);
@@ -198,6 +195,81 @@ class CountriesController extends Controller
             ];
 
         return view('countries.details',$data);
+    }
+
+    public function countryPublicationsPage(Request $request, ?string $slug = null)
+    {
+        if (! $this->countryPublicationsInfiniteScrollEnabled()) {
+            return response()->json(['ok' => false, 'error' => 'infinite_scroll_disabled'], 403);
+        }
+
+        $country = $this->resolveMemberState($request, $slug);
+        $countryId = (int) $country->id;
+
+        $request->merge([
+            'area' => $countryId,
+            'state' => $countryId,
+        ]);
+        $this->prepareCountryPublicationsListingRequest($request);
+        $request->merge(['rows' => self::COUNTRY_PUBLICATIONS_INFINITE_ROWS]);
+
+        $publications = $this->publicationsRepo->getLightweight($request);
+
+        $page = (int) $publications->currentPage();
+        $perPage = (int) $publications->perPage();
+        $listOffset = max(0, ($page - 1) * $perPage);
+        $loadedCount = min($publications->total(), $listOffset + $publications->count());
+
+        return response()->json([
+            'ok' => true,
+            'html' => view('publications.partials.publications_list_items', [
+                'publications' => $publications,
+                'listOffset' => $listOffset,
+            ])->render(),
+            'current_page' => $page,
+            'last_page' => (int) $publications->lastPage(),
+            'has_more' => $publications->hasMorePages(),
+            'total' => (int) $publications->total(),
+            'loaded_count' => $loadedCount,
+        ]);
+    }
+
+    protected function resolveMemberState(Request $request, ?string $slug = null)
+    {
+        if ($slug) {
+            $country = $this->areasRepo->member_state_by_slug($slug);
+            if (! $country) {
+                abort(404);
+            }
+
+            return $country;
+        }
+
+        if (! $request->filled('state')) {
+            abort(404);
+        }
+
+        $country = $this->areasRepo->member_state((int) $request->state);
+        if (! $country) {
+            abort(404);
+        }
+
+        return $country;
+    }
+
+    protected function prepareCountryPublicationsListingRequest(Request $request): void
+    {
+        if ($this->countryPublicationsInfiniteScrollEnabled()) {
+            $request->merge([
+                'page' => max(1, (int) $request->input('page', 1)),
+                'rows' => self::COUNTRY_PUBLICATIONS_INFINITE_ROWS,
+            ]);
+        }
+    }
+
+    protected function countryPublicationsInfiniteScrollEnabled(): bool
+    {
+        return (settings()->country_publications_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll';
     }
 
 

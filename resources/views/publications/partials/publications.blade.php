@@ -179,7 +179,7 @@
 
  @php
      $federatedPublications = $federatedPublications ?? collect();
-     $searchInfiniteScroll = (bool) ($searchInfiniteScroll ?? false);
+     $listingInfiniteScroll = (bool) ($listingInfiniteScroll ?? $searchInfiniteScroll ?? false);
      $loadedCount = (($publications->currentPage() - 1) * $publications->perPage()) + $publications->count();
  @endphp
 
@@ -202,7 +202,7 @@
  @endif
 
  <div id="records-search-publications"
-      @if($searchInfiniteScroll)
+      @if($listingInfiniteScroll)
       data-infinite-scroll="1"
       data-current-page="{{ $publications->currentPage() }}"
       data-last-page="{{ $publications->lastPage() }}"
@@ -213,7 +213,7 @@
          @include('publications.partials.publications_list_items', ['listOffset' => ($publications->currentPage() - 1) * $publications->perPage()])
      </div>
 
-     @if($searchInfiniteScroll && $publications->total() > 0)
+     @if($listingInfiniteScroll && $publications->total() > 0)
          <div class="records-search-infinite-footer py-3 text-center" id="records-search-infinite-footer">
              <p class="text-muted small mb-2" id="records-search-infinite-status">
                  @if($publications->total() > 0)

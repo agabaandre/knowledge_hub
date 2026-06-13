@@ -11,6 +11,8 @@ use App\Repositories\QuotesRepository;
 
 class AuthorsController extends Controller
 {
+    public const AUTHORS_INFINITE_ROWS = 12;
+
     private $publicationsRepo,$authorsRepo;
 
     public function __construct(PublicationsRepository $publicationsRepo,
@@ -23,7 +25,9 @@ class AuthorsController extends Controller
     public function index(Request $request)
     {
         $data['search'] = (object) $request->all();
+        $this->prepareAuthorsListingRequest($request);
         $data['authors'] = $this->authorsRepo->get($request);
+        $data['authorsInfiniteScroll'] = $this->authorsInfiniteScrollEnabled();
 
         $authors = $data['authors'];
         $total = method_exists($authors, 'total') ? (int) $authors->total() : $authors->count();
@@ -66,5 +70,45 @@ class AuthorsController extends Controller
         $data['authorsSearchTerm'] = $searchTerm;
 
         return view('authors.index', $data);
+    }
+
+    public function authorsPage(Request $request)
+    {
+        if (! $this->authorsInfiniteScrollEnabled()) {
+            return response()->json(['ok' => false, 'error' => 'infinite_scroll_disabled'], 403);
+        }
+
+        $this->prepareAuthorsListingRequest($request);
+        $request->merge(['rows' => self::AUTHORS_INFINITE_ROWS]);
+        $authors = $this->authorsRepo->get($request);
+
+        $page = (int) $authors->currentPage();
+        $perPage = (int) $authors->perPage();
+        $loadedCount = min($authors->total(), max(0, ($page - 1) * $perPage) + $authors->count());
+
+        return response()->json([
+            'ok' => true,
+            'html' => view('authors.partials.author_list_items', ['authors' => $authors])->render(),
+            'current_page' => $page,
+            'last_page' => (int) $authors->lastPage(),
+            'has_more' => $authors->hasMorePages(),
+            'total' => (int) $authors->total(),
+            'loaded_count' => $loadedCount,
+        ]);
+    }
+
+    protected function prepareAuthorsListingRequest(Request $request): void
+    {
+        if ($this->authorsInfiniteScrollEnabled()) {
+            $request->merge([
+                'page' => max(1, (int) $request->input('page', 1)),
+                'rows' => self::AUTHORS_INFINITE_ROWS,
+            ]);
+        }
+    }
+
+    protected function authorsInfiniteScrollEnabled(): bool
+    {
+        return (settings()->authors_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll';
     }
 }

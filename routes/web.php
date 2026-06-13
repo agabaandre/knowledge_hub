@@ -162,6 +162,7 @@ if(states_enabled()):
             Route::get('/', [CountriesController::class, 'index'])->name('countries');
             Route::get('/map-data', [CountriesController::class, 'mapData'])->name('countries.map-data');
             Route::get('/indicator-summaries', [CountriesController::class, 'indicatorSummaries'])->name('countries.indicator-summaries');
+            Route::get('/details/{slug}/publications-page', [CountriesController::class, 'countryPublicationsPage'])->where('slug', '[\w\-]+')->name('countries.publications-page');
             Route::get('/details/{slug}', [CountriesController::class, 'country'])->where('slug', '[\w\-]+')->name('countries.details');
             Route::get('/details', [CountriesController::class, 'country']);
     });
@@ -183,6 +184,7 @@ Route::group(["prefix" => "browse"], function () {
     Route::get("subthemes", [ThemesController::class, 'subthemes']);
     Route::put('subthemes/update', [ThemesController::class, 'subthemes/update'])->name('subthemes.update');
     Route::get("authors", [AuthorsController::class, 'index'])->name('browse.authors');
+    Route::get("authors/page", [AuthorsController::class, 'authorsPage'])->name('browse.authors.page');
     // Redirect legacy areas route to countries page
     Route::get("areas", function(){ return redirect('countries'); });
 

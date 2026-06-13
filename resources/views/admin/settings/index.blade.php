@@ -1522,6 +1522,28 @@
                         </div>
                     </div>
                     <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="authors_pagination_mode">Contributors &amp; authors listing loading</label>
+                                <select class="form-control" id="authors_pagination_mode" name="authors_pagination_mode">
+                                    <option value="pagination" @if(($settings->authors_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
+                                    <option value="infinite_scroll" @if(($settings->authors_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
+                                </select>
+                                <small class="info-text">Infinite scroll loads 12 contributors per batch on browse/authors.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="country_publications_pagination_mode">Country page publications loading</label>
+                                <select class="form-control" id="country_publications_pagination_mode" name="country_publications_pagination_mode">
+                                    <option value="pagination" @if(($settings->country_publications_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
+                                    <option value="infinite_scroll" @if(($settings->country_publications_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
+                                </select>
+                                <small class="info-text">Infinite scroll loads 5 publications per batch on member state detail pages.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
                                 <div class="form-check">

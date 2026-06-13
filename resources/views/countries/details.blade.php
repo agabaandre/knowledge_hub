@@ -589,4 +589,15 @@
 })();
 </script>
 @endif
+@if($countryPublicationsInfiniteScroll ?? false)
+<script>
+    window.publicationsListingInfiniteScrollConfig = {
+        enabled: true,
+        pageUrl: @json(route('countries.publications-page', ['slug' => $country->slug ?? $country->id]))
+    };
+    window.PUBLICATIONS_LISTING_INFINITE_COMPLETE = 'All publications loaded';
+    window.PUBLICATIONS_LISTING_INFINITE_ERROR = 'Could not load more publications. Tap to retry.';
+</script>
+<script src="{{ asset('js/publications-listing-infinite.js') }}?v={{ @filemtime(public_path('js/publications-listing-infinite.js')) }}"></script>
+@endif
 @endsection

@@ -359,6 +359,8 @@ class SettingsRepository
             'faqs_pagination_mode' => 'infinite_scroll',
             'health_topics_pagination_mode' => 'infinite_scroll',
             'home_events_pagination_mode' => 'infinite_scroll',
+            'authors_pagination_mode' => 'infinite_scroll',
+            'country_publications_pagination_mode' => 'infinite_scroll',
         ] as $column => $default) {
             if (Schema::hasColumn('setting', $column)) {
                 $mode = (string) $request->input($column, $default);
