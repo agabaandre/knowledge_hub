@@ -10,6 +10,8 @@ use App\Models\ThemeticArea;
 use App\Support\ContributorsSeo;
 use App\Support\PublicationSeo;
 use App\Support\RecordsSearchSeo;
+use App\Support\RecordsSearchFragmentCache;
+use App\Support\PublicationSearchQuery;
 use App\Services\ContributorBadgeAwardService;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
@@ -20,6 +22,7 @@ use App\Models\SearchLog;
 use App\Services\FederatedContentService;
 use App\Services\HomeTopSearchesService;
 use App\Services\HybridRecordsSearchService;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 
 class PublicationsController extends Controller
@@ -251,8 +254,14 @@ class PublicationsController extends Controller
     {
         $this->prepareRecordsSearchRequest($request);
         $this->validateRecordsSearchRequest($request);
-        $data = $this->buildRecordsSearchData($request);
-        $this->maybeLogKeywordSearch($request, $data);
+
+        $term = trim((string) ($request->term ?? ''));
+        if ($term !== '') {
+            $data = $this->buildRecordsSearchShellData($request);
+        } else {
+            $data = $this->buildRecordsSearchData($request);
+            $this->maybeLogKeywordSearch($request, $data);
+        }
 
         return view('publications.search', $data);
     }
@@ -290,16 +299,85 @@ class PublicationsController extends Controller
     {
         $this->prepareRecordsSearchRequest($request);
         $this->validateRecordsSearchRequest($request);
-        $data = $this->buildRecordsSearchData($request);
 
-        return response()->json([
+        $cached = RecordsSearchFragmentCache::get($request);
+        if ($cached !== null) {
+            return response()->json($cached);
+        }
+
+        $data = $this->buildRecordsSearchData($request, skipAi: true);
+        $this->maybeLogKeywordSearch($request, $data);
+
+        $payload = [
             'main_html' => view('publications.partials.search_main_column', $data)->render(),
             'sidebar_html' => view('publications.partials.search_sidebar_dynamic', $data)->render(),
             'page_title' => $data['pageTitle'],
             'meta_description' => strip_tags($data['pageDescription']),
             'canonical_url' => $data['canonicalUrl'],
             'structured_data' => $data['searchJsonLd'] ?? null,
-        ]);
+            'results_count' => $data['results_count'] ?? 0,
+            'search_time' => $data['search_time'] ?? null,
+        ];
+
+        RecordsSearchFragmentCache::put($request, $payload);
+
+        return response()->json($payload);
+    }
+
+    /**
+     * Khub AI assistant HTML loaded asynchronously after the search shell renders.
+     */
+    public function searchAiInsightsFragment(Request $request)
+    {
+        if (! (bool) (settings()->enable_ai_search ?? false)) {
+            return response()->json(['ok' => false, 'error' => 'ai_disabled'], 403);
+        }
+
+        $this->prepareRecordsSearchRequest($request);
+        $this->validateRecordsSearchRequest($request);
+
+        $term = trim((string) ($request->term ?? ''));
+        if ($term === '' || mb_strlen($term) < 2) {
+            return response()->json(['ok' => false, 'error' => 'term_too_short'], 422);
+        }
+
+        $cacheKey = 'records_search_ai_fragment:v'.\App\Support\SearchCache::aiInsightsVersion().':'.md5(
+            mb_strtolower(PublicationSearchQuery::normalizeTerm($term)).'|'.json_encode($request->except('page'))
+        );
+        $store = \App\Support\MetricsCache::store();
+        $cached = $store->get($cacheKey);
+        if (is_array($cached)) {
+            return response()->json($cached);
+        }
+
+        $data = $this->buildRecordsSearchData($request, skipAi: true, skipHeavyExtras: true);
+
+        try {
+            $data['aiSearchInsights'] = app(\App\Services\AiSearchInsightsService::class)->generate(
+                $request,
+                $data['publications'],
+                $data['searchForums'],
+                $data['searchCommunities'],
+                $data['federatedPublications']
+            );
+        } catch (\Throwable $e) {
+            $data['aiSearchInsights'] = null;
+        }
+
+        $assistantHtml = '';
+        if (($data['aiSearchEnabled'] ?? false)
+            || \App\Services\AiSearchInsightsService::isDisplayable($data['aiSearchInsights'] ?? null)) {
+            $assistantHtml = view('publications.partials.ai_search_assistant', $data)->render();
+        }
+
+        $payload = [
+            'ok' => true,
+            'assistant_html' => $assistantHtml,
+        ];
+
+        $store->put($cacheKey, $payload, \App\Support\MetricsCache::ttl('ai_search'));
+
+        return response()->json($payload);
     }
 
     /**
@@ -415,7 +493,66 @@ class PublicationsController extends Controller
         ]);
     }
 
-    protected function buildRecordsSearchData(Request $request): array
+    protected function buildRecordsSearchShellData(Request $request): array
+    {
+        $request->merge([
+            'thematic_area_id' => $request->theme ?? $request->thematic_area_id,
+        ]);
+
+        if ($this->searchInfiniteScrollEnabled()) {
+            $request->merge([
+                'page' => 1,
+                'rows' => HomeTopSearchesService::SEARCH_INFINITE_ROWS,
+            ]);
+        }
+
+        $perPage = max(1, (int) ($request->rows ?? HomeTopSearchesService::SEARCH_INFINITE_ROWS));
+        $emptyPublications = new LengthAwarePaginator(
+            [],
+            0,
+            $perPage,
+            1,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+        );
+
+        $data['sub_themes'] = ($request->thematic_area_id) ? $this->publicationsRepo->get_subthemes($request) : [];
+        $data['publications'] = $emptyPublications;
+        $data['search'] = (object) $request->all();
+        $data['searchForums'] = collect();
+        $data['searchCommunities'] = collect();
+        $data['federatedPublications'] = collect();
+        $data['federatedForums'] = collect();
+        $data['federationBrowseEnabled'] = $this->federationContent->federationConsumerEnabled();
+        $data['results_count'] = null;
+        $data['search_time'] = null;
+        $data['latestPublications'] = collect();
+        $data['tags'] = Tag::popularByEngagement(20);
+
+        $seo = RecordsSearchSeo::build(
+            $request,
+            $data['publications'],
+            0,
+            $data['searchForums'],
+            $data['searchCommunities']
+        );
+
+        $data['pageTitle'] = $seo['pageTitle'];
+        $data['pageDescription'] = $seo['pageDescription'];
+        $data['pageKeywords'] = $seo['pageKeywords'];
+        $data['canonicalUrl'] = $seo['canonicalUrl'];
+        $data['searchJsonLd'] = $seo['searchJsonLd'];
+        $data['searchHeading'] = $seo['searchHeading'];
+        $data['ogType'] = 'website';
+        $data['jsonLdFlags'] = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
+        $data['aiSearchInsights'] = null;
+        $data['aiSearchEnabled'] = (bool) (settings()->enable_ai_search ?? false);
+        $data['searchInfiniteScroll'] = $this->searchInfiniteScrollEnabled();
+        $data['searchAsyncLoad'] = true;
+
+        return $data;
+    }
+
+    protected function buildRecordsSearchData(Request $request, bool $skipAi = false, bool $skipHeavyExtras = false): array
     {
         $request->merge([
             'thematic_area_id' => $request->theme ?? $request->thematic_area_id,
@@ -447,7 +584,7 @@ class PublicationsController extends Controller
         $data['federatedForums'] = collect();
         $data['federationBrowseEnabled'] = $this->federationContent->federationConsumerEnabled();
 
-        if ($data['federationBrowseEnabled'] && $request->filled('term')) {
+        if (! $skipHeavyExtras && $data['federationBrowseEnabled'] && $request->filled('term')) {
             $federated = $this->federationContent->search($request->input('term'), 20);
             $data['federatedPublications'] = $federated['publications'];
             if (settings()->search_show_forums ?? true) {
@@ -463,7 +600,11 @@ class PublicationsController extends Controller
             + $data['federatedPublications']->count()
             + $data['federatedForums']->count();
 
-        $data['latestPublications'] = $this->publicationsRepo->get(new Request(['rows' => 5]));
+        if (! $skipHeavyExtras) {
+            $data['latestPublications'] = $this->publicationsRepo->get(new Request(['rows' => 5]));
+        } else {
+            $data['latestPublications'] = collect();
+        }
 
         $data['tags'] = Tag::popularByEngagement(20);
 
@@ -486,9 +627,11 @@ class PublicationsController extends Controller
         $data['aiSearchInsights'] = null;
         $data['aiSearchEnabled'] = (bool) (settings()->enable_ai_search ?? false);
         $data['searchInfiniteScroll'] = $this->searchInfiniteScrollEnabled();
+        $data['searchAsyncLoad'] = false;
+        $data['skipAiAssistant'] = $skipAi;
 
         $searchTerm = trim((string) ($request->input('term', '')));
-        if ($data['aiSearchEnabled'] && mb_strlen($searchTerm) >= 2) {
+        if (! $skipAi && $data['aiSearchEnabled'] && mb_strlen($searchTerm) >= 2) {
             try {
                 $data['aiSearchInsights'] = app(\App\Services\AiSearchInsightsService::class)->generate(
                     $request,

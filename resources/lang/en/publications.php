@@ -99,6 +99,8 @@ return [
         'loading_more' => 'Loading more results…',
         'all_results_loaded' => 'All results loaded',
         'load_more_error' => 'Could not load more results. Tap to retry.',
+        'loading_results' => 'Searching publications, forums, and communities…',
+        'loading_ai' => 'Preparing Khub AI insights…',
         'ai_analysis_publications' => 'Matching publications include: :sample.',
         'ai_analysis_forums' => ':count related forum discussion(s) expand on community perspectives.',
         'ai_analysis_generic' => 'Khub indexed resources for “:term” include descriptive summaries you can explore below.',

@@ -4,9 +4,13 @@
             {{ $searchHeading ?? 'Browse public health resources' }}
         </h1>
 
-        @include('publications.partials.ai_search_assistant')
+        @if(!($searchAsyncLoad ?? false) && !($skipAiAssistant ?? false))
+            @include('publications.partials.ai_search_assistant')
+        @endif
 
-        {{-- Search Results Info Card --}}
+        @if($searchAsyncLoad ?? false)
+            @include('publications.partials.search_async_loading')
+        @else
         @if(isset($results_count) || isset($search_time))
         <div class="sidebar-content mb-3" style="background:#fff;border:1px solid #e2e8f0;border-radius:0.25rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
             <div class="d-flex align-items-center justify-content-between flex-wrap">
@@ -105,9 +109,11 @@
                 </div>
             </div>
         @endif
+        @endif
     </div>
 </div>
 
+@if(!($searchAsyncLoad ?? false))
 @include('partials.quiz.quiz')
 
 @if (isset($sub_themes) && count($sub_themes) > 0)
@@ -115,3 +121,4 @@
 @endif
 
 @include('publications.partials.publications')
+@endif

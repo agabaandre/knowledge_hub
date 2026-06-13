@@ -27,9 +27,22 @@
 
             <div class="row">
                 <div class="col-lg-8">
+                    <div id="khub-search-ai-mount" class="khub-search-ai-mount">
+                        @if(($searchAsyncLoad ?? false) && ($aiSearchEnabled ?? false) && mb_strlen(trim((string) request('term', ''))) >= 2)
+                            @include('publications.partials.search_ai_async_loading')
+                        @endif
+                    </div>
                     <div id="records-search-main" class="records-search-main position-relative">
                         @include('publications.partials.search_main_column')
                     </div>
+                    @if($searchAsyncLoad ?? false)
+                        <script type="application/json" id="records-search-async-config">{!! json_encode([
+                            'fragmentUrl' => url('records/search/fragment'),
+                            'aiInsightsUrl' => route('records.search.ai-insights'),
+                            'aiEnabled' => (bool) ($aiSearchEnabled ?? false),
+                        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+                        <div id="records-search-async-root" aria-hidden="true"></div>
+                    @endif
                 </div>
 
                 <div class="col-lg-4" id="records-search-sidebar">
@@ -113,6 +126,9 @@
         <script>
         (function () {
             var FRAGMENT_URL = @json(url('records/search/fragment'));
+            var AI_INSIGHTS_URL = @json(route('records.search.ai-insights'));
+            var AI_SEARCH_ENABLED = @json((bool) (settings()->enable_ai_search ?? false));
+            var SEARCH_ASYNC_LOAD = @json($searchAsyncLoad ?? false);
             var PUBLICATIONS_PAGE_URL = @json(route('records.search.publications-page'));
             var INFINITE_SCROLL_ENABLED = @json((settings()->search_pagination_mode ?? 'pagination') === 'infinite_scroll');
             var INFINITE_STATUS_LOADING = @json(__('publications.search.loading_more'));
@@ -245,6 +261,107 @@
                     } catch (e) { /* ignore */ }
                 });
             }
+
+            function placeAiMountAfterHeading(root) {
+                var aiMount = document.getElementById('khub-search-ai-mount');
+                var h1 = root && root.querySelector('h1');
+                if (!aiMount || !h1 || !h1.parentNode) {
+                    return;
+                }
+                h1.insertAdjacentElement('afterend', aiMount);
+            }
+
+            function applyRecordsSearchFragment(data, opts) {
+                opts = opts || {};
+                var root = opts.mainEl || mainEl;
+                if (!root || !data) {
+                    return;
+                }
+                root.innerHTML = data.main_html;
+                if (sideDyn && data.sidebar_html) {
+                    sideDyn.innerHTML = data.sidebar_html;
+                }
+                if (data.page_title) {
+                    document.title = data.page_title;
+                }
+                var md = document.querySelector('meta[name="description"]');
+                if (md && data.meta_description) {
+                    md.setAttribute('content', data.meta_description);
+                }
+                var cn = document.querySelector('link[rel="canonical"]');
+                if (cn && data.canonical_url) {
+                    cn.setAttribute('href', data.canonical_url);
+                }
+                var ogU = document.querySelector('meta[property="og:url"]');
+                if (ogU && data.canonical_url) {
+                    ogU.setAttribute('content', data.canonical_url);
+                }
+                var twU = document.querySelector('meta[name="twitter:url"]');
+                if (twU && data.canonical_url) {
+                    twU.setAttribute('content', data.canonical_url);
+                }
+                updateStructuredData(data);
+                window.initSearchSidebarFacets();
+                updateSidebarTagActiveState();
+                if (typeof window.initKhubSearchAssistant === 'function') {
+                    window.initKhubSearchAssistant(document);
+                } else if (typeof window.initAiSearchChat === 'function') {
+                    window.initAiSearchChat(root);
+                }
+                if (typeof window.initRecordsSearchInfiniteScroll === 'function') {
+                    window.initRecordsSearchInfiniteScroll(root);
+                }
+                placeAiMountAfterHeading(root);
+            }
+
+            window.applyRecordsSearchFragment = applyRecordsSearchFragment;
+
+            function loadAiInsightsFragment(params, opts) {
+                opts = opts || {};
+                var aiMount = opts.aiMount || document.getElementById('khub-search-ai-mount');
+                if (!aiMount || !AI_SEARCH_ENABLED || !AI_INSIGHTS_URL) {
+                    return Promise.resolve(null);
+                }
+                var term = params.get('term');
+                if (!term || String(term).trim().length < 2) {
+                    aiMount.innerHTML = '';
+                    return Promise.resolve(null);
+                }
+
+                var qs = params.toString();
+                var url = AI_INSIGHTS_URL + (qs ? '?' + qs : '');
+
+                return fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                })
+                    .then(function (r) {
+                        if (!r.ok) {
+                            return null;
+                        }
+                        return r.json();
+                    })
+                    .then(function (data) {
+                        if (data && data.ok && data.assistant_html) {
+                            aiMount.innerHTML = data.assistant_html;
+                            if (typeof window.initKhubSearchAssistant === 'function') {
+                                window.initKhubSearchAssistant(document);
+                            }
+                        } else {
+                            aiMount.innerHTML = '';
+                        }
+                        return data;
+                    })
+                    .catch(function () {
+                        aiMount.innerHTML = '';
+                        return null;
+                    });
+            }
+
+            window.loadAiInsightsFragment = loadAiInsightsFragment;
 
             function formatInfiniteStatus(loaded, total) {
                 return 'Showing ' + Number(loaded).toLocaleString() + ' of ' + Number(total).toLocaleString() + ' publications';
@@ -440,8 +557,16 @@
                 normalizeFacetArrayQueryKeys(fragParams);
                 var qs = fragParams.toString();
                 var fragUrl = FRAGMENT_URL + (qs ? '?' + qs : '');
+                var aiMount = document.getElementById('khub-search-ai-mount');
+                if (aiMount && AI_SEARCH_ENABLED && fragParams.get('term') && String(fragParams.get('term')).trim().length >= 2) {
+                    aiMount.innerHTML = '<p class="text-muted small mb-0"><i class="fa fa-spinner fa-spin me-1" aria-hidden="true"></i>' + @json(__('publications.search.loading_ai')) + '</p>';
+                } else if (aiMount) {
+                    aiMount.innerHTML = '';
+                }
                 mainEl.classList.add('is-loading');
-                fetch(fragUrl, {
+                disconnectInfiniteScroll();
+
+                var fragmentPromise = fetch(fragUrl, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json'
@@ -453,44 +578,16 @@
                             throw new Error('fragment failed');
                         }
                         return r.json();
-                    })
-                    .then(function (data) {
-                        mainEl.innerHTML = data.main_html;
-                        if (sideDyn) {
-                            sideDyn.innerHTML = data.sidebar_html;
-                        }
-                        if (data.page_title) {
-                            document.title = data.page_title;
-                        }
-                        var md = document.querySelector('meta[name="description"]');
-                        if (md && data.meta_description) {
-                            md.setAttribute('content', data.meta_description);
-                        }
-                        var cn = document.querySelector('link[rel="canonical"]');
-                        if (cn && data.canonical_url) {
-                            cn.setAttribute('href', data.canonical_url);
-                        }
-                        var ogU = document.querySelector('meta[property="og:url"]');
-                        if (ogU && data.canonical_url) {
-                            ogU.setAttribute('content', data.canonical_url);
-                        }
-                        var twU = document.querySelector('meta[name="twitter:url"]');
-                        if (twU && data.canonical_url) {
-                            twU.setAttribute('content', data.canonical_url);
-                        }
-                        updateStructuredData(data);
+                    });
+
+                var aiPromise = loadAiInsightsFragment(fragParams, { aiMount: aiMount });
+
+                Promise.all([fragmentPromise, aiPromise])
+                    .then(function (results) {
+                        var data = results[0];
+                        applyRecordsSearchFragment(data, { mainEl: mainEl });
                         if (push) {
                             history.pushState({ recordsSearchAjax: 1 }, '', u.pathname + (qs ? '?' + qs : ''));
-                        }
-                        window.initSearchSidebarFacets();
-                        updateSidebarTagActiveState();
-                        if (typeof window.initKhubSearchAssistant === 'function') {
-                            window.initKhubSearchAssistant(mainEl);
-                        } else if (typeof window.initAiSearchChat === 'function') {
-                            window.initAiSearchChat(mainEl);
-                        }
-                        if (typeof window.initRecordsSearchInfiniteScroll === 'function') {
-                            window.initRecordsSearchInfiniteScroll(mainEl);
                         }
                     })
                     .catch(function () {
@@ -546,6 +643,9 @@
             }
 
             document.addEventListener('DOMContentLoaded', function () {
+                if (SEARCH_ASYNC_LOAD) {
+                    placeAiMountAfterHeading(mainEl);
+                }
                 window.initSearchSidebarFacets();
                 updateSidebarTagActiveState();
                 if (typeof window.initRecordsSearchInfiniteScroll === 'function') {
@@ -577,6 +677,8 @@
                 }
             });
 
+            window.normalizeRecordsSearchFacetParams = normalizeFacetArrayQueryKeys;
+
             window.addEventListener('popstate', function () {
                 if (!document.getElementById('records-search-main')) {
                     return;
@@ -589,4 +691,9 @@
             });
         })();
         </script>
+        @if($searchAsyncLoad ?? false)
+        <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+        <script src="{{ asset('js/records-search-async.js') }}?v={{ filemtime(public_path('js/records-search-async.js')) }}"></script>
+        @endif
     @endsection
