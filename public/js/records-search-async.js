@@ -1,6 +1,6 @@
 /**
  * Async records search bootstrap (React 18 from CDN).
- * Fetches search results and AI insights in parallel after the shell renders.
+ * Fetches search results then AI insights after the shell renders.
  */
 (function () {
     if (!window.React || !window.ReactDOM) {
@@ -21,8 +21,7 @@
             started.current = true;
 
             var mainEl = document.getElementById('records-search-main');
-            var configEl = document.getElementById('records-search-async-config');
-            if (!mainEl || !configEl) {
+            if (!mainEl) {
                 return;
             }
 
@@ -37,28 +36,27 @@
 
             mainEl.classList.add('is-loading');
 
-            var fragmentPromise = fetch(fragmentUrl, {
+            fetch(fragmentUrl, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json'
                 },
                 credentials: 'same-origin'
-            }).then(function (r) {
-                if (!r.ok) {
-                    throw new Error('fragment failed');
-                }
-                return r.json();
-            });
-
-            var aiPromise = (config.aiEnabled && config.aiInsightsUrl && typeof window.loadAiInsightsFragment === 'function')
-                ? window.loadAiInsightsFragment(params, { aiMount: aiMount })
-                : Promise.resolve(null);
-
-            Promise.all([fragmentPromise, aiPromise])
-                .then(function (results) {
-                    if (typeof window.applyRecordsSearchFragment === 'function') {
-                        window.applyRecordsSearchFragment(results[0], { mainEl: mainEl });
+            })
+                .then(function (r) {
+                    if (!r.ok) {
+                        throw new Error('fragment failed');
                     }
+                    return r.json();
+                })
+                .then(function (data) {
+                    if (typeof window.applyRecordsSearchFragment === 'function') {
+                        window.applyRecordsSearchFragment(data, { mainEl: mainEl });
+                    }
+                    if (config.aiEnabled && config.aiInsightsUrl && typeof window.loadAiInsightsFragment === 'function') {
+                        return window.loadAiInsightsFragment(params, { aiMount: aiMount });
+                    }
+                    return null;
                 })
                 .catch(function () {
                     window.location.reload();

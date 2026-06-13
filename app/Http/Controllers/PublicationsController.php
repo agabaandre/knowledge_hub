@@ -309,6 +309,8 @@ class PublicationsController extends Controller
         $this->maybeLogKeywordSearch($request, $data);
 
         $payload = [
+            'heading_html' => view('publications.partials.search_main_heading', $data)->render(),
+            'body_html' => view('publications.partials.search_main_body', $data)->render(),
             'main_html' => view('publications.partials.search_main_column', $data)->render(),
             'sidebar_html' => view('publications.partials.search_sidebar_dynamic', $data)->render(),
             'page_title' => $data['pageTitle'],
@@ -346,7 +348,7 @@ class PublicationsController extends Controller
         );
         $store = \App\Support\MetricsCache::store();
         $cached = $store->get($cacheKey);
-        if (is_array($cached)) {
+        if (is_array($cached) && ! empty($cached['assistant_html'])) {
             return response()->json($cached);
         }
 
@@ -365,9 +367,14 @@ class PublicationsController extends Controller
         }
 
         $assistantHtml = '';
-        if (($data['aiSearchEnabled'] ?? false)
-            || \App\Services\AiSearchInsightsService::isDisplayable($data['aiSearchInsights'] ?? null)) {
-            $assistantHtml = view('publications.partials.ai_search_assistant', $data)->render();
+        if ($data['aiSearchEnabled'] ?? false) {
+            try {
+                $assistantHtml = view('publications.partials.ai_search_assistant', $data)->render();
+            } catch (\Throwable $e) {
+                Log::warning('records_search.ai_fragment_view_failed', [
+                    'message' => $e->getMessage(),
+                ]);
+            }
         }
 
         $payload = [
@@ -375,7 +382,9 @@ class PublicationsController extends Controller
             'assistant_html' => $assistantHtml,
         ];
 
-        $store->put($cacheKey, $payload, \App\Support\MetricsCache::ttl('ai_search'));
+        if ($assistantHtml !== '') {
+            $store->put($cacheKey, $payload, \App\Support\MetricsCache::ttl('ai_search'));
+        }
 
         return response()->json($payload);
     }

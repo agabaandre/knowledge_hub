@@ -27,13 +27,20 @@
 
             <div class="row">
                 <div class="col-lg-8">
-                    <div id="khub-search-ai-mount" class="khub-search-ai-mount">
-                        @if(($searchAsyncLoad ?? false) && ($aiSearchEnabled ?? false) && mb_strlen(trim((string) request('term', ''))) >= 2)
-                            @include('publications.partials.search_ai_async_loading')
-                        @endif
-                    </div>
                     <div id="records-search-main" class="records-search-main position-relative">
-                        @include('publications.partials.search_main_column')
+                        <div id="records-search-heading">
+                            @include('publications.partials.search_main_heading')
+                        </div>
+                        <div id="khub-search-ai-mount" class="khub-search-ai-mount">
+                            @if(($searchAsyncLoad ?? false) && ($aiSearchEnabled ?? false) && mb_strlen(trim((string) request('term', ''))) >= 2)
+                                @include('publications.partials.search_ai_async_loading')
+                            @elseif(!($searchAsyncLoad ?? false) && ($aiSearchEnabled ?? false) && mb_strlen(trim((string) request('term', ''))) >= 2)
+                                @include('publications.partials.ai_search_assistant')
+                            @endif
+                        </div>
+                        <div id="records-search-body">
+                            @include('publications.partials.search_main_body')
+                        </div>
                     </div>
                     @if($searchAsyncLoad ?? false)
                         <script type="application/json" id="records-search-async-config">{!! json_encode([
@@ -123,6 +130,18 @@
         @auth
             @include('common.pdf-chat-js')
         @endauth
+        @if((bool) (settings()->enable_ai_search ?? false))
+        <script>
+        window.KHUB_SEARCH_AI_STRINGS = {
+            chatSend: @json(__('publications.search.ai_chat_send')),
+            chatThinking: @json(__('publications.search.ai_chat_thinking')),
+            chatError: @json(__('publications.search.ai_chat_error')),
+            chatSubtitle: @json(__('publications.search.ai_chat_subtitle')),
+            chatDocuments: @json(__('publications.search.ai_chat_documents'))
+        };
+        </script>
+        <script src="{{ asset('js/khub-search-ai-init.js') }}?v={{ filemtime(public_path('js/khub-search-ai-init.js')) }}"></script>
+        @endif
         <script>
         (function () {
             var FRAGMENT_URL = @json(url('records/search/fragment'));
@@ -262,22 +281,26 @@
                 });
             }
 
-            function placeAiMountAfterHeading(root) {
-                var aiMount = document.getElementById('khub-search-ai-mount');
-                var h1 = root && root.querySelector('h1');
-                if (!aiMount || !h1 || !h1.parentNode) {
-                    return;
-                }
-                h1.insertAdjacentElement('afterend', aiMount);
-            }
-
             function applyRecordsSearchFragment(data, opts) {
                 opts = opts || {};
                 var root = opts.mainEl || mainEl;
                 if (!root || !data) {
                     return;
                 }
-                root.innerHTML = data.main_html;
+
+                var headingEl = root.querySelector('#records-search-heading');
+                var bodyEl = root.querySelector('#records-search-body');
+
+                if (headingEl && data.heading_html) {
+                    headingEl.innerHTML = data.heading_html;
+                }
+                if (bodyEl && data.body_html) {
+                    bodyEl.innerHTML = data.body_html;
+                } else if (bodyEl && data.main_html) {
+                    bodyEl.innerHTML = data.main_html;
+                } else if (data.main_html) {
+                    root.innerHTML = data.main_html;
+                }
                 if (sideDyn && data.sidebar_html) {
                     sideDyn.innerHTML = data.sidebar_html;
                 }
@@ -309,9 +332,8 @@
                     window.initAiSearchChat(root);
                 }
                 if (typeof window.initRecordsSearchInfiniteScroll === 'function') {
-                    window.initRecordsSearchInfiniteScroll(root);
+                    window.initRecordsSearchInfiniteScroll(bodyEl || root);
                 }
-                placeAiMountAfterHeading(root);
             }
 
             window.applyRecordsSearchFragment = applyRecordsSearchFragment;
@@ -345,12 +367,12 @@
                         return r.json();
                     })
                     .then(function (data) {
-                        if (data && data.ok && data.assistant_html) {
+                        if (data && data.ok && data.assistant_html && String(data.assistant_html).trim() !== '') {
                             aiMount.innerHTML = data.assistant_html;
                             if (typeof window.initKhubSearchAssistant === 'function') {
                                 window.initKhubSearchAssistant(document);
                             }
-                        } else {
+                        } else if (!data || !data.ok) {
                             aiMount.innerHTML = '';
                         }
                         return data;
@@ -643,9 +665,6 @@
             }
 
             document.addEventListener('DOMContentLoaded', function () {
-                if (SEARCH_ASYNC_LOAD) {
-                    placeAiMountAfterHeading(mainEl);
-                }
                 window.initSearchSidebarFacets();
                 updateSidebarTagActiveState();
                 if (typeof window.initRecordsSearchInfiniteScroll === 'function') {
