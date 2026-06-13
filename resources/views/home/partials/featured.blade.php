@@ -145,36 +145,29 @@
                                                            class="fa fa-comments"></i> {{ count($row->comments) }}
                                                        Comments</span></span>
                                             <div class="d-flex align-items-center mt-2" style="flex-wrap: wrap; gap: 4px;">
-                                                @php
-                                                    $auGold = settings()->au_gold ?? '#B4A269';
-                                                    $goldTextColor = '#5a4d2e';
-                                                @endphp
                                                 @auth
-                                                    @if(!$row->is_favourite)
-                                                        <a href="{{ url('publications/add_favourite') }}?id={{ $row->id }}" 
-                                                           class="btn btn-sm btn-outline-warning" 
-                                                           style="border-color: {{ $auGold }}; color: {{ $goldTextColor }}; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease; background-color: transparent;">
-                                                            <i class="fa fa-star mr-1"></i> Add to Favourites
-                                                        </a>
-                                                    @else
-                                                        <a href="{{ url('publications/remove_favourite') }}?id={{ $row->id }}" 
-                                                           class="btn btn-sm btn-warning" 
-                                                           style="background-color: {{ $auGold }}; border-color: {{ $auGold }}; color: {{ $goldTextColor }}; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease;">
-                                                            <i class="fa fa-star mr-1"></i> Remove favorite
-                                                        </a>
-                                                    @endif
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-outline-danger js-favourite-pub-btn"
+                                                        data-publication-id="{{ $row->id }}"
+                                                        data-favourited="{{ ($row->is_favourite ?? false) ? '1' : '0' }}"
+                                                        style="border-color: #ef4444; color: #ef4444; background-color: transparent; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer;"
+                                                        onclick="if(window.handlePubFavourite){event.preventDefault();event.stopPropagation();window.handlePubFavourite(this);}">
+                                                        <i class="fa fa-heart{{ ($row->is_favourite ?? false) ? '' : '-o' }} mr-1" style="{{ ($row->is_favourite ?? false) ? 'color: #ef4444;' : 'color: inherit;' }}"></i>
+                                                        <span class="js-fav-label">Favorite</span>
+                                                    </button>
                                                 @else
-                                                    <a href="{{ url('login') }}" 
-                                                       class="btn btn-sm btn-outline-warning" 
-                                                       style="border-color: {{ $auGold }}; color: {{ $goldTextColor }}; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease; background-color: transparent;">
-                                                        <i class="fa fa-star mr-1"></i> Add to Favourites
+                                                    <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}"
+                                                       class="btn btn-sm btn-outline-danger"
+                                                       style="border-color: #ef4444; color: #ef4444; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease; background-color: transparent;">
+                                                        <i class="fa fa-heart-o mr-1"></i> Favorite
                                                     </a>
                                                 @endauth
                                                 <a href="{{ publication_url($row)}}" 
                                                    class="btn btn-sm btn-primary" 
                                                    style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease;">
-                                                    <i class="fa fa-eye mr-1"></i> Browse Resource
+                                                    <i class="fa fa-eye mr-1"></i> Browse
                                                 </a>
+                                                @include('common.khub_ai_publication_button', ['publication' => $row])
                                             </div>
                                            </span>
 

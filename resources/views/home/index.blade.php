@@ -211,6 +211,13 @@
         @include('partials.tour.js')
     @endif
 
+    @auth
+        @if((settings()->show_featured ?? false) || (settings()->show_top_searches ?? false))
+            @include('common.pdf-chat-modal')
+            @include('common.pdf-chat-js')
+        @endif
+    @endauth
+
     <script>
         var showing = false;
 

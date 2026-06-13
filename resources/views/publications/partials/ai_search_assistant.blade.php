@@ -17,6 +17,10 @@
         margin-bottom: 1rem;
         overflow: hidden;
         box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
     .khub-search-ai__banner {
         display: flex;
@@ -107,6 +111,10 @@
     }
     .khub-search-ai__panel-inner {
         padding: 0.75rem 1rem 1rem;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
     .khub-search-ai__suggestions {
         display: flex;
@@ -141,10 +149,49 @@
     .khub-search-ai__resources-anchor:target {
         scroll-margin-top: 6rem;
     }
+    .khub-search-ai-mount {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+    @media (max-width: 767.98px) {
+        .khub-search-ai__banner {
+            flex-direction: column;
+            padding: 0.75rem 0.85rem;
+        }
+        .khub-search-ai__brand {
+            width: 100%;
+        }
+        .khub-search-ai__actions {
+            width: 100%;
+            justify-content: stretch;
+        }
+        .khub-search-ai__actions .btn {
+            flex: 1 1 calc(50% - 0.25rem);
+            min-width: 0;
+            white-space: normal;
+            text-align: center;
+        }
+        .khub-search-ai__panel-inner {
+            padding: 0.65rem 0.75rem 0.85rem;
+        }
+        .khub-search-ai__suggestions {
+            gap: 0.3rem;
+        }
+        .khub-search-ai__suggestion {
+            flex: 1 1 calc(50% - 0.2rem);
+            min-width: 0;
+            text-align: center;
+            line-height: 1.35;
+        }
+    }
     @media (max-width: 575.98px) {
-        .khub-search-ai__banner { flex-direction: column; }
-        .khub-search-ai__actions { width: 100%; justify-content: stretch; }
-        .khub-search-ai__actions .btn { flex: 1 1 auto; }
+        .khub-search-ai__actions .btn {
+            flex: 1 1 100%;
+        }
+        .khub-search-ai__suggestion {
+            flex: 1 1 100%;
+        }
     }
 </style>
 

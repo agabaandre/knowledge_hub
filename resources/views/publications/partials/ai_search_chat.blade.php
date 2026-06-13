@@ -10,6 +10,10 @@
         background: linear-gradient(180deg, #f8fbff 0%, #fff 100%);
         margin-bottom: 0.75rem;
         font-size: 0.84rem;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
     .ai-search-chat__head {
         display: flex;
@@ -85,6 +89,19 @@
         font-size: 0.78rem;
         text-align: center;
         padding: 0.5rem 0;
+    }
+    @media (max-width: 767.98px) {
+        .ai-search-chat__head {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        .ai-search-chat__form {
+            flex-direction: column;
+        }
+        .ai-search-chat__messages {
+            max-height: 240px;
+        }
     }
 </style>
 

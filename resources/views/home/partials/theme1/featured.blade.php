@@ -147,17 +147,19 @@
                                     style="border-color: #ef4444; color: #ef4444; background: transparent; padding: 0.25rem 0.5rem; font-size: 0.875rem; cursor: pointer;"
                                     onclick="if(window.handlePubFavourite){event.preventDefault();event.stopPropagation();window.handlePubFavourite(this);}">
                                     <i class="fa fa-heart{{ ($row->is_favourite ?? false) ? '' : '-o' }} me-1" style="{{ ($row->is_favourite ?? false) ? 'color: #ef4444;' : 'color: inherit;' }}"></i>
-                                    <span class="js-fav-label">{{ ($row->is_favourite ?? false) ? 'Favorite' : 'Add favorite' }}</span>
+                                    <span class="js-fav-label">Favorite</span>
                                 </button>
                                 @else
-                                <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}" class="forum-action-btn me-2" style="color: #ef4444;"><i class="fa fa-heart-o me-1"></i> Add favorite</a>
+                                <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}" class="forum-action-btn me-2" style="color: #ef4444;"><i class="fa fa-heart-o me-1"></i> Favorite</a>
                                 @endauth
                                 <a href="{{ publication_url($row)}}" class="forum-action-btn">
-                                    Read More <i class="fa fa-arrow-right"></i>
+                                    Browse <i class="fa fa-arrow-right"></i>
                                 </a>
-                                <a href="{{ publication_url($row)}}" class="forum-action-btn">
-                                    <i class="fa-solid fa-microchip me-1"></i> Khub AI
-                                </a>
+                                @include('common.khub_ai_publication_button', [
+                                    'publication' => $row,
+                                    'btnClass' => 'forum-action-btn',
+                                    'btnStyle' => 'cursor: pointer; border: none; background: none; padding: 0;',
+                                ])
                                 <span class="text-muted small"><i class="fa fa-eye me-1"></i>{{ $row->visits ?? 0 }} Visits</span>
                                 @if(method_exists($row, 'comments') && $row->relationLoaded('comments'))
                                 <span class="text-muted small"><i class="fa fa-comments me-1"></i>{{ $row->comments->count() }} Comments</span>

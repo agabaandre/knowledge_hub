@@ -112,7 +112,6 @@
                 @can('manage_experts')<li class="nav-item"><a href="{{ url('admin/licenses') }}" class="nav-link">{{ __('admin_nav.licenses') }}</a></li>@endcan
                 <li class="nav-item"><a href="{{ url('admin/static-links') }}" class="nav-link">{{ __('admin_nav.static_links') }}</a></li>
                 @can('view_privacy_policy')<li class="nav-item"><a href="{{ url('admin/privacy') }}" class="nav-link">{{ __('admin_nav.privacy_policy') }}</a></li>@endcan
-                <li class="nav-item"><a href="{{ url('admin/events') }}" class="nav-link">{{ __('admin_nav.events') }}</a></li>
             </ul>
         </li>
         <li class="nav-item has-sub">

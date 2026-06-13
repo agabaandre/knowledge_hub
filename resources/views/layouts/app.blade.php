@@ -64,7 +64,7 @@
                         icon.classList.remove('fa-heart');
                         icon.classList.add('fa-heart-o');
                         icon.style.color = 'inherit';
-                        if (label) label.textContent = 'Add favorite';
+                        if (label) label.textContent = 'Favorite';
                     }
                 }
             })

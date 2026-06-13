@@ -11,7 +11,7 @@
     $visibleDocuments = $docLimit ? array_slice($allDocuments, 0, $docLimit) : $allDocuments;
     $hiddenDocuments = $docLimit && count($allDocuments) > $docLimit ? array_slice($allDocuments, $docLimit) : [];
 @endphp
-@if(!$embedded)
+@once
 <style>
     .ai-brief {
         border: 1px solid #e2e8f0;
@@ -20,6 +20,10 @@
         margin-bottom: 0.5rem !important;
         font-size: 0.84rem;
         color: #334155;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
     .ai-brief__head {
         display: flex;
@@ -34,6 +38,7 @@
         align-items: center;
         gap: 0.45rem;
         min-width: 0;
+        flex: 1 1 auto;
     }
     .ai-brief__icon {
         width: 1.5rem;
@@ -96,16 +101,24 @@
         border: 1px solid #eef2f6;
         border-radius: 0.2rem;
         overflow: hidden;
+        width: 100%;
+    }
+    .ai-brief__highlights > li {
+        width: 100%;
+        min-width: 0;
     }
     .ai-brief__highlight,
     .ai-brief__highlight-link {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 0.45rem;
-        padding: 0.38rem 0.5rem;
+        padding: 0.55rem 0.65rem;
         border-top: 1px solid #eef2f6;
         color: inherit;
         text-decoration: none;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
     .ai-brief__highlights > li:first-child .ai-brief__highlight,
     .ai-brief__highlights > li:first-child .ai-brief__highlight-link { border-top: 0; }
@@ -116,20 +129,40 @@
         color: var(--theme-color-primary, #119A48);
         font-size: 0.72rem;
         flex-shrink: 0;
+        margin-top: 0.1rem;
     }
     .ai-brief__highlight-text {
-        flex: 1;
+        flex: 1 1 auto;
         min-width: 0;
-        line-height: 1.35;
+        width: 0;
+        line-height: 1.45;
         color: #1e293b;
         font-weight: 500;
+        overflow-wrap: anywhere;
+        word-break: normal;
+    }
+    .ai-brief__highlight-text strong {
+        display: block;
+        font-weight: 700;
+        line-height: 1.35;
+    }
+    .ai-brief__highlight-desc {
+        display: block;
+        font-weight: 400;
+        color: #64748b;
+        margin-top: 0.2rem;
+        line-height: 1.45;
     }
     .ai-brief__highlight-type {
+        flex: 0 0 auto;
+        max-width: 38%;
         font-size: 0.6rem;
         font-weight: 700;
         text-transform: uppercase;
         color: #94a3b8;
-        white-space: nowrap;
+        line-height: 1.3;
+        text-align: right;
+        overflow-wrap: anywhere;
     }
     .ai-brief__scholarly {
         display: flex;
@@ -188,36 +221,43 @@
         color: #94a3b8;
         line-height: 1.3;
     }
-    @media (max-width: 575.98px) {
-        .ai-brief__head { flex-direction: column; align-items: flex-start; }
-        .ai-brief__highlight-type { display: none; }
+    .ai-brief__more-docs { margin: 0.35rem 0 0.5rem; }
+    .ai-brief--embedded {
+        border-color: #eef2f6;
+        border-radius: 0.35rem;
+        margin-bottom: 0.75rem !important;
+    }
+    .ai-brief--embedded .ai-brief__title { font-size: 0.82rem; }
+    @media (max-width: 767.98px) {
+        .ai-brief__head {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .ai-brief__meta {
+            justify-content: flex-start;
+        }
+        .ai-brief__highlight,
+        .ai-brief__highlight-link {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.35rem;
+        }
+        .ai-brief__highlight-text {
+            width: 100%;
+            flex: none;
+        }
+        .ai-brief__highlight-type {
+            display: none;
+        }
+        .ai-brief__scholarly-title {
+            max-width: 100%;
+            white-space: normal;
+        }
     }
 </style>
-@else
-<style>
-    .ai-brief { border: 1px solid #eef2f6; border-radius: 0.35rem; background: #fff; margin-bottom: 0.75rem !important; font-size: 0.84rem; color: #334155; }
-    .ai-brief__head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.5rem 0.75rem; border-bottom: 1px solid #eef2f6; }
-    .ai-brief__title-wrap { display: flex; align-items: center; gap: 0.45rem; min-width: 0; }
-    .ai-brief__icon { width: 1.5rem; height: 1.5rem; border-radius: 0.3rem; display: inline-flex; align-items: center; justify-content: center; background: var(--theme-color-primary, #119A48); color: #fff; font-size: 0.72rem; flex-shrink: 0; }
-    .ai-brief__title { margin: 0; font-size: 0.82rem; font-weight: 700; color: #0f172a; line-height: 1.2; }
-    .ai-brief__meta { display: flex; flex-wrap: wrap; gap: 0.25rem; justify-content: flex-end; }
-    .ai-brief__chip { font-size: 0.65rem; font-weight: 600; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 999px; padding: 0.12rem 0.4rem; white-space: nowrap; }
-    .ai-brief__body { padding: 0.55rem 0.75rem 0.35rem; }
-    .ai-brief__summary { margin: 0 0 0.45rem; color: #475569; line-height: 1.5; font-size: 0.84rem; }
-    .ai-brief__label { margin: 0 0 0.25rem; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #94a3b8; }
-    .ai-brief__highlights { list-style: none; margin: 0 0 0.45rem; padding: 0; border: 1px solid #eef2f6; border-radius: 0.2rem; overflow: hidden; }
-    .ai-brief__highlight-link { display: flex; align-items: center; gap: 0.45rem; padding: 0.38rem 0.5rem; border-top: 1px solid #eef2f6; color: inherit; text-decoration: none; }
-    .ai-brief__highlights > li:first-child .ai-brief__highlight-link { border-top: 0; }
-    .ai-brief__highlight-link:hover { background: #f8fafc; color: var(--theme-color-primary, #119A48); }
-    .ai-brief__highlight-icon { width: 1.25rem; text-align: center; color: var(--theme-color-primary, #119A48); font-size: 0.72rem; flex-shrink: 0; }
-    .ai-brief__highlight-text { flex: 1; min-width: 0; line-height: 1.35; color: #1e293b; font-weight: 500; }
-    .ai-brief__highlight-type { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; white-space: nowrap; }
-    .ai-brief__foot { padding: 0.35rem 0.75rem 0.45rem; border-top: 1px solid #eef2f6; font-size: 0.64rem; color: #94a3b8; line-height: 1.3; }
-    .ai-brief__more-docs { margin: 0.35rem 0 0.5rem; }
-</style>
-@endif
+@endonce
 
-<div class="ai-brief">
+<div class="ai-brief{{ $embedded ? ' ai-brief--embedded' : '' }}">
     @if(!$embedded)
     <header class="ai-brief__head">
         <div class="ai-brief__title-wrap">
@@ -253,7 +293,7 @@
                                 <span class="ai-brief__highlight-text">
                                     <strong>{{ $doc['title'] ?? '' }}</strong>
                                     @if(!empty($doc['description']))
-                                        <span style="display:block;font-weight:400;color:#64748b;margin-top:0.15rem;">{{ Str::limit($doc['description'], 220) }}</span>
+                                        <span class="ai-brief__highlight-desc">{{ Str::limit($doc['description'], 220) }}</span>
                                     @endif
                                 </span>
                                 @if(!empty($doc['meta']))
@@ -274,7 +314,7 @@
                                     <span class="ai-brief__highlight-text">
                                         <strong>{{ $doc['title'] ?? '' }}</strong>
                                         @if(!empty($doc['description']))
-                                            <span style="display:block;font-weight:400;color:#64748b;margin-top:0.15rem;">{{ Str::limit($doc['description'], 220) }}</span>
+                                            <span class="ai-brief__highlight-desc">{{ Str::limit($doc['description'], 220) }}</span>
                                         @endif
                                     </span>
                                     @if(!empty($doc['meta']))
