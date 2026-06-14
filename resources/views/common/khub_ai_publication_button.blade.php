@@ -18,7 +18,7 @@
     }
     $docTitle = \Illuminate\Support\Str::limit(strip_tags($publication->title ?? 'Document'), 200);
     $btnClass = $btnClass ?? 'btn btn-sm btn-primary';
-    $btnStyle = $btnStyle ?? 'background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500;';
+    $btnStyle = $btnStyle ?? 'background-color: var(--theme-color-primary, #119A48); border: none; color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500;';
 @endphp
 @auth
     <button type="button"

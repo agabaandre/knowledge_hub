@@ -102,6 +102,23 @@ php artisan migrate
 
 ---
 
+## Admin — Communities of practice (listing & create)
+
+**Path:** `/admin/commsofpractice`
+
+### DataTables
+
+- Community listing and participant tables return JSON when `datatable=1` is passed (no longer requires a strict AJAX-only request), fixing DataTables load errors on admin pages.
+
+### Create / edit modal
+
+- Modal title reads **Create Community** (or edit when updating).
+- **Region** and **Member state (country)** fields use chained Select2: choosing a region filters the country dropdown.
+
+**Key files:** `app/Http/Controllers/Admin/CommsOfPracticeController.php`, `resources/views/admin/commsofpractice/index.blade.php`
+
+---
+
 ## Frontend — Navigation & account
 
 ### Create menu (guests)
@@ -134,6 +151,86 @@ Separate page for threads **authored** by the user (all moderation states), with
 
 - Topic **overviews** render as HTML on the topic detail page (`overview-text-container`).
 - SEO meta description uses plain text derived from the overview when present.
+
+---
+
+## Frontend — Communities of practice (detail)
+
+**Path:** `/communities/detail/{slug}` (e.g. `/communities/detail/africa-cdc-staff`)
+
+Member-facing community hub with tabbed activity, an enhanced sidebar, and publication cards styled like forum posts.
+
+### Activity tabs (no full page reload)
+
+Four tabs, backed by **React 18 (CDN)** and `public/assets/js/community-detail-react.js`:
+
+| Tab | Content |
+|-----|---------|
+| **Wall posts** | Community wall comments, compose form, likes/replies |
+| **Publications** | Linked resources with forum-style cards |
+| **Forums** | Discussions linked to the community |
+| **Processed requests** | Content requests referred to this CoP and marked complete |
+
+**Behaviour:**
+
+- Switching tabs shows/hides server-rendered panels instantly — **no full page reload**.
+- The URL updates with `?tab=wall|publications|forums|processed` via `history.pushState` (browser back/forward supported).
+- Default tab is **Wall** when there are approved wall posts in the **last 7 days**; otherwise **Publications**.
+- Hero **Post on community wall** switches to the Wall tab and opens the compose form without navigating away.
+
+**Pagination** inside a tab (e.g. publication page 2) still uses normal links.
+
+### Publication cards (Publications tab)
+
+Forum-inspired layout per linked resource:
+
+- Cover image, title, description, theme/sub-theme metadata
+- **Associated authors** in the metadata block only (not under the poster name)
+- **Posted by** footer shows the contributor’s **account organisation** (`users.organization_name`), matching `/account` — not `author_affiliation` from the publication record
+- **Attachments** in a collapsible **Show attachments (N)** panel (preview/download when expanded)
+- Inline comments, share buttons, favourite / read more / Khub AI actions
+- View counts and engagement stats
+
+### Sidebar
+
+- **Recent forums**, **Upcoming events**, **Community members** (search + infinite scroll), **Contribution badges** — Blade-rendered cards
+- **My other communities** — React card list with initials avatar, description snippet, stat pills (pubs / forums / members), hover affordances
+
+### Visual design
+
+- Consistent **4px** corner radius on detail UI via CSS variable `--community-ui-radius: 4px`
+- Circular avatars and pill stat badges remain fully rounded
+
+### Contributor organisation helper
+
+`contributor_profile_organization()` in `app/Helpers/UtilsHelper.php` reads **only** the linked user’s `organization_name` (account profile). It no longer falls back to the latest publication’s `author_affiliation`.
+
+Used on:
+
+- Community publication card footers
+- Author profile header (`/authors/publications/{slug}`)
+
+### Key files
+
+| Area | Files |
+|------|--------|
+| Detail page | `resources/views/communities/detail.blade.php` |
+| Styles | `resources/views/communities/partials/detail_styles.blade.php` |
+| Sidebar | `resources/views/communities/partials/detail_sidebar.blade.php` |
+| Publication card | `resources/views/communities/partials/publication_card.blade.php`, `publication_attachments_strip.blade.php`, `publication_card_scripts.blade.php` |
+| Wall | `resources/views/communities/partials/community_comments.blade.php`, `community_comment_scripts.blade.php` |
+| React tabs & other communities | `public/assets/js/community-detail-react.js` |
+| Controller | `app/Http/Controllers/CommunitiesController.php` |
+| Org helper | `app/Helpers/UtilsHelper.php` → `contributor_profile_organization()` |
+
+### CDN dependencies (community detail only)
+
+Loaded on member community detail pages:
+
+- `react@18` / `react-dom@18` (unpkg UMD builds)
+- `assets/js/community-detail-react.js`
+
+Config is injected as `window.communityDetailReactConfig` from the Blade view.
 
 ---
 
@@ -184,5 +281,8 @@ Separate page for threads **authored** by the user (all moderation states), with
 | Tags AI | `app/Http/Controllers/Admin/TagsController.php`, `app/Services/ChatGPTService.php`, `app/Services/WhoFactsheetFetcher.php`, `app/Services/HealthTopicSourceFetcher.php`, `app/Support/HealthTopicSourceCatalog.php`, `app/Repositories/TagsRepository.php`, `resources/views/admin/tags/` |
 | Email config | `app/Support/EmailConfig.php`, `app/Providers/AppServiceProvider.php`, `resources/views/admin/settings/index.blade.php` |
 | CoP participants | `app/Repositories/CommsOfPracticeRepository.php`, `resources/views/admin/commsofpractice/participants.blade.php` |
+| CoP admin listing | `app/Http/Controllers/Admin/CommsOfPracticeController.php`, `resources/views/admin/commsofpractice/index.blade.php` |
+| Community detail | `app/Http/Controllers/CommunitiesController.php`, `resources/views/communities/detail.blade.php`, `public/assets/js/community-detail-react.js` |
+| Contributor org | `app/Helpers/UtilsHelper.php` → `contributor_profile_organization()` |
 | Forum sharing | `resources/views/forums/partials/share_buttons.blade.php`, `resources/views/forums/index.blade.php` |
 | Guest create nav | `resources/views/layouts/partials/create_menu.blade.php`, `app/Http/Controllers/Auth/LoginController.php` |

@@ -42,7 +42,7 @@ Central index for operators, administrators, and developers. Start with [install
 
 | Document | Audience | Description |
 |----------|----------|-------------|
-| [features/FEATURE_ENHANCEMENTS.md](features/FEATURE_ENHANCEMENTS.md) | Admin, dev | Tags AI, email config, forum sharing, CoP |
+| [features/FEATURE_ENHANCEMENTS.md](features/FEATURE_ENHANCEMENTS.md) | Admin, dev | Tags AI, email config, forum sharing, CoP admin & detail |
 | [features/KPI_INDICATORS_OWID.md](features/KPI_INDICATORS_OWID.md) | Admin, dev | Country indicators, OWID import, KPI queues |
 | [features/CONTENT_REQUEST_REFERRALS.md](features/CONTENT_REQUEST_REFERRALS.md) | Admin, dev | Content request referrals |
 | [features/FORUM_ATTACHMENTS_PDF.md](features/FORUM_ATTACHMENTS_PDF.md) | Dev / ops | Forum Office → PDF conversion |

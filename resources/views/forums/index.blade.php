@@ -1171,11 +1171,10 @@
 }
 
 .khub-forums-ai-banner {
-    background: #fff;
-    border: 1px solid #dbe3ec;
-    border-left: 4px solid var(--theme-color-primary, #119A48);
+    background: linear-gradient(135deg, rgba(17, 154, 72, 0.06) 0%, #fff 55%, #f8fafc 100%);
+    border: none;
     margin-bottom: 1.25rem;
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+    box-shadow: none;
 }
 .khub-forums-ai-banner-inner {
     display: flex;
@@ -1228,7 +1227,7 @@
     flex-wrap: wrap;
     gap: 0.45rem;
     padding: 0 1.25rem 1rem;
-    border-top: 1px solid #eef2f6;
+    border-top: none;
     padding-top: 0.75rem;
 }
 .khub-forums-ai-chip {

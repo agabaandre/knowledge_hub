@@ -5,6 +5,16 @@ Web platform for health knowledge management: publications, forums, communities 
 
 **Full documentation:** [docs/README.md](docs/README.md)
 
+### Recent features (June 2026)
+
+| Area | Highlights |
+|------|------------|
+| **Community detail** | Tabbed activity (Wall · Publications · Forums · Processed requests), React-powered tab switching without page reload, collapsible publication attachments, forum-style publication cards |
+| **Contributors** | Poster organisation from account profile (not publication metadata) on community cards and author profile pages |
+| **Admin CoP** | Communities DataTables fix, region→country linking on create/edit |
+
+Details: [docs/features/FEATURE_ENHANCEMENTS.md](docs/features/FEATURE_ENHANCEMENTS.md#frontend--communities-of-practice-detail)
+
 ---
 
 ## Quick start
@@ -74,6 +84,7 @@ Details: [docs/installation/WEB_INSTALLER.md](docs/installation/WEB_INSTALLER.md
 | Permissions script | [docs/deployment/PERMISSIONS.md](docs/deployment/PERMISSIONS.md) |
 | KPI / OWID indicators | [docs/features/KPI_INDICATORS_OWID.md](docs/features/KPI_INDICATORS_OWID.md) |
 | Forum Office → PDF | [docs/features/FORUM_ATTACHMENTS_PDF.md](docs/features/FORUM_ATTACHMENTS_PDF.md) |
+| Community detail (tabs, React, publications) | [docs/features/FEATURE_ENHANCEMENTS.md](docs/features/FEATURE_ENHANCEMENTS.md#frontend--communities-of-practice-detail) |
 
 ---
 

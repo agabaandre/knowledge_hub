@@ -60,7 +60,7 @@
                 </h5>
                 <p class="community-pub-description">
                     <a href="{{ publication_url($row) }}">
-                        {!! Str::words(strip_tags(clean_unicode(publication_description_for_list($row->description ?? ''))), 40, '...') !!}
+                        {!! Str::words(strip_tags(clean_unicode(publication_description_for_list($row->description ?? ''))), 65, '...') !!}
                     </a>
                 </p>
             </div>
