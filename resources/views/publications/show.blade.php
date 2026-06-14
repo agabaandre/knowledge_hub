@@ -579,11 +579,11 @@
                             <img src="{{ $image_link }}" class="img-fluid shadow rounded" alt="{{ $publication->title }} - Cover Image" itemprop="image" style="max-height: 250px; width: auto;" onerror="this.onerror=null; this.src='{{ $default_image }}';">
                             @endunless
                             
-                            <!-- Source, Visits, Year, Comments below image -->
+                            <!-- Source, Views, Year, Comments below image -->
                             <div class="mt-3 text-left" style="font-size: 0.9rem;">
                                 <div class="mb-2 ml-2">
                                     <span class="badge" style="background-color: #6c757d; color: #ffffff; padding: 0.35em 0.65em; font-size: 0.875em;">
-                                        <i class="fa fa-eye mr-1"></i>Visits: {{ $publication->visits }}
+                                        <i class="fa fa-eye mr-1"></i>Views: {{ format_view_count($publication->visits ?? 0) }}
                                     </span>
                                 </div>
                                 <div class="mb-2 ml-2">

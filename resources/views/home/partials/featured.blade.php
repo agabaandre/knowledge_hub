@@ -134,7 +134,7 @@
 
                                            <span class="text-muted medium d-block mt-1">
                                                @include('partials.publications.card_timestamps', ['row' => $row])
-                                               <span class=" mr-2"><i class="fa fa-eye mr-1"></i>{{ $row->visits }}
+                                               <span class=" mr-2"><i class="fa fa-eye mr-1"></i>{{ format_view_count($row->visits ?? 0) }}
                                                    Views </span>
 
                                                <span><span class="mr-1 ml-2 text-muted d-inline pop{{ $row->id }}"

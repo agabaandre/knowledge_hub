@@ -293,6 +293,29 @@ if (!function_exists('format_title_with_ai_fallback')) {
 	}
 }
 
+if (!function_exists('format_view_count')) {
+    /**
+     * Compact view count: up to 999 as-is; 1,000+ as 1.0k / 1.5m / 2.3b (one decimal).
+     */
+    function format_view_count($count): string
+    {
+        $n = max(0, (int) $count);
+
+        if ($n <= 999) {
+            return (string) $n;
+        }
+
+        if ($n < 1_000_000) {
+            return number_format($n / 1_000, 1, '.', '') . 'k';
+        }
+
+        if ($n < 1_000_000_000) {
+            return number_format($n / 1_000_000, 1, '.', '') . 'm';
+        }
+
+        return number_format($n / 1_000_000_000, 1, '.', '') . 'b';
+    }
+}
 
 if (!function_exists('publication_content_updated_at')) {
     /**

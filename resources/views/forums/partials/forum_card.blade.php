@@ -98,7 +98,7 @@
                 </div>
                 <div class="meta-item">
                     <i class="fa fa-eye"></i>
-                    <span>{{ $totalViews }} {{ $totalViews === 1 ? 'view' : 'views' }}</span>
+                    <span>{{ format_view_count($totalViews) }} {{ $totalViews === 1 ? 'view' : 'views' }}</span>
                 </div>
             </div>
 

@@ -920,7 +920,7 @@
                             @if($publication->author)
                             <span class="notranslate" translate="no"><i class="fa fa-user"></i> {{ $publication->author->name ?? 'Unknown' }}</span>
                             @endif
-                            <span><i class="fa fa-eye"></i> {{ $publication->visits ?? 0 }} {{ ($publication->visits ?? 0) == 1 ? 'view' : 'views' }}</span>
+                            <span><i class="fa fa-eye"></i> {{ format_view_count($publication->visits ?? 0) }} {{ ($publication->visits ?? 0) == 1 ? 'view' : 'views' }}</span>
                             @if(publication_content_updated_at($publication))
                             <span><i class="fa fa-calendar"></i> Updated {{ publication_content_updated_ago($publication) }}</span>
                             @endif

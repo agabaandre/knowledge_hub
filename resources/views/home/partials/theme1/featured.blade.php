@@ -160,7 +160,7 @@
                                     'btnClass' => 'forum-action-btn',
                                     'btnStyle' => 'cursor: pointer; border: none; background: none; padding: 0;',
                                 ])
-                                <span class="text-muted small"><i class="fa fa-eye me-1"></i>{{ $row->visits ?? 0 }} Visits</span>
+                                <span class="text-muted small"><i class="fa fa-eye me-1"></i>{{ format_view_count($row->visits ?? 0) }} Views</span>
                                 @if(method_exists($row, 'comments') && $row->relationLoaded('comments'))
                                 <span class="text-muted small"><i class="fa fa-comments me-1"></i>{{ $row->comments->count() }} Comments</span>
                                 @endif

@@ -30,7 +30,7 @@
                     @endif
                     <span><i class="fa fa-clock" aria-hidden="true"></i> {{ time_ago($forum->created_at) }}</span>
                     <span><i class="fa fa-comments" aria-hidden="true"></i> {{ $forum->total_comments ?? 0 }} {{ __('publications.search.comments') }}</span>
-                    <span><i class="fa fa-eye" aria-hidden="true"></i> {{ $forum->views ?? 0 }} {{ __('publications.search.views') }}</span>
+                    <span><i class="fa fa-eye" aria-hidden="true"></i> {{ format_view_count($forum->views ?? 0) }} {{ __('publications.search.views') }}</span>
                 </span>
             </a>
         </li>

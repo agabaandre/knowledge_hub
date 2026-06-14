@@ -79,7 +79,7 @@
                         @endif
                     </div>
                     <div class="initiative-meta">
-                        <span><i class="fa fa-eye"></i> {{ $visits }} Visits</span>
+                        <span><i class="fa fa-eye"></i> {{ format_view_count($visits) }} Views</span>
                         <span><i class="fa fa-comments"></i> {{ $commentsCount }} Comments</span>
                     </div>
                     <div class="initiative-actions" onclick="event.stopPropagation();">

@@ -76,6 +76,42 @@ class ForumsRepository extends SharedRepo{
         });
     }
 
+    /**
+     * Public forums index: threads from the last 14 days first (newest first), then older
+     * threads by views, joined-thread preference, and engagement.
+     */
+    protected function applyPublicForumListingOrder($query, ?int $userId = null): void
+    {
+        $cutoff = Carbon::now()->subDays(14)->toDateTimeString();
+
+        $query->orderByRaw('CASE WHEN forums.created_at >= ? THEN 0 ELSE 1 END ASC', [$cutoff]);
+        $query->orderByRaw('CASE WHEN forums.created_at >= ? THEN forums.created_at END DESC', [$cutoff]);
+
+        $joinedIds = [];
+        if ($userId) {
+            $joinedIds = ForumSubscription::query()
+                ->where('user_id', $userId)
+                ->pluck('forum_id')
+                ->map(fn ($id) => (int) $id)
+                ->filter(fn ($id) => $id > 0)
+                ->values()
+                ->all();
+        }
+
+        if ($joinedIds !== []) {
+            $placeholders = implode(',', array_fill(0, count($joinedIds), '?'));
+            $query->orderByRaw(
+                "CASE WHEN forums.created_at < ? AND forums.id IN ($placeholders) THEN 1 ELSE 0 END DESC",
+                array_merge([$cutoff], $joinedIds)
+            );
+        }
+
+        $query->orderByRaw('CASE WHEN forums.created_at < ? THEN COALESCE(forums.views, 0) END DESC', [$cutoff]);
+        $query->orderByRaw('CASE WHEN forums.created_at < ? THEN total_comments END DESC', [$cutoff]);
+        $query->orderByRaw('CASE WHEN forums.created_at < ? THEN total_likes END DESC', [$cutoff]);
+        $query->orderByDesc('forums.created_at');
+    }
+
     public function get(Request $request, $approved = 1, ?string $adminQueue = null, bool $applyAccessFilter = true){
 
         $rows_count = ($request->rows)?$request->rows:20;
@@ -112,7 +148,7 @@ class ForumsRepository extends SharedRepo{
             // All forums: pending first, then by date
             $forums->orderByRaw('CASE WHEN is_approved = 0 AND status = 0 THEN 0 ELSE 1 END')
                    ->orderBy('created_at', 'desc');
-        } else {
+        } elseif ((int) $approved !== 1 || ($adminQueue !== null && $adminQueue !== '')) {
             $forums->orderBy('created_at', 'desc');
         }
 
@@ -188,6 +224,9 @@ class ForumsRepository extends SharedRepo{
 
         if ($adminQueue !== null && $adminQueue !== '') {
             $forums->orderBy('created_at', 'desc');
+        } elseif ((int) $approved === 1) {
+            $userId = auth()->check() ? (int) auth()->id() : null;
+            $this->applyPublicForumListingOrder($forums, $userId);
         }
 
         $results = $forums->paginate($rows_count)->withQueryString();
