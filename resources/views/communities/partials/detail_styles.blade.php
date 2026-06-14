@@ -1030,10 +1030,10 @@
 
         .community-pub-intro__image {
             width: 100%;
-            max-width: 210px;
+            max-width: 250px;
             height: auto;
-            min-height: 126px;
-            max-height: 168px;
+            min-height: 136px;
+            max-height: 178px;
         }
 
         .community-pub-body {
