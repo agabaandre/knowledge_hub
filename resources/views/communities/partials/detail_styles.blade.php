@@ -10,6 +10,24 @@
         --community-ui-radius: 4px;
     }
 
+    .community-detail-page .card,
+    .community-detail-page .btn,
+    .community-detail-page .alert,
+    .community-detail-page .form-control,
+    .community-detail-page .badge:not(.community-tab-new-badge) {
+        border-radius: var(--community-ui-radius) !important;
+    }
+
+    .community-detail-page .btn-group .btn:first-child {
+        border-top-left-radius: var(--community-ui-radius) !important;
+        border-bottom-left-radius: var(--community-ui-radius) !important;
+    }
+
+    .community-detail-page .btn-group .btn:last-child {
+        border-top-right-radius: var(--community-ui-radius) !important;
+        border-bottom-right-radius: var(--community-ui-radius) !important;
+    }
+
     .theme-text {
         color: {{ $primaryColor }};
     }
@@ -150,7 +168,7 @@
     .community-forum-card {
         background: #fff;
         border: 1px solid #e2e8f0;
-        border-radius: 1rem;
+        border-radius: var(--community-ui-radius);
         overflow: hidden;
         box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
     }
@@ -165,7 +183,7 @@
         flex-shrink: 0;
         width: 4.5rem;
         height: 4.5rem;
-        border-radius: 0.75rem;
+        border-radius: var(--community-ui-radius);
         overflow: hidden;
         border: 1px solid #e2e8f0;
         display: flex;
@@ -286,7 +304,7 @@
 
     /* Publication cards — forum-inspired layout */
     .community-detail-page .community-pub-card {
-        border-radius: 1rem;
+        border-radius: var(--community-ui-radius);
         border: 1px solid #e2e8f0;
         overflow: hidden;
         box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.04);
@@ -318,7 +336,7 @@
         width: 168px;
         height: 168px;
         object-fit: contain;
-        border-radius: 0.875rem;
+        border-radius: var(--community-ui-radius);
         border: 1px solid rgba(17, 154, 72, 0.15);
         box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
         background: #fff;
@@ -478,7 +496,7 @@
         align-items: flex-start;
         gap: 1rem;
         padding: 1rem;
-        border-radius: 0.875rem;
+        border-radius: var(--community-ui-radius);
         background: linear-gradient(180deg, #fafbfc 0%, #f8fafc 100%);
         border: 1px solid #e8edf2;
     }
@@ -605,7 +623,7 @@
     }
 
     .community-pub-attachments {
-        border-radius: 0.75rem;
+        border-radius: var(--community-ui-radius);
         background: linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%);
         border: 1px solid rgba(17, 154, 72, 0.12);
         overflow: hidden;
@@ -669,7 +687,7 @@
         max-width: 280px;
         flex: 1 1 200px;
         padding: 0.45rem 0.55rem;
-        border-radius: 0.65rem;
+        border-radius: var(--community-ui-radius);
         background: #fff;
         border: 1px solid #e2e8f0;
         box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
@@ -685,7 +703,7 @@
         padding: 0;
         width: 3.25rem;
         height: 3.25rem;
-        border-radius: 0.5rem;
+        border-radius: var(--community-ui-radius);
         overflow: hidden;
         flex-shrink: 0;
         cursor: pointer;
@@ -700,7 +718,7 @@
     .community-pub-attachment-chip__icon {
         width: 2.5rem;
         height: 2.5rem;
-        border-radius: 0.5rem;
+        border-radius: var(--community-ui-radius);
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -744,7 +762,7 @@
         display: inline-flex;
         align-items: center;
         padding: 0.45rem 0.75rem;
-        border-radius: 0.65rem;
+        border-radius: var(--community-ui-radius);
         border: 1px dashed #cbd5e1;
         color: {{ $primaryColor }};
         font-size: 0.8125rem;
@@ -769,7 +787,7 @@
         padding: 0.85rem;
         border: 1px solid #e8edf2;
         background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
-        border-radius: 0.75rem;
+        border-radius: var(--community-ui-radius);
         margin-bottom: 0.5rem;
     }
 
@@ -826,14 +844,14 @@
         margin-top: 0.35rem;
         padding: 0.85rem;
         border: 1px solid #e2e8f0;
-        border-radius: 0.75rem;
+        border-radius: var(--community-ui-radius);
         background: #fff;
     }
 
     .inline-comment-form .comment-textarea {
         width: 100%;
         border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
+        border-radius: var(--community-ui-radius);
         padding: 0.65rem 0.75rem;
         resize: vertical;
         min-height: 72px;
@@ -852,7 +870,7 @@
         padding: 1rem;
         color: #64748b;
         background: #f8fafc;
-        border-radius: 0.65rem;
+        border-radius: var(--community-ui-radius);
         border: 1px dashed #e2e8f0;
         font-size: 0.875rem;
     }
@@ -1130,7 +1148,7 @@
         min-width: 0;
         background: #ffffff;
         border: 1px solid #e2e8f0;
-        border-radius: 12px;
+        border-radius: var(--community-ui-radius);
         padding: 1rem;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }

@@ -1,4 +1,7 @@
 <script>
+@php
+    $communityWallPostUrl = community_detail_url($community, true, ['tab' => 'wall', 'post' => 1]);
+@endphp
 (function () {
     function fallbackCopy(text) {
         var ta = document.createElement('textarea');
@@ -27,7 +30,7 @@
     window.openCommunityWallPost = function () {
         var wallTab = document.getElementById('wall-posts');
         if (wallTab && !wallTab.classList.contains('active')) {
-            window.location.href = @json(community_detail_url($community, true, ['tab' => 'wall', 'post' => 1]));
+            window.location.href = @json($communityWallPostUrl);
             return;
         }
         var container = document.getElementById('communityCommentFormContainer');
