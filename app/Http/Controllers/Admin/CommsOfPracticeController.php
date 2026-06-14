@@ -27,7 +27,7 @@ class CommsOfPracticeController extends Controller
 
     public function index(Request $request){
 
-        if ($request->ajax() && $request->boolean('datatable')) {
+        if ($request->boolean('datatable')) {
             return response()->json($this->commsOfPracticeRepository->adminCommunitiesDatatable($request));
         }
 
@@ -191,7 +191,7 @@ class CommsOfPracticeController extends Controller
 
     public function participants(Request $request)
     {
-        if ($request->ajax() && $request->boolean('datatable')) {
+        if ($request->boolean('datatable')) {
             if ($request->input('scope') === 'pending') {
                 return response()->json($this->commsOfPracticeRepository->adminPendingParticipantsDatatable($request));
             }

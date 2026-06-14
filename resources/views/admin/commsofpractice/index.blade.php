@@ -153,6 +153,7 @@
 <script>
 let communitiesTable = null;
 let communitiesFilterTimer = null;
+let copAllCountries = [];
 
 function collectCommunitiesFilterParams() {
     const params = {};
@@ -163,6 +164,58 @@ function collectCommunitiesFilterParams() {
 
 function reloadCommunitiesTable() {
     if (communitiesTable) communitiesTable.ajax.reload();
+}
+
+function initCopModalSelect($el) {
+    if (!$el.length || typeof $.fn.select2 === 'undefined') {
+        return;
+    }
+
+    if ($el.hasClass('select2-hidden-accessible')) {
+        $el.select2('destroy');
+    }
+
+    $el.select2({
+        width: '100%',
+        dropdownParent: $('#create-modal'),
+        minimumResultsForSearch: 0,
+        placeholder: $el.data('placeholder') || 'Select an option',
+        allowClear: $el.attr('id') === 'country_id'
+    });
+}
+
+function rebuildCopCountryOptions(selectedRegion, preserveCountryId) {
+    const countrySelect = $('#country_id');
+    if (!countrySelect.length) {
+        return;
+    }
+
+    const firstOption = countrySelect.find('option:first').clone();
+    countrySelect.empty().append(firstOption);
+
+    let list = copAllCountries;
+    if (selectedRegion && selectedRegion !== 'all' && selectedRegion !== '') {
+        const regionId = parseInt(selectedRegion, 10);
+        list = copAllCountries.filter(function (country) {
+            return country.region_id === regionId;
+        });
+    }
+
+    list.forEach(function (country) {
+        countrySelect.append(
+            $('<option></option>').attr('value', country.id).text(country.name)
+        );
+    });
+
+    if (preserveCountryId && countrySelect.find('option[value="' + preserveCountryId + '"]').length) {
+        countrySelect.val(String(preserveCountryId));
+    } else {
+        countrySelect.val('');
+    }
+
+    if (countrySelect.hasClass('select2-hidden-accessible')) {
+        countrySelect.trigger('change');
+    }
 }
 
 $(function(){
@@ -177,6 +230,10 @@ $(function(){
         order: [[1, 'asc']],
         ajax: {
             url: '{{ request()->url() }}',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
             data: function (d) {
                 d.datatable = 1;
                 return Object.assign(d, collectCommunitiesFilterParams());
@@ -208,16 +265,19 @@ $(function(){
         if ($el.length && !$el.hasClass('summernote-sm')) { $el.addClass('summernote-sm'); }
     }
     initSN();
-    $(document).on('shown.bs.modal', '#create-modal', function(){ 
-        initSN(); 
-        // Initialize Select2 for tags dropdown if not already initialized
+    $(document).on('shown.bs.modal', '#create-modal', function(){
+        initSN();
+        initCopModalSelect($('#region_id'));
+        initCopModalSelect($('#country_id'));
+        rebuildCopCountryOptions($('#region_id').val(), $('#country_id').val());
+
         var $tagsSelect = $('#tags\\[\\]');
         if ($tagsSelect.length && typeof $.fn.select2 !== 'undefined' && !$tagsSelect.hasClass('select2-hidden-accessible')) {
             $tagsSelect.select2({
                 theme: 'bootstrap4',
                 placeholder: 'Select Tags',
                 allowClear: true,
-                dropdownParent: $('#create-modal') // Ensure dropdown appears in modal
+                dropdownParent: $('#create-modal')
             });
         }
     });
@@ -255,21 +315,9 @@ function openEditCommunity(id){
                 $('#description').val(item.description || ''); 
             }
             
-            // Set region and country
-            if (item.region_id) {
-                $('#region_id').val(item.region_id).trigger('change');
-            } else {
-                $('#region_id').val('all').trigger('change');
-            }
-            
-            // Wait for country dropdown to update, then set country
-            setTimeout(function() {
-                if (item.country_id) {
-                    $('#country_id').val(item.country_id).trigger('change');
-                } else {
-                    $('#country_id').val('').trigger('change');
-                }
-            }, 300);
+            var regionVal = item.region_id ? String(item.region_id) : 'all';
+            $('#region_id').val(regionVal).trigger('change');
+            rebuildCopCountryOptions(regionVal, item.country_id || null);
             
             $('#organisation').val(item.organisation || '');
             $('#department').val(item.department || '');
@@ -295,16 +343,13 @@ function openEditCommunity(id){
 
 // Chained region/country dropdowns
 $(document).ready(function() {
-    // Get regions data with countries (from ViewComposer)
     var regionsData = @json($regions ?? []);
-    var allCountries = [];
-    
-    // Build a map of all countries with their region_id for quick lookup
+
     if (regionsData && Array.isArray(regionsData)) {
         regionsData.forEach(function(region) {
             if (region.countries && Array.isArray(region.countries)) {
                 region.countries.forEach(function(country) {
-                    allCountries.push({
+                    copAllCountries.push({
                         id: country.id,
                         name: country.name,
                         region_id: region.id
@@ -313,47 +358,9 @@ $(document).ready(function() {
             }
         });
     }
-    
-    // Handle region change - filter countries
+
     $(document).on('change', '#region_id', function() {
-        var selectedRegion = $(this).val();
-        var countrySelect = $('#country_id');
-        var currentCountryId = countrySelect.val();
-        
-        // Clear existing options except the "All Countries" option
-        countrySelect.find('option:not(:first)').remove();
-        
-        // If "all" is selected, show all countries
-        if (selectedRegion === 'all' || selectedRegion === '' || selectedRegion === null) {
-            // Add all countries
-            allCountries.forEach(function(country) {
-                countrySelect.append($('<option></option>')
-                    .attr('value', country.id)
-                    .text(country.name));
-            });
-        } else {
-            // Filter countries by selected region
-            var regionId = parseInt(selectedRegion);
-            allCountries.forEach(function(country) {
-                if (country.region_id === regionId) {
-                    countrySelect.append($('<option></option>')
-                        .attr('value', country.id)
-                        .text(country.name));
-                }
-            });
-        }
-        
-        // Reinitialize Select2 if it exists
-        if (typeof $.fn.select2 !== 'undefined' && countrySelect.data('select2')) {
-            countrySelect.trigger('change.select2');
-        } else {
-            countrySelect.trigger('change');
-        }
-        
-        // Try to restore previous selection if it's still valid
-        if (currentCountryId && countrySelect.find('option[value="' + currentCountryId + '"]').length) {
-            countrySelect.val(currentCountryId).trigger('change');
-        }
+        rebuildCopCountryOptions($(this).val(), null);
     });
 });
 </script>

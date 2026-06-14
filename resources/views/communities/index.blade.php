@@ -161,6 +161,128 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+        .community-room-card__chairs {
+            margin: 0 1rem 0.75rem;
+            padding: 0.6rem 0.7rem;
+            border: 1px solid #e8efe9;
+            border-left: 3px solid var(--crc-green);
+            border-radius: var(--crc-radius);
+            background: linear-gradient(135deg, #f0fdf4 0%, #fafafa 100%);
+        }
+        .community-room-card__chairs-label {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--crc-green);
+            margin-bottom: 0.5rem;
+        }
+        .community-room-card__chairs-label i {
+            font-size: 0.62rem;
+            opacity: 0.9;
+        }
+        .community-room-card__chair {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.55rem;
+        }
+        .community-room-card__chair + .community-room-card__chair {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed #e2e8f0;
+        }
+        .community-room-card__chair-avatar-link,
+        .community-room-card__chair-avatar-wrap {
+            flex-shrink: 0;
+            text-decoration: none;
+            color: inherit;
+        }
+        .community-room-card__chair-avatar-link:hover,
+        .community-room-card__chair-avatar-link:focus-visible {
+            outline: 2px solid var(--crc-green);
+            outline-offset: 2px;
+            border-radius: var(--crc-radius);
+        }
+        .community-room-card__chair-avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: var(--crc-radius);
+            overflow: hidden;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08);
+            background: #e4e6e8;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .community-room-card__chair-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .community-room-card__chair-initials {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #475569;
+        }
+        .community-room-card__chair-body {
+            flex: 1;
+            min-width: 0;
+        }
+        .community-room-card__chair-name-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.35rem 0.5rem;
+            margin-bottom: 0.1rem;
+        }
+        .community-room-card__chair-name,
+        .community-room-card__chair-name-link {
+            font-size: 0.8125rem;
+            font-weight: 700;
+            color: var(--crc-text);
+            line-height: 1.3;
+        }
+        .community-room-card__chair-name-link {
+            text-decoration: none;
+        }
+        .community-room-card__chair-name-link:hover {
+            color: var(--crc-green);
+            text-decoration: underline;
+        }
+        .community-room-card__chair-role {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.1rem 0.4rem;
+            border-radius: var(--crc-radius);
+            background: #ecfdf3;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            font-size: 0.625rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+        .community-room-card__chair-title {
+            display: block;
+            font-size: 0.75rem;
+            line-height: 1.35;
+            color: var(--crc-muted);
+        }
+        .community-room-card__chairs-more {
+            margin-top: 0.45rem;
+            font-size: 0.72rem;
+            color: var(--crc-muted);
+        }
         .community-room-card__members {
             margin: 0 1rem 0.75rem;
             padding: 0.55rem 0.65rem;
@@ -482,26 +604,6 @@
             margin-bottom: 0.35rem;
         }
 
-        /* Ensure filter select fields always show visible borders */
-        #filterForm .form-control {
-            border: 1px solid #ced4da !important;
-            border-radius: 0.25rem !important;
-            background-color: #fff;
-        }
-        #filterForm .select2-container--default .select2-selection--single,
-        #filterForm .select2-container--bootstrap4 .select2-selection {
-            border: 1px solid #ced4da !important;
-            border-radius: 0.25rem !important;
-            min-height: calc(1.5em + 0.75rem + 2px);
-            background-color: #fff !important;
-        }
-        #filterForm .select2-container .select2-selection__rendered {
-            line-height: calc(1.5em + 0.75rem) !important;
-        }
-        #filterForm .select2-container .select2-selection__arrow {
-            height: calc(1.5em + 0.75rem + 2px) !important;
-        }
-
         .communities-nav-react { margin-bottom: 1.5rem; }
         .communities-nav-jumps {
             display: flex;
@@ -705,11 +807,8 @@
                 ? (($communities->currentPage() - 1) * $communities->perPage()) + $communities->count()
                 : count($communities ?? []);
             $navJumps = [];
-            if (!request()->routeIs('account.my-communities')) {
-                $navJumps[] = ['id' => 'communities-filters', 'label' => 'Filters'];
-                if (Auth::check() && isset($recommendedCommunities) && $recommendedCommunities->isNotEmpty()) {
-                    $navJumps[] = ['id' => 'communities-recommended', 'label' => 'Recommended'];
-                }
+            if (Auth::check() && isset($recommendedCommunities) && $recommendedCommunities->isNotEmpty() && !request()->routeIs('account.my-communities')) {
+                $navJumps[] = ['id' => 'communities-recommended', 'label' => 'Recommended'];
             }
             $navJumps[] = ['id' => 'communities-all-heading', 'label' => 'All communities'];
         @endphp
@@ -719,93 +818,18 @@
             'totalCommunities' => $communities instanceof \Illuminate\Pagination\AbstractPaginator
                 ? $communities->total()
                 : count($communities ?? []),
-            'searchPlaceholder' => 'Search communities by name or description...',
-            'searchDebounceMs' => 220,
+            'searchPlaceholder' => 'Search by name, region, country, organisation, department… (min. 4 characters)',
+            'searchDebounceMs' => 400,
+            'searchMinChars' => 4,
+            'initialSearchTerm' => request('term', ''),
             'jumps' => $navJumps,
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 
-        <!-- Filter Section (main directory only) -->
-        @if(!request()->routeIs('account.my-communities'))
-        <div class="row mb-4" id="communities-filters">
-            <div class="col-12">
-                <div class="card" style="border-radius: 0.25rem; border: 1px solid #e2e8f0;">
-                    <div class="card-body">
-                        <form method="GET" action="{{ route('community.index') }}" id="filterForm">
-                            <div class="row">
-                                <div class="col-md-3 mb-3">
-                                    <label for="coverage" class="form-label" style="font-weight: 600; color: #2d3748;">Coverage</label>
-                                    <select class="form-control select2" id="coverage" name="coverage" style="width: 100%;">
-                                        <option value="">All Coverage Types</option>
-                                        <option value="whole_of_africa" {{ request('coverage') == 'whole_of_africa' ? 'selected' : '' }}>Whole of Africa</option>
-                                        <option value="region" {{ request('coverage') == 'region' ? 'selected' : '' }}>Region</option>
-                                        <option value="country" {{ request('coverage') == 'country' ? 'selected' : '' }}>Country</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-3 mb-3" id="region_filter_container" style="display: {{ request('coverage') == 'region' ? 'block' : 'none' }};">
-                                    <label for="region_id" class="form-label" style="font-weight: 600; color: #2d3748;">Region</label>
-                                    <select class="form-control select2" id="region_id" name="region_id" style="width: 100%;">
-                                        <option value="">All Regions</option>
-                                        @foreach($regions ?? [] as $region)
-                                            <option value="{{ $region->id }}" {{ request('region_id') == $region->id ? 'selected' : '' }}>
-                                                {{ $region->region_name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-3 mb-3" id="country_filter_container" style="display: {{ request('coverage') == 'country' || request('country_id') ? 'block' : 'none' }};">
-                                    <label for="country_id" class="form-label" style="font-weight: 600; color: #2d3748;">Country</label>
-                                    <select class="form-control select2" id="country_id" name="country_id" style="width: 100%;">
-                                        <option value="">All Countries</option>
-                                        @foreach($countries ?? [] as $country)
-                                            <option value="{{ $country->id }}" {{ request('country_id') == $country->id ? 'selected' : '' }}>
-                                                {{ $country->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-3 mb-3">
-                                    <label for="organisation" class="form-label" style="font-weight: 600; color: #2d3748;">Organisation</label>
-                                    <select class="form-control select2" id="organisation" name="organisation" style="width: 100%;">
-                                        <option value="">All Organisations</option>
-                                        @foreach($organisations ?? [] as $org)
-                                            <option value="{{ $org }}" {{ request('organisation') == $org ? 'selected' : '' }}>
-                                                {{ $org }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-3 mb-3">
-                                    <label for="department" class="form-label" style="font-weight: 600; color: #2d3748;">Department</label>
-                                    <select class="form-control select2" id="department" name="department" style="width: 100%;">
-                                        <option value="">All Departments</option>
-                                        @foreach($departments ?? [] as $dept)
-                                            <option value="{{ $dept }}" {{ request('department') == $dept ? 'selected' : '' }}>
-                                                {{ $dept }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-3 mb-3 d-flex align-items-end">
-                                    <button type="submit" class="btn theme-primary" style="width: 100%; border: none; padding: 0.775rem .95rem;">
-                                        <i class="fa fa-filter mr-1"></i> Filter
-                                    </button>
-                                    @if(request()->hasAny(['coverage', 'region_id', 'country_id', 'organisation', 'department']))
-                                        <a href="{{ route('community.index') }}" class="btn theme-secondary ml-2" style="border: none; padding: 0.775rem .95rem; white-space: nowrap;">
-                                            <i class="fa fa-times mr-1"></i> Clear
-                                        </a>
-                                    @endif
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @if(!request()->routeIs('account.my-communities') && request()->filled('term'))
+            <p class="text-muted small mb-3">
+                Showing results for <strong class="notranslate" translate="no">“{{ request('term') }}”</strong>.
+                <a href="{{ route('community.index') }}">Clear search</a>
+            </p>
         @endif
 
         @if(Auth::check() && isset($recommendedCommunities) && $recommendedCommunities->isNotEmpty() && !request()->routeIs('account.my-communities'))
@@ -931,38 +955,8 @@
         window.COMMUNITIES_INFINITE_STATUS_ERROR = 'Could not load more communities. Tap to retry.';
     </script>
     <script src="{{ asset('js/communities-index-infinite.js') }}?v={{ @filemtime(public_path('js/communities-index-infinite.js')) }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css" rel="stylesheet" />
     <script>
         $(document).ready(function() {
-            if ($('#filterForm').length) {
-            $('.select2').select2({
-                theme: 'bootstrap4',
-                width: '100%'
-            });
-
-            $('#coverage').on('change', function() {
-                var coverage = $(this).val();
-                if (coverage === 'region') {
-                    $('#region_filter_container').show();
-                    $('#country_filter_container').hide();
-                    $('#country_id').val('').trigger('change');
-                } else if (coverage === 'country') {
-                    $('#region_filter_container').hide();
-                    $('#country_filter_container').show();
-                    $('#region_id').val('').trigger('change');
-                } else {
-                    $('#region_filter_container').hide();
-                    $('#country_filter_container').hide();
-                    $('#region_id').val('').trigger('change');
-                    $('#country_id').val('').trigger('change');
-                }
-            });
-
-            $('#coverage').trigger('change');
-            }
-
             /* Participant strip: constant low-speed smooth scroll (rAF), pause on hover */
             var communityAvatarReduceMotion = window.matchMedia
                 && window.matchMedia('(prefers-reduced-motion: reduce)').matches;

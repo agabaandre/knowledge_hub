@@ -1,5 +1,5 @@
 /**
- * React navigation for /communities — search, filters, jump links (CDN, no build).
+ * React navigation for /communities — unified search + membership filters (CDN, no build).
  */
 (function () {
     if (!window.React || !window.ReactDOM || !window.CommunitiesIndexFilters) {
@@ -29,6 +29,8 @@
         var config = props.config || {};
         var urlState = CommunitiesIndexFilters.readUrlState();
         var debounceRef = useRef(null);
+        var skipSearchNavRef = useRef(true);
+        var minChars = config.searchMinChars || 4;
 
         var initialFilter = ['all', 'joined', 'open'].indexOf(urlState.filter) !== -1
             ? urlState.filter
@@ -38,7 +40,11 @@
         var activeFilter = filterState[0];
         var setActiveFilter = filterState[1];
 
-        var searchState = useState(urlState.searchTerm || '');
+        var initialTerm = config.initialSearchTerm !== undefined
+            ? config.initialSearchTerm
+            : (urlState.searchTerm || '');
+
+        var searchState = useState(initialTerm);
         var searchTerm = searchState[0];
         var setSearchTerm = searchState[1];
 
@@ -48,15 +54,14 @@
 
         var jumps = config.jumps || [];
 
-        var applyNow = useCallback(function (filter, term) {
-            var result = CommunitiesIndexFilters.apply(filter, term, true);
+        var applyMembershipFilter = useCallback(function (filter) {
+            var result = CommunitiesIndexFilters.apply(filter, '', true);
             setStats({ visible: result.visible, total: result.total });
         }, []);
 
         useEffect(function () {
             CommunitiesIndexFilters.init({
                 initialFilter: activeFilter,
-                initialSearch: searchTerm,
                 onChange: function (result) {
                     setStats({ visible: result.visible, total: result.total });
                 }
@@ -76,21 +81,50 @@
         }, []);
 
         useEffect(function () {
+            applyMembershipFilter(activeFilter);
+        }, [activeFilter, applyMembershipFilter]);
+
+        useEffect(function () {
+            if (skipSearchNavRef.current) {
+                skipSearchNavRef.current = false;
+                return;
+            }
+
             if (debounceRef.current) {
                 clearTimeout(debounceRef.current);
             }
+
             debounceRef.current = setTimeout(function () {
-                applyNow(activeFilter, searchTerm);
-            }, config.searchDebounceMs || 220);
+                var term = (searchTerm || '').trim();
+                var params = new URLSearchParams(window.location.search);
+                var currentTerm = (params.get('term') || '').trim();
+
+                if (term.length > 0 && term.length < minChars) {
+                    return;
+                }
+
+                if (term === currentTerm) {
+                    return;
+                }
+
+                var nextUrl = CommunitiesIndexFilters.buildSearchUrl(term, activeFilter);
+                if (nextUrl !== window.location.pathname + window.location.search) {
+                    window.location.assign(nextUrl);
+                }
+            }, config.searchDebounceMs || 400);
 
             return function () {
                 if (debounceRef.current) {
                     clearTimeout(debounceRef.current);
                 }
             };
-        }, [searchTerm, activeFilter, applyNow]);
+        }, [searchTerm, activeFilter, minChars]);
 
         function statusText() {
+            var trimmed = (searchTerm || '').trim();
+            if (trimmed.length > 0 && trimmed.length < minChars) {
+                return 'Type at least ' + minChars + ' characters to search across name, region, country, organisation, and department';
+            }
             if (stats.total === 0) {
                 return 'No communities on this page';
             }
@@ -98,7 +132,7 @@
                 return 'Showing all ' + stats.total + ' communit' + (stats.total === 1 ? 'y' : 'ies') + ' on this page';
             }
             if (stats.visible === 0) {
-                return 'No communities match your search or filter';
+                return 'No communities match your filter on this page';
             }
             return 'Showing ' + stats.visible + ' of ' + stats.total + ' communities on this page';
         }
@@ -135,7 +169,7 @@
                         type: 'search',
                         id: 'communities-search',
                         value: searchTerm,
-                        placeholder: config.searchPlaceholder || 'Search communities by name or description...',
+                        placeholder: config.searchPlaceholder || 'Search by name, region, country, organisation, department…',
                         'aria-label': 'Search communities',
                         autoComplete: 'off',
                         onChange: function (e) { setSearchTerm(e.target.value); }

@@ -102,6 +102,17 @@ class CommunityOfPractice extends Model
         return $this->belongsToMany(\App\Models\Tag::class, 'community_of_practice_tags', 'community_of_practice_id', 'tag_id');
     }
 
+    public function comments()
+    {
+        return $this->hasMany(CommunityComment::class, 'community_of_practice_id')
+            ->whereNull('parent_id');
+    }
+
+    public function allComments()
+    {
+        return $this->hasMany(CommunityComment::class, 'community_of_practice_id');
+    }
+
     // Accessor to get the count of publications
     public function getPublicationsCountAttribute()
     {

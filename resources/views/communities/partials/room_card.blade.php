@@ -7,6 +7,9 @@
     $descLineClamp = communities_listing_description_line_clamp($cardsPerRow);
     $lastAt = $community->listing_last_activity ?? null;
     $faces = $community->listing_contributor_faces ?? collect();
+    $chairs = $community->listing_chairs ?? collect();
+    $chairsShown = $chairs->take(3);
+    $chairsOverflow = max(0, $chairs->count() - $chairsShown->count());
     $moreMembers = (int) ($community->listing_more_members_not_shown ?? 0);
     $roleLabel = function (string $role) {
         if ($role === 'creator') {
@@ -20,6 +23,16 @@
         }
 
         return 'Member';
+    };
+    $chairRoleLabel = function (string $role) {
+        if ($role === 'creator') {
+            return 'Chair';
+        }
+        if ($role === 'admin') {
+            return 'Admin';
+        }
+
+        return 'Lead';
     };
     $canEnterCommunity = Auth::check() && ($community->user_joined ?? false);
     $coverageBits = [];
@@ -80,6 +93,61 @@
             @endif
         </div>
     </header>
+
+    @if($chairsShown->isNotEmpty())
+    <section class="community-room-card__chairs" aria-label="Community leadership" onclick="event.stopPropagation();">
+        <span class="community-room-card__chairs-label">
+            <i class="fa fa-star" aria-hidden="true"></i> Chaired by
+        </span>
+        <ul class="community-room-card__chairs-list list-unstyled mb-0">
+            @foreach($chairsShown as $chair)
+                @php
+                    $u = $chair['user'];
+                    $jobTitle = trim((string) ($chair['job_title'] ?? community_user_display_job_title($u)));
+                    $profileUrl = user_author_publications_url($u);
+                    $showImg = community_user_has_profile_image($u);
+                @endphp
+                <li class="community-room-card__chair">
+                    @if($profileUrl)
+                        <a href="{{ $profileUrl }}" class="community-room-card__chair-avatar-link" aria-label="View profile: {{ $u->name }}">
+                    @else
+                        <span class="community-room-card__chair-avatar-wrap" aria-hidden="true">
+                    @endif
+                        <span class="community-room-card__chair-avatar">
+                            @if($showImg)
+                                <img src="{{ $u->photo }}" alt="" loading="lazy" width="32" height="32" decoding="async"
+                                    onerror="this.style.display='none';var el=this.nextElementSibling;if(el){el.style.display='flex';}">
+                                <span class="community-room-card__chair-initials notranslate" style="display:none" translate="no">{{ community_user_initials($u->name) }}</span>
+                            @else
+                                <span class="community-room-card__chair-initials notranslate" translate="no">{{ community_user_initials($u->name) }}</span>
+                            @endif
+                        </span>
+                    @if($profileUrl)
+                        </a>
+                    @else
+                        </span>
+                    @endif
+                    <div class="community-room-card__chair-body min-width-0">
+                        <div class="community-room-card__chair-name-row">
+                            @if($profileUrl)
+                                <a href="{{ $profileUrl }}" class="community-room-card__chair-name-link notranslate" translate="no">{{ $u->name }}</a>
+                            @else
+                                <span class="community-room-card__chair-name notranslate" translate="no">{{ $u->name }}</span>
+                            @endif
+                            <span class="community-room-card__chair-role">{{ $chairRoleLabel($chair['role']) }}</span>
+                        </div>
+                        @if($jobTitle !== '')
+                            <span class="community-room-card__chair-title notranslate" translate="no">{{ $jobTitle }}</span>
+                        @endif
+                    </div>
+                </li>
+            @endforeach
+        </ul>
+        @if($chairsOverflow > 0)
+            <p class="community-room-card__chairs-more mb-0">+{{ $chairsOverflow }} more {{ $chairsOverflow === 1 ? 'leader' : 'leaders' }}</p>
+        @endif
+    </section>
+    @endif
 
     @if($descPlain !== '')
     <p class="community-room-card__desc community-room-card__desc--cols-{{ $cardsPerRow }}"

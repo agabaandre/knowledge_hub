@@ -3,7 +3,10 @@ namespace App\Repositories;
 
 use App\Models\CommunityOfPractice;
 use App\Models\CommunityOfPracticeMembers;
+use App\Models\CommunityComment;
+use App\Models\CommunityCommentLike;
 use App\Models\CommunityInvitation;
+use App\Models\CustomAttachment;
 use App\Models\Event;
 use App\Models\Forum;
 use App\Models\ForumCommunityOfPractice;
@@ -17,6 +20,8 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
+use App\Services\OfficeDocumentToPdfService;
 use App\Support\SeoSlugger;
 
 class CommsOfPracticeRepository{
@@ -101,17 +106,12 @@ class CommsOfPracticeRepository{
 
         $this->scopeAfricaCdcStaffVisibility($query, $request);
 
-        // Add search functionality (community name, description, or creator name/email)
+        // Unified search (name, description, coverage, region, country, organisation, department)
         if ($request->filled('term')) {
-            $term = $request->input('term');
-            $query->where(function($q) use ($term) {
-                $q->where('community_name', 'like', '%' . $term . '%')
-                  ->orWhere('description', 'like', '%' . $term . '%')
-                  ->orWhereHas('creator', function($q2) use ($term) {
-                      $q2->where('name', 'like', '%' . $term . '%')
-                         ->orWhere('email', 'like', '%' . $term . '%');
-                  });
-            });
+            $term = trim((string) $request->input('term'));
+            if (mb_strlen($term) >= 4) {
+                $this->applyListingTermSearch($query, $term);
+            }
         }
 
         // Filter by coverage type
@@ -182,6 +182,48 @@ class CommsOfPracticeRepository{
         }
         
         return $results;
+    }
+
+    /**
+     * Match communities against a single search term (coverage, geography, org, etc.).
+     */
+    protected function applyListingTermSearch($query, string $term): void
+    {
+        $like = '%'.$term.'%';
+        $termLower = mb_strtolower($term);
+
+        $query->where(function ($q) use ($like, $termLower) {
+            $q->where('community_name', 'like', $like)
+                ->orWhere('description', 'like', $like)
+                ->orWhere('organisation', 'like', $like)
+                ->orWhere('department', 'like', $like)
+                ->orWhereHas('creator', function ($q2) use ($like) {
+                    $q2->where('name', 'like', $like)
+                        ->orWhere('email', 'like', $like);
+                })
+                ->orWhereHas('region', function ($q2) use ($like) {
+                    $q2->where('region_name', 'like', $like);
+                })
+                ->orWhereHas('country', function ($q2) use ($like) {
+                    $q2->where('name', 'like', $like);
+                })
+                ->orWhereHas('membership', function ($q2) use ($like) {
+                    $q2->where('is_approved', 1)
+                        ->where('is_admin', 1)
+                        ->whereHas('user', function ($q3) use ($like) {
+                            $q3->where('name', 'like', $like)
+                                ->orWhere('job_title', 'like', $like);
+                        });
+                });
+
+            if (str_contains($termLower, 'whole of africa')
+                || ($termLower === 'whole')
+                || ($termLower === 'africa' && ! str_contains($termLower, 'cdc'))) {
+                $q->orWhere(function ($q2) {
+                    $q2->whereNull('region_id')->whereNull('country_id');
+                });
+            }
+        });
     }
 
     /**
@@ -383,6 +425,16 @@ class CommsOfPracticeRepository{
             ->selectRaw('fcp.community_of_practice_id as cid, MAX(f.created_at) as last_at')
             ->pluck('last_at', 'cid');
 
+        $adminByCid = CommunityOfPracticeMembers::query()
+            ->whereIn('community_of_practice_id', $ids)
+            ->where('is_approved', 1)
+            ->where('is_admin', 1)
+            ->orderBy('id')
+            ->get(['community_of_practice_id', 'user_id'])
+            ->groupBy('community_of_practice_id');
+
+        $this->attachListingChairs($items, $adminByCid);
+
         if ($maxFaces === 0) {
             foreach ($items as $c) {
                 if (! $c instanceof CommunityOfPractice) {
@@ -407,14 +459,6 @@ class CommsOfPracticeRepository{
             }])
             ->orderByDesc('id')
             ->get()
-            ->groupBy('community_of_practice_id');
-
-        $adminByCid = CommunityOfPracticeMembers::query()
-            ->whereIn('community_of_practice_id', $ids)
-            ->where('is_approved', 1)
-            ->where('is_admin', 1)
-            ->orderByDesc('id')
-            ->get(['community_of_practice_id', 'user_id'])
             ->groupBy('community_of_practice_id');
 
         $links = DB::table('forum_community_of_practices')
@@ -573,6 +617,75 @@ class CommsOfPracticeRepository{
 
             // Backward compatibility for any code using listing_member_preview
             $c->setAttribute('listing_member_preview', $mg->take($maxFaces));
+        }
+    }
+
+    /**
+     * Creator + community admins for listing cards ("Chaired by").
+     *
+     * @param  array<int, CommunityOfPractice>  $items
+     */
+    protected function attachListingChairs(array $items, $adminByCid): void
+    {
+        $chairUserIds = [];
+
+        foreach ($items as $c) {
+            if (! $c instanceof CommunityOfPractice) {
+                continue;
+            }
+            if (! empty($c->created_by)) {
+                $chairUserIds[(int) $c->created_by] = true;
+            }
+            $admins = $adminByCid[$c->id] ?? $adminByCid[(string) $c->id] ?? collect();
+            foreach ($admins as $adm) {
+                if ($adm->user_id) {
+                    $chairUserIds[(int) $adm->user_id] = true;
+                }
+            }
+        }
+
+        $userById = collect();
+        if ($chairUserIds !== []) {
+            $userById = User::query()
+                ->whereIn('id', array_keys($chairUserIds))
+                ->get(['id', 'name', 'photo', 'job_title', 'is_photo_external', 'author_id'])
+                ->keyBy('id');
+        }
+
+        foreach ($items as $c) {
+            if (! $c instanceof CommunityOfPractice) {
+                continue;
+            }
+
+            $chairs = collect();
+            $seen = [];
+
+            $pushChair = function (int $userId, string $role) use (&$chairs, &$seen, $userById) {
+                if ($userId <= 0 || isset($seen[$userId])) {
+                    return;
+                }
+                $user = $userById->get($userId);
+                if (! $user) {
+                    return;
+                }
+                $seen[$userId] = true;
+                $chairs->push([
+                    'user' => $user,
+                    'role' => $role,
+                    'job_title' => community_user_display_job_title($user),
+                ]);
+            };
+
+            if (! empty($c->created_by)) {
+                $pushChair((int) $c->created_by, 'creator');
+            }
+
+            $admins = $adminByCid[$c->id] ?? $adminByCid[(string) $c->id] ?? collect();
+            foreach ($admins as $adm) {
+                $pushChair((int) $adm->user_id, 'admin');
+            }
+
+            $c->setAttribute('listing_chairs', $chairs);
         }
     }
 
@@ -1903,5 +2016,211 @@ class CommsOfPracticeRepository{
             'recordsFiltered' => $recordsFiltered,
             'data' => $data,
         ];
+    }
+
+    public function assertUserIsCommunityMember(int $communityId, int $userId): bool
+    {
+        return CommunityOfPracticeMembers::where('community_of_practice_id', $communityId)
+            ->where('user_id', $userId)
+            ->where('is_approved', 1)
+            ->where('is_active', 1)
+            ->exists();
+    }
+
+    public function saveCommunityComment(Request $request)
+    {
+        $communityId = (int) $request->input('id');
+        $userId = (int) current_user()->id;
+
+        if (! $this->assertUserIsCommunityMember($communityId, $userId)) {
+            throw new \Illuminate\Auth\Access\AuthorizationException('Only active community members can comment.');
+        }
+
+        $comment = new CommunityComment();
+        $comment->created_by = $userId;
+        $comment->community_of_practice_id = $communityId;
+        $comment->comment = sanitize_rich_text_for_storage(clean_unicode($request->comment ?? ''));
+        $comment->parent_id = $request->parent_id ?? null;
+
+        $autoApprove = settings()->auto_approve_comments ?? true;
+        $comment->status = $autoApprove ? 'approved' : 'pending';
+
+        $comment->save();
+
+        if ($request->hasFile('attachments') && $comment->id) {
+            $files = $request->file('attachments');
+
+            try {
+                $this->saveCommunityCommentAttachments($files, $comment->id);
+            } catch (\Exception $e) {
+                \Log::error('Failed to save community comment attachments', [
+                    'comment_id' => $comment->id,
+                    'community_id' => $communityId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        if ($comment->id) {
+            $comment->refresh();
+            $comment->attachments;
+        }
+
+        return $comment;
+    }
+
+    public function toggleCommunityCommentLike($commentId, ?int $userId = null)
+    {
+        $userId = $userId ?? auth()->id();
+        $comment = CommunityComment::find($commentId);
+
+        if (! $comment || ! $userId) {
+            return [
+                'liked' => false,
+                'count' => 0,
+            ];
+        }
+
+        if (! $this->assertUserIsCommunityMember((int) $comment->community_of_practice_id, (int) $userId)) {
+            throw new \Illuminate\Auth\Access\AuthorizationException('Only active community members can like comments.');
+        }
+
+        $like = CommunityCommentLike::where('community_comment_id', $commentId)
+            ->where('user_id', $userId)
+            ->first();
+
+        if ($like) {
+            $like->delete();
+            $liked = false;
+        } else {
+            CommunityCommentLike::create([
+                'community_comment_id' => $commentId,
+                'user_id' => $userId,
+            ]);
+            $liked = true;
+        }
+
+        $count = CommunityCommentLike::where('community_comment_id', $commentId)->count();
+
+        return [
+            'liked' => $liked,
+            'count' => $count,
+        ];
+    }
+
+    /**
+     * @param  array|\Illuminate\Http\UploadedFile  $files
+     */
+    private function saveCommunityCommentAttachments($files, $comment_id): int
+    {
+        if (! $comment_id || ! CommunityComment::find($comment_id)) {
+            \Log::error('Invalid community comment ID provided for attachment save', [
+                'comment_id' => $comment_id,
+            ]);
+
+            return 0;
+        }
+
+        $officeService = app(OfficeDocumentToPdfService::class);
+        $allowedExtensions = array_values(array_unique(array_merge([
+            'jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf',
+            'mp4', 'm4v', 'mov', 'avi', 'webm', 'mkv', 'wmv', 'flv', '3gp', '3gpp', 'mpeg', 'mpg',
+            'mp3', 'm4a', 'wav', 'aac', 'ogg', 'oga', 'opus', 'flac', 'wma',
+        ], OfficeDocumentToPdfService::CONVERTIBLE_EXTENSIONS)));
+        $rasterPdfMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+        $octetStreamExtensions = array_values(array_unique(array_merge([
+            'mp4', 'm4v', 'mov', 'avi', 'webm', 'mkv', 'wmv', 'flv', '3gp', '3gpp', 'mpeg', 'mpg',
+            'mp3', 'm4a', 'wav', 'aac', 'ogg', 'oga', 'opus', 'flac', 'wma',
+        ], OfficeDocumentToPdfService::CONVERTIBLE_EXTENSIONS)));
+        $maxFileSize = 2 * 1024 * 1024;
+        $dangerousExtensions = ['exe', 'bat', 'cmd', 'com', 'pif', 'scr', 'vbs', 'js', 'jar', 'apk', 'dll', 'sh', 'php', 'asp', 'jsp', 'py', 'rb', 'pl', 'cgi', 'bin', 'msi', 'deb', 'rpm'];
+
+        $upfiles = (! is_array($files)) ? [$files] : $files;
+        $savedCount = 0;
+
+        foreach ($upfiles as $file) {
+            if (! $file || ! $file->isValid()) {
+                continue;
+            }
+
+            $extension = strtolower($file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION));
+            $fileSize = $file->getSize();
+
+            if (! in_array($extension, $allowedExtensions)) {
+                continue;
+            }
+
+            $mimeNorm = strtolower((string) $file->getMimeType());
+            if (in_array($mimeNorm, ['image/jpg', 'image/pjpeg'], true)) {
+                $mimeNorm = 'image/jpeg';
+            }
+
+            $isOfficeConvertible = $officeService->isConvertibleExtension($extension);
+
+            $mimeAllowed = in_array($mimeNorm, $rasterPdfMimes, true)
+                || Str::startsWith($mimeNorm, 'video/')
+                || Str::startsWith($mimeNorm, 'audio/')
+                || ($mimeNorm === 'application/octet-stream' && in_array($extension, $octetStreamExtensions, true))
+                || $isOfficeConvertible;
+
+            if (Str::startsWith($mimeNorm, 'image/') && ! in_array($mimeNorm, ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true) && ! $isOfficeConvertible) {
+                $mimeAllowed = false;
+            }
+
+            if (! $mimeAllowed || $fileSize > $maxFileSize || in_array($extension, $dangerousExtensions)) {
+                continue;
+            }
+
+            try {
+                $original_filename = str_replace(["\0", "\r"], '', (string) $file->getClientOriginalName());
+                $file_name = md5_file($file->getRealPath());
+                $file_path = 'community/'.$file_name.'.'.$extension;
+
+                $storagePath = hub_storage_path('uploads/community').'/';
+                if (! is_dir($storagePath)) {
+                    mkdir($storagePath, 0755, true);
+                }
+
+                $moved = $file->move($storagePath, $file_name.'.'.$extension);
+                if (! $moved) {
+                    throw new \Exception('Failed to move uploaded file to '.$storagePath);
+                }
+
+                $finalPath = $storagePath.$file_name.'.'.$extension;
+                if (! file_exists($finalPath)) {
+                    throw new \Exception('File does not exist after move: '.$finalPath);
+                }
+
+                if ($officeService->isConvertibleExtension($extension)) {
+                    $pdfPath = $officeService->convertToPdf($finalPath);
+                    if ($pdfPath && is_file($pdfPath) && filesize($pdfPath) > 0) {
+                        if (is_file($finalPath) && $finalPath !== $pdfPath) {
+                            @unlink($finalPath);
+                        }
+                        $extension = 'pdf';
+                        $file_path = 'community/'.$file_name.'.pdf';
+                        $original_filename = pathinfo($original_filename, PATHINFO_FILENAME).'.pdf';
+                        $finalPath = $pdfPath;
+                    }
+                }
+
+                CustomAttachment::create([
+                    'model' => 'community_comments',
+                    'path' => $file_path,
+                    'name' => $original_filename,
+                    'stored_filename' => basename($file_path),
+                    'record_id' => $comment_id,
+                ]);
+
+                $savedCount++;
+            } catch (\Exception $e) {
+                \Log::error('Error saving community comment attachment: '.$e->getMessage(), [
+                    'comment_id' => $comment_id,
+                    'filename' => $file->getClientOriginalName(),
+                ]);
+            }
+        }
+
+        return $savedCount;
     }
 }

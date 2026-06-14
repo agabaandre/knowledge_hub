@@ -1,5 +1,6 @@
 /**
  * Client-side filter engine for the communities listing page.
+ * Text search is server-side via the `term` query param (min 4 characters).
  */
 (function () {
     var state = {
@@ -8,14 +9,6 @@
         initialOrder: [],
         onChange: null
     };
-
-    function itemMatchesSearch(item, searchTerm) {
-        if (!searchTerm) {
-            return true;
-        }
-        var haystack = (item.getAttribute('data-search') || item.textContent || '').toLowerCase();
-        return haystack.indexOf(searchTerm) !== -1;
-    }
 
     function restoreDefaultOrder() {
         if (!state.listRoot || !state.initialOrder.length) {
@@ -36,9 +29,8 @@
         return visible;
     }
 
-    function applyFilter(filter, searchTerm) {
+    function applyFilter(filter) {
         filter = filter || 'all';
-        searchTerm = (searchTerm || '').trim().toLowerCase();
 
         restoreDefaultOrder();
 
@@ -51,16 +43,12 @@
                 shouldShow = item.getAttribute('data-public') === 'true';
             }
 
-            if (shouldShow && searchTerm) {
-                shouldShow = itemMatchesSearch(item, searchTerm);
-            }
-
             item.style.display = shouldShow ? '' : 'none';
         });
 
         var stats = {
             filter: filter,
-            searchTerm: searchTerm,
+            searchTerm: readUrlState().searchTerm || '',
             visible: countVisible(),
             total: state.items.length
         };
@@ -74,16 +62,18 @@
 
     function readUrlState() {
         var params = new URLSearchParams(window.location.search);
+        var legacyTerm = params.get('cq') || '';
+        var term = params.get('term') || legacyTerm;
+
         return {
             filter: params.get('cfilter') || 'all',
-            searchTerm: params.get('cq') || ''
+            searchTerm: term
         };
     }
 
-    function writeUrlState(filter, searchTerm) {
+    function writeUrlState(filter) {
         var params = new URLSearchParams(window.location.search);
         var normalizedFilter = filter && filter !== 'all' ? filter : '';
-        var normalizedSearch = (searchTerm || '').trim();
 
         if (normalizedFilter) {
             params.set('cfilter', normalizedFilter);
@@ -91,11 +81,7 @@
             params.delete('cfilter');
         }
 
-        if (normalizedSearch) {
-            params.set('cq', normalizedSearch);
-        } else {
-            params.delete('cq');
-        }
+        params.delete('cq');
 
         var qs = params.toString();
         history.replaceState({ communitiesNav: 1 }, '', window.location.pathname + (qs ? '?' + qs : ''));
@@ -119,15 +105,14 @@
 
             var urlState = readUrlState();
             var filter = opts.initialFilter || urlState.filter || 'all';
-            var searchTerm = opts.initialSearch !== undefined ? opts.initialSearch : urlState.searchTerm;
 
-            return applyFilter(filter, searchTerm);
+            return applyFilter(filter);
         },
-        apply: function (filter, searchTerm, syncUrl) {
+        apply: function (filter, _searchTerm, syncUrl) {
             if (syncUrl !== false) {
-                writeUrlState(filter, searchTerm);
+                writeUrlState(filter);
             }
-            return applyFilter(filter, searchTerm);
+            return applyFilter(filter);
         },
         readUrlState: readUrlState,
         refreshItems: function () {
@@ -140,7 +125,34 @@
             state.initialOrder = state.items.slice();
 
             var urlState = readUrlState();
-            return applyFilter(urlState.filter || 'all', urlState.searchTerm);
+            return applyFilter(urlState.filter || 'all');
+        },
+        buildSearchUrl: function (term, filter) {
+            var params = new URLSearchParams(window.location.search);
+            var normalized = (term || '').trim();
+
+            params.delete('page');
+            params.delete('cq');
+            params.delete('coverage');
+            params.delete('region_id');
+            params.delete('country_id');
+            params.delete('organisation');
+            params.delete('department');
+
+            if (normalized.length >= 4) {
+                params.set('term', normalized);
+            } else {
+                params.delete('term');
+            }
+
+            if (filter && filter !== 'all') {
+                params.set('cfilter', filter);
+            } else {
+                params.delete('cfilter');
+            }
+
+            var qs = params.toString();
+            return window.location.pathname + (qs ? '?' + qs : '');
         }
     };
 })();

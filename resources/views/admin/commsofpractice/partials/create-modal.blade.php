@@ -7,7 +7,7 @@
         #create-modal .modal-body{ max-height:70vh; overflow-y:auto; }
       </style>
       <div class="modal-header">
-        <h5 class="modal-title" id="myExtraLargeModalLabel">Create Access Group </h5>
+        <h5 class="modal-title" id="myExtraLargeModalLabel">Create Community</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

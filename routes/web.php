@@ -879,6 +879,8 @@ Route::group(["prefix" => "communities"], function () {
     Route::post('/detail/{id}/member-status', [CommunitiesController::class, 'updateMemberStatus'])->middleware('auth')->whereNumber('id')->name('community.member-status');
     Route::get('/detail/{id}/members-data', [CommunitiesController::class, 'membersData'])->middleware('auth')->whereNumber('id')->name('community.members-data');
     Route::post('/detail/{id}/events', [CommunitiesController::class, 'createCommunityEvent'])->middleware('auth')->whereNumber('id')->name('community.events.create');
+    Route::post('/detail/{id}/comment', [CommunitiesController::class, 'comment'])->middleware('auth')->whereNumber('id')->name('community.comment');
+    Route::post('/comment-like', [CommunitiesController::class, 'commentLike'])->middleware('auth')->name('community.comment-like');
     Route::get('/accept-invitation/{token}', [CommunitiesController::class, 'acceptInvitation'])->name('community.accept-invitation');
     Route::get('/detail/{key}', [CommunitiesController::class, 'detail'])->where('key', '[\w\-]+')->name('community.detail');
 });

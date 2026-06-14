@@ -8,6 +8,7 @@ use App\Repositories\AreasRepository;
 use Illuminate\Support\Facades\Auth;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\CommunityInvitation;
+use App\Models\CommunityComment;
 use App\Models\ContentRequest;
 use App\Models\Event;
 use Illuminate\Support\Str;
@@ -30,30 +31,7 @@ class CommunitiesController extends Controller
         $request = request();
         $this->prepareCommunitiesListingRequest($request);
         $communities = $this->commsOfPracticeRepository->get($request);
-        
-        // Get regions and countries for filter dropdowns
-        $regions = $this->areasRepo->regions()->load('countries');
-        $countries = \App\Models\Country::where('region_id', '>', 0)
-            ->orderBy('name', 'asc')
-            ->get();
-        
-        // Get unique organisations and departments for filter dropdowns
-        $organisations = \App\Models\CommunityOfPractice::where('is_public', 1)
-            ->whereNotNull('organisation')
-            ->distinct()
-            ->orderBy('organisation', 'asc')
-            ->pluck('organisation')
-            ->filter()
-            ->values();
-        
-        $departments = \App\Models\CommunityOfPractice::where('is_public', 1)
-            ->whereNotNull('department')
-            ->distinct()
-            ->orderBy('department', 'asc')
-            ->pluck('department')
-            ->filter()
-            ->values();
-        
+
         // SEO variables
         $pageTitle = 'Communities of Practice - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
         $pageDescription = 'Join professional communities of practice focused on public health topics across Africa. Connect with experts, share knowledge, and collaborate on health initiatives.';
@@ -103,10 +81,6 @@ class CommunitiesController extends Controller
             'communities',
             'recommendedCommunities',
             'userMembershipStats',
-            'regions',
-            'countries',
-            'organisations',
-            'departments',
             'pageTitle',
             'pageDescription',
             'pageKeywords',
@@ -369,6 +343,7 @@ class CommunitiesController extends Controller
                 'badgeTypes' => collect(),
                 'isCommunityAdmin' => false,
                 'communityEvents' => collect(),
+                'communityComments' => collect(),
                 'communityOrganizationLd' => $communityOrganizationLd,
             ]);
         }
@@ -377,9 +352,16 @@ class CommunitiesController extends Controller
         $publicationIds = \App\Models\PublicationCommunityOfPractice::where('community_of_practice_id', $id)
             ->pluck('publication_id');
         $publications = \App\Models\Publication::whereIn('id', $publicationIds)
-            ->with('author')
+            ->with(['author', 'sub_theme.theme', 'data_category', 'favourited', 'comments'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+
+        $communityComments = CommunityComment::where('community_of_practice_id', $id)
+            ->whereNull('parent_id')
+            ->where('status', 'approved')
+            ->with(['user', 'likes', 'replies.user', 'replies.likes'])
+            ->orderByDesc('created_at')
+            ->get();
 
         // Content requests referred to this community (hub workflow), including multi-community referrals
         $pendingCommunityContentRequests = ContentRequest::query()
@@ -468,6 +450,7 @@ class CommunitiesController extends Controller
             'badgeTypes',
             'isCommunityAdmin',
             'communityEvents',
+            'communityComments',
             'communityOrganizationLd'
         ) + [
             'isCommunityMember' => true,
@@ -749,5 +732,92 @@ class CommunitiesController extends Controller
         ]);
 
         return response()->json(['status' => 'success', 'message' => 'Community event created successfully.']);
+    }
+
+    public function comment(Request $request, $id)
+    {
+        if (! auth()->check()) {
+            abort(403, 'You must be logged in to comment.');
+        }
+
+        if (! $this->commsOfPracticeRepository->assertUserIsCommunityMember((int) $id, (int) auth()->id())) {
+            abort(403, 'Only active community members can comment.');
+        }
+
+        $request->merge(['id' => (int) $id]);
+
+        $request->validate([
+            'comment' => 'required|string|max:20000',
+            'parent_id' => 'nullable|integer',
+            'attachments' => 'sometimes|array',
+            'attachments.*' => 'file|max:2048|mimes:jpeg,jpg,png,gif,webp,pdf,mp4,m4v,mov,avi,webm,mkv,wmv,flv,3gp,3gpp,mpeg,mpg,mp3,m4a,wav,aac,ogg,oga,opus,flac,wma,doc,docx,xls,xlsx,ppt,pptx,odt,ods,odp,rtf',
+        ]);
+
+        $commentText = trim((string) $request->input('comment'));
+        $wordCount = count(preg_split('/\s+/u', $commentText, -1, PREG_SPLIT_NO_EMPTY));
+        if ($wordCount > 300) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Comments are limited to 300 words.',
+                ], 422);
+            }
+
+            return back()->withErrors(['comment' => 'Comments are limited to 300 words.'])->withInput();
+        }
+
+        $request->merge(['comment' => $commentText]);
+
+        try {
+            $comment = $this->commsOfPracticeRepository->saveCommunityComment($request);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            abort(403, $e->getMessage());
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            $comment->refresh();
+            $comment->load(['user', 'likes', 'replies.user', 'replies.likes']);
+            $comment->attachments;
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Comment saved successfully',
+                'comment' => $comment,
+                'comment_html' => view('communities.partials.community_comment_item', [
+                    'comment' => $comment,
+                    'community' => \App\Models\CommunityOfPractice::findOrFail((int) $id),
+                    'isCommunityMember' => true,
+                    'isReply' => ! empty($comment->parent_id),
+                ])->render(),
+            ]);
+        }
+
+        $message = ($comment) ? 'Comment saved successfully' : 'Request failed try again';
+
+        return back()->with([
+            'alert_class' => ($comment) ? 'success' : 'danger',
+            'message' => $message,
+            'alert' => $message,
+            'status' => 200,
+        ]);
+    }
+
+    public function commentLike(Request $request)
+    {
+        if (! auth()->check()) {
+            return response()->json(['error' => 'Please login to like'], 401);
+        }
+
+        $request->validate([
+            'comment_id' => 'required|integer',
+        ]);
+
+        try {
+            $result = $this->commsOfPracticeRepository->toggleCommunityCommentLike($request->comment_id);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json(['error' => $e->getMessage()], 403);
+        }
+
+        return response()->json($result);
     }
 }
