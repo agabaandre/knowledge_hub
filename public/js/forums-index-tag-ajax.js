@@ -6,27 +6,53 @@
     var fragmentUrl = config.fragmentUrl;
     var loading = false;
 
-    function getTagSlugFromPath() {
-        var match = window.location.pathname.match(/\/forums\/tag\/([^/]+)/);
+    function getTagSlugFromPathname(pathname) {
+        var path = pathname || window.location.pathname;
+        var match = path.match(/\/forums\/tag\/([^/]+)/);
         return match ? decodeURIComponent(match[1]) : null;
     }
 
-    function ensureTagInParams(params) {
-        if (params.get('tag')) {
-            return params;
-        }
-
-        var slug = getTagSlugFromPath();
+    function tagTextFromSlug(slug) {
         if (!slug) {
-            return params;
+            return null;
         }
-
-        var link = document.querySelector('a.js-forums-tag-ajax[data-tag-slug="' + slug.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"]');
+        var escaped = slug.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        var link = document.querySelector('a.js-forums-tag-ajax[data-tag-slug="' + escaped + '"]');
         if (link && link.getAttribute('data-tag-text')) {
-            params.set('tag', link.getAttribute('data-tag-text'));
+            return link.getAttribute('data-tag-text');
+        }
+        return null;
+    }
+
+    /**
+     * Build API query params for the fragment endpoint (always includes tag text when filtered).
+     */
+    function resolveTagApiParams(url) {
+        var params = new URLSearchParams(url.search);
+        var slug = getTagSlugFromPathname(url.pathname);
+
+        if (slug) {
+            params.delete('tag');
+            var text = tagTextFromSlug(slug);
+            if (text) {
+                params.set('tag', text);
+            }
         }
 
+        params.delete('page');
         return params;
+    }
+
+    /**
+     * Browser URL: smart tag paths never carry a redundant ?tag= query param.
+     */
+    function buildBrowserUrl(url, apiParams) {
+        var params = new URLSearchParams(apiParams.toString());
+        if (getTagSlugFromPathname(url.pathname)) {
+            params.delete('tag');
+        }
+        var qs = params.toString();
+        return url.pathname + (qs ? '?' + qs : '');
     }
 
     function formatStatus(loaded, total) {
@@ -34,7 +60,7 @@
     }
 
     function updateSidebarActiveState(activeTag) {
-        var slug = getTagSlugFromPath();
+        var slug = getTagSlugFromPathname();
         var normalizedActive = activeTag ? String(activeTag).toLowerCase() : '';
 
         document.querySelectorAll('a.js-forums-tag-ajax[data-tag-text]').forEach(function (link) {
@@ -43,8 +69,7 @@
             var isActive = false;
             if (normalizedActive && text === normalizedActive) {
                 isActive = true;
-            }
-            if (slug && linkSlug === slug) {
+            } else if (!normalizedActive && slug && linkSlug === slug) {
                 isActive = true;
             }
             link.classList.toggle('is-active', isActive);
@@ -107,7 +132,7 @@
         }
     }
 
-    function applyFragment(data) {
+    function applyFragment(data, browserUrl) {
         var list = document.getElementById('forums-list');
         var wrap = document.getElementById('forums-list-wrap');
         if (!list || !data) {
@@ -143,12 +168,14 @@
             window.khubAiChat.forum_ids = data.forum_ids || [];
         }
 
-        updateSidebarActiveState(data.active_tag || null);
-
-        var canon = document.querySelector('link[rel="canonical"]');
-        if (canon && data.canonical_url) {
-            canon.setAttribute('href', data.canonical_url);
+        if (browserUrl) {
+            var canon = document.querySelector('link[rel="canonical"]');
+            if (canon && data.canonical_url) {
+                canon.setAttribute('href', data.canonical_url);
+            }
         }
+
+        updateSidebarActiveState(data.active_tag || null);
     }
 
     function runForumsTagAjax(fullUrl, opts) {
@@ -166,18 +193,16 @@
             return;
         }
 
-        var params = new URLSearchParams(u.search);
-        ensureTagInParams(params);
-        params.delete('page');
-
-        var qs = params.toString();
+        var apiParams = resolveTagApiParams(u);
+        var apiQs = apiParams.toString();
+        var browserUrl = buildBrowserUrl(u, apiParams);
         var wrap = document.getElementById('forums-list-wrap');
         loading = true;
         if (wrap) {
             wrap.classList.add('is-loading');
         }
 
-        fetch(fragmentUrl + (qs ? '?' + qs : ''), {
+        fetch(fragmentUrl + (apiQs ? '?' + apiQs : ''), {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
@@ -194,13 +219,13 @@
                 if (!data.ok) {
                     throw new Error('invalid payload');
                 }
-                applyFragment(data);
                 if (push) {
-                    history.pushState({ forumsTagAjax: 1 }, '', u.pathname + (qs ? '?' + qs : ''));
+                    history.pushState({ forumsTagAjax: 1 }, '', browserUrl);
                 }
+                applyFragment(data, browserUrl);
             })
             .catch(function () {
-                window.location.assign(u.pathname + (qs ? '?' + qs : ''));
+                window.location.assign(browserUrl);
             })
             .finally(function () {
                 loading = false;
@@ -211,6 +236,13 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        var initialSlug = getTagSlugFromPathname();
+        if (initialSlug && window.location.search.indexOf('tag=') !== -1) {
+            var cleanUrl = buildBrowserUrl(window.location, resolveTagApiParams(window.location));
+            if (cleanUrl !== window.location.pathname + window.location.search) {
+                history.replaceState({ forumsTagAjax: 1 }, '', cleanUrl);
+            }
+        }
         updateSidebarActiveState(config.activeTag || null);
 
         var sidebar = document.querySelector('.forums-sidebar');
@@ -239,17 +271,15 @@
     window.runForumsTagAjax = runForumsTagAjax;
 
     window.ensureForumTagInParams = function (params) {
-        if (params.get('tag')) {
-            return params;
+        if (!params) {
+            params = new URLSearchParams(window.location.search);
         }
-        var slug = getTagSlugFromPath();
-        if (!slug) {
-            return params;
-        }
-        var link = document.querySelector('a.js-forums-tag-ajax[data-tag-slug="' + slug.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"]');
-        if (link && link.getAttribute('data-tag-text')) {
-            params.set('tag', link.getAttribute('data-tag-text'));
-        }
+        var resolved = resolveTagApiParams(new URL(window.location.href));
+        params.delete('tag');
+        params.delete('page');
+        resolved.forEach(function (value, key) {
+            params.set(key, value);
+        });
         return params;
     };
 })();

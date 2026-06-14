@@ -127,6 +127,9 @@
 
     function writeUrlState(filter, searchTerm) {
         var params = new URLSearchParams(window.location.search);
+        if (window.location.pathname.match(/\/forums\/tag\/[^/]+/)) {
+            params.delete('tag');
+        }
         var normalizedFilter = filter && filter !== 'all' ? filter : '';
         var normalizedSearch = (searchTerm || '').trim();
 
