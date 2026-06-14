@@ -86,6 +86,8 @@
         color: #475569;
         line-height: 1.65;
         font-size: 0.9375rem;
+        text-align: justify;
+        text-justify: inter-word;
         display: -webkit-box;
         -webkit-line-clamp: 9;
         -webkit-box-orient: vertical;
