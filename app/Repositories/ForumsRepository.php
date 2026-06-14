@@ -10,6 +10,7 @@ use App\Models\Faq;
 use App\Models\Forum;
 use App\Models\ForumComment;
 use App\Models\ForumCommunityOfPractice;
+use App\Models\ForumLike;
 use App\Models\ForumSubscription;
 use App\Models\ForumTag;
 use App\Models\ForumApprovalLog;
@@ -937,8 +938,8 @@ class ForumsRepository extends SharedRepo{
     }
 
     /**
-     * Author updates a forum that is not yet published: pending approval or rejected (same fields as create).
-     * Clears rejection and notifies approvers only when the post was rejected.
+     * Author updates their own forum post (pending, rejected, or previously published).
+     * Rejected and published edits are reset to pending approval and notify moderators.
      */
     public function updateUnpublishedForumByAuthor(Request $request, Forum $forum): bool
     {
@@ -948,12 +949,10 @@ class ForumsRepository extends SharedRepo{
         if ((int) $forum->created_by !== (int) current_user()->id) {
             return false;
         }
-        // Published / live — authors cannot use this path
-        if ((int) ($forum->is_approved ?? 0) === 1 && (int) ($forum->status ?? 0) === 1) {
-            return false;
-        }
 
         $wasRejected = (int) ($forum->is_rejected ?? 0) === 1;
+        $wasPublished = (int) ($forum->is_approved ?? 0) === 1 && (int) ($forum->status ?? 0) === 1;
+        $needsReapproval = $wasRejected || $wasPublished;
 
         CommunityTargeting::mergeTagAllIntoRequest($request);
         if ($request->has('community_targeting_options')) {
@@ -967,15 +966,17 @@ class ForumsRepository extends SharedRepo{
         $forum->forum_title = format_title_with_ai_fallback($request->title ?? '');
         $forum->forum_description = sanitize_rich_text_for_storage(clean_unicode($request->description ?? ''));
 
-        if ($wasRejected) {
+        if ($needsReapproval) {
             $forum->status = 0;
             $forum->is_approved = 0;
-            $forum->is_rejected = 0;
-            if (DBSchema::hasColumn('forums', 'rejected_reason')) {
-                $forum->rejected_reason = null;
-            }
-            if (DBSchema::hasColumn('forums', 'rejected_by')) {
-                $forum->rejected_by = null;
+            if ($wasRejected) {
+                $forum->is_rejected = 0;
+                if (DBSchema::hasColumn('forums', 'rejected_reason')) {
+                    $forum->rejected_reason = null;
+                }
+                if (DBSchema::hasColumn('forums', 'rejected_by')) {
+                    $forum->rejected_by = null;
+                }
             }
             if (DBSchema::hasColumn('forums', 'approved_by')) {
                 $forum->approved_by = null;
@@ -1000,6 +1001,8 @@ class ForumsRepository extends SharedRepo{
 
         if ($wasRejected) {
             $this->logForumApprovalEvent($forum->id, 'resubmitted', null, ['after_rejection' => true], (int) $forum->created_by);
+        } elseif ($wasPublished) {
+            $this->logForumApprovalEvent($forum->id, 'resubmitted', null, ['after_publication' => true], (int) $forum->created_by);
         }
 
         ForumCommunityOfPractice::where('forum_id', $forum->id)->delete();
@@ -1038,7 +1041,7 @@ class ForumsRepository extends SharedRepo{
             $this->save_attachments($files, $forum->id, 'forums');
         }
 
-        if ($wasRejected && $forum->id && (int) $forum->status === 0 && (int) $forum->is_approved === 0) {
+        if ($needsReapproval && $forum->id && (int) $forum->status === 0 && (int) $forum->is_approved === 0) {
             $forum->load('user');
             $approveUrl = url('admin/forums/moderate') . '?id=' . $forum->id;
             NotifyApprovers::dispatch(
@@ -1612,6 +1615,224 @@ class ForumsRepository extends SharedRepo{
             (string) ($forum->forum_title ?? ''),
             $forum->id ?: null
         );
+    }
+
+    public function forumEngagementScore(object $forum): int
+    {
+        $views = (int) ($forum->views ?? 0);
+        $comments = (int) ($forum->total_comments ?? count($forum->comments ?? []));
+        $likes = (int) ($forum->total_likes ?? count($forum->likes ?? []));
+
+        return $views + ($comments * 3) + ($likes * 2);
+    }
+
+    /**
+     * @param  \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|array<int, Forum>  $forums
+     */
+    public function attachForumListingEnhancements($forums): void
+    {
+        if ($forums instanceof \Illuminate\Contracts\Pagination\Paginator) {
+            $this->decorateForumListingCollection($forums->getCollection());
+
+            return;
+        }
+
+        $this->decorateForumListingCollection(collect($forums));
+    }
+
+    /**
+     * @param  Collection<int, Forum>  $forums
+     */
+    protected function decorateForumListingCollection(Collection $forums): void
+    {
+        if ($forums->isEmpty()) {
+            return;
+        }
+
+        $rankMap = $this->forumPopularityRankMap();
+
+        foreach ($forums as $forum) {
+            if (! $forum instanceof Forum) {
+                continue;
+            }
+            $score = $this->forumEngagementScore($forum);
+            $forum->setAttribute('engagement_score', $score);
+            $forum->setAttribute('popularity_rank', $rankMap[(int) $forum->id] ?? null);
+        }
+
+        $this->attachForumContributorFaces($forums);
+    }
+
+    /**
+     * @return array<int, int> forum_id => rank (1 = highest engagement)
+     */
+    protected function forumPopularityRankMap(): array
+    {
+        return Cache::remember('forums_popularity_ranks_v1', 300, function () {
+            $rows = Forum::query()
+                ->where('status', 1)
+                ->where('is_approved', 1)
+                ->where(function ($q) {
+                    $q->where('is_rejected', 0)->orWhereNull('is_rejected');
+                })
+                ->withCount([
+                    'comments as total_comments' => function ($query) {
+                        $query->whereNull('parent_id');
+                    },
+                    'likes as total_likes',
+                ])
+                ->get(['id', 'views']);
+
+            $scored = $rows->map(function ($forum) {
+                return [
+                    'id' => (int) $forum->id,
+                    'score' => $this->forumEngagementScore($forum),
+                ];
+            })->sortByDesc('score')->values();
+
+            $map = [];
+            foreach ($scored as $index => $row) {
+                $map[(int) $row['id']] = $index + 1;
+            }
+
+            return $map;
+        });
+    }
+
+    /**
+     * @return Collection<int, object{tag: string, topics_count: int}>
+     */
+    public function getSidebarTopicCategories(int $limit = 14): Collection
+    {
+        return Cache::remember('forums_sidebar_categories_v1_' . $limit, 600, function () use ($limit) {
+            return ForumTag::query()
+                ->join('forums', 'forums.id', '=', 'forum_tags.forum_id')
+                ->where('forums.status', 1)
+                ->where('forums.is_approved', 1)
+                ->where(function ($q) {
+                    $q->where('forums.is_rejected', 0)->orWhereNull('forums.is_rejected');
+                })
+                ->select('forum_tags.tag', DB::raw('COUNT(DISTINCT forum_tags.forum_id) as topics_count'))
+                ->groupBy('forum_tags.tag')
+                ->orderByDesc('topics_count')
+                ->orderBy('forum_tags.tag')
+                ->limit($limit)
+                ->get();
+        });
+    }
+
+    /**
+     * @return Collection<int, Forum>
+     */
+    public function getTopForumsByEngagement(int $limit = 5): Collection
+    {
+        return Cache::remember('forums_top_by_engagement_v1_' . $limit, 300, function () use ($limit) {
+            $forums = Forum::query()
+                ->where('status', 1)
+                ->where('is_approved', 1)
+                ->where(function ($q) {
+                    $q->where('is_rejected', 0)->orWhereNull('is_rejected');
+                })
+                ->with(['user'])
+                ->withCount([
+                    'comments as total_comments' => function ($query) {
+                        $query->whereNull('parent_id');
+                    },
+                    'likes as total_likes',
+                ])
+                ->get(['id', 'forum_title', 'slug', 'views', 'created_at', 'created_by']);
+
+            return $forums
+                ->sortByDesc(fn ($forum) => $this->forumEngagementScore($forum))
+                ->take($limit)
+                ->values()
+                ->each(function ($forum) {
+                    $forum->setAttribute('engagement_score', $this->forumEngagementScore($forum));
+                });
+        });
+    }
+
+    /**
+     * @param  Collection<int, Forum>  $forums
+     */
+    protected function attachForumContributorFaces(Collection $forums, int $maxFaces = 14): void
+    {
+        $forumIds = $forums->pluck('id')->map(fn ($id) => (int) $id)->filter(fn ($id) => $id > 0)->values()->all();
+        if ($forumIds === []) {
+            return;
+        }
+
+        $likesByForum = ForumLike::query()
+            ->whereIn('forum_id', $forumIds)
+            ->orderByDesc('id')
+            ->get(['forum_id', 'user_id'])
+            ->groupBy('forum_id');
+
+        $allUserIds = [];
+        foreach ($forums as $forum) {
+            if (! empty($forum->created_by)) {
+                $allUserIds[(int) $forum->created_by] = true;
+            }
+            foreach ($forum->comments ?? [] as $comment) {
+                $uid = (int) ($comment->created_by ?? 0);
+                if ($uid > 0) {
+                    $allUserIds[$uid] = true;
+                }
+            }
+            foreach ($likesByForum->get($forum->id, collect()) as $like) {
+                $uid = (int) ($like->user_id ?? 0);
+                if ($uid > 0) {
+                    $allUserIds[$uid] = true;
+                }
+            }
+        }
+
+        $userById = collect();
+        if ($allUserIds !== []) {
+            $userById = User::query()
+                ->whereIn('id', array_keys($allUserIds))
+                ->get(['id', 'name', 'photo', 'updated_at', 'job_title', 'is_photo_external', 'author_id'])
+                ->keyBy('id');
+        }
+
+        $onlineBefore = Carbon::now()->subMinutes(20);
+
+        foreach ($forums as $forum) {
+            $ordered = [];
+            $seen = [];
+
+            $push = function (int $uid, string $role) use (&$ordered, &$seen, $maxFaces, $userById, $onlineBefore) {
+                if ($uid <= 0 || isset($seen[$uid]) || count($ordered) >= $maxFaces) {
+                    return;
+                }
+                $user = $userById->get($uid);
+                if (! $user) {
+                    return;
+                }
+                $seen[$uid] = true;
+                $ordered[] = [
+                    'user' => $user,
+                    'role' => $role,
+                    'online' => $user->updated_at && $user->updated_at->gt($onlineBefore),
+                ];
+            };
+
+            if (! empty($forum->created_by)) {
+                $push((int) $forum->created_by, 'author');
+            }
+
+            foreach ($forum->comments ?? [] as $comment) {
+                $push((int) ($comment->created_by ?? 0), 'contributor');
+            }
+
+            foreach ($likesByForum->get($forum->id, collect()) as $like) {
+                $push((int) ($like->user_id ?? 0), 'member');
+            }
+
+            $faces = collect($ordered);
+            $forum->setAttribute('listing_contributor_faces', $faces);
+            $forum->setAttribute('listing_more_contributors_not_shown', max(0, count($seen) - $faces->count()));
+        }
     }
 
 }

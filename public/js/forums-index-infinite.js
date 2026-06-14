@@ -93,6 +93,9 @@
         if (window.ForumsIndexFilters && typeof window.ForumsIndexFilters.refreshCards === 'function') {
             window.ForumsIndexFilters.refreshCards();
         }
+        if (typeof window.initForumContributorCarousels === 'function') {
+            window.initForumContributorCarousels(list);
+        }
         mergeForumIds(data.forum_ids || []);
     }
 

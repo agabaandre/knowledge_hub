@@ -150,6 +150,304 @@
     position: relative;
 }
 
+.forum-popularity-rank {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 0.45rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    font-size: 0.8125rem;
+    font-weight: 800;
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.35);
+}
+
+.forum-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding-right: 2.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.3;
+}
+
+.forum-engagement-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    background: #ecfdf5;
+    border: 1px solid rgba(17, 154, 72, 0.2);
+    color: #166534;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.forum-card__contributors {
+    margin: 0.75rem 0 0.25rem;
+}
+
+.forums-layout-main {
+    min-width: 0;
+}
+
+.forums-sidebar {
+    position: sticky;
+    top: 5.5rem;
+    align-self: flex-start;
+}
+
+.forums-sidebar-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.forums-sidebar-card__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.35rem;
+}
+
+.forums-sidebar-card__hint {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin: 0 0 0.75rem;
+    line-height: 1.45;
+}
+
+.forums-sidebar-table-wrap {
+    overflow-x: auto;
+}
+
+.forums-sidebar-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.forums-sidebar-table thead th {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    font-weight: 700;
+    padding: 0.35rem 0.25rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.forums-sidebar-table tbody td {
+    padding: 0.45rem 0.25rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.forums-sidebar-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.forums-sidebar-table tbody tr.is-active {
+    background: #f0fdf4;
+}
+
+.forums-sidebar-table__link {
+    color: #0f172a;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.forums-sidebar-table__link:hover {
+    color: var(--theme-color-primary, #119A48);
+    text-decoration: underline;
+}
+
+.forums-sidebar-table__count {
+    color: #64748b;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.forums-sidebar-clear {
+    display: inline-block;
+    margin-top: 0.65rem;
+    color: var(--theme-color-primary, #119A48);
+}
+
+.forums-sidebar-ranked__item {
+    display: flex;
+    gap: 0.65rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.forums-sidebar-ranked__item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.forums-sidebar-ranked__num {
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 999px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 0.75rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.forums-sidebar-ranked__body {
+    min-width: 0;
+}
+
+.forums-sidebar-ranked__title {
+    display: block;
+    color: #0f172a;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-decoration: none;
+    margin-bottom: 0.15rem;
+}
+
+.forums-sidebar-ranked__title:hover {
+    color: var(--theme-color-primary, #119A48);
+}
+
+.forums-sidebar-ranked__meta {
+    display: block;
+    font-size: 0.6875rem;
+    color: #64748b;
+}
+
+.forums-sidebar-links li {
+    margin-bottom: 0.45rem;
+}
+
+.forums-sidebar-links li:last-child {
+    margin-bottom: 0;
+}
+
+.forums-sidebar-links a {
+    color: #334155;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.forums-sidebar-links a:hover {
+    color: var(--theme-color-primary, #119A48);
+}
+
+@media (max-width: 991.98px) {
+    .forums-sidebar {
+        position: static;
+        margin-top: 1.5rem;
+    }
+}
+
+/* Contributor carousel (shared with communities listing) */
+.community-room-card__avatar-carousel {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 2.5rem;
+}
+.community-room-card__avatar-nav {
+    flex-shrink: 0;
+    width: 1.65rem;
+    height: 1.65rem;
+    padding: 0;
+    border: 1px solid #e1e4e8;
+    border-radius: 50%;
+    background: #fff;
+    color: #6a737c;
+    font-size: 0.65rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.community-room-card__avatar-nav:hover {
+    color: var(--theme-color-primary, #119A48);
+    border-color: var(--theme-color-primary, #119A48);
+}
+.community-room-card__avatar-track {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+}
+.community-room-card__avatar-track::-webkit-scrollbar { display: none; }
+.community-room-card__avatar-slides {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: max-content;
+}
+.community-room-card__avatar-wrap {
+    position: relative;
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+}
+.community-room-card__avatar-wrap--linked { text-decoration: none; color: inherit; }
+.community-room-card__avatar-wrap--online::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: #22c55e;
+    border: 2px solid #fff;
+}
+.community-room-card__avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.community-room-card__avatar-initials {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #475569;
+}
+.community-room-card__more-members {
+    font-size: 0.75rem;
+    color: #64748b;
+    white-space: nowrap;
+    padding: 0 0.25rem;
+}
+
 .forum-card:hover {
     border-color: var(--theme-color-primary, #119A48);
 }
@@ -227,14 +525,6 @@
     font-size: 2rem;
     color: var(--theme-color-primary, #119A48);
     opacity: 0.85;
-}
-
-.forum-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #1e293b;
-    margin: 0 0 0.75rem 0;
-    line-height: 1.3;
 }
 
 .forum-title a {
@@ -783,7 +1073,7 @@
     <div class="container" style="max-width: 1200px;">
                 <div class="row">
             <!-- Main Content -->
-            <div class="col-lg-12 col-md-12">
+            <div class="col-lg-8 col-md-12 forums-layout-main">
                 <!-- React navigation: search, filters, section jumps -->
                 <div id="forums-nav-root"></div>
                 @php
@@ -855,111 +1145,12 @@
                 </div>
             </div>
 
-            <!-- Sidebar -->
-            {{-- <div class="col-lg-4 col-md-12">
-                @php 
-                    $primary = settings()->primary_color ?? '#119A48';
-                    $textColor = settings()->links_active_color ?? settings()->primary_text_color ?? $primary;
-                @endphp
-                <style>
-                    .sidebar-card{background:#fff;border:1px solid #e2e8f0;border-radius:0.25rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:20px}
-                    .sidebar-card-title{margin-bottom:15px;font-size:15px;font-weight:600;color:#2d3748}
-                    .sidebar-item{margin-bottom:15px;padding-bottom:15px;border-bottom:1px solid #e2e8f0}
-                    .sidebar-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
-                    .sidebar-item-title{font-size:0.9rem;font-weight:600;color:#0f172a;line-height:1.4;margin-bottom:8px}
-                    .sidebar-item-title a{color:{{ $textColor }};text-decoration:none;transition:color 0.2s}
-                    .sidebar-item-title a:hover{color:var(--theme-color-primary, {{ $primary }})}
-                    .sidebar-item-meta{font-size:0.75rem;color:#94a3b8;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-                    .sidebar-item-meta i{color:var(--theme-color-primary, {{ $primary }})}
-                    .sidebar-card .btn-outline-primary{color:var(--theme-color-primary, {{ $primary }});border-color:var(--theme-color-primary, {{ $primary }});width:100%}
-                    .sidebar-card .btn-outline-primary:hover{background:var(--theme-color-primary, {{ $primary }});color:#fff}
-                </style>
-
-                <!-- Related Forums -->
-                @if(isset($relatedForums) && $relatedForums->count() > 0)
-                <div class="sidebar-card">
-                    <h5 class="sidebar-card-title">
-                        <i class="fa fa-comments me-2" style="color: {{ $primary }};"></i>Related Discussions
-                    </h5>
-                    @foreach($relatedForums as $forum)
-                    <div class="sidebar-item">
-                        <div class="sidebar-item-title">
-                            <a href="{{ forum_thread_url($forum) }}">
-                                {{ Str::limit(strip_tags($forum->forum_title), 80) }}
-                            </a>
-                        </div>
-                        <div class="sidebar-item-meta">
-                            @if($forum->user)
-                            <span class="notranslate" translate="no"><i class="fa fa-user"></i> {{ $forum->user->name ?? 'Anonymous' }}</span>
-                            @endif
-                            <span><i class="fa fa-comments"></i> {{ $forum->total_comments ?? 0 }} {{ ($forum->total_comments ?? 0) == 1 ? 'comment' : 'comments' }}</span>
-                            @if($forum->created_at)
-                            <span><i class="fa fa-clock"></i> {{ $forum->created_at->diffForHumans() }}</span>
-                            @endif
-                        </div>
-                    </div>
-                    @endforeach
-                    <a href="{{ url('forums') }}" class="btn btn-sm btn-outline-primary mt-2">View All Forums</a>
-                </div>
-                @endif
-
-                <!-- Related Publications -->
-                @if(isset($relatedPublications) && $relatedPublications->count() > 0)
-                <div class="sidebar-card">
-                    <h5 class="sidebar-card-title">
-                        <i class="fa fa-file-text me-2" style="color: {{ $primary }};"></i>Related Publications
-                    </h5>
-                    @foreach($relatedPublications as $publication)
-                    <div class="sidebar-item">
-                        <div class="sidebar-item-title">
-                            <a href="{{ publication_url($publication)}}">
-                                {{ Str::limit(strip_tags($publication->title), 80) }}
-                            </a>
-                        </div>
-                        <div class="sidebar-item-meta">
-                            @if($publication->author)
-                            <span class="notranslate" translate="no"><i class="fa fa-user"></i> {{ $publication->author->name ?? 'Unknown' }}</span>
-                            @endif
-                            <span><i class="fa fa-eye"></i> {{ format_view_count($publication->visits ?? 0) }} {{ ($publication->visits ?? 0) == 1 ? 'view' : 'views' }}</span>
-                            @if(publication_content_updated_at($publication))
-                            <span><i class="fa fa-calendar"></i> Updated {{ publication_content_updated_ago($publication) }}</span>
-                            @endif
-                            @if(publication_last_visited_at($publication))
-                            <span><i class="fa fa-history"></i> Last visit {{ time_ago(publication_last_visited_at($publication)) }}</span>
-                            @endif
-                        </div>
-                    </div>
-                    @endforeach
-                    <a href="{{ url('records') }}" class="btn btn-sm btn-outline-primary mt-2">View All Publications</a>
+            <div class="col-lg-4 col-md-12">
+                @include('forums.partials.sidebar', [
+                    'forumSidebarCategories' => $forumSidebarCategories ?? collect(),
+                    'forumTopByEngagement' => $forumTopByEngagement ?? collect(),
+                ])
             </div>
-                @endif
-
-                <!-- Related Communities -->
-                @if(isset($relatedCommunities) && $relatedCommunities->count() > 0)
-                <div class="sidebar-card">
-                    <h5 class="sidebar-card-title">
-                        <i class="fa fa-users me-2" style="color: {{ $primary }};"></i>Related Communities
-                    </h5>
-                    @foreach($relatedCommunities as $community)
-                    <div class="sidebar-item">
-                        <div class="sidebar-item-title">
-                            <a href="{{ community_detail_url($community) }}">
-                                {{ Str::limit(strip_tags($community->community_name), 80) }}
-                            </a>
-                        </div>
-                        <div class="sidebar-item-meta">
-                            <span><i class="fa fa-users"></i> {{ $community->members_count ?? 0 }} {{ ($community->members_count ?? 0) == 1 ? 'member' : 'members' }}</span>
-                            <span><i class="fa fa-comments"></i> {{ $community->forums_count ?? 0 }} {{ ($community->forums_count ?? 0) == 1 ? 'forum' : 'forums' }}</span>
-                            @if($community->created_at)
-                            <span><i class="fa fa-clock"></i> {{ $community->created_at->diffForHumans() }}</span>
-                            @endif
-                        </div>
-                    </div>
-                    @endforeach
-                    <a href="{{ route('community.index') }}" class="btn btn-sm btn-outline-primary mt-2">View All Communities</a>
-                </div>
-                @endif
-            </div> --}}
         </div>
     </div>
 </div>
@@ -1692,6 +1883,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.FORUMS_INFINITE_STATUS_ERROR = 'Could not load more discussions. Tap to retry.';
 </script>
 <script src="{{ asset('js/forums-index-infinite.js') }}?v={{ @filemtime(public_path('js/forums-index-infinite.js')) }}"></script>
+<script src="{{ asset('js/forums-index-contributors.js') }}?v={{ @filemtime(public_path('js/forums-index-contributors.js')) }}"></script>
 
 @auth
 @include('common.pdf-chat-modal')

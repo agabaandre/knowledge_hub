@@ -1,5 +1,6 @@
 @php
     $hide_search = true;
+    $isLive = (int) ($forum->is_approved ?? 0) === 1 && (int) ($forum->status ?? 0) === 1;
 @endphp
 
 @extends('layouts.app')
@@ -16,7 +17,9 @@
                         <i class="fa fa-edit me-2"></i>Edit discussion
                     </h1>
                     <p style="margin: 0; color: rgba(255, 255, 255, 0.95); font-size: 1rem;">
-                        @if((int)($forum->is_rejected ?? 0) === 1)
+                        @if($isLive)
+                            Saving changes will take this post offline until a moderator approves it again.
+                        @elseif((int)($forum->is_rejected ?? 0) === 1)
                             Update your post and resubmit it for approval.
                         @else
                             Update your post while it is awaiting moderator approval.
@@ -35,6 +38,13 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-body text-left" style="padding: 2rem;">
+                    @if($isLive)
+                        <div class="alert alert-warning">
+                            <strong>This discussion is currently published.</strong>
+                            <div class="mt-2 mb-0">If you save changes, it will be hidden from the public forums list until a moderator reviews and approves it again.</div>
+                        </div>
+                    @endif
+
                     @if(!empty($forum->rejected_reason))
                         <div class="alert alert-danger">
                             <strong>This post was not approved.</strong>
@@ -115,7 +125,9 @@
                         <div class="form-group mt-4" style="display: flex; gap: 1rem; justify-content: flex-end;">
                             <a href="{{ route('account.my-discussions') }}" class="btn btn-secondary" type="button">Cancel</a>
                             <button class="btn btn-primary theme-bg text-white" type="submit">
-                                @if((int)($forum->is_rejected ?? 0) === 1)
+                                @if($isLive)
+                                    <i class="fa fa-paper-plane me-2"></i>Save & submit for approval
+                                @elseif((int)($forum->is_rejected ?? 0) === 1)
                                     <i class="fa fa-paper-plane me-2"></i>Resubmit for approval
                                 @else
                                     <i class="fa fa-save me-2"></i>Save changes

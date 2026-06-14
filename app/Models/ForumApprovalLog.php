@@ -29,7 +29,9 @@ class ForumApprovalLog extends Model
             'submitted' => 'Submitted for review',
             'approved' => 'Approved',
             'rejected' => 'Rejected',
-            'resubmitted' => 'Resubmitted after rejection',
+            'resubmitted' => ! empty($this->metadata['after_publication'])
+                ? 'Resubmitted after edit (was published)'
+                : 'Resubmitted after rejection',
             'auto_approved' => 'Auto-approved',
             'legacy_approved' => 'Approved (moderator not recorded)',
             default => ucfirst(str_replace('_', ' ', (string) $this->action)),

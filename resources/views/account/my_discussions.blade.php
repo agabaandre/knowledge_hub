@@ -62,11 +62,9 @@
 								<td>{{ $thread->created_at ? \Carbon\Carbon::parse($thread->created_at)->format('M j, Y g:i A') : '—' }}</td>
 								<td>
 									<a href="{{ forum_thread_url($thread) }}" class="btn btn-sm btn-outline-primary">View</a>
-									@if(! $isLive)
-										<a href="{{ route('account.my-discussions.edit', $thread) }}" class="btn btn-sm btn-primary">
-											{{ $isRejected ? 'Edit & resubmit' : 'Edit' }}
-										</a>
-									@endif
+									<a href="{{ route('account.my-discussions.edit', $thread) }}" class="btn btn-sm btn-primary">
+										{{ $isRejected ? 'Edit & resubmit' : 'Edit' }}
+									</a>
 								</td>
 							</tr>
 						@empty

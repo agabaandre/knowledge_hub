@@ -2,7 +2,14 @@
      data-forum-id="{{ $forum->id }}"
      data-joined="{{ in_array($forum->id, $my_forums) ? 'true' : 'false' }}"
      data-comments="{{ $forum->total_comments ?? count($forum->comments) }}"
+     data-views="{{ (int) ($forum->views ?? 0) }}"
+     data-engagement="{{ (int) ($forum->engagement_score ?? 0) }}"
      data-date="{{ $forum->created_at }}">
+    @if(!empty($forum->popularity_rank) && (int) $forum->popularity_rank <= 20)
+        <span class="forum-popularity-rank" title="Popularity rank by total engagements (views, comments, likes)">
+            #{{ (int) $forum->popularity_rank }}
+        </span>
+    @endif
     <div class="forum-header">
         @if($forum->forum_image)
         <img src="{{ $forum->forum_image }}" alt="{{ $forum->forum_title }} - Forum Discussion" class="forum-image" loading="lazy">
@@ -31,6 +38,12 @@
             @endphp
             <h2 class="forum-title" itemprop="headline">
                 <a href="{{ forum_thread_url($forum)}}">{!! $forum->forum_title !!}</a>
+                @if(!empty($forum->engagement_score))
+                    <span class="forum-engagement-pill" title="Total engagements (views, comments, and likes)">
+                        <i class="fa fa-chart-line" aria-hidden="true"></i>
+                        {{ number_format((int) $forum->engagement_score) }}
+                    </span>
+                @endif
             </h2>
             <p class="forum-description">
                 @php
@@ -47,6 +60,8 @@
                 @endforeach
             </div>
             @endif
+
+            @include('forums.partials.contributor_carousel', ['forum' => $forum])
 
             @php
                 $totalComments = $forum->total_comments ?? count($forum->comments);

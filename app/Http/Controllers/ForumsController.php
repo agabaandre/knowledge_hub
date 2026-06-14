@@ -35,6 +35,9 @@ class ForumsController extends Controller
         }
 
         $data['forums']    = $this->forumsRepo->get($request, 1, null, false);
+        $this->forumsRepo->attachForumListingEnhancements($data['forums']);
+        $data['forumSidebarCategories'] = $this->forumsRepo->getSidebarTopicCategories();
+        $data['forumTopByEngagement'] = $this->forumsRepo->getTopForumsByEngagement();
         $data['my_forums'] = $this->forumsRepo->getJoinedForums($request);
         $data['search']    = (object) $request->all();
         $data['forumsInfiniteScroll'] = $this->forumsInfiniteScrollEnabled();
@@ -152,6 +155,7 @@ class ForumsController extends Controller
 
         $request->merge(['rows' => self::FORUMS_INFINITE_ROWS]);
         $forums = $this->forumsRepo->get($request, 1, null, false);
+        $this->forumsRepo->attachForumListingEnhancements($forums);
         $myForums = $this->forumsRepo->getJoinedForums($request);
 
         $page = (int) $forums->currentPage();
@@ -306,9 +310,6 @@ class ForumsController extends Controller
         if ((int) $forum->created_by !== (int) auth()->id()) {
             abort(403);
         }
-        if ((int) ($forum->is_approved ?? 0) === 1 && (int) ($forum->status ?? 0) === 1) {
-            abort(403, 'Published posts cannot be edited here.');
-        }
 
         $forum->load(['tags']);
         $selectedCommunityIds = ForumCommunityOfPractice::where('forum_id', $forum->id)
@@ -348,17 +349,20 @@ class ForumsController extends Controller
         ] : []));
 
         $wasRejected = (int) ($forum->is_rejected ?? 0) === 1;
+        $wasPublished = (int) ($forum->is_approved ?? 0) === 1 && (int) ($forum->status ?? 0) === 1;
 
         $ok = $this->forumsRepo->updateUnpublishedForumByAuthor($request, $forum);
         if (! $ok) {
             return back()
-                ->withErrors(['form' => 'Could not update this post. You may not be the author, or it may already be published.'])
+                ->withErrors(['form' => 'Could not update this post. You may not be the author.'])
                 ->withInput();
         }
 
-        $message = $wasRejected
-            ? 'Your discussion was resubmitted for approval.'
-            : 'Your changes were saved. Your post is still awaiting approval.';
+        $message = $wasPublished
+            ? 'Your changes were saved. The post is pending approval and is no longer visible publicly until a moderator approves it.'
+            : ($wasRejected
+                ? 'Your discussion was resubmitted for approval.'
+                : 'Your changes were saved. Your post is still awaiting approval.');
 
         return redirect()
             ->route('account.my-discussions')
