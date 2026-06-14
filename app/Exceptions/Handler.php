@@ -48,7 +48,11 @@ class Handler extends ExceptionHandler
     {
         if ($e instanceof HttpException && in_array($e->getStatusCode(), [403, 404], true)) {
             $status = $e->getStatusCode();
-            $suffix = ($request->is('admin*') || $request->is('permissions*')) ? '_admin' : '';
+            $useAdminShell = ($request->is('admin*') || $request->is('permissions*'))
+                && auth()->check()
+                && can_access_admin();
+
+            $suffix = $useAdminShell ? '_admin' : '';
             $view = "errors.{$status}{$suffix}";
 
             if (view()->exists($view)) {
