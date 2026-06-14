@@ -129,22 +129,53 @@
                     </div>
 
                     <div class="account-profile-field">
-                        <label class="form-label" for="email">Email</label>
-                        <input type="email" class="form-control" id="email" placeholder="Email"
-                            value="{{ $user->email }}" name="email" required
-                            {{ $user->is_social_login ? 'readonly' : '' }}>
-                        @error('email')
+                        <label class="form-label">Country *</label>
+                        @include('partials.countries.dropdown', [
+                            'field' => 'country_id',
+                            'selected' => old('country_id', $user->country_id),
+                        ])
+                        <small class="form-text text-muted">Please keep your country up to date for better recommendations and community matching.</small>
+                        @error('country_id')
                             <div class="text-danger small mt-1"><strong>{{ $message }}</strong></div>
                         @enderror
                     </div>
 
+                    @if(\Illuminate\Support\Facades\Schema::hasColumn('users', 'gender'))
                     <div class="account-profile-field">
-                        <label class="form-label" for="phone_number">Phone number</label>
-                        <input type="tel" class="form-control" id="phone_number" placeholder="Phone number"
-                            name="phone_number" value="{{ $user->phone_number }}" inputmode="tel" autocomplete="tel">
-                        @error('phone_number')
+                        <label class="form-label" for="gender">Gender</label>
+                        <select name="gender" id="gender" class="form-control">
+                            <option value="" @selected(old('gender', $user->gender ?? '') === '' || old('gender', $user->gender ?? '') === null)>Prefer not to say</option>
+                            <option value="male" @selected(old('gender', $user->gender ?? '') === 'male')>Male</option>
+                            <option value="female" @selected(old('gender', $user->gender ?? '') === 'female')>Female</option>
+                        </select>
+                        @error('gender')
                             <div class="text-danger small mt-1"><strong>{{ $message }}</strong></div>
                         @enderror
+                    </div>
+                    @endif
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="account-profile-field">
+                                <label class="form-label" for="email">Email</label>
+                                <input type="email" class="form-control" id="email" placeholder="Email"
+                                    value="{{ $user->email }}" name="email" required
+                                    {{ $user->is_social_login ? 'readonly' : '' }}>
+                                @error('email')
+                                    <div class="text-danger small mt-1"><strong>{{ $message }}</strong></div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="account-profile-field">
+                                <label class="form-label" for="phone_number">Phone number</label>
+                                <input type="tel" class="form-control" id="phone_number" placeholder="Phone number"
+                                    name="phone_number" value="{{ $user->phone_number }}" inputmode="tel" autocomplete="tel">
+                                @error('phone_number')
+                                    <div class="text-danger small mt-1"><strong>{{ $message }}</strong></div>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
 
                     @php
@@ -162,7 +193,7 @@
                             'selected' => old('job', $user->job_title),
                             'valueField' => 'name',
                         ])
-                        <div class="form-check mt-2">
+                        <div class="account-profile-check mt-2">
                             <input class="form-check-input" type="checkbox" id="job_missing_account"
                                 name="job_missing" value="1" {{ $showCustomJobField ? 'checked' : '' }}>
                             <label class="form-check-label" for="job_missing_account">
@@ -241,10 +272,10 @@
                     </div>
                     @endcan
 
-                    <h4 class="account-profile-section-title">Location &amp; updates</h4>
+                    <h4 class="account-profile-section-title">Updates</h4>
 
-                    <div class="account-profile-field">
-                        <div class="form-check">
+                    <div class="account-profile-field mb-0">
+                        <div class="account-profile-check">
                             <input type="checkbox" class="form-check-input" name="is_subscribed" id="is_subscribed"
                                 value="1" {{ $user->is_subscribed ? 'checked' : '' }}>
                             <label class="form-check-label" for="is_subscribed">
@@ -252,18 +283,6 @@
                             </label>
                         </div>
                         @error('is_subscribed')
-                            <div class="text-danger small mt-1"><strong>{{ $message }}</strong></div>
-                        @enderror
-                    </div>
-
-                    <div class="account-profile-field mb-0">
-                        <label class="form-label">Country *</label>
-                        @include('partials.countries.dropdown', [
-                            'field' => 'country_id',
-                            'selected' => old('country_id', $user->country_id),
-                        ])
-                        <small class="form-text text-muted">Please keep your country up to date for better recommendations and community matching.</small>
-                        @error('country_id')
                             <div class="text-danger small mt-1"><strong>{{ $message }}</strong></div>
                         @enderror
                     </div>

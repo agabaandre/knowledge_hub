@@ -1341,6 +1341,17 @@
                                     <small class="text-muted">Between 1 and 24. Default 8. Applies to the public communities listing and “My communities” cards.</small>
                                 </div>
                                 @endif
+                                @if(Schema::hasColumn('setting', 'communities_listing_cards_per_row'))
+                                <div class="form-group mt-2 mb-0">
+                                    <label for="communities_listing_cards_per_row">Community cards per row (desktop)</label>
+                                    <select class="form-control" id="communities_listing_cards_per_row" name="communities_listing_cards_per_row">
+                                        @foreach([1 => '1 per row — widest cards, longest descriptions', 2 => '2 per row (default)', 3 => '3 per row — compact cards, shortest descriptions'] as $val => $label)
+                                            <option value="{{ $val }}" @selected((int) ($settings->communities_listing_cards_per_row ?? 2) === $val)>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                    <small class="text-muted">Controls the public communities directory and “My communities” grid. Wider layouts show more description text.</small>
+                                </div>
+                                @endif
                                 @if(Schema::hasColumn('setting', 'show_publication_card_file_type_badge'))
                                 <div class="form-check mt-2">
                                     <input type="hidden" name="show_publication_card_file_type_badge" value="0">

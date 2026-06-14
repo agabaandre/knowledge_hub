@@ -6,12 +6,16 @@
 <style>
     .account-profile-page {
         --ap-green: {{ settings()->au_corporate_green ?? '#119A48' }};
+        --account-ui-radius: 4px;
         background: #f4f5f7;
         padding: 2rem 0;
     }
+    .account-profile-page .card {
+        border-radius: var(--account-ui-radius) !important;
+    }
     .account-profile-shell {
         border: none;
-        border-radius: 16px;
+        border-radius: var(--account-ui-radius);
         box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
         overflow: hidden;
         margin-bottom: 1.25rem;
@@ -45,7 +49,7 @@
         padding: 1.25rem;
         margin-bottom: 1.5rem;
         border: 1px solid #e2e8f0;
-        border-radius: 14px;
+        border-radius: var(--account-ui-radius);
         background: linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%);
     }
     .account-profile-photo__preview {
@@ -65,7 +69,7 @@
         display: block;
     }
     .account-profile-photo__actions .btn {
-        border-radius: 999px;
+        border-radius: var(--account-ui-radius);
         font-weight: 600;
     }
     .account-profile-section-title {
@@ -87,8 +91,33 @@
         margin-bottom: 0.35rem;
     }
     .account-profile-field .form-control,
-    .account-profile-field .select2-container {
-        border-radius: 8px;
+    .account-profile-field .select2-container .select2-selection--single,
+    .account-profile-field .select2-container .select2-selection--multiple {
+        border-radius: var(--account-ui-radius);
+    }
+    .account-profile-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 4px;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--account-ui-radius);
+        background: #f8fafc;
+    }
+    .account-profile-check .form-check-input {
+        margin-top: 0.2rem;
+        margin-left: 0;
+        flex-shrink: 0;
+    }
+    .account-profile-check .form-check-label {
+        padding-top: 2px;
+    }
+    .account-contributor-card,
+    .account-contributor-stat {
+        border-radius: var(--account-ui-radius) !important;
+    }
+    .account-profile-page .btn {
+        border-radius: var(--account-ui-radius);
     }
     .account-profile-field .form-text,
     .account-profile-field small.text-muted {

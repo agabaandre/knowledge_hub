@@ -91,6 +91,7 @@ class AuthController extends Controller
             'id' => 'required',
             'phone_number' => ['nullable', 'string', 'max:64'],
             'photo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'],
+            'gender' => ['nullable', 'in:male,female'],
         ];
 
         $request->validate($val_rules);

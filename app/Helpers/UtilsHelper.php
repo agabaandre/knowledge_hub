@@ -1397,6 +1397,61 @@ function communities_listing_max_faces(): int
     }
 }
 
+/**
+ * Community directory cards per row on desktop (1, 2, or 3; default 2).
+ */
+function communities_listing_cards_per_row(): int
+{
+    try {
+        if (! \Illuminate\Support\Facades\Schema::hasColumn('setting', 'communities_listing_cards_per_row')) {
+            return 2;
+        }
+        $s = settings();
+        $n = (int) ($s->communities_listing_cards_per_row ?? 2);
+
+        return max(1, min(3, $n));
+    } catch (\Throwable $e) {
+        return 2;
+    }
+}
+
+function communities_listing_grid_column_class(?int $cardsPerRow = null): string
+{
+    $cardsPerRow = $cardsPerRow ?? communities_listing_cards_per_row();
+    if ($cardsPerRow === 1) {
+        return 'col-12';
+    }
+    if ($cardsPerRow === 3) {
+        return 'col-md-6 col-lg-4';
+    }
+
+    return 'col-md-6';
+}
+
+function communities_listing_description_char_limit(?int $cardsPerRow = null): int
+{
+    $cardsPerRow = $cardsPerRow ?? communities_listing_cards_per_row();
+    $limits = [
+        1 => 360,
+        2 => 220,
+        3 => 140,
+    ];
+
+    return $limits[$cardsPerRow] ?? 220;
+}
+
+function communities_listing_description_line_clamp(?int $cardsPerRow = null): int
+{
+    $cardsPerRow = $cardsPerRow ?? communities_listing_cards_per_row();
+    $limits = [
+        1 => 6,
+        2 => 4,
+        3 => 2,
+    ];
+
+    return $limits[$cardsPerRow] ?? 4;
+}
+
 function community_africa_cdc_staff_name(): string
 {
     return 'Africa CDC Staff';

@@ -554,7 +554,7 @@
                 <p class="text-muted small mb-3 mb-md-4">Based on your profile health themes and tags from publications you have saved.</p>
                 <div class="row align-items-start">
                     @foreach($recommendedCommunities as $community)
-                        <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="{{ communities_listing_grid_column_class() }} mb-3">
                             @include('communities.partials.room_card', ['community' => $community, 'pinned' => true])
                         </div>
                     @endforeach

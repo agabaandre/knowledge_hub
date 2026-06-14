@@ -71,6 +71,12 @@ class UsersRepository {
             $countryId = $request->input('country');
             $user->country_id = $countryId !== '' ? $countryId : $user->country_id;
         }
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'gender')) {
+            $gender = $request->input('gender');
+            $user->gender = in_array($gender, ['male', 'female'], true) ? $gender : null;
+        }
+
         $user->phone_number  = ($request->phone ?? $request->phone_number)?($request->phone ?? $request->phone_number):$user->phone_number;
         
         // Handle job_title with camel case transformation

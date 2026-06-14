@@ -218,6 +218,7 @@ return [
         'show_publication_card_file_type_badge' => 1,
         'communities_listing_show_participants' => 1,
         'communities_listing_max_faces' => 8,
+        'communities_listing_cards_per_row' => 2,
         'publication_required_fields' => '{"tags":"1","theme":"1","title":"1","sub_theme":"1","description":"1","data_category_id":"1","associated_authors":"1"}',
         'content_disclaimer' => 'This platform provides information for research and learning purposes only and is not a substitute for professional medical advice.',
     ],

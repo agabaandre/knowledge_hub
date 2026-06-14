@@ -283,6 +283,10 @@ class SettingsRepository
             $mf = (int) $request->input('communities_listing_max_faces', 8);
             $settings->communities_listing_max_faces = max(1, min(24, $mf));
         }
+        if (Schema::hasColumn('setting', 'communities_listing_cards_per_row')) {
+            $cardsPerRow = (int) $request->input('communities_listing_cards_per_row', 2);
+            $settings->communities_listing_cards_per_row = max(1, min(3, $cardsPerRow));
+        }
         if (Schema::hasColumn('setting', 'show_publication_card_file_type_badge')) {
             $settings->show_publication_card_file_type_badge = $request->boolean('show_publication_card_file_type_badge');
         }

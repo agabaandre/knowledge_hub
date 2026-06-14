@@ -2,6 +2,9 @@
     $pinned = $pinned ?? false;
     $detailUrl = community_detail_url($community);
     $descPlain = strip_tags($community->description ?? '');
+    $cardsPerRow = communities_listing_cards_per_row();
+    $descCharLimit = communities_listing_description_char_limit($cardsPerRow);
+    $descLineClamp = communities_listing_description_line_clamp($cardsPerRow);
     $lastAt = $community->listing_last_activity ?? null;
     $faces = $community->listing_contributor_faces ?? collect();
     $moreMembers = (int) ($community->listing_more_members_not_shown ?? 0);
@@ -54,7 +57,10 @@
         </div>
     </div>
 
-    <p class="community-room-card__desc">{{ Str::limit($descPlain, 156) }}</p>
+    <p class="community-room-card__desc community-room-card__desc--cols-{{ $cardsPerRow }}"
+       style="-webkit-line-clamp: {{ $descLineClamp }}; max-height: calc(1.32em * {{ $descLineClamp }} * 1.5);">
+        {{ Str::limit($descPlain, $descCharLimit) }}
+    </p>
 
     @php
         $coverageBits = [];
