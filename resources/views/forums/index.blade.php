@@ -1,12 +1,13 @@
 @php
     $hide_search = true;
-    // SEO Meta Tags for Forums Listing Page
-    $pageTitle = 'Discussion Forums - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
-    $pageDescription = 'Join public health discussion forums, share insights, ask questions, and collaborate with experts across Africa. Participate in health-related discussions and knowledge exchange.';
-    $pageKeywords = 'discussion forums, public health forums, health discussions, Africa CDC forums, health experts, ' . (settings()->seo_keywords ?? '');
-    $pageImage = settings()->logo ?? asset('assets/images/logo.png');
-    $canonicalUrl = url('forums');
-    $ogType = 'website';
+    // SEO Meta Tags for Forums Listing Page (controller may override for tag filters)
+    $siteName = settings()->site_name ?? 'Africa CDC Knowledge Hub';
+    $pageTitle = $pageTitle ?? ('Discussion Forums - '.$siteName);
+    $pageDescription = $pageDescription ?? 'Join public health discussion forums, share insights, ask questions, and collaborate with experts across Africa. Participate in health-related discussions and knowledge exchange.';
+    $pageKeywords = $pageKeywords ?? ('discussion forums, public health forums, health discussions, Africa CDC forums, health experts, '.(settings()->seo_keywords ?? ''));
+    $pageImage = $pageImage ?? (settings()->logo ?? asset('assets/images/logo.png'));
+    $canonicalUrl = $canonicalUrl ?? url('forums');
+    $ogType = $ogType ?? 'website';
 @endphp
 
 @extends('layouts.app')
@@ -708,6 +709,12 @@
     color: #64748b;
     font-size: 0.875rem;
     padding: 0.5rem 0;
+}
+
+#forums-list-wrap.is-loading {
+    pointer-events: none;
+    opacity: 0.55;
+    transition: opacity 0.2s ease;
 }
 
 .forum-image {
@@ -1437,18 +1444,7 @@
             @if($forums->count() > 0)
                 @include('forums.partials.forum_list_items', ['forums' => $forums, 'my_forums' => $my_forums ?? []])
             @else
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fa fa-comments"></i>
-                    </div>
-                    <h3>No Discussions Yet</h3>
-                    <p class="text-muted">Be the first to start a discussion!</p>
-                    @auth
-                    <a href="{{ url('forums/create') }}" class="btn btn-sm theme-bg text-white mt-3">
-                        <i class="fa fa-plus-circle me-2"></i>Start First Discussion
-                    </a>
-                    @endauth
-                </div>
+                @include('forums.partials.empty_state')
             @endif
                 </div>
 
@@ -2210,9 +2206,15 @@ document.addEventListener('DOMContentLoaded', function() {
         enabled: @json((bool) ($forumsInfiniteScroll ?? false)),
         pageUrl: @json(route('forums.page'))
     };
+    window.forumsTagAjaxConfig = {
+        fragmentUrl: @json(route('forums.fragment')),
+        infiniteScrollEnabled: @json((bool) ($forumsInfiniteScroll ?? false)),
+        activeTag: @json($activeForumTag ?? request('tag'))
+    };
     window.FORUMS_INFINITE_STATUS_COMPLETE = 'All discussions loaded';
     window.FORUMS_INFINITE_STATUS_ERROR = 'Could not load more discussions. Tap to retry.';
 </script>
+<script src="{{ asset('js/forums-index-tag-ajax.js') }}?v={{ @filemtime(public_path('js/forums-index-tag-ajax.js')) }}"></script>
 <script src="{{ asset('js/forums-index-infinite.js') }}?v={{ @filemtime(public_path('js/forums-index-infinite.js')) }}"></script>
 <script src="{{ asset('js/forums-index-contributors.js') }}?v={{ @filemtime(public_path('js/forums-index-contributors.js')) }}"></script>
 

@@ -12,7 +12,18 @@
         $tag = mb_strtolower(trim((string) ($row->tag ?? '')));
         return $tag !== '' && ! in_array($tag, $popularTagNames, true);
     });
-    $activeTag = request('tag');
+    $activeTag = $activeForumTag ?? request('tag');
+    $sidebarTagTexts = $popularTags->pluck('tag')
+        ->merge($moreTopics->pluck('tag'))
+        ->map(fn ($t) => trim((string) $t))
+        ->filter()
+        ->unique()
+        ->values();
+    $sidebarTagSlugs = $sidebarTagTexts->isNotEmpty()
+        ? \App\Models\Tag::query()
+            ->whereIn('tag_text', $sidebarTagTexts)
+            ->pluck('slug', 'tag_text')
+        : collect();
 @endphp
 
 <aside class="forums-sidebar" aria-label="Forum navigation">
@@ -32,19 +43,22 @@
                 @php
                     $tag = (string) ($row->tag ?? '');
                     $isActive = $activeTag !== null && strcasecmp((string) $activeTag, $tag) === 0;
+                    $tagSlug = (string) ($sidebarTagSlugs[$tag] ?? '');
                 @endphp
                 <li>
-                    <a href="{{ url('forums') }}?tag={{ urlencode($tag) }}"
-                       class="forums-sidebar-topics__link {{ $isActive ? 'is-active' : '' }}">
+                    <a href="{{ tag_forums_url($tag) }}"
+                       class="forums-sidebar-topics__link js-forums-tag-ajax{{ $isActive ? ' is-active' : '' }}"
+                       data-tag-text="{{ $tag }}"
+                       data-tag-slug="{{ $tagSlug }}">
                         <span class="forums-sidebar-topics__label">#{{ truncate($tag, 28) }}</span>
                         <span class="forums-sidebar-topics__count">{{ number_format((int) ($row->topics_count ?? 0)) }}</span>
                     </a>
                 </li>
             @endforeach
         </ul>
-        @if($activeTag)
-            <a href="{{ url('forums') }}" class="forums-sidebar-clear small">Clear topic filter</a>
-        @endif
+        <div class="forums-sidebar-clear-wrap{{ $activeTag ? '' : ' d-none' }}">
+            <a href="{{ tag_forums_url(null) }}" class="forums-sidebar-clear small js-forums-tag-ajax">Clear topic filter</a>
+        </div>
     </div>
     @endif
 
@@ -134,10 +148,13 @@
                 @php
                     $tag = (string) ($row->tag ?? '');
                     $isActive = $activeTag !== null && strcasecmp((string) $activeTag, $tag) === 0;
+                    $tagSlug = (string) ($sidebarTagSlugs[$tag] ?? '');
                 @endphp
                 <li>
-                    <a href="{{ url('forums') }}?tag={{ urlencode($tag) }}"
-                       class="forums-sidebar-topics__link {{ $isActive ? 'is-active' : '' }}">
+                    <a href="{{ tag_forums_url($tag) }}"
+                       class="forums-sidebar-topics__link js-forums-tag-ajax{{ $isActive ? ' is-active' : '' }}"
+                       data-tag-text="{{ $tag }}"
+                       data-tag-slug="{{ $tagSlug }}">
                         <span class="forums-sidebar-topics__label">#{{ $tag }}</span>
                         <span class="forums-sidebar-topics__count">{{ number_format((int) ($row->topics_count ?? 0)) }}</span>
                     </a>

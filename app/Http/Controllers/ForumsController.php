@@ -27,6 +27,117 @@ class ForumsController extends Controller
 
     public function index(Request $request)
     {
+        if (seo_friendly_urls_enabled()) {
+            $legacyRedirect = $this->legacyForumTagRedirect($request);
+            if ($legacyRedirect) {
+                return $legacyRedirect;
+            }
+        }
+
+        return $this->renderForumsIndex($request);
+    }
+
+    public function indexByTag(Request $request, string $slug)
+    {
+        $tag = Tag::query()->where('slug', $slug)->first();
+        if (! $tag) {
+            abort(404);
+        }
+
+        $request->merge(['tag' => $tag->tag_text]);
+
+        return $this->renderForumsIndex($request);
+    }
+
+    /**
+     * JSON fragments for AJAX tag filtering on the forums listing page.
+     */
+    public function forumsFragment(Request $request)
+    {
+        if ($this->forumsInfiniteScrollEnabled()) {
+            $request->merge([
+                'page' => max(1, (int) $request->input('page', 1)),
+                'rows' => self::FORUMS_INFINITE_ROWS,
+            ]);
+        }
+
+        $forums = $this->forumsRepo->get($request, 1, null, false);
+        $this->forumsRepo->attachForumListingEnhancements($forums);
+        $myForums = $this->forumsRepo->getJoinedForums($request);
+
+        $page = $forums instanceof \Illuminate\Pagination\AbstractPaginator
+            ? (int) $forums->currentPage()
+            : 1;
+        $perPage = $forums instanceof \Illuminate\Pagination\AbstractPaginator
+            ? (int) $forums->perPage()
+            : $forums->count();
+        $listOffset = max(0, ($page - 1) * $perPage);
+        $total = $forums instanceof \Illuminate\Pagination\AbstractPaginator
+            ? (int) $forums->total()
+            : $forums->count();
+        $loadedCount = $forums instanceof \Illuminate\Pagination\AbstractPaginator
+            ? min($total, $listOffset + $forums->count())
+            : $total;
+
+        $activeTag = $request->filled('tag') ? trim((string) $request->tag) : null;
+        $tagQuery = array_filter($request->except('tag', 'page'));
+
+        if ($forums->count() > 0) {
+            $listHtml = view('forums.partials.forum_list_items', [
+                'forums' => $forums,
+                'my_forums' => $myForums,
+            ])->render();
+        } else {
+            $listHtml = view('forums.partials.empty_state')->render();
+        }
+
+        return response()->json([
+            'ok' => true,
+            'list_html' => $listHtml,
+            'has_forums' => $forums->count() > 0,
+            'current_page' => $page,
+            'last_page' => $forums instanceof \Illuminate\Pagination\AbstractPaginator
+                ? (int) $forums->lastPage()
+                : 1,
+            'has_more' => $forums instanceof \Illuminate\Pagination\AbstractPaginator
+                && $forums->hasMorePages(),
+            'total' => $total,
+            'loaded_count' => $loadedCount,
+            'forum_ids' => $forums instanceof \Illuminate\Pagination\AbstractPaginator
+                ? $forums->getCollection()->pluck('id')->values()->all()
+                : collect($forums)->pluck('id')->values()->all(),
+            'active_tag' => $activeTag,
+            'canonical_url' => $activeTag
+                ? tag_forums_url($activeTag, true, $tagQuery)
+                : url('forums'),
+        ]);
+    }
+
+    protected function legacyForumTagRedirect(Request $request): ?\Illuminate\Http\RedirectResponse
+    {
+        if (! $request->filled('tag')) {
+            return null;
+        }
+
+        $tagText = trim((string) $request->tag);
+        $tagModel = Tag::query()->where('tag_text', $tagText)->first();
+        if (! $tagModel || empty($tagModel->slug)) {
+            return null;
+        }
+
+        $query = $request->query();
+        unset($query['tag']);
+        $target = tag_forums_url($tagModel, true, $query);
+
+        if ($target !== $request->fullUrl()) {
+            return redirect()->to($target, 301);
+        }
+
+        return null;
+    }
+
+    protected function renderForumsIndex(Request $request)
+    {
         if ($this->forumsInfiniteScrollEnabled()) {
             $request->merge([
                 'page' => max(1, (int) $request->input('page', 1)),
@@ -136,12 +247,21 @@ class ForumsController extends Controller
         $data['relatedCommunities'] = $relatedCommunities;
 
         // SEO variables
-        $data['pageTitle'] = 'Discussion Forums - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
-        $data['pageDescription'] = 'Join public health discussion forums, share insights, ask questions, and collaborate with experts across Africa. Participate in health-related discussions and knowledge exchange.';
-        $data['pageKeywords'] = 'discussion forums, public health forums, health discussions, Africa CDC forums, health experts, ' . (settings()->seo_keywords ?? '');
+        $activeTag = $request->filled('tag') ? trim((string) $request->tag) : null;
+        $siteName = settings()->site_name ?? 'Africa CDC Knowledge Hub';
+        $data['pageTitle'] = $activeTag
+            ? $activeTag.' — Discussion Forums - '.$siteName
+            : 'Discussion Forums - '.$siteName;
+        $data['pageDescription'] = $activeTag
+            ? 'Browse discussion forums tagged with '.$activeTag.' on the Africa Health Knowledge Hub.'
+            : 'Join public health discussion forums, share insights, ask questions, and collaborate with experts across Africa. Participate in health-related discussions and knowledge exchange.';
+        $data['pageKeywords'] = 'discussion forums, public health forums, health discussions, Africa CDC forums, health experts, '.(settings()->seo_keywords ?? '');
         $data['pageImage'] = settings()->logo ?? asset('assets/images/logo.png');
-        $data['canonicalUrl'] = url('forums');
+        $data['canonicalUrl'] = $activeTag
+            ? tag_forums_url($activeTag, true, $request->except('tag', 'page'))
+            : url('forums');
         $data['ogType'] = 'website';
+        $data['activeForumTag'] = $activeTag;
 
         return view('forums.index', $data);
     }

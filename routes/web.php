@@ -804,6 +804,8 @@ Route::group(['prefix' => 'permissions', 'middleware' => ['auth', 'web']], funct
 Route::group(["prefix" => "forums"], function () {
 
     Route::get("/", [ForumsController::class, 'index'])->name('forums.index');
+    Route::get("/tag/{slug}", [ForumsController::class, 'indexByTag'])->where('slug', '[\w\-]+')->name('forums.tag');
+    Route::get("/fragment", [ForumsController::class, 'forumsFragment'])->name('forums.fragment');
     Route::get("/page", [ForumsController::class, 'forumsPage'])->name('forums.page');
     Route::get("/create", [ForumsController::class, 'create'])->name('forums.create');
     Route::get("/thread/{slug}", [ForumsController::class, 'thread'])->where('slug', '[\w\-]+');

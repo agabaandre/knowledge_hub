@@ -47,6 +47,98 @@ if (! function_exists('resolve_tag_for_url')) {
     }
 }
 
+if (! function_exists('resolve_forum_tag_for_url')) {
+    /**
+     * Resolve a forum topic tag (Tag model, id, slug, or raw tag text from forum_tags).
+     *
+     * @return array{text: ?string, slug: ?string, id: ?int}
+     */
+    function resolve_forum_tag_for_url($tag): array
+    {
+        if ($tag instanceof Tag) {
+            return [
+                'text' => (string) $tag->tag_text,
+                'slug' => $tag->slug ?? null,
+                'id' => (int) $tag->id,
+            ];
+        }
+
+        if (is_object($tag) && isset($tag->tag_text)) {
+            return [
+                'text' => (string) $tag->tag_text,
+                'slug' => $tag->slug ?? null,
+                'id' => isset($tag->id) ? (int) $tag->id : null,
+            ];
+        }
+
+        if (is_numeric($tag)) {
+            $model = Tag::query()->find((int) $tag);
+
+            return [
+                'text' => $model ? (string) $model->tag_text : null,
+                'slug' => $model->slug ?? null,
+                'id' => $model ? (int) $model->id : null,
+            ];
+        }
+
+        if (is_string($tag)) {
+            $trimmed = trim($tag);
+            if ($trimmed === '') {
+                return ['text' => null, 'slug' => null, 'id' => null];
+            }
+
+            $model = Tag::query()->where('tag_text', $trimmed)->first()
+                ?? Tag::query()->where('slug', $trimmed)->first();
+
+            if ($model) {
+                return [
+                    'text' => (string) $model->tag_text,
+                    'slug' => $model->slug ?? null,
+                    'id' => (int) $model->id,
+                ];
+            }
+
+            return ['text' => $trimmed, 'slug' => null, 'id' => null];
+        }
+
+        return ['text' => null, 'slug' => null, 'id' => null];
+    }
+}
+
+if (! function_exists('tag_forums_url')) {
+    /**
+     * @param  Tag|object|int|string|null  $tag
+     */
+    function tag_forums_url($tag, bool $absolute = true, array $query = []): string
+    {
+        $resolved = resolve_forum_tag_for_url($tag);
+        $text = $resolved['text'];
+        $slug = $resolved['slug'];
+
+        if ($text === null || $text === '') {
+            $path = 'forums';
+            if ($query) {
+                $path .= '?'.http_build_query($query);
+            }
+
+            return $absolute ? url($path) : $path;
+        }
+
+        if (seo_friendly_urls_enabled() && ! empty($slug)) {
+            $path = 'forums/tag/'.$slug;
+            if ($query) {
+                $path .= '?'.http_build_query($query);
+            }
+        } else {
+            $path = 'forums';
+            $query = array_merge(['tag' => $text], $query);
+            $path .= '?'.http_build_query($query);
+        }
+
+        return $absolute ? url($path) : $path;
+    }
+}
+
 if (! function_exists('resolve_community_for_url')) {
     /**
      * @param  CommunityOfPractice|object|int|string|null  $community

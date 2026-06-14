@@ -129,6 +129,9 @@
         }
 
         var params = new URLSearchParams(window.location.search);
+        if (typeof window.ensureForumTagInParams === 'function') {
+            window.ensureForumTagInParams(params);
+        }
         params.delete('page');
         params.set('page', String(currentPage + 1));
 
