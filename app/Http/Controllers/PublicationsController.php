@@ -8,6 +8,7 @@ use App\Models\Tag;
 use App\Models\Publication;
 use App\Models\SubThemeticArea;
 use App\Models\ThemeticArea;
+use App\Support\ContributorProfileContext;
 use App\Support\ContributorsSeo;
 use App\Support\PublicationSeo;
 use App\Support\RecordsSearchSeo;
@@ -680,22 +681,35 @@ class PublicationsController extends Controller
             abort(404);
         }
 
-        $request->merge(['author' => $author->id]);
+        $profileContext = ContributorProfileContext::resolve($author);
+        $contributorUser = $profileContext->user;
 
-        $data['author']       = $author;
-        $data['contributorOrganization'] = contributor_profile_organization($author, $author->user ?? null);
+        $request->merge([
+            'contributor_profile_scope' => true,
+            'contributor_profile_author_id' => $author->id,
+            'contributor_profile_user_id' => (int) ($contributorUser?->id ?? 0),
+            'search_listing' => true,
+        ]);
+
+        $data['author'] = $author;
+        $data['contributorUser'] = $contributorUser;
+        $data['contributorOrganization'] = contributor_profile_organization($author, $contributorUser);
         $data['publications'] = $this->publicationsRepo->get($request);
         $data['forumContributions'] = collect();
+
+        $resourceStats = $this->publicationsRepo->contributorProfileResourceStats($profileContext, $request);
         $data['contributionStats'] = [
-            'resource_contributions' => method_exists($data['publications'], 'total') ? (int) $data['publications']->total() : count($data['publications'] ?? []),
+            'resource_contributions' => $resourceStats['total'],
+            'direct_resource_contributions' => $resourceStats['direct'],
+            'corporate_resource_contributions' => $resourceStats['corporate'],
             'forum_posts' => 0,
             'forum_comments' => 0,
             'forum_contributions' => 0,
             'total_contributions' => 0,
         ];
 
-        if (!empty($data['author']) && !empty($data['author']->user)) {
-            $userId = (int) $data['author']->user->id;
+        if ($contributorUser !== null) {
+            $userId = (int) $contributorUser->id;
 
             $forumPosts = \App\Models\Forum::query()
                 ->where('created_by', $userId)
@@ -771,13 +785,13 @@ class PublicationsController extends Controller
         $data['lifetimeBadge'] = null;
         $data['communityBadgeStarCount'] = 0;
 
-        if (! empty($data['author']->user)) {
-            $data['author']->user->loadMissing('lifetimeBadge.badgeType');
-            $data['lifetimeBadge'] = $data['author']->user->lifetimeBadge;
+        if ($contributorUser !== null) {
+            $contributorUser->loadMissing('lifetimeBadge.badgeType');
+            $data['lifetimeBadge'] = $contributorUser->lifetimeBadge;
             if ($data['lifetimeBadge'] && $data['lifetimeBadge']->badge_type_id) {
                 $data['communityBadgeStarCount'] = $badgeService
                     ->communityContributionsForMonth(
-                        (int) $data['author']->user->id,
+                        (int) $contributorUser->id,
                         $data['badgeDrilldownYear'],
                         $data['badgeDrilldownMonth']
                     )
@@ -786,8 +800,8 @@ class PublicationsController extends Controller
         }
 
         $data['authorCommunities'] = collect();
-        if (! empty($data['author']->user)) {
-            $memberUserId = (int) $data['author']->user->id;
+        if ($contributorUser !== null) {
+            $memberUserId = (int) $contributorUser->id;
             $data['authorCommunities'] = \App\Models\CommunityOfPractice::query()
                 ->select(['community_of_practices.id', 'community_of_practices.community_name', 'community_of_practices.slug'])
                 ->whereHas('membership', function ($q) use ($memberUserId) {

@@ -1,6 +1,6 @@
 @php
     $primary = settings()->primary_color ?? '#119A48';
-    $user = $author->user ?? null;
+    $user = $contributorUser ?? $author->user ?? null;
     $isOrganisation = strtolower((string) ($author->is_organsiation ?? '')) === 'yes';
     $avatarUrl = null;
 
@@ -268,6 +268,12 @@
         color: #64748b;
         line-height: 1.3;
     }
+    .contributor-stat-detail {
+        font-size: 0.72rem;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+        line-height: 1.35;
+    }
     .contributor-section-title {
         font-size: 1.15rem;
         font-weight: 700;
@@ -380,6 +386,12 @@
         <div>
             <div class="contributor-stat-value">{{ number_format((int) ($stats['resource_contributions'] ?? 0)) }}</div>
             <div class="contributor-stat-label">Published resources</div>
+            @if((int) ($stats['corporate_resource_contributions'] ?? 0) > 0)
+                <div class="contributor-stat-detail">
+                    {{ number_format((int) ($stats['direct_resource_contributions'] ?? 0)) }} direct
+                    · {{ number_format((int) $stats['corporate_resource_contributions']) }} corporate account
+                </div>
+            @endif
         </div>
     </div>
     <div class="contributor-stat-card contributor-stat-card--threads">

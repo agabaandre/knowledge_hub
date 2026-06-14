@@ -8,6 +8,7 @@
 
 @section('styles')
 <style>
+@include('partials.publications.publication_feed_card_styles')
     .author-profile-page {
         padding: 2rem 0 3rem;
         background: #f8fafc;
@@ -50,6 +51,7 @@
 
         @include('publications.partials.contributor_profile', [
             'author' => $author,
+            'contributorUser' => $contributorUser ?? null,
             'contributionStats' => $contributionStats,
             'contributorOrganization' => $contributorOrganization ?? null,
             'lifetimeBadge' => $lifetimeBadge ?? null,
@@ -106,4 +108,17 @@
         </div>
     </div>
 </div>
+
+@auth
+    @include('common.pdf-chat-modal')
+@endauth
+@endsection
+
+@section('scripts')
+    @auth
+        @include('common.pdf-chat-js')
+    @endauth
+    @include('common.attachment_js')
+    @include('publications.partials.preview_modal')
+    @include('partials.publications.publication_feed_card_scripts')
 @endsection

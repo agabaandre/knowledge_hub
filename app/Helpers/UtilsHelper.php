@@ -1347,8 +1347,18 @@ function contributor_profile_organization(?\App\Models\Author $author, ?\App\Mod
     }
 
     $fromUser = trim((string) ($user->organization_name ?? ''));
+    if ($fromUser !== '') {
+        return $fromUser;
+    }
 
-    return $fromUser !== '' ? $fromUser : null;
+    if ((int) $user->author_id > 0 && ($author === null || (int) $user->author_id !== (int) $author->id)) {
+        $corporateAuthor = \App\Models\Author::query()->find((int) $user->author_id);
+        $fromCorporate = trim((string) ($corporateAuthor->name ?? ''));
+
+        return $fromCorporate !== '' ? $fromCorporate : null;
+    }
+
+    return null;
 }
 
 /**

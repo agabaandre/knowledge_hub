@@ -23,6 +23,7 @@ use App\Models\Tag;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\User;
 use App\Support\CommunityTargeting;
+use App\Support\ContributorProfileContext;
 use App\Support\SeoSlugger;
 use App\Models\ContentRequest;
 use Illuminate\Http\Request;
@@ -1948,8 +1949,42 @@ private function normalizeMultiFilterIds($request, string $key): ?array
     return $ids === [] ? null : $ids;
 }
 
+/**
+ * Resource counts for a contributor profile (direct author credit + corporate account uploads).
+ *
+ * @return array{total: int, direct: int, corporate: int}
+ */
+public function contributorProfileResourceStats(ContributorProfileContext $ctx, Request $request): array
+{
+    $pubs = Publication::query()->where('is_version', 0);
+    $ctx->applyPublicationScope($pubs);
+    $pubs->when(! is_admin(), function ($query) use ($request) {
+        $this->applyHubListingVisibility($query, $request);
+    }, function ($query) {
+        $this->access_filter($query);
+    });
+
+    return [
+        'total' => (int) (clone $pubs)->count(),
+        'direct' => $ctx->countDirectPublications($pubs),
+        'corporate' => $ctx->countCorporatePublications($pubs),
+    ];
+}
+
 // New method to apply filters
 private function applyFilters($query, $request) {
+
+    if ($request->boolean('contributor_profile_scope')) {
+        $authorId = (int) $request->input('contributor_profile_author_id');
+        $userId = (int) $request->input('contributor_profile_user_id');
+
+        $query->where(function ($q) use ($authorId, $userId) {
+            $q->where('author_id', $authorId);
+            if ($userId > 0) {
+                $q->orWhere('user_id', $userId);
+            }
+        });
+    }
 
     $skipCategory = false;
     $skipFileCategory = false;
@@ -2041,6 +2076,9 @@ private function applyFilters($query, $request) {
     ];
 
     foreach ($filters as $key => $callback) {
+        if ($key === 'author' && $request->boolean('contributor_profile_scope')) {
+            continue;
+        }
         if ($key === 'category' && $skipCategory) {
             continue;
         }
