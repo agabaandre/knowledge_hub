@@ -1700,6 +1700,24 @@ class ForumsRepository extends SharedRepo{
     }
 
     /**
+     * @return Collection<int, Forum>
+     */
+    public function getRecentForumsForSidebar(int $limit = 5): Collection
+    {
+        return Cache::remember('forums_recent_sidebar_v1_' . $limit, 300, function () use ($limit) {
+            return Forum::query()
+                ->where('status', 1)
+                ->where('is_approved', 1)
+                ->where(function ($q) {
+                    $q->where('is_rejected', 0)->orWhereNull('is_rejected');
+                })
+                ->orderByDesc('created_at')
+                ->limit($limit)
+                ->get(['id', 'forum_title', 'slug', 'forum_image', 'created_at']);
+        });
+    }
+
+    /**
      * @return Collection<int, object{tag: string, topics_count: int}>
      */
     public function getSidebarTopicCategories(int $limit = 14): Collection

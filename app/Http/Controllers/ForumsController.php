@@ -37,6 +37,7 @@ class ForumsController extends Controller
         $data['forums']    = $this->forumsRepo->get($request, 1, null, false);
         $this->forumsRepo->attachForumListingEnhancements($data['forums']);
         $data['forumSidebarCategories'] = $this->forumsRepo->getSidebarTopicCategories();
+        $data['forumSidebarRecent'] = $this->forumsRepo->getRecentForumsForSidebar();
         $data['forumTopByEngagement'] = $this->forumsRepo->getTopForumsByEngagement();
         $data['my_forums'] = $this->forumsRepo->getJoinedForums($request);
         $data['search']    = (object) $request->all();

@@ -18,19 +18,6 @@
         { id: 'popular', label: 'Most Active' }
     ];
 
-    var JUMPS = [
-        { id: 'khub-forums-ai-banner', label: 'Khub AI' },
-        { id: 'forums-list', label: 'Discussions' }
-    ];
-
-    function scrollToId(id) {
-        var el = document.getElementById(id);
-        if (!el) {
-            return;
-        }
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
     function ForumsNavApp(props) {
         var config = props.config || {};
         var urlState = ForumsIndexFilters.readUrlState();
@@ -116,25 +103,6 @@
         return React.createElement(
             'div',
             { className: 'forums-nav-react' },
-            React.createElement(
-                'nav',
-                {
-                    className: 'forums-nav-jumps',
-                    'aria-label': 'Forums page sections'
-                },
-                JUMPS.map(function (jump) {
-                    return React.createElement(
-                        'button',
-                        {
-                            key: jump.id,
-                            type: 'button',
-                            className: 'forums-nav-jump-btn',
-                            onClick: function () { scrollToId(jump.id); }
-                        },
-                        jump.label
-                    );
-                })
-            ),
             React.createElement(
                 'div',
                 { className: 'forums-filters forums-filters--react' },
