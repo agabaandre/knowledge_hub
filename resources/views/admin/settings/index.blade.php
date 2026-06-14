@@ -2461,6 +2461,7 @@
                                         <strong>resource publications</strong> (account publish wizard), <strong>forum</strong> attachments, and
                                         <strong>community</strong> comment uploads. Requires LibreOffice (<code>soffice</code>) on the server for best results;
                                         <code>.docx</code> can fall back to PhpWord when LibreOffice is unavailable.
+                                        If conversion fails, the <strong>original file is still saved</strong> — uploads are never blocked.
                                     </small>
                                 </div>
                             </div>

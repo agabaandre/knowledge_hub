@@ -251,7 +251,7 @@ public function getPublicationIds(Request $request, int $limit = 80): array
         $rows_count = ($request->rows)?$request->rows:20;
         $user_id  = auth()->user()->id;
 
-        $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])->orderBy('id','desc');
+        $pubs = Publication::with(['file_type','author','sub_theme','category','comments','attachments'])->orderBy('id','desc');
         $pubs->where('user_id',$user_id);
         if($request->term){
             $t = trim($request->term);
@@ -270,7 +270,7 @@ public function getPublicationIds(Request $request, int $limit = 80): array
         $rows_count = ($request->rows)?$request->rows:20;
         $user_id    =  auth()->user()->id;
         
-        $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])
+        $pubs = Publication::with(['file_type','author','sub_theme','category','comments','attachments'])
             ->whereHas('favourited', function($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })
@@ -292,7 +292,7 @@ public function getPublicationIds(Request $request, int $limit = 80): array
             return collect();
         }
 
-        $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])
+        $pubs = Publication::with(['file_type','author','sub_theme','category','comments','attachments'])
             ->where('is_version', 0)
             ->where('is_active', 'Active')
             ->where('is_approved', 1)
@@ -321,7 +321,7 @@ public function getPublicationIds(Request $request, int $limit = 80): array
         }
 
         // Get publications with these tags (excluding already favorited ones)
-        $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])
+        $pubs = Publication::with(['file_type','author','sub_theme','category','comments','attachments'])
             ->where('is_version', 0)
             ->where('is_active', 'Active')
             ->where('is_approved', 1)
@@ -1495,6 +1495,7 @@ public function getPublicationIds(Request $request, int $limit = 80): array
 
         $upfiles   = (!is_array($files))?[$files]:$files;
         $file_path = null;
+        $first_saved_path = null;
         $attachmentData = [];
         $savedCount = 0;
         $errorCount = 0;
@@ -1554,6 +1555,9 @@ public function getPublicationIds(Request $request, int $limit = 80): array
 
             // Optimized: Collect attachment data for bulk insert
             if($publication_id) {
+                if ($first_saved_path === null) {
+                    $first_saved_path = $file_path;
+                }
                 $attachmentData[] = [
                     'description' => $displayLabel,
                     'original_filename' => $clientOriginal,
@@ -1600,7 +1604,7 @@ public function getPublicationIds(Request $request, int $limit = 80): array
             ]);
         }
 
-       return $file_path;
+       return $first_saved_path ?? $file_path;
     }
 
     public function save_summary(Request $request){
@@ -2157,7 +2161,7 @@ public function getLightweight(Request $request, $return_array = false)
     $rows_count = $request->rows ?? 20;
 
     $pubs = Publication::with([
-            'file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent'
+            'file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent', 'attachments',
         ])
         ->where('is_version', 0)
         ->where('is_admin_only_access', 0)

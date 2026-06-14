@@ -789,46 +789,36 @@ function getFileMimeType($file_path)
 }
 
 function get_file_type($file_path=null,$pub_url=null){
-    $mime_type = null;
+    return \App\Support\PublicationFileTypeResolver::resolve(
+        ! empty($file_path) && is_string($file_path) ? $file_path : null,
+        ! empty($pub_url) && is_string($pub_url) ? $pub_url : null
+    );
+}
 
-    if (!empty($file_path) && is_string($file_path) && file_exists($file_path)) {
-   $mime_type = getFileMimeType($file_path);
-        if ($mime_type && strtolower($mime_type) !== 'file not found') {
-            $mime_type = strtolower($mime_type);
-            $mime_type = str_replace('application/', '', $mime_type);
-            $mime_type = str_replace('images/', '', $mime_type);
-        } else {
-            $mime_type = null;
+if (! function_exists('publication_effective_file_type')) {
+    /**
+     * File type for cards and UI — infers from attachments/URL when DB row is "Other".
+     */
+    function publication_effective_file_type($publication): ?\App\Models\PublicationType
+    {
+        if (! $publication instanceof \App\Models\Publication) {
+            return null;
         }
-    }
 
-    if (!$mime_type && !empty($pub_url) && is_string($pub_url)) {
-        $url = strtolower(trim($pub_url));
-        if (is_video_platform_url($url)) {
-            $mime_type = 'video';
-        } else {
-            $path = parse_url($url, PHP_URL_PATH) ?: $url;
-            $ext = strtolower(pathinfo((string) $path, PATHINFO_EXTENSION));
-            if ($ext !== '') {
-                $mime_type = $ext;
-            } else {
-                $mime_type = $url;
-            }
-        }
+        return \App\Support\PublicationFileTypeResolver::resolveForPublication($publication);
     }
+}
 
-    if (!$mime_type) {
-        $mime_type = 'other';
-    }
+if (! function_exists('publication_file_type_badge_presentation')) {
+    /**
+     * @return array{icon: string, short: string, show_text_label: bool, title: string}
+     */
+    function publication_file_type_badge_presentation($publication): array
+    {
+        $type = publication_effective_file_type($publication);
 
-    $type = PublicationType::where('mime_types', 'like', '%' . strtolower($mime_type) . '%')->first();
-    if (!$type && strpos((string) $mime_type, 'video') !== false) {
-        $type = PublicationType::where('name', 'like', '%video%')->first();
+        return \App\Support\PublicationFileTypeResolver::badgePresentation($type);
     }
-    if (!$type)
-        $type = PublicationType::where('name','like','%other%')->first();
- 
-    return $type;
 }
 
 if (!function_exists('is_video_platform_url')) {

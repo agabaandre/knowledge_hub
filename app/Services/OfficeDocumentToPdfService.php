@@ -39,34 +39,43 @@ class OfficeDocumentToPdfService
         string $extension,
         string $displayFilename
     ): ?array {
-        if (! $this->isEnabled()) {
+        try {
+            if (! $this->isEnabled()) {
+                return null;
+            }
+
+            $extension = strtolower($extension);
+            if (! $this->isConvertibleExtension($extension)) {
+                return null;
+            }
+
+            $pdfPath = $this->convertToPdf($absolutePath);
+            if (! $pdfPath || ! is_file($pdfPath) || filesize($pdfPath) === 0) {
+                return null;
+            }
+
+            if (is_file($absolutePath) && $absolutePath !== $pdfPath) {
+                @unlink($absolutePath);
+            }
+
+            $stem = pathinfo($displayFilename, PATHINFO_FILENAME);
+            if ($stem === '' || $stem === '.') {
+                $stem = pathinfo($absolutePath, PATHINFO_FILENAME);
+            }
+
+            return [
+                'absolute_path' => $pdfPath,
+                'extension' => 'pdf',
+                'display_filename' => $stem.'.pdf',
+            ];
+        } catch (\Throwable $e) {
+            Log::warning('OfficeDocumentToPdfService: replaceStoredFileWithPdfIfEnabled failed', [
+                'source' => $absolutePath,
+                'message' => $e->getMessage(),
+            ]);
+
             return null;
         }
-
-        $extension = strtolower($extension);
-        if (! $this->isConvertibleExtension($extension)) {
-            return null;
-        }
-
-        $pdfPath = $this->convertToPdf($absolutePath);
-        if (! $pdfPath || ! is_file($pdfPath) || filesize($pdfPath) === 0) {
-            return null;
-        }
-
-        if (is_file($absolutePath) && $absolutePath !== $pdfPath) {
-            @unlink($absolutePath);
-        }
-
-        $stem = pathinfo($displayFilename, PATHINFO_FILENAME);
-        if ($stem === '' || $stem === '.') {
-            $stem = pathinfo($absolutePath, PATHINFO_FILENAME);
-        }
-
-        return [
-            'absolute_path' => $pdfPath,
-            'extension' => 'pdf',
-            'display_filename' => $stem.'.pdf',
-        ];
     }
 
     /**
@@ -76,41 +85,52 @@ class OfficeDocumentToPdfService
      */
     public function convertToPdf(string $sourceAbsolutePath): ?string
     {
-        if (!is_file($sourceAbsolutePath) || !is_readable($sourceAbsolutePath)) {
-            return null;
-        }
+        try {
+            if (!is_file($sourceAbsolutePath) || !is_readable($sourceAbsolutePath)) {
+                return null;
+            }
 
-        $ext = strtolower(pathinfo($sourceAbsolutePath, PATHINFO_EXTENSION));
-        if (!$this->isConvertibleExtension($ext)) {
-            return null;
-        }
+            $ext = strtolower(pathinfo($sourceAbsolutePath, PATHINFO_EXTENSION));
+            if (!$this->isConvertibleExtension($ext)) {
+                return null;
+            }
 
-        $outDir = dirname($sourceAbsolutePath);
-        $stem = pathinfo($sourceAbsolutePath, PATHINFO_FILENAME);
-        $targetPdf = $outDir . DIRECTORY_SEPARATOR . $stem . '.pdf';
+            $outDir = dirname($sourceAbsolutePath);
+            $stem = pathinfo($sourceAbsolutePath, PATHINFO_FILENAME);
+            $targetPdf = $outDir . DIRECTORY_SEPARATOR . $stem . '.pdf';
 
-        if ($this->convertUsingLibreOffice($sourceAbsolutePath, $outDir) && is_file($targetPdf) && filesize($targetPdf) > 0) {
-            return $targetPdf;
-        }
-
-        if ($ext === 'docx') {
-            if ($this->convertDocxUsingPhpWord($sourceAbsolutePath, $targetPdf) && is_file($targetPdf) && filesize($targetPdf) > 0) {
+            if ($this->convertUsingLibreOffice($sourceAbsolutePath, $outDir) && is_file($targetPdf) && filesize($targetPdf) > 0) {
                 return $targetPdf;
             }
+
+            if ($ext === 'docx') {
+                if ($this->convertDocxUsingPhpWord($sourceAbsolutePath, $targetPdf) && is_file($targetPdf) && filesize($targetPdf) > 0) {
+                    return $targetPdf;
+                }
+            }
+
+            Log::info('OfficeDocumentToPdfService: conversion failed (original file kept)', [
+                'source' => $sourceAbsolutePath,
+                'extension' => $ext,
+            ]);
+
+            return null;
+        } catch (\Throwable $e) {
+            Log::warning('OfficeDocumentToPdfService: convertToPdf failed', [
+                'source' => $sourceAbsolutePath,
+                'message' => $e->getMessage(),
+            ]);
+
+            return null;
         }
-
-        Log::info('OfficeDocumentToPdfService: conversion failed', [
-            'source' => $sourceAbsolutePath,
-            'extension' => $ext,
-        ]);
-
-        return null;
     }
 
     private function convertUsingLibreOffice(string $sourcePath, string $outputDirectory): bool
     {
         $binary = $this->resolveLibreOfficeBinary();
         if ($binary === null) {
+            Log::debug('OfficeDocumentToPdfService: LibreOffice (soffice) not found; skipping LO conversion');
+
             return false;
         }
 
