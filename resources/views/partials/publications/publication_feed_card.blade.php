@@ -36,7 +36,7 @@
     $final_image = (! empty($image_link) && filter_var($image_link, FILTER_VALIDATE_URL)) ? $image_link : $default_image;
 
     // Intro block: shared word budget for title + description (balanced card).
-    $feedIntroWordBudget = 132; // balanced intro: title + description share this pool
+    $feedIntroWordBudget = 142; // balanced intro: title + description share this pool
     $minDescriptionWords = 30;
     $titlePlain = strip_tags(clean_unicode($row->title ?? ''));
     $titleWordCount = Str::wordCount($titlePlain);

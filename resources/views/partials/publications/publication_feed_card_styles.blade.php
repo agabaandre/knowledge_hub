@@ -87,7 +87,7 @@
         line-height: 1.65;
         font-size: 0.9375rem;
         display: -webkit-box;
-        -webkit-line-clamp: 8;
+        -webkit-line-clamp: 9;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
