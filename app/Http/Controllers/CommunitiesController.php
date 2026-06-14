@@ -80,9 +80,12 @@ class CommunitiesController extends Controller
         }
 
         $recommendedCommunities = collect();
+        $userMembershipStats = null;
         if (Auth::check()) {
+            $userId = (int) Auth::id();
+            $userMembershipStats = $this->commsOfPracticeRepository->membershipStatsForUser($userId);
             $rawRecommended = $this->commsOfPracticeRepository->recommendedForUser(
-                (int) Auth::id(),
+                $userId,
                 communities_listing_recommended_fetch_limit()
             );
             $this->commsOfPracticeRepository->attachListingMeta($rawRecommended);
@@ -99,6 +102,7 @@ class CommunitiesController extends Controller
         return view('communities.index', compact(
             'communities',
             'recommendedCommunities',
+            'userMembershipStats',
             'regions',
             'countries',
             'organisations',
@@ -178,6 +182,7 @@ class CommunitiesController extends Controller
         $communities = $this->commsOfPracticeRepository->getByUser($userId, request());
         $this->commsOfPracticeRepository->attachListingMeta($communities);
         $recommendedCommunities = collect();
+        $userMembershipStats = $this->commsOfPracticeRepository->membershipStatsForUser((int) $userId);
 
         $pageKeywords = 'communities of practice, my communities, ' . (settings()->seo_keywords ?? '');
         if (communities_listing_show_participants()) {
@@ -208,6 +213,7 @@ class CommunitiesController extends Controller
         return view('communities.index', compact(
             'communities',
             'recommendedCommunities',
+            'userMembershipStats',
             'communitiesCollectionPageSchema',
             'pageTitle',
             'pageDescription',

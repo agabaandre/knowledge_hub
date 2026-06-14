@@ -254,10 +254,10 @@
         .community-room-card__avatar-wrap {
             position: relative;
             box-sizing: border-box;
-            width: 1.75rem;
-            height: 1.75rem;
-            min-width: 1.75rem;
-            min-height: 1.75rem;
+            width: 1.82rem;
+            height: 1.82rem;
+            min-width: 1.82rem;
+            min-height: 1.82rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -307,8 +307,8 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 1.75rem;
-            height: 1.75rem;
+            min-width: 1.82rem;
+            height: 1.82rem;
             padding: 0 0.35rem;
             border-radius: var(--crc-radius);
             background: #fff;
@@ -572,8 +572,85 @@
         .communities-infinite-loader { color: #64748b; font-size: 0.875rem; padding: 0.5rem 0; }
         #communities-filters,
         #communities-recommended,
-        #communities-all-heading {
+        #communities-all-heading,
+        #communities-membership-summary {
             scroll-margin-top: 6rem;
+        }
+
+        .communities-membership-summary {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem 1.25rem;
+            margin-bottom: 1.25rem;
+            padding: 0.9rem 1.1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+        }
+        .communities-membership-summary__icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 4px;
+            background: #fff;
+            border: 1px solid #dcfce7;
+            color: var(--theme-color-primary, #119A48);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .communities-membership-summary__body {
+            flex: 1;
+            min-width: 12rem;
+        }
+        .communities-membership-summary__title {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .communities-membership-summary__text {
+            margin: 0.2rem 0 0;
+            font-size: 0.82rem;
+            color: #64748b;
+            line-height: 1.45;
+        }
+        .communities-membership-summary__stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .communities-membership-summary__stat {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.65rem;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #334155;
+        }
+        .communities-membership-summary__stat strong {
+            color: var(--theme-color-primary, #119A48);
+            font-size: 0.92rem;
+        }
+        .communities-membership-summary__stat--pending strong {
+            color: #d97706;
+        }
+        .communities-membership-summary__link {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--theme-color-primary, #119A48);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .communities-membership-summary__link:hover {
+            text-decoration: underline;
         }
     </style>
 @endsection
@@ -584,6 +661,43 @@
             <h1>Communities of Practice</h1>
             <p style="margin: 0.5rem 0 0 0; font-size: 1rem; color: #718096;">Join a community of practice to connect with peers, share knowledge, and participate in discussions.</p>
         </div>
+
+        @if(Auth::check() && !empty($userMembershipStats))
+            <div class="communities-membership-summary" id="communities-membership-summary">
+                <span class="communities-membership-summary__icon" aria-hidden="true">
+                    <i class="fa fa-users"></i>
+                </span>
+                <div class="communities-membership-summary__body">
+                    <p class="communities-membership-summary__title">Your community memberships</p>
+                    <p class="communities-membership-summary__text">
+                        @if(request()->routeIs('account.my-communities'))
+                            You are a member of {{ number_format((int) ($userMembershipStats['joined'] ?? 0)) }} public {{ (int) ($userMembershipStats['joined'] ?? 0) === 1 ? 'community' : 'communities' }}.
+                        @else
+                            Communities you belong to appear first in the list below.
+                        @endif
+                    </p>
+                </div>
+                <div class="communities-membership-summary__stats">
+                    <span class="communities-membership-summary__stat">
+                        <i class="fa fa-check-circle" aria-hidden="true"></i>
+                        <strong>{{ number_format((int) ($userMembershipStats['joined'] ?? 0)) }}</strong>
+                        joined
+                    </span>
+                    @if((int) ($userMembershipStats['pending'] ?? 0) > 0)
+                        <span class="communities-membership-summary__stat communities-membership-summary__stat--pending">
+                            <i class="fa fa-clock-o" aria-hidden="true"></i>
+                            <strong>{{ number_format((int) $userMembershipStats['pending']) }}</strong>
+                            pending
+                        </span>
+                    @endif
+                </div>
+                @if(!request()->routeIs('account.my-communities') && (int) ($userMembershipStats['joined'] ?? 0) > 0)
+                    <a href="{{ route('account.my-communities') }}" class="communities-membership-summary__link">
+                        View my communities <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                @endif
+            </div>
+        @endif
 
         @php
             $communitiesInfiniteScroll = (bool) ($communitiesInfiniteScroll ?? false);

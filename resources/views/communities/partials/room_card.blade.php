@@ -118,7 +118,7 @@
                         @endphp
                         <{{ $avatarTag }} {!! $avatarAttrs !!} class="community-room-card__avatar-wrap notranslate {{ $profileUrl ? 'community-room-card__avatar-wrap--linked' : '' }} {{ !empty($face['online']) ? 'community-room-card__avatar-wrap--online' : '' }}" translate="no">
                             @if($showImg)
-                                <img src="{{ $u->photo }}" alt="" class="community-room-card__avatar" loading="lazy" width="32" height="32" decoding="async"
+                                <img src="{{ $u->photo }}" alt="" class="community-room-card__avatar" loading="lazy" width="33" height="33" decoding="async"
                                     onerror="this.style.display='none';var el=this.nextElementSibling;if(el){el.style.display='flex';}">
                                 <span class="community-room-card__avatar-initials community-room-card__avatar-initials--fallback notranslate" style="display:none" aria-hidden="true" translate="no">{{ community_user_initials($u->name) }}</span>
                             @else

@@ -50,6 +50,45 @@ class CommsOfPracticeRepository{
         );
     }
 
+    /**
+     * Logged-in members see communities they belong to before the rest of the directory.
+     */
+    private function orderMemberCommunitiesFirstForViewer($query, $viewer): void
+    {
+        if (! $viewer || ! auth()->check()) {
+            return;
+        }
+
+        $userId = (int) auth()->id();
+        $query->orderByRaw(
+            'CASE WHEN EXISTS (
+                SELECT 1 FROM community_of_practice_members AS copm
+                WHERE copm.community_of_practice_id = community_of_practices.id
+                  AND copm.user_id = ?
+                  AND copm.is_approved = 1
+                  AND copm.is_active = 1
+            ) THEN 0 ELSE 1 END',
+            [$userId]
+        );
+    }
+
+    /**
+     * @return array{joined: int, pending: int}
+     */
+    public function membershipStatsForUser(int $userId): array
+    {
+        $base = CommunityOfPracticeMembers::query()
+            ->where('user_id', $userId)
+            ->whereHas('community', function ($q) {
+                $q->where('is_public', 1);
+            });
+
+        return [
+            'joined' => (clone $base)->where('is_approved', 1)->where('is_active', 1)->count(),
+            'pending' => (clone $base)->where('is_approved', 0)->count(),
+        ];
+    }
+
     public function get(Request $request, $return_array = false)
     {
         $query = CommunityOfPractice::query();
@@ -127,6 +166,7 @@ class CommsOfPracticeRepository{
         }
 
         if (! $request->boolean('admin')) {
+            $this->orderMemberCommunitiesFirstForViewer($query, auth()->user());
             $this->orderAfricaCdcStaffCommunityFirstForViewer($query, auth()->user());
         }
         $query->orderBy('community_name');
