@@ -24,7 +24,7 @@
                                    <span class="kh-nav-label">{{ ucwords(current_user()->name) }}</span>
                                </a>
                                <ul class="nav-dropdown nav-submenu">
-                                   @if (is_admin())
+                                   @if (can_access_admin())
                                        <li class=" {{ $class ?? '' }}">
                                            <a href="{{ route('admin.index') }}">
                                                <i class="fa fa-th-large mr-1"></i><span class="khub-i18n-text" data-khub-i18n="ui_body.admin_panel">{{ __('ui_body.admin_panel') }}</span>

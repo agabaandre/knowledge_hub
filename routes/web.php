@@ -308,7 +308,7 @@ Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function 
 });
 
 
-Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function () {
+Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web', 'admin.access']], function () {
 
     Route::get("/", [AdminController::class, 'index'])->name('admin.index');
     Route::get("/dashboard", [AdminController::class, 'dashboards'])->name('admin.dashboard');
@@ -769,7 +769,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 });
 
 // Admin Messaging routes
-Route::prefix('admin/messaging')->name('admin.messaging.')->middleware(['auth'])->group(function () {
+Route::prefix('admin/messaging')->name('admin.messaging.')->middleware(['auth', 'admin.access'])->group(function () {
     Route::get('/', [\App\Http\Controllers\Admin\MessagingController::class, 'index'])->name('index');
     Route::post('/send', [\App\Http\Controllers\Admin\MessagingController::class, 'sendMessage'])->name('send');
 });
@@ -778,7 +778,7 @@ Route::prefix('admin/messaging')->name('admin.messaging.')->middleware(['auth'])
 Route::get('/mailing_list', [MailingListController::class, 'index'])->middleware(['auth'])->name('mailing_list.index');
 
 //permissions and access control
-Route::group(['prefix' => 'permissions', 'middleware' => ['auth', 'web']], function () {
+Route::group(['prefix' => 'permissions', 'middleware' => ['auth', 'web', 'admin.access']], function () {
 
     Route::get('/',  [PermissionController::class, 'permissions'])->name('permissions.permissions');
     Route::get('/roles',  [PermissionController::class, 'index'])->name('permissions.roles');
@@ -960,7 +960,7 @@ Route::get("/tests",function(){
 
 });
 
-Route::group(['prefix' => 'admin/content-requests', 'as' => 'admin.content-requests.', 'middleware' => ['auth', 'web', 'permission:view_content_requests']], function () {
+Route::group(['prefix' => 'admin/content-requests', 'as' => 'admin.content-requests.', 'middleware' => ['auth', 'web', 'admin.access', 'permission:view_content_requests']], function () {
     Route::get('/', [ContentRequestAdminController::class, 'index'])->name('index');
     Route::get('/create', [ContentRequestAdminController::class, 'create'])->name('create');
     Route::post('/', [ContentRequestAdminController::class, 'store'])->middleware('permission:manage_content_requests')->name('store');
@@ -971,7 +971,7 @@ Route::group(['prefix' => 'admin/content-requests', 'as' => 'admin.content-reque
     Route::delete('/{id}', [ContentRequestAdminController::class, 'destroy'])->middleware('permission:manage_content_requests')->name('destroy');
 });
 
-Route::group(["prefix" => "admin/static-links"], function () {
+Route::group(["prefix" => "admin/static-links", 'middleware' => ['auth', 'web', 'admin.access']], function () {
     Route::get('/', [\App\Http\Controllers\Admin\StaticLinksController::class, 'index'])->name('admin.static_links.index');
     Route::post('/store', [\App\Http\Controllers\Admin\StaticLinksController::class, 'store'])->name('admin.static_links.store');
     Route::put('/update/{id}', [\App\Http\Controllers\Admin\StaticLinksController::class, 'update'])->name('admin.static_links.update');

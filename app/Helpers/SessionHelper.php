@@ -204,6 +204,27 @@ function is_admin(){
 	return ($role)?((strpos(strtolower($role->name),'admin') >-1)?true:false):false;
 }
 
+function can_access_admin(){
+	$user = auth()->user();
+
+	if (! $user) {
+		return false;
+	}
+
+	$user->loadMissing('access_level');
+	$levelName = $user->access_level?->level_name;
+
+	if ($levelName && strcasecmp($levelName, 'Viewer') === 0) {
+		return false;
+	}
+
+	if (is_admin()) {
+		return true;
+	}
+
+	return $user->getAllPermissions()->isNotEmpty();
+}
+
 function filter_access($query){
 	$user = @current_user();
 

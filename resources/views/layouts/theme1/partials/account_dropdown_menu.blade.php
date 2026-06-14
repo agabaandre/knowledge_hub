@@ -1,5 +1,5 @@
 @auth
-    @if (is_admin())
+    @if (can_access_admin())
         <a href="{{ route('admin.index') }}" class="dropdown-item">
             <i class="fa fa-th-large me-2"></i>
             <span class="khub-i18n-text notranslate" data-khub-i18n="ui_body.admin_panel">{{ __('ui_body.admin_panel') }}</span>
