@@ -1369,6 +1369,80 @@ function contributor_profile_organization(?\App\Models\Author $author, ?\App\Mod
 }
 
 /**
+ * Resolved profile / logo URL for publication card footer avatars (forums-style user photos).
+ */
+function publication_card_poster_photo_url($publication, ?\App\Models\Author $author = null, ?\App\Models\User $authorUser = null): ?string
+{
+    if (! $publication instanceof \App\Models\Publication) {
+        return null;
+    }
+
+    $author = $author ?? $publication->author;
+    if ($authorUser === null && $author !== null) {
+        $authorUser = $author->user ?? null;
+    }
+
+    $users = [];
+    if ($publication->relationLoaded('user') && $publication->user) {
+        $users[] = $publication->user;
+    } elseif ($publication->user_id) {
+        $uploader = $publication->user ?? \App\Models\User::query()->find((int) $publication->user_id);
+        if ($uploader) {
+            $users[] = $uploader;
+        }
+    }
+    if ($authorUser) {
+        $users[] = $authorUser;
+    }
+
+    foreach ($users as $user) {
+        if ($user instanceof \App\Models\User && community_user_has_profile_image($user)) {
+            $url = trim((string) ($user->photo ?? ''));
+            if ($url !== '') {
+                return publication_card_normalize_photo_url($url);
+            }
+        }
+    }
+
+    if ($author instanceof \App\Models\Author) {
+        $logo = trim((string) ($author->getRawOriginal('logo') ?? ''));
+        if ($logo !== '' && $logo !== 'author.png') {
+            return publication_card_normalize_photo_url(
+                filter_var($logo, FILTER_VALIDATE_URL) ? $logo : asset(ltrim($logo, '/'))
+            );
+        }
+
+        $icon = trim((string) ($author->icon ?? ''));
+        if ($icon !== '' && str_contains($icon, '/')) {
+            return publication_card_normalize_photo_url(
+                filter_var($icon, FILTER_VALIDATE_URL) ? $icon : asset(ltrim($icon, '/'))
+            );
+        }
+    }
+
+    return null;
+}
+
+function publication_card_normalize_photo_url(string $photoUrl): string
+{
+    $baseUrl = rtrim(url('/'), '/');
+    if (preg_match('/^https?:\/\//i', $photoUrl)) {
+        return $photoUrl;
+    }
+    if (str_contains($photoUrl, $baseUrl)) {
+        return $photoUrl;
+    }
+    if (str_starts_with($photoUrl, '/storage/')) {
+        return $baseUrl.$photoUrl;
+    }
+    if (str_starts_with($photoUrl, 'storage/')) {
+        return $baseUrl.'/'.$photoUrl;
+    }
+
+    return $photoUrl;
+}
+
+/**
  * Emoji icon for a community participant badge slug.
  */
 function participant_badge_emoji(?string $slug): string

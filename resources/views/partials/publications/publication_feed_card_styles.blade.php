@@ -261,14 +261,32 @@
     }
 
     .community-pub-footer__meta {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.5rem 0.65rem;
+        display: block;
+        width: 100%;
     }
 
     .community-pub-footer__author-text {
-        max-width: min(100%, 22rem);
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .community-pub-footer__name-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .community-pub-footer__name-row .community-pub-footer__name {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .community-pub-footer__time {
+        flex: 0 0 auto;
+        margin-left: auto;
+        white-space: nowrap;
     }
 
     .community-pub-footer__name {

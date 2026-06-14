@@ -3,16 +3,9 @@
     $pubId = (int) $row->id;
     $likes = count($row->favourited ?? []);
     $author = $row->author;
-    $authorPhoto = $author->photo ?? ($author->logo ?? null);
-    if ($authorPhoto && ! preg_match('/^https?:\/\//', $authorPhoto)) {
-        if (strpos($authorPhoto, '/storage/') === 0) {
-            $authorPhoto = url($authorPhoto);
-        } elseif (strpos($authorPhoto, 'storage/') === 0) {
-            $authorPhoto = url('/' . $authorPhoto);
-        }
-    }
-    $posterName = $author->name ?? 'Unknown';
     $authorUser = $author->user ?? null;
+    $authorPhoto = publication_card_poster_photo_url($row, $author, $authorUser);
+    $posterName = $author->name ?? 'Unknown';
     $authorSubtitle = contributor_profile_organization($author, $authorUser) ?? '';
     $approvedComments = collect($row->comments ?? [])->filter(function ($comment) {
         $status = $comment->status ?? null;
@@ -154,7 +147,7 @@
 
             <div class="community-pub-footer">
                 <div class="community-pub-footer__avatar">
-                    @if($author && $authorPhoto)
+                    @if($authorPhoto)
                         <img src="{{ $authorPhoto }}" alt="{{ $posterName }}"
                              onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
                         <i class="fa fa-user" style="display:none;" aria-hidden="true"></i>
@@ -166,15 +159,17 @@
                 <div class="community-pub-footer__body">
                     <div class="community-pub-footer__meta">
                         <div class="community-pub-footer__author-text">
-                            <span class="community-pub-footer__name notranslate" translate="no">{{ $posterName }}</span>
+                            <div class="community-pub-footer__name-row">
+                                <span class="community-pub-footer__name notranslate" translate="no">{{ $posterName }}</span>
+                                <span class="community-pub-stat community-pub-stat--time community-pub-footer__time">
+                                    <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                    {{ publication_content_updated_ago($row) }}
+                                </span>
+                            </div>
                             @if($authorSubtitle !== '')
                                 <span class="community-pub-footer__subtitle notranslate" translate="no">{{ clean_unicode($authorSubtitle) }}</span>
                             @endif
                         </div>
-                        <span class="community-pub-stat community-pub-stat--time">
-                            <i class="fa fa-clock-o" aria-hidden="true"></i>
-                            {{ publication_content_updated_ago($row) }}
-                        </span>
                     </div>
 
                     <div class="community-pub-footer__actions publication-card-actions" onclick="event.stopPropagation();">
