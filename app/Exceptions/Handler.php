@@ -46,15 +46,17 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $e)
     {
-        if ($e instanceof HttpException && $e->getStatusCode() === 403) {
-            $view = ($request->is('admin*') || $request->is('permissions*'))
-                ? 'errors.403_admin'
-                : 'errors.403';
+        if ($e instanceof HttpException && in_array($e->getStatusCode(), [403, 404], true)) {
+            $status = $e->getStatusCode();
+            $suffix = ($request->is('admin*') || $request->is('permissions*')) ? '_admin' : '';
+            $view = "errors.{$status}{$suffix}";
 
-            return response()->view($view, [
-                'exception' => $e,
-                'message' => $e->getMessage(),
-            ], 403);
+            if (view()->exists($view)) {
+                return response()->view($view, [
+                    'exception' => $e,
+                    'message' => $e->getMessage(),
+                ], $status);
+            }
         }
 
         return parent::render($request, $e);
