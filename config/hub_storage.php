@@ -49,6 +49,7 @@ return [
         'publication_summaries' => 'uploads/publications/summaries',
         'forums' => 'uploads/forums',
         'forum_attachments' => 'uploads/forum',
+        'users' => 'uploads/users',
     ],
 
     /*

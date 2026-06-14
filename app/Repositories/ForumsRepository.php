@@ -394,6 +394,28 @@ class ForumsRepository extends SharedRepo{
             }
         }
 
+        if ($request->filled('status')) {
+            $status = (string) $request->status;
+            if ($status === 'published') {
+                $forums->where('is_approved', 1)
+                    ->where('status', 1)
+                    ->where(function ($q) {
+                        $q->where('is_rejected', 0)->orWhereNull('is_rejected');
+                    });
+            } elseif ($status === 'pending') {
+                $forums->where(function ($q) {
+                    $q->where('is_rejected', 0)->orWhereNull('is_rejected');
+                })->where(function ($q) {
+                    $q->where('is_approved', '!=', 1)
+                        ->orWhere('status', '!=', 1)
+                        ->orWhereNull('is_approved')
+                        ->orWhereNull('status');
+                });
+            } elseif ($status === 'rejected') {
+                $forums->where('is_rejected', 1);
+            }
+        }
+
         return $forums->paginate($rows_count)->withQueryString();
     }
 

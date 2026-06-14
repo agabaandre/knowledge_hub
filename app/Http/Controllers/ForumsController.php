@@ -298,7 +298,45 @@ class ForumsController extends Controller
             return redirect()->guest(route('login'));
         }
 
-        $data['threads'] = $this->forumsRepo->getAuthoredForumThreads((int) auth()->id(), $request);
+        $userId = (int) auth()->id();
+        $userForums = Forum::query()
+            ->where('created_by', $userId)
+            ->get(['id', 'is_approved', 'status', 'is_rejected', 'views']);
+
+        $stats = [
+            'total' => $userForums->count(),
+            'published' => $userForums->filter(function ($forum) {
+                return (int) ($forum->is_rejected ?? 0) !== 1
+                    && (int) ($forum->is_approved ?? 0) === 1
+                    && (int) ($forum->status ?? 0) === 1;
+            })->count(),
+            'pending' => $userForums->filter(function ($forum) {
+                $isRejected = (int) ($forum->is_rejected ?? 0) === 1;
+                $isLive = (int) ($forum->is_approved ?? 0) === 1 && (int) ($forum->status ?? 0) === 1;
+
+                return ! $isRejected && ! $isLive;
+            })->count(),
+            'rejected' => $userForums->where('is_rejected', 1)->count(),
+            'total_views' => $userForums->sum(fn ($forum) => (int) ($forum->views ?? 0)),
+            'forum_comments' => \App\Models\ForumEngagement::getTotalForumComments($userId),
+            'forum_engagements' => \App\Models\ForumEngagement::getTotalEngagements($userId),
+            'communities' => \App\Models\CommunityOfPracticeMembers::where('user_id', $userId)
+                ->where('is_approved', 1)
+                ->with('community')
+                ->get()
+                ->map(fn ($membership) => $membership->community)
+                ->filter()
+                ->map(fn ($community) => [
+                    'id' => (int) $community->id,
+                    'name' => (string) $community->community_name,
+                    'url' => community_detail_url($community),
+                ])
+                ->values()
+                ->all(),
+        ];
+
+        $data['stats'] = $stats;
+        $data['threads'] = $this->forumsRepo->getAuthoredForumThreads($userId, $request);
 
         return view('account.my_discussions', $data);
     }

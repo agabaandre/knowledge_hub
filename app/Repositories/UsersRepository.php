@@ -147,12 +147,15 @@ class UsersRepository {
         }
         
         if($request->hasFile( 'photo')):
-            //upload photo
-            $file        = $request->file('photo');
-            $file_name   = md5_file($file->getRealPath());
-            $extension   = $file->guessExtension();
-            $file_path   = $file_name.'.'.$extension;
-            $file->move(storage_path().'/app/public/uploads/users/',$file_path);
+            $file = $request->file('photo');
+            $extension = strtolower((string) ($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'jpg'));
+            $file_name = md5_file($file->getRealPath());
+            $file_path = $file_name.'.'.$extension;
+            $storagePath = hub_storage_path('uploads/users');
+            if (! is_dir($storagePath)) {
+                mkdir($storagePath, 0755, true);
+            }
+            $file->move($storagePath, $file_path);
             $user->photo  = $file_path;
             $user->is_photo_external  = false;
         endif;
