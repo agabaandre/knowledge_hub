@@ -303,16 +303,6 @@
         color: #fff !important;
     }
 
-    .community-pub-footer__posted-label {
-        display: block;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: #94a3b8;
-        margin-bottom: 0.1rem;
-    }
-
     .community-pub-share-actions--inline {
         display: inline-flex;
         align-items: center;

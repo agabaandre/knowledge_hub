@@ -39,6 +39,9 @@
 
 @section('styles')
 @include('communities.partials.detail_styles')
+<style>
+@include('publications.partials.preview_modal_styles')
+</style>
 @endsection
 
 @php

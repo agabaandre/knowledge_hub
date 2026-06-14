@@ -11,10 +11,15 @@
 @endphp
 
 @if(isset($searchForums) && $searchForums->count() > 0)
-<div class="contributor-sidebar-panel search-sidebar-panel mb-4">
-    <div class="contributor-sidebar-panel__header">
-        <i class="fa fa-comments contributor-sidebar-panel__icon" aria-hidden="true"></i>
-        <h3 class="contributor-sidebar-panel__title">{{ __('publications.search.related_forums') }}</h3>
+<div class="records-sidebar-card records-sidebar-card--forums search-sidebar-panel mb-4">
+    <div class="records-sidebar-card__head">
+        <span class="records-sidebar-card__icon records-sidebar-card__icon--forums" aria-hidden="true">
+            <i class="fa fa-comments"></i>
+        </span>
+        <div>
+            <h2 class="records-sidebar-card__title">{{ __('publications.search.related_forums') }}</h2>
+            <p class="records-sidebar-card__hint">Discussions related to your search.</p>
+        </div>
     </div>
     <ul class="search-sidebar-list list-unstyled mb-0">
         @foreach($searchForums as $forum)
@@ -36,15 +41,20 @@
         </li>
         @endforeach
     </ul>
-    <a href="{{ $forumsUrl }}" class="search-sidebar-view-all">{{ __('publications.search.view_all_forums') }}</a>
+    <a href="{{ $forumsUrl }}" class="search-sidebar-view-all"><i class="fa fa-arrow-right" aria-hidden="true"></i> {{ __('publications.search.view_all_forums') }}</a>
 </div>
 @endif
 
 @if(isset($latestPublications) && $latestPublications->count() > 0)
-<div class="contributor-sidebar-panel search-sidebar-panel mb-4">
-    <div class="contributor-sidebar-panel__header">
-        <i class="fa fa-clock contributor-sidebar-panel__icon" aria-hidden="true"></i>
-        <h3 class="contributor-sidebar-panel__title">{{ __('publications.search.latest_publications') }}</h3>
+<div class="records-sidebar-card records-sidebar-card--latest search-sidebar-panel mb-4">
+    <div class="records-sidebar-card__head">
+        <span class="records-sidebar-card__icon records-sidebar-card__icon--latest" aria-hidden="true">
+            <i class="fa fa-clock"></i>
+        </span>
+        <div>
+            <h2 class="records-sidebar-card__title">{{ __('publications.search.latest_publications') }}</h2>
+            <p class="records-sidebar-card__hint">Recently added resources on the hub.</p>
+        </div>
     </div>
     <ul class="search-sidebar-list list-unstyled mb-0">
         @foreach($latestPublications->take(5) as $pub)
@@ -64,6 +74,6 @@
         </li>
         @endforeach
     </ul>
-    <a href="{{ url('records') }}" class="search-sidebar-view-all">{{ __('publications.search.view_all_publications') }}</a>
+    <a href="{{ url('records') }}" class="search-sidebar-view-all"><i class="fa fa-arrow-right" aria-hidden="true"></i> {{ __('publications.search.view_all_publications') }}</a>
 </div>
 @endif

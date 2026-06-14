@@ -15,6 +15,9 @@
 @section('styles')
 <style>
 @include('partials.publications.publication_feed_card_styles')
+@include('publications.partials.preview_modal_styles')
+@include('publications.partials.records_search_sidebar_styles')
+.records-search-main.is-loading { pointer-events: none; opacity: 0.55; transition: opacity .2s ease; }
 </style>
 @endsection
 
@@ -55,64 +58,8 @@
                     @endif
                 </div>
 
-                <div class="col-lg-4" id="records-search-sidebar">
-                    @php
-                        $recordsSearchTagQuery = request()->except('page');
-                        $sidebarTagsList = (isset($tags) && count($tags) > 0) ? $tags->take(10) : \App\Models\Tag::query()->orderBy('tag_text', 'asc')->limit(10)->get();
-                    @endphp
-                    @include('publications.partials.contributor_sidebar_styles')
-                    <style>
-                        .sidebar-content{background:#fff;border:1px solid #e2e8f0;border-radius:0.5rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:20px}
-                        .search-sidebar-panel{margin-bottom:1.25rem}
-                        .search-sidebar-list{display:flex;flex-direction:column;gap:0.5rem}
-                        .search-sidebar-list__link{display:flex;flex-direction:column;gap:0.25rem;padding:0.75rem 0.85rem;border:1px solid #e2e8f0;border-radius:8px;text-decoration:none;background:#f8fafc;transition:border-color .15s ease,background .15s ease,box-shadow .15s ease}
-                        .search-sidebar-list__link:hover{border-color:rgba(17,154,72,.35);background:#fff;box-shadow:0 2px 8px rgba(15,23,42,.05)}
-                        .search-sidebar-list__title{font-size:0.9rem;font-weight:600;color:#0f172a;line-height:1.35}
-                        .search-sidebar-list__excerpt{font-size:0.8rem;color:#64748b;line-height:1.45}
-                        .search-sidebar-list__meta{display:flex;flex-wrap:wrap;gap:0.5rem 0.75rem;font-size:0.75rem;color:#94a3b8}
-                        .search-sidebar-list__meta i{color:var(--theme-color-primary,#119A48);margin-right:0.2rem}
-                        .search-sidebar-view-all{display:inline-block;margin-top:0.85rem;font-size:0.8125rem;font-weight:600;color:var(--theme-color-primary,#119A48);text-decoration:none}
-                        .search-sidebar-view-all:hover{text-decoration:underline}
-                        .sidebar-content h5.popular-tags-title{margin-bottom:10px;font-size:15px;font-weight:500;text-transform:capitalize;color:#2d3748}
-                        .search-facet-filters h5.popular-tags-title{font-size:15px;font-weight:500;margin-bottom:10px;color:#2d3748}
-                        .search-facet-filters h5.facet-subheading{font-size:15px;font-weight:500;margin:0 0 8px 0;color:#2d3748;text-transform:none}
-                        .sidebar-content .btn-primary{background-color:var(--theme-color-primary, #119A48);border-color:var(--theme-color-primary, #119A48);font-weight:500;border-radius:0.375rem}
-                        .sidebar-content .btn-primary:hover{background-color:var(--theme-color-primary, #0d7a38);border-color:var(--theme-color-primary, #0d7a38);filter:brightness(1.05)}
-                        .sidebar-content .btn-secondary{font-weight:500;border-radius:0.375rem}
-                        .sidebar-tags{display:flex;flex-wrap:wrap;gap:0.5rem}
-                        .sidebar-tag-pill{display:inline-block;padding:0.3rem 0.7rem;font-size:0.8rem;font-weight:500;color:#ffffff !important;text-decoration:none;border-radius:0.25rem;transition:all 0.2s ease;white-space:nowrap;background-color:var(--theme-color-primary, #119A48) !important;border:1px solid rgba(17,154,72,0.3)}
-                        .sidebar-tag-pill:hover{transform:translateY(-2px);box-shadow:0 2px 6px rgba(17,154,72,0.3);color:#ffffff !important;text-decoration:none;background-color:var(--theme-color-primary, #119A48) !important}
-                        .sidebar-tag-pill.sidebar-tag-pill--active{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--theme-color-primary, #119A48)}
-                        .records-search-main.is-loading{pointer-events:none;opacity:0.55;transition:opacity .2s ease}
-                        .search-facet-filters .facet-checkbox-column{display:flex;flex-direction:column;align-items:flex-start;gap:0}
-                        .search-facet-filters .facet-checkbox-column--2col{display:grid;grid-template-columns:1fr 1fr;gap:0.2rem 0.45rem;align-items:start;width:100%}
-                        .search-facet-filters .facet-checkbox-column--2col .facet-checkbox-label{margin-bottom:0}
-                        .search-facet-filters .facet-checkbox-label{display:flex;align-items:flex-start;font-size:0.62rem;line-height:1.3;margin-bottom:0.28rem;cursor:pointer;color:#334155;padding:0.18rem 0.32rem;border-radius:0.25rem;transition:background-color .15s ease,color .15s ease}
-                        .search-facet-filters .facet-checkbox-label input{margin-top:0.12rem;margin-right:0.3rem;flex-shrink:0;width:0.85rem;height:0.85rem;accent-color:var(--theme-color-primary, #119A48)}
-                        .search-facet-filters .facet-checkbox-label span{font-size:0.62rem}
-                        .search-facet-filters .facet-checkbox-label:has(input:checked){background-color:var(--theme-color-primary, #119A48);color:#fff}
-                        .search-facet-filters .facet-checkbox-label:has(input:checked) span{color:#fff}
-                    </style>
-
-                    @if($sidebarTagsList->count() > 0)
-                    <div class="sidebar-content">
-                        <h5 class="popular-tags-title">{{ __('ui_body.footer_popular_tags') }}</h5>
-                      <div class="sidebar-tags">
-                            @foreach($sidebarTagsList as $tag)
-                                @php
-                                    $tagHref = tag_records_url($tag, true, $recordsSearchTagQuery);
-                                    $tagActive = request('tag') !== null && request('tag') !== '' && (string) request('tag') === (string) $tag->id;
-                    @endphp
-                                <a href="{{ $tagHref }}"
-                                   class="sidebar-tag-pill js-records-search-ajax{{ $tagActive ? ' sidebar-tag-pill--active' : '' }}"
-                                   title="{{ $tag->tag_text }}">
-                                    {{ truncate($tag->tag_text, 15) }}
-                        </a>
-                        @endforeach
-                      </div>
-                    </div>
-                    @endif
-
+                <div class="col-lg-4 records-search-sidebar" id="records-search-sidebar">
+                    @include('publications.partials.records_search_sidebar_tags')
                     @include('partials.search.search_sidebar_facets')
 
                     <div id="records-search-sidebar-dynamic">

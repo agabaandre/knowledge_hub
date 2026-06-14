@@ -166,7 +166,6 @@
                 <div class="community-pub-footer__body">
                     <div class="community-pub-footer__meta">
                         <div class="community-pub-footer__author-text">
-                            <span class="community-pub-footer__posted-label">Posted by:</span>
                             <span class="community-pub-footer__name notranslate" translate="no">{{ $posterName }}</span>
                             @if($authorSubtitle !== '')
                                 <span class="community-pub-footer__subtitle notranslate" translate="no">{{ clean_unicode($authorSubtitle) }}</span>

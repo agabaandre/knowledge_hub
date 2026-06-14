@@ -9,6 +9,7 @@
 @section('styles')
 <style>
 @include('partials.publications.publication_feed_card_styles')
+@include('publications.partials.preview_modal_styles')
     .author-profile-page {
         padding: 2rem 0 3rem;
         background: #f8fafc;
