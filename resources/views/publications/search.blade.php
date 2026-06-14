@@ -221,47 +221,86 @@
                 });
             };
 
-            function getRecordsSearchTagId() {
-                var params = new URLSearchParams(window.location.search);
-                if (params.get('tag')) {
-                    return String(params.get('tag'));
-                }
-                var pathMatch = window.location.pathname.match(/\/records\/tag\/([^/]+)/);
-                if (pathMatch) {
-                    var slug = decodeURIComponent(pathMatch[1]);
-                    var escaped = slug.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-                    var link = document.querySelector('a.records-sidebar-tags__link[data-tag-slug="' + escaped + '"]');
-                    if (link && link.dataset.tagId) {
-                        return String(link.dataset.tagId);
-                    }
-                }
-                return RECORDS_SEARCH_TAG_ID || null;
+            function getTagSlugFromPathname(pathname) {
+                var path = pathname || window.location.pathname;
+                var match = path.match(/\/records\/tag\/([^/]+)/);
+                return match ? decodeURIComponent(match[1]) : null;
             }
 
-            function ensureTagInSearchParams(params) {
-                var tagId = getRecordsSearchTagId();
-                if (tagId && !params.get('tag')) {
-                    params.set('tag', tagId);
+            function tagIdFromSlug(slug) {
+                if (!slug) {
+                    return null;
+                }
+                var escaped = slug.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+                var link = document.querySelector('a.records-sidebar-tags__link[data-tag-slug="' + escaped + '"]');
+                return link && link.dataset.tagId ? String(link.dataset.tagId) : null;
+            }
+
+            function resolveRecordsTagApiParams(url) {
+                var params = new URLSearchParams(url.search);
+                var slug = getTagSlugFromPathname(url.pathname);
+                if (slug) {
+                    params.delete('tag');
+                    var tagId = tagIdFromSlug(slug);
+                    if (tagId) {
+                        params.set('tag', tagId);
+                    }
                 }
                 return params;
             }
 
+            function buildRecordsBrowserUrl(url, apiParams) {
+                var params = new URLSearchParams(apiParams.toString());
+                if (getTagSlugFromPathname(url.pathname)) {
+                    params.delete('tag');
+                }
+                normalizeFacetArrayQueryKeys(params);
+                var qs = params.toString();
+                return url.pathname + (qs ? '?' + qs : '');
+            }
+
+            function getActiveRecordsTagId() {
+                var slug = getTagSlugFromPathname();
+                if (slug) {
+                    var fromSlug = tagIdFromSlug(slug);
+                    if (fromSlug) {
+                        return fromSlug;
+                    }
+                }
+                var fromQuery = new URLSearchParams(window.location.search).get('tag');
+                return fromQuery ? String(fromQuery) : (RECORDS_SEARCH_TAG_ID || null);
+            }
+
+            function updateFacetClearVisibility() {
+                var wrap = document.getElementById('records-facet-clear-wrap');
+                if (!wrap) {
+                    return;
+                }
+                var anyChecked = document.querySelectorAll('.search-facet-cb:checked').length > 0;
+                wrap.classList.toggle('d-none', !anyChecked);
+            }
+
             function updateSidebarTagActiveState() {
-                var pathMatch = window.location.pathname.match(/\/records\/tag\/([^/]+)/);
-                var curTagSlug = pathMatch ? decodeURIComponent(pathMatch[1]) : null;
-                var curTagId = new URLSearchParams(window.location.search).get('tag');
+                var curTagSlug = getTagSlugFromPathname();
+                var curTagId = getActiveRecordsTagId();
 
                 document.querySelectorAll('a.js-records-search-ajax.records-sidebar-tags__link, a.js-records-search-ajax.sidebar-tag-pill').forEach(function (a) {
                     try {
+                        var linkTagId = a.dataset.tagId || null;
+                        var linkSlug = a.dataset.tagSlug || null;
                         var u = new URL(a.getAttribute('href'), window.location.origin);
-                        var tId = u.searchParams.get('tag');
-                        var tagSlugMatch = u.pathname.match(/\/records\/tag\/([^/]+)/);
-                        var tSlug = tagSlugMatch ? decodeURIComponent(tagSlugMatch[1]) : null;
+                        if (!linkTagId) {
+                            linkTagId = u.searchParams.get('tag');
+                        }
+                        if (!linkSlug) {
+                            var tagSlugMatch = u.pathname.match(/\/records\/tag\/([^/]+)/);
+                            linkSlug = tagSlugMatch ? decodeURIComponent(tagSlugMatch[1]) : null;
+                        }
                         var active = false;
-                        if (curTagId && tId && String(tId) === String(curTagId)) {
+                        if (curTagId && linkTagId && String(linkTagId) === String(curTagId)) {
                             active = true;
                         }
-                        if (curTagSlug && tSlug && String(tSlug) === String(curTagSlug)) {
+                        if (curTagSlug && linkSlug && String(linkSlug) === String(curTagSlug)) {
                             active = true;
                         }
                         if (a.classList.contains('records-sidebar-tags__link')) {
@@ -270,6 +309,10 @@
                             a.classList.toggle('sidebar-tag-pill--active', active);
                         }
                     } catch (e) { /* ignore */ }
+                });
+
+                document.querySelectorAll('.records-sidebar-card--tags .records-sidebar-clear-wrap').forEach(function (wrap) {
+                    wrap.classList.toggle('d-none', !curTagId);
                 });
             }
 
@@ -317,6 +360,7 @@
                 }
                 updateStructuredData(data);
                 window.initSearchSidebarFacets();
+                updateFacetClearVisibility();
                 updateSidebarTagActiveState();
                 if (typeof window.initKhubSearchAssistant === 'function') {
                     window.initKhubSearchAssistant(document);
@@ -468,8 +512,7 @@
                     loader.classList.remove('d-none');
                 }
 
-                var params = new URLSearchParams(window.location.search);
-                ensureTagInSearchParams(params);
+                var params = resolveRecordsTagApiParams(new URL(window.location.href));
                 params.delete('page');
                 params.set('page', String(currentPage + 1));
                 normalizeFacetArrayQueryKeys(params);
@@ -568,11 +611,11 @@
                     window.location.assign(fullUrl);
                     return;
                 }
-                var fragParams = new URLSearchParams(u.search);
-                ensureTagInSearchParams(fragParams);
+                var fragParams = resolveRecordsTagApiParams(u);
                 normalizeFacetArrayQueryKeys(fragParams);
-                var qs = fragParams.toString();
-                var fragUrl = FRAGMENT_URL + (qs ? '?' + qs : '');
+                var apiQs = fragParams.toString();
+                var browserUrl = buildRecordsBrowserUrl(u, fragParams);
+                var fragUrl = FRAGMENT_URL + (apiQs ? '?' + apiQs : '');
                 var aiMount = document.getElementById('khub-search-ai-mount');
                 if (aiMount && AI_SEARCH_ENABLED && fragParams.get('term') && String(fragParams.get('term')).trim().length >= 2) {
                     aiMount.innerHTML = '<p class="text-muted small mb-0"><i class="fa fa-spinner fa-spin me-1" aria-hidden="true"></i>' + @json(__('publications.search.loading_ai')) + '</p>';
@@ -603,11 +646,11 @@
                         var data = results[0];
                         applyRecordsSearchFragment(data, { mainEl: mainEl });
                         if (push) {
-                            history.pushState({ recordsSearchAjax: 1 }, '', u.pathname + (qs ? '?' + qs : ''));
+                            history.pushState({ recordsSearchAjax: 1 }, '', browserUrl);
                         }
                     })
                     .catch(function () {
-                        window.location.assign(u.href);
+                        window.location.assign(window.location.origin + browserUrl);
                     })
                     .finally(function () {
                         mainEl.classList.remove('is-loading');
@@ -622,8 +665,8 @@
                     clearTimeout(facetDebounceTimer);
                     facetDebounceTimer = null;
                 }
-                var params = new URLSearchParams(window.location.search);
-                ensureTagInSearchParams(params);
+                var u = new URL(window.location.href);
+                var params = resolveRecordsTagApiParams(u);
                 removeFacetParams(params);
                 params.delete('page');
                 var groups = [
@@ -644,9 +687,20 @@
                         params.append(g.param + '[]', cb.value);
                     });
                 });
-                var q = params.toString();
-                var url = window.location.origin + window.location.pathname + (q ? '?' + q : '');
-                runRecordsSearchAjax(url, { push: true });
+                var browserUrl = buildRecordsBrowserUrl(u, params);
+                runRecordsSearchAjax(window.location.origin + browserUrl, { push: true });
+            }
+
+            function clearSearchSidebarFacets() {
+                document.querySelectorAll('.search-facet-cb').forEach(function (cb) {
+                    cb.checked = false;
+                });
+                var u = new URL(window.location.href);
+                var params = resolveRecordsTagApiParams(u);
+                removeFacetParams(params);
+                params.delete('page');
+                var browserUrl = buildRecordsBrowserUrl(u, params);
+                runRecordsSearchAjax(window.location.origin + browserUrl, { push: true });
             }
 
             function scheduleApplySearchSidebarFacets() {
@@ -660,7 +714,17 @@
             }
 
             document.addEventListener('DOMContentLoaded', function () {
+                if (getTagSlugFromPathname() && window.location.search.indexOf('tag=') !== -1) {
+                    var cleanUrl = buildRecordsBrowserUrl(
+                        new URL(window.location.href),
+                        resolveRecordsTagApiParams(new URL(window.location.href))
+                    );
+                    if (cleanUrl !== window.location.pathname + window.location.search) {
+                        history.replaceState({ recordsSearchAjax: 1 }, '', cleanUrl);
+                    }
+                }
                 window.initSearchSidebarFacets();
+                updateFacetClearVisibility();
                 updateSidebarTagActiveState();
                 if (typeof window.initRecordsSearchInfiniteScroll === 'function') {
                     window.initRecordsSearchInfiniteScroll(mainEl);
@@ -669,10 +733,16 @@
                 if (side) {
                     side.addEventListener('change', function (e) {
                         if (e.target && e.target.classList && e.target.classList.contains('search-facet-cb')) {
+                            updateFacetClearVisibility();
                             scheduleApplySearchSidebarFacets();
                         }
                     });
                     side.addEventListener('click', function (e) {
+                        if (e.target.closest('.js-records-clear-facets')) {
+                            e.preventDefault();
+                            clearSearchSidebarFacets();
+                            return;
+                        }
                         var a = e.target.closest('a.js-records-search-ajax');
                         if (!a) {
                             return;

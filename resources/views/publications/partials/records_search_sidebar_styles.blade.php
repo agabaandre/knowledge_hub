@@ -172,6 +172,17 @@
         text-decoration: underline;
     }
 
+    .records-sidebar-tags__clear--btn {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+    }
+
+    .records-sidebar-clear-wrap {
+        margin-top: 0.65rem;
+    }
+
     .records-facet-group + .records-facet-group {
         margin-top: 1rem;
         padding-top: 0.85rem;

@@ -3,18 +3,23 @@
     $topForums = collect($forumTopByEngagement ?? []);
     $categories = collect($forumSidebarCategories ?? []);
     $popularTags = collect($forumPopularTags ?? $categories->take(5));
-    $popularTagNames = $popularTags
-        ->map(fn ($row) => mb_strtolower(trim((string) ($row->tag ?? ''))))
-        ->filter()
-        ->values()
-        ->all();
-    $moreTopics = $categories->filter(function ($row) use ($popularTagNames) {
-        $tag = mb_strtolower(trim((string) ($row->tag ?? '')));
-        return $tag !== '' && ! in_array($tag, $popularTagNames, true);
-    });
     $activeTag = $activeForumTag ?? request('tag');
+
+    if ($activeTag) {
+        $inPopularList = $popularTags->contains(
+            fn ($row) => strcasecmp((string) ($row->tag ?? ''), (string) $activeTag) === 0
+        );
+        if (! $inPopularList) {
+            $activeRow = $categories->first(
+                fn ($row) => strcasecmp((string) ($row->tag ?? ''), (string) $activeTag) === 0
+            );
+            if ($activeRow) {
+                $popularTags = $popularTags->take(4)->prepend($activeRow);
+            }
+        }
+    }
+
     $sidebarTagTexts = $popularTags->pluck('tag')
-        ->merge($moreTopics->pluck('tag'))
         ->map(fn ($t) => trim((string) $t))
         ->filter()
         ->unique()
@@ -129,38 +134,6 @@
                 </li>
             @endforeach
         </ol>
-    </div>
-    @endif
-
-    @if($moreTopics->isNotEmpty())
-    <div class="forums-sidebar-card forums-sidebar-card--topics">
-        <div class="forums-sidebar-card__head">
-            <span class="forums-sidebar-card__icon forums-sidebar-card__icon--topics" aria-hidden="true">
-                <i class="fa fa-folder-open"></i>
-            </span>
-            <div>
-                <h2 class="forums-sidebar-card__title mb-0">Topics</h2>
-                <p class="forums-sidebar-card__hint mb-0">Browse discussions by health topic.</p>
-            </div>
-        </div>
-        <ul class="forums-sidebar-topics list-unstyled mb-0">
-            @foreach($moreTopics as $row)
-                @php
-                    $tag = (string) ($row->tag ?? '');
-                    $isActive = $activeTag !== null && strcasecmp((string) $activeTag, $tag) === 0;
-                    $tagSlug = (string) ($sidebarTagSlugs[$tag] ?? '');
-                @endphp
-                <li>
-                    <a href="{{ tag_forums_url($tag) }}"
-                       class="forums-sidebar-topics__link js-forums-tag-ajax{{ $isActive ? ' is-active' : '' }}"
-                       data-tag-text="{{ $tag }}"
-                       data-tag-slug="{{ $tagSlug }}">
-                        <span class="forums-sidebar-topics__label">#{{ $tag }}</span>
-                        <span class="forums-sidebar-topics__count">{{ number_format((int) ($row->topics_count ?? 0)) }}</span>
-                    </a>
-                </li>
-            @endforeach
-        </ul>
     </div>
     @endif
 

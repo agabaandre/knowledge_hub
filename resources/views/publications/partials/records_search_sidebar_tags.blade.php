@@ -60,8 +60,14 @@
         @endforeach
     </div>
     @if($activeTagId)
-        <a href="{{ url('records/search') . (request()->except('tag', 'page') ? '?' . http_build_query(request()->except('tag', 'page')) : '') }}"
-           class="records-sidebar-tags__clear js-records-search-ajax">Clear tag filter</a>
+        <div class="records-sidebar-clear-wrap">
+            @php
+                $clearTagQuery = request()->except('tag', 'page');
+                $clearTagUrl = url('records/search') . ($clearTagQuery ? '?' . http_build_query($clearTagQuery) : '');
+            @endphp
+            <a href="{{ $clearTagUrl }}"
+               class="records-sidebar-tags__clear js-records-search-ajax">Clear tag filter</a>
+        </div>
     @endif
 </div>
 @endif

@@ -69,5 +69,10 @@
         </div>
     </div>
     @endif
+    <div id="records-facet-clear-wrap" class="records-sidebar-clear-wrap d-none">
+        <button type="button" class="records-sidebar-tags__clear records-sidebar-tags__clear--btn js-records-clear-facets">
+            Clear filters
+        </button>
+    </div>
 </div>
 @endif
