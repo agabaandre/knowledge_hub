@@ -141,13 +141,15 @@
                     </div>
 
                     @if(\Illuminate\Support\Facades\Schema::hasColumn('users', 'gender'))
-                    @php($profileGender = old('gender', $user->gender))
+                    @php
+                        $profileGender = old('gender', $user->gender);
+                    @endphp
                     <div class="account-profile-field">
                         <label class="form-label" for="gender">Gender</label>
                         <select name="gender" id="gender" class="form-control">
-                            <option value="" @selected(blank($profileGender))>Prefer not to say</option>
-                            <option value="male" @selected($profileGender === 'male')>Male</option>
-                            <option value="female" @selected($profileGender === 'female')>Female</option>
+                            <option value="" @if(blank($profileGender)) selected @endif>Prefer not to say</option>
+                            <option value="male" @if($profileGender === 'male') selected @endif>Male</option>
+                            <option value="female" @if($profileGender === 'female') selected @endif>Female</option>
                         </select>
                         @error('gender')
                             <div class="text-danger small mt-1"><strong>{{ $message }}</strong></div>
