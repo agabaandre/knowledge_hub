@@ -118,7 +118,7 @@
 @include('partials.secondary_navigation', ['forceShow' => true])
 
 <div class="community-detail-shell">
-<div class="container community-detail-page">
+<div class="container community-detail-page publication-feed-card-scope">
     @if(! $isCommunityMember)
         <div class="alert {{ $isPendingMember ? 'alert-warning' : 'alert-info' }} mb-4">
             @if($isPendingMember)
@@ -244,7 +244,7 @@
                     @endif
                     @if($publications->count() > 0)
                         @foreach($publications as $index => $publication)
-                            @include('communities.partials.publication_card', [
+                            @include('partials.publications.publication_feed_card', [
                                 'row' => $publication,
                                 'i' => (($publications->currentPage() - 1) * $publications->perPage()) + $index + 1,
                             ])
@@ -669,6 +669,6 @@
 </script>
 @endif
 @include('publications.partials.preview_modal')
-@include('communities.partials.publication_card_scripts')
+@include('partials.publications.publication_feed_card_scripts')
 @endsection
 

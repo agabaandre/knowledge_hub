@@ -13,6 +13,9 @@
 @endsection
 
 @section('styles')
+<style>
+@include('partials.publications.publication_feed_card_styles')
+</style>
 @endsection
 
 @section('content')
@@ -715,4 +718,7 @@
         <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
         <script src="{{ asset('js/records-search-async.js') }}?v={{ filemtime(public_path('js/records-search-async.js')) }}"></script>
         @endif
+        @include('common.attachment_js')
+        @include('publications.partials.preview_modal')
+        @include('partials.publications.publication_feed_card_scripts')
     @endsection

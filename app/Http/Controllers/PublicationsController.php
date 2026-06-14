@@ -976,7 +976,7 @@ class PublicationsController extends Controller
                 'comment_count' => $approvedCount,
                 'comment' => $comment,
                 'comment_html' => $isApproved
-                    ? view('communities.partials.publication_comment_item_mini', ['comment' => $comment])->render()
+                    ? view('partials.publications.publication_comment_item_mini', ['comment' => $comment])->render()
                     : null,
             ]);
         }

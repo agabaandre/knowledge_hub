@@ -42,7 +42,16 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
     $with = ['file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent', 'attachments'];
     if ($request->boolean('search_listing')) {
-        $with = ['file_type', 'author', 'sub_theme', 'category', 'country'];
+        $with = [
+            'file_type',
+            'author.user',
+            'sub_theme.theme',
+            'data_category',
+            'country',
+            'comments.user',
+            'attachments',
+            'favourited',
+        ];
     }
     if (!empty($request->approved_only)) {
         $with[] = 'approver';
