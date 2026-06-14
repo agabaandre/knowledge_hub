@@ -2191,17 +2191,12 @@ class CommsOfPracticeRepository{
                     throw new \Exception('File does not exist after move: '.$finalPath);
                 }
 
-                if ($officeService->isConvertibleExtension($extension)) {
-                    $pdfPath = $officeService->convertToPdf($finalPath);
-                    if ($pdfPath && is_file($pdfPath) && filesize($pdfPath) > 0) {
-                        if (is_file($finalPath) && $finalPath !== $pdfPath) {
-                            @unlink($finalPath);
-                        }
-                        $extension = 'pdf';
-                        $file_path = 'community/'.$file_name.'.pdf';
-                        $original_filename = pathinfo($original_filename, PATHINFO_FILENAME).'.pdf';
-                        $finalPath = $pdfPath;
-                    }
+                $converted = $officeService->replaceStoredFileWithPdfIfEnabled($finalPath, $extension, $original_filename);
+                if ($converted !== null) {
+                    $extension = 'pdf';
+                    $file_path = 'community/'.$file_name.'.pdf';
+                    $original_filename = $converted['display_filename'];
+                    $finalPath = $converted['absolute_path'];
                 }
 
                 CustomAttachment::create([

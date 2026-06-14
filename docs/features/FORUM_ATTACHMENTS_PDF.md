@@ -6,7 +6,7 @@ This document describes **server software**, **configuration**, and **runtime be
 
 ## Feature overview
 
-- **Where it applies:** Attachments on **forum comments** (`model = forum_comments` in `custom_attachments`), including the main “Share your views” form and replies on forum threads (e.g. `/forums/thread?id=…`).
+- **Where it applies:** Attachments on **forum comments**, **forum thread posts**, **community comments**, and **publication** uploads (account publish wizard and admin). Controlled by **Admin → Settings → Advanced → Convert Office documents to PDF on upload** (`convert_office_uploads_to_pdf`, default on).
 - **Goal:** Store and preview **PDF** where possible, instead of leaving binary office formats in public storage.
 - **Code touchpoints (reference):**
   - `App\Services\OfficeDocumentToPdfService` — conversion (LibreOffice + PhpWord fallback for `.docx`)

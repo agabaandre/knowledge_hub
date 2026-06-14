@@ -14,10 +14,21 @@ BODY_FILE="${TMPDIR:-/tmp}/khub_sec_body.html"
 run_test() {
   local label="$1"
   local url="$2"
-  local code time_s body leak result
+  local accept="${3:-}"
+  local mode="${4:-follow}"
+  local code time_s body leak result curl_args=()
 
-  code=$(curl -sL -A "$UA" -o "$BODY_FILE" -w "%{http_code}" --max-time 45 "$url" 2>/dev/null || echo "000")
-  time_s=$(curl -sL -A "$UA" -o /dev/null -w "%{time_total}" --max-time 45 "$url" 2>/dev/null || echo "0")
+  if [ "$mode" = "no-follow" ]; then
+    curl_args=(-s -A "$UA" --max-redirs 0)
+  else
+    curl_args=(-sL -A "$UA")
+  fi
+  if [ -n "$accept" ]; then
+    curl_args+=(-H "Accept: $accept")
+  fi
+
+  code=$(curl "${curl_args[@]}" -o "$BODY_FILE" -w "%{http_code}" --max-time 45 "$url" 2>/dev/null || echo "000")
+  time_s=$(curl "${curl_args[@]}" -o /dev/null -w "%{time_total}" --max-time 45 "$url" 2>/dev/null || echo "0")
   body=$(wc -c < "$BODY_FILE" 2>/dev/null | tr -d ' ')
   leak=""
 
@@ -60,6 +71,6 @@ run_test "rcc_all" "${BASE}/records/search?rcc=all"
 run_test "country_invalid" "${BASE}/records/search?country_id=abc"
 run_test "data_cat_invalid" "${BASE}/records/search?data_category_id=abc"
 run_test "term_xss" "${BASE}/records/search?term=%3Cscript%3Ealert(1)%3C%2Fscript%3E"
-run_test "fragment_sqli" "${BASE}/records/search/fragment?term=test%27%20OR%201%3D1--&country_id=1%20OR%201%3D1"
-run_test "admin_unauth" "${BASE}/admin"
+run_test "fragment_sqli" "${BASE}/records/search/fragment?term=test%27%20OR%201%3D1--&country_id=1%20OR%201%3D1" "application/json"
+run_test "admin_unauth" "${BASE}/admin" "" "no-follow"
 run_test "path_traversal" "${BASE}/records/search?term=..%2F..%2Fetc%2Fpasswd"

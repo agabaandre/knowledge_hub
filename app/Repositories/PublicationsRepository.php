@@ -25,6 +25,7 @@ use App\Models\User;
 use App\Support\CommunityTargeting;
 use App\Support\ContributorProfileContext;
 use App\Support\SeoSlugger;
+use App\Services\OfficeDocumentToPdfService;
 use App\Models\ContentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -1539,6 +1540,15 @@ public function getPublicationIds(Request $request, int $limit = 80): array
                 }
 
                 $file->move($storagePath, $file_path);
+
+                $finalPath = $storagePath.$file_path;
+                $extension = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
+                $converter = app(OfficeDocumentToPdfService::class);
+                $converted = $converter->replaceStoredFileWithPdfIfEnabled($finalPath, $extension, $clientOriginal);
+                if ($converted !== null) {
+                    $file_path = pathinfo($file_path, PATHINFO_FILENAME).'.pdf';
+                    $clientOriginal = $converted['display_filename'];
+                }
 
                 $displayLabel = \Illuminate\Support\Str::limit($clientOriginal, 120);
 

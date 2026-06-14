@@ -758,17 +758,12 @@ class ForumsRepository extends SharedRepo{
                 }
 
                 $converter = app(OfficeDocumentToPdfService::class);
-                if ($converter->isConvertibleExtension($extension)) {
-                    $pdfPath = $converter->convertToPdf($finalPath);
-                    if ($pdfPath && is_file($pdfPath) && filesize($pdfPath) > 0) {
-                        if (is_file($finalPath) && $finalPath !== $pdfPath) {
-                            @unlink($finalPath);
-                        }
-                        $extension = 'pdf';
-                        $file_path = 'forum/'.$file_name.'.pdf';
-                        $original_filename = pathinfo($original_filename, PATHINFO_FILENAME).'.pdf';
-                        $finalPath = $pdfPath;
-                    }
+                $converted = $converter->replaceStoredFileWithPdfIfEnabled($finalPath, $extension, $original_filename);
+                if ($converted !== null) {
+                    $extension = 'pdf';
+                    $file_path = 'forum/'.$file_name.'.pdf';
+                    $original_filename = $converted['display_filename'];
+                    $finalPath = $converted['absolute_path'];
                 }
 
                 \Log::info('Forum comment attachment saved successfully', [
@@ -1263,18 +1258,13 @@ class ForumsRepository extends SharedRepo{
             $finalPath = $dir . DIRECTORY_SEPARATOR . $basename;
             $file_path = $model . '/' . $basename;
 
-            if ($converter->isConvertibleExtension($extension)) {
-                $pdfPath = $converter->convertToPdf($finalPath);
-                if ($pdfPath && is_file($pdfPath) && filesize($pdfPath) > 0) {
-                    if (is_file($finalPath) && $finalPath !== $pdfPath) {
-                        @unlink($finalPath);
-                    }
-                    $extension = 'pdf';
-                    $basename = $file_name . '.pdf';
-                    $file_path = $model . '/' . $basename;
-                    $description = pathinfo($description, PATHINFO_FILENAME) . '.pdf';
-                    $finalPath = $pdfPath;
-                }
+            $converted = $converter->replaceStoredFileWithPdfIfEnabled($finalPath, $extension, $description);
+            if ($converted !== null) {
+                $extension = 'pdf';
+                $basename = $file_name.'.pdf';
+                $file_path = $model.'/'.$basename;
+                $description = $converted['display_filename'];
+                $finalPath = $converted['absolute_path'];
             }
 
             $lastPath = $file_path;

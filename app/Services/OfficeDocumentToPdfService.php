@@ -9,15 +9,64 @@ use Symfony\Component\Process\Process;
 
 class OfficeDocumentToPdfService
 {
-    /** Office formats we convert to PDF for forum attachments. */
+    /** Office formats converted to PDF when the feature is enabled. */
     public const CONVERTIBLE_EXTENSIONS = [
         'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
         'odt', 'ods', 'odp', 'rtf',
     ];
 
+    public function isEnabled(): bool
+    {
+        if (! function_exists('office_documents_to_pdf_enabled')) {
+            return true;
+        }
+
+        return office_documents_to_pdf_enabled();
+    }
+
     public function isConvertibleExtension(string $extension): bool
     {
         return in_array(strtolower($extension), self::CONVERTIBLE_EXTENSIONS, true);
+    }
+
+    /**
+     * When enabled, convert a stored office file to PDF and remove the original.
+     *
+     * @return array{absolute_path: string, extension: string, display_filename: string}|null
+     */
+    public function replaceStoredFileWithPdfIfEnabled(
+        string $absolutePath,
+        string $extension,
+        string $displayFilename
+    ): ?array {
+        if (! $this->isEnabled()) {
+            return null;
+        }
+
+        $extension = strtolower($extension);
+        if (! $this->isConvertibleExtension($extension)) {
+            return null;
+        }
+
+        $pdfPath = $this->convertToPdf($absolutePath);
+        if (! $pdfPath || ! is_file($pdfPath) || filesize($pdfPath) === 0) {
+            return null;
+        }
+
+        if (is_file($absolutePath) && $absolutePath !== $pdfPath) {
+            @unlink($absolutePath);
+        }
+
+        $stem = pathinfo($displayFilename, PATHINFO_FILENAME);
+        if ($stem === '' || $stem === '.') {
+            $stem = pathinfo($absolutePath, PATHINFO_FILENAME);
+        }
+
+        return [
+            'absolute_path' => $pdfPath,
+            'extension' => 'pdf',
+            'display_filename' => $stem.'.pdf',
+        ];
     }
 
     /**

@@ -700,7 +700,7 @@ class ForumsController extends Controller
             return redirect()->away(storage_link('uploads/' . $relative));
         }
 
-        if (!$converter->isConvertibleExtension($ext)) {
+        if (!$converter->isEnabled() || !$converter->isConvertibleExtension($ext)) {
             return redirect()->away(storage_link('uploads/' . $relative));
         }
 

@@ -177,6 +177,61 @@ Notable public endpoints: `GET /api/publications`, `GET /api/home`, `GET /api/he
 
 ---
 
+## Security testing (records search)
+
+SQL injection and filter-validation checks for `/records/search` and `/records/search/fragment`.
+
+| Method | Command |
+|--------|---------|
+| PHPUnit | `php artisan test tests/Feature/RecordsSearchSecurityTest.php` |
+| Smoke script (production) | `./scripts/security-test-records-search.sh https://khub.africacdc.org` |
+| Smoke script (local) | `./scripts/security-test-records-search.sh http://localhost/knowledge_hub` |
+
+Full methodology, probe list, and **complete production test results** (2026-06-14): [docs/security/RECORDS_SEARCH_SECURITY_TESTING.md](docs/security/RECORDS_SEARCH_SECURITY_TESTING.md)
+
+### PHPUnit results (2026-06-14)
+
+```
+PASS  Tests\Feature\RecordsSearchSecurityTest
+✓ rejects invalid country id on fragment
+✓ rejects sql injection style country id on fragment
+✓ rejects sql injection style rcc on fragment
+✓ rejects invalid author id on fragment
+✓ rejects invalid file type id on fragment
+✓ rejects invalid tag on fragment
+✓ term sql probe does not leak database errors on fragment
+✓ rejects invalid country id on full search
+✓ rejects sql injection style rcc on full search
+
+Tests:  9 passed (0.90s)
+```
+
+### Production smoke results — https://khub.africacdc.org (2026-06-14 18:33 UTC)
+
+| Probe | Result | Time | Size |
+|-------|--------|------|------|
+| baseline_home | OK (200) | 2.28s | 595964 B |
+| search_empty | OK (200) | 9.66s | 627636 B |
+| term_sql_or | OK (200) | 2.63s | 481610 B |
+| term_union | OK (200) | 8.24s | 482008 B |
+| country_sqli | OK (200) | 8.40s | 595964 B |
+| author_sqli | OK (200) | 2.53s | 595964 B |
+| file_type_sqli | OK (200) | 2.46s | 595964 B |
+| thematic_sqli | OK (200) | 2.92s | 595964 B |
+| tag_sqli | OK (200) | 7.02s | 628783 B |
+| rcc_sqli | OK (200) | 3.62s | 595964 B |
+| rcc_all | OK (200) | 2.24s | 623106 B |
+| country_invalid | OK (200) | 8.02s | 595964 B |
+| data_cat_invalid | OK (200) | 4.16s | 595964 B |
+| term_xss | OK (200) | 4.78s | 481336 B |
+| fragment_sqli | REJECTED (422) | 1.82s | 104 B |
+| admin_unauth | REDIRECT (302) | 0.79s | 104 B |
+| path_traversal | OK (200) | 1.93s | 481598 B |
+
+No SQL error strings (`SQLSTATE`, `PDOException`, `QueryException`) were observed in responses. The fragment endpoint rejected combined SQL probes with **422**. Full-page filter probes return **200** after redirect follow because invalid integers are rejected with **302** first.
+
+---
+
 ## Troubleshooting
 
 | Issue | Solution |

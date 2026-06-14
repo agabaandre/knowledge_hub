@@ -1182,6 +1182,22 @@ if (!function_exists('forum_comment_attachment_raw_extension')) {
     }
 }
 
+if (! function_exists('office_documents_to_pdf_enabled')) {
+    /**
+     * Convert Word, Excel, PowerPoint, and OpenDocument uploads to PDF (publications, forums, communities).
+     */
+    function office_documents_to_pdf_enabled(): bool
+    {
+        if (! function_exists('settings')) {
+            return true;
+        }
+
+        $value = settings()->convert_office_uploads_to_pdf ?? null;
+
+        return $value === null ? true : (bool) $value;
+    }
+}
+
 if (!function_exists('forum_comment_attachment_is_convertible_office')) {
     /**
      * Office types on forum comments or forum thread posts (may be converted to PDF on demand via the PDF route).
@@ -1197,7 +1213,8 @@ if (!function_exists('forum_comment_attachment_is_convertible_office')) {
         }
         $ext = forum_comment_attachment_raw_extension($attachment);
 
-        return $ext !== '' && app(\App\Services\OfficeDocumentToPdfService::class)->isConvertibleExtension($ext);
+        return $ext !== '' && office_documents_to_pdf_enabled()
+            && app(\App\Services\OfficeDocumentToPdfService::class)->isConvertibleExtension($ext);
     }
 }
 

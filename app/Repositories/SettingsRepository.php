@@ -123,6 +123,9 @@ class SettingsRepository
         if (Schema::hasColumn('setting', 'use_seo_friendly_urls')) {
             $settings->use_seo_friendly_urls = (bool) $request->boolean('use_seo_friendly_urls', true);
         }
+        if (Schema::hasColumn('setting', 'convert_office_uploads_to_pdf')) {
+            $settings->convert_office_uploads_to_pdf = (bool) $request->boolean('convert_office_uploads_to_pdf', true);
+        }
         $settings->address           = $request->address;
         $settings->phone             = $request->phone;
         $settings->email             = $request->email;

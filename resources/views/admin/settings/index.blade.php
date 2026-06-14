@@ -2436,6 +2436,37 @@
                         </div>
                         @endif
 
+                        @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'convert_office_uploads_to_pdf'))
+                        <div class="col-lg-6">
+                            <div class="settings-group-card">
+                                <div class="settings-group-title">
+                                    <i class="fa fa-file-pdf"></i>
+                                    Uploads &amp; attachments
+                                </div>
+                                <div class="form-group mb-0">
+                                    <input type="hidden" name="convert_office_uploads_to_pdf" value="0">
+                                    <div class="form-check">
+                                        <input type="checkbox"
+                                               class="form-check-input"
+                                               id="convert_office_uploads_to_pdf"
+                                               name="convert_office_uploads_to_pdf"
+                                               value="1"
+                                               @if(old('convert_office_uploads_to_pdf', $settings->convert_office_uploads_to_pdf ?? true)) checked @endif>
+                                        <label class="form-check-label" for="convert_office_uploads_to_pdf">
+                                            Convert Office documents to PDF on upload
+                                        </label>
+                                    </div>
+                                    <small class="info-text d-block mt-2">
+                                        When enabled, Word, Excel, PowerPoint, OpenDocument, and RTF uploads are converted to PDF for
+                                        <strong>resource publications</strong> (account publish wizard), <strong>forum</strong> attachments, and
+                                        <strong>community</strong> comment uploads. Requires LibreOffice (<code>soffice</code>) on the server for best results;
+                                        <code>.docx</code> can fall back to PhpWord when LibreOffice is unavailable.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
                         @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'africa_map_version'))
                         <div class="col-lg-12">
                             <div class="settings-group-card">
