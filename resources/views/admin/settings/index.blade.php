@@ -874,6 +874,10 @@
             margin-bottom: 1rem;
         }
 
+        #settings-main-form {
+            display: block;
+        }
+
         .settings-grid-row {
             margin-bottom: 0.25rem;
         }
@@ -978,9 +982,7 @@
         </span>
     </div>
 
-    <form action="{{ route('admin.config.save') }}" method="post" enctype="multipart/form-data" id="settings-main-form">
-            @csrf
-        <div class="settings-container {{ (settings()->site_theme ?? '') === 'theme1.' ? 'settings-theme1' : '' }}">
+    <div class="settings-container {{ (settings()->site_theme ?? '') === 'theme1.' ? 'settings-theme1' : '' }}">
             <div class="settings-header">
                 <h2><i class="fa fa-cog me-2"></i>System Configuration</h2>
                 <p>Manage your site settings and preferences</p>
@@ -999,7 +1001,7 @@
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="colors-tab" data-tab="colors" type="button" role="tab" aria-controls="colors" aria-selected="false">
-                        <i class="fa fa-palette me-2"></i>Colors
+                        <i class="fa fa-palette me-2"></i>Colors &amp; Typography
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -1018,11 +1020,6 @@
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="typography-tab" data-tab="typography" type="button" role="tab" aria-controls="typography" aria-selected="false">
-                        <i class="fa fa-font me-2"></i>Typography
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
                     <button class="nav-link" id="contact-tab" data-tab="contact" type="button" role="tab" aria-controls="contact" aria-selected="false">
                         <i class="fa fa-address-book me-2"></i>Contact
                     </button>
@@ -1032,6 +1029,13 @@
                         <i class="fa fa-envelope me-2"></i>Email
                     </button>
                 </li>
+                @if(!empty($ssoFields))
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="social-login-tab" data-tab="social-login" type="button" role="tab" aria-controls="social-login" aria-selected="false">
+                        <i class="fa fa-sign-in-alt me-2"></i>Social Login
+                    </button>
+                </li>
+                @endif
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="badges-tab" data-tab="badges" type="button" role="tab" aria-controls="badges" aria-selected="false">
                         <i class="fa fa-trophy me-2"></i>Badges
@@ -1045,13 +1049,14 @@
             </ul>
 
             <div class="tab-content settings-content" id="settingsTabContent">
+                <form action="{{ route('admin.config.save') }}" method="post" enctype="multipart/form-data" id="settings-main-form">
+                    @csrf
                 @include('admin.settings.partials.tab_general')
                 @include('admin.settings.partials.tab_branding', ['configGalleryImages' => $configGalleryImages ?? []])
                 @include('admin.settings.partials.tab_colors')
                 @include('admin.settings.partials.tab_navigation')
                 @include('admin.settings.partials.tab_homepage')
                 @include('admin.settings.partials.tab_search')
-                @include('admin.settings.partials.tab_typography')
 
                 <!-- Contact Tab -->
                 <div class="tab-pane fade" id="contact" role="tabpanel">
@@ -1474,7 +1479,7 @@
                                     <small class="info-text d-block">When enabled, users who originally registered with email/password can use social login if the email matches. A successful social login verifies unverified accounts and updates sign-in method to social.</small>
                                 </div>
                                 <p class="text-muted small mb-0">
-                                    Microsoft, Google, and LinkedIn credentials are saved in the <strong>Social Login</strong> section below the tabs. Saving general settings no longer changes sign-in provider toggles.
+                                    Microsoft, Google, and LinkedIn credentials are configured on the <strong>Social Login</strong> tab. Saving general settings does not change sign-in provider toggles.
                                 </p>
                                 @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'block_disposable_email_registration'))
                                 <hr class="my-3">
@@ -1778,20 +1783,10 @@
                         </div>
                     </div>
                 </div>
-                </div>
-    </form>
+                </form>
 
-    @if(!empty($ssoFields))
-        <div class="settings-container mt-4 {{ (settings()->site_theme ?? '') === 'theme1.' ? 'settings-theme1' : '' }}" id="social-login-settings">
-            <div class="settings-header">
-                <h2><i class="fa fa-sign-in-alt me-2"></i>Social Login</h2>
-                <p>Configure Microsoft, Google, and LinkedIn sign-in separately from general settings.</p>
+                @include('admin.settings.partials.tab_social_login', ['ssoFields' => $ssoFields ?? []])
             </div>
-            <div class="p-4">
-                @include('admin.settings.partials.sso_credentials_form', ['ssoFields' => $ssoFields, 'standalone' => true])
-            </div>
-        </div>
-    @endif
 
             <div class="settings-action-bar">
                 <div class="settings-action-bar__inner">
@@ -2114,7 +2109,7 @@
                 $('#' + tabId).addClass('show active');
             }
 
-            var legacyTabMap = { appearance: 'colors' };
+            var legacyTabMap = { appearance: 'colors', typography: 'colors' };
 
             $('.settings-tabs .nav-link').on('click', function(e) {
                 e.preventDefault();

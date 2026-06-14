@@ -99,7 +99,7 @@
                 <label for="communities_listing_cards_per_row">Cards per row (desktop)</label>
                 <select class="form-control" id="communities_listing_cards_per_row" name="communities_listing_cards_per_row">
                     @foreach([1 => '1 per row', 2 => '2 per row (default)', 3 => '3 per row'] as $val => $label)
-                        <option value="{{ $val }}" @selected((int) ($settings->communities_listing_cards_per_row ?? 2) === $val)>{{ $label }}</option>
+                        <option value="{{ $val }}" @if((int) ($settings->communities_listing_cards_per_row ?? 2) === $val) selected @endif>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
