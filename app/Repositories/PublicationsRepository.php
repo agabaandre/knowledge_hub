@@ -1977,11 +1977,15 @@ private function applyFilters($query, $request) {
     if ($request->boolean('contributor_profile_scope')) {
         $authorId = (int) $request->input('contributor_profile_author_id');
         $userId = (int) $request->input('contributor_profile_user_id');
+        $corporateAuthorId = (int) $request->input('contributor_profile_corporate_author_id');
 
-        $query->where(function ($q) use ($authorId, $userId) {
+        $query->where(function ($q) use ($authorId, $userId, $corporateAuthorId) {
             $q->where('author_id', $authorId);
-            if ($userId > 0) {
-                $q->orWhere('user_id', $userId);
+            if ($userId > 0 && $corporateAuthorId > 0) {
+                $q->orWhere(function ($sub) use ($userId, $corporateAuthorId) {
+                    $sub->where('user_id', $userId)
+                        ->where('author_id', $corporateAuthorId);
+                });
             }
         });
     }

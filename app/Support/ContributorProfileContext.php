@@ -45,13 +45,19 @@ final class ContributorProfileContext
 
     public function applyPublicationScope(Builder $query): void
     {
-        $authorId = (int) $this->author->id;
+        $profileAuthorId = (int) $this->author->id;
         $userId = (int) ($this->user?->id ?? 0);
+        $corporateAuthorId = (int) ($this->corporateAuthor?->id ?? 0);
 
-        $query->where(function (Builder $q) use ($authorId, $userId) {
-            $q->where('author_id', $authorId);
-            if ($userId > 0) {
-                $q->orWhere('user_id', $userId);
+        $query->where(function (Builder $q) use ($profileAuthorId, $userId, $corporateAuthorId) {
+            $q->where('author_id', $profileAuthorId);
+
+            // Corporate account uploads only — not every record this user touched as editor/uploader.
+            if ($userId > 0 && $corporateAuthorId > 0) {
+                $q->orWhere(function (Builder $sub) use ($userId, $corporateAuthorId) {
+                    $sub->where('user_id', $userId)
+                        ->where('author_id', $corporateAuthorId);
+                });
             }
         });
     }
