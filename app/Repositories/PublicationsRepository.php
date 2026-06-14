@@ -47,6 +47,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
             'author.user',
             'sub_theme.theme',
             'data_category',
+            'sub_category',
             'country',
             'comments.user',
             'attachments',

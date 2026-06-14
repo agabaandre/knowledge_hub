@@ -87,7 +87,7 @@
         line-height: 1.65;
         font-size: 0.9375rem;
         display: -webkit-box;
-        -webkit-line-clamp: 7;
+        -webkit-line-clamp: 8;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
@@ -142,6 +142,17 @@
     .community-pub-meta-row strong {
         color: #334155;
         font-weight: 600;
+    }
+
+    .community-pub-meta-inline {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.35rem 1.25rem;
+    }
+
+    .community-pub-meta-part {
+        display: inline;
     }
 
     .community-pub-stats {

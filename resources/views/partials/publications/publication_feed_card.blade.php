@@ -36,7 +36,7 @@
     $final_image = (! empty($image_link) && filter_var($image_link, FILTER_VALIDATE_URL)) ? $image_link : $default_image;
 
     // Intro block: shared word budget for title + description (balanced card).
-    $feedIntroWordBudget = 112; // 82 baseline + 30 for description
+    $feedIntroWordBudget = 132; // balanced intro: title + description share this pool
     $minDescriptionWords = 30;
     $titlePlain = strip_tags(clean_unicode($row->title ?? ''));
     $titleWordCount = Str::wordCount($titlePlain);
@@ -97,16 +97,27 @@
                         <span><strong>Sub Theme:</strong> {!! clean_unicode($row->sub_theme->description) !!}</span>
                     </div>
                 @endif
+                @php
+                    $categoryName = trim((string) ($row->data_category->category_name ?? ''));
+                    $subCategoryName = trim((string) ($row->sub_category->category_name ?? ''));
+                @endphp
+                @if($categoryName !== '' || $subCategoryName !== '')
+                    <div class="community-pub-meta-row">
+                        <i class="lni lni-empty-file" aria-hidden="true"></i>
+                        <span class="community-pub-meta-inline">
+                            @if($categoryName !== '')
+                                <span class="community-pub-meta-part"><strong>Category:</strong> {{ $categoryName }}</span>
+                            @endif
+                            @if($subCategoryName !== '')
+                                <span class="community-pub-meta-part"><strong>Sub Category:</strong> {{ $subCategoryName }}</span>
+                            @endif
+                        </span>
+                    </div>
+                @endif
                 @if(! empty($row->associated_authors))
                     <div class="community-pub-meta-row">
                         <i class="fa fa-users" aria-hidden="true"></i>
                         <span><strong>Associated Authors:</strong> <span class="notranslate" translate="no">{{ clean_unicode($row->associated_authors) }}</span></span>
-                    </div>
-                @endif
-                @if(! empty($row->data_category->category_name ?? ''))
-                    <div class="community-pub-meta-row">
-                        <i class="lni lni-empty-file" aria-hidden="true"></i>
-                        <span><strong>Category:</strong> {{ $row->data_category->category_name }}</span>
                     </div>
                 @endif
             </div>
