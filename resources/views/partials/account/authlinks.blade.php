@@ -18,7 +18,7 @@
                                <a href="#" class="kh-nav-profile-link">
                                    @include('partials.user_avatar', [
                                        'user' => current_user(),
-                                       'size' => '28px',
+                                       'size' => '45px',
                                        'class' => 'kh-nav-avatar',
                                    ])
                                    <span class="kh-nav-label">{{ ucwords(current_user()->name) }}</span>

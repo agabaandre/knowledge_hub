@@ -18,12 +18,12 @@
                 <div class="d-none d-md-block">@include('layouts.partials.langselect')</div>
                 @auth
                     <div class="dropdown">
-                        <button class="btn btn-icon btn-sm btn-light rounded-circle p-0 overflow-hidden user-avatar-btn" type="button" data-bs-toggle="dropdown" aria-label="Account" style="width:36px;height:36px;">
+                        <button class="btn btn-icon btn-sm btn-light rounded-circle p-0 overflow-hidden user-avatar-btn" type="button" data-bs-toggle="dropdown" aria-label="Account" style="width:45px;height:45px;">
                             @if(!empty(current_user()->photo))
                                 <img src="{{ current_user()->photo }}" alt="" class="rounded-circle w-100 h-100" style="object-fit:cover;" onerror="this.style.display='none';var s=this.nextElementSibling;if(s){s.classList.remove('d-none');s.classList.add('d-inline-flex','user-avatar-placeholder-show');s.style.display='inline-flex';}">
-                                <span class="user-avatar-placeholder d-none align-items-center justify-content-center rounded-circle w-100 h-100" style="background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;font-size:0.9rem;"><i class="fa fa-user" aria-hidden="true"></i></span>
+                                <span class="user-avatar-placeholder d-none align-items-center justify-content-center rounded-circle w-100 h-100" style="background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;font-size:1.125rem;"><i class="fa fa-user" aria-hidden="true"></i></span>
                             @else
-                                <span class="user-avatar-placeholder d-inline-flex align-items-center justify-content-center rounded-circle w-100 h-100" style="background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;font-size:0.9rem;"><i class="fa fa-user" aria-hidden="true"></i></span>
+                                <span class="user-avatar-placeholder d-inline-flex align-items-center justify-content-center rounded-circle w-100 h-100" style="background:#f1f5f9;color:#334155;border:1px solid #e2e8f0;font-size:1.125rem;"><i class="fa fa-user" aria-hidden="true"></i></span>
                             @endif
                         </button>
                         <div class="dropdown-menu dropdown-menu-end">

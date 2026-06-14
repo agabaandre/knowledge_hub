@@ -873,6 +873,82 @@
             font-size: 0.875rem;
             margin-bottom: 1rem;
         }
+
+        .settings-grid-row {
+            margin-bottom: 0.25rem;
+        }
+
+        .settings-grid-row > [class*="col-"] {
+            margin-bottom: 1rem;
+        }
+
+        .settings-field--compact label {
+            margin-bottom: 0.35rem;
+        }
+
+        .settings-toggle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        .settings-toggle-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.85rem 0.95rem;
+            background: #f8fafc;
+            min-height: 3.25rem;
+        }
+
+        .settings-color-picker__controls {
+            display: flex;
+            align-items: stretch;
+        }
+
+        .settings-color-native {
+            width: 44px;
+            min-width: 44px;
+            height: auto;
+            min-height: 48px;
+            padding: 0.15rem;
+            border: none;
+            border-left: 1px solid #e2e8f0;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .settings-color-picker .settings-color-text {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.875rem;
+        }
+
+        .branding-asset-preview--banner {
+            width: 168px;
+            height: 58px;
+        }
+
+        .branding-asset-card--feature .branding-asset-card__header {
+            align-items: center;
+        }
+
+        .branding-asset-card--feature .branding-asset-preview--banner {
+            width: min(100%, 280px);
+            height: auto;
+            aspect-ratio: 1894 / 658;
+            max-height: 96px;
+        }
+
+        @media (max-width: 991.98px) {
+            .settings-toggle-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .settings-toggle-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 @endsection
 
@@ -917,8 +993,33 @@
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="appearance-tab" data-tab="appearance" type="button" role="tab" aria-controls="appearance" aria-selected="false">
-                        <i class="fa fa-palette me-2"></i>Appearance
+                    <button class="nav-link" id="branding-tab" data-tab="branding" type="button" role="tab" aria-controls="branding" aria-selected="false">
+                        <i class="fa fa-image me-2"></i>Branding
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="colors-tab" data-tab="colors" type="button" role="tab" aria-controls="colors" aria-selected="false">
+                        <i class="fa fa-palette me-2"></i>Colors
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="navigation-tab" data-tab="navigation" type="button" role="tab" aria-controls="navigation" aria-selected="false">
+                        <i class="fa fa-bars me-2"></i>Navigation
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="homepage-tab" data-tab="homepage" type="button" role="tab" aria-controls="homepage" aria-selected="false">
+                        <i class="fa fa-home me-2"></i>Homepage
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="search-tab" data-tab="search" type="button" role="tab" aria-controls="search" aria-selected="false">
+                        <i class="fa fa-search me-2"></i>Search
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="typography-tab" data-tab="typography" type="button" role="tab" aria-controls="typography" aria-selected="false">
+                        <i class="fa fa-font me-2"></i>Typography
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -944,986 +1045,13 @@
             </ul>
 
             <div class="tab-content settings-content" id="settingsTabContent">
-                <!-- General Tab -->
-                <div class="tab-pane fade show active" id="general" role="tabpanel">
-                    <div class="form-section-title">
-                        <i class="fa fa-bullhorn"></i>
-                        Basic Information
-                </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                <div class="form-group">
-                                <label>Site Name <span class="text-danger">*</span></label>
-                                <input type="text" name="site_name" value="{{ $settings->site_name }}" class="form-control" required>
-                </div>
-                </div>
-                        <div class="col-md-6">
-                <div class="form-group">
-                                <label>Title</label>
-                                <input type="text" name="title" value="{{ $settings->title }}" class="form-control">
-                </div>
-                </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                <div class="form-group">
-                                <label>Slogan</label>
-                                <input type="text" name="slogan" value="{{ $settings->slogan }}" class="form-control" placeholder="Your site slogan">
-                </div>
-            </div>
-                        <div class="col-md-6">
-                <div class="form-group">
-                                <label>Language</label>
-                                <input type="text" name="language" value="{{ $settings->language }}" class="form-control" placeholder="en">
-                </div>
-                </div>
-                </div>
-
-                <div class="form-group">
-                        <label>Site Description</label>
-                        <textarea name="site_description" rows="4" class="form-control" placeholder="Brief description of your site">{{ $settings->site_description }}</textarea>
-                        <small class="info-text">This description may be used by search engines.</small>
-                </div>
-
-                <div class="form-group">
-                        <label>SEO Keywords</label>
-                        <textarea name="seo_keywords" rows="3" class="form-control" placeholder="keyword1, keyword2, keyword3">{{ $settings->seo_keywords }}</textarea>
-                        <small class="info-text">Separate keywords with commas.</small>
-                    </div>
-
-                <div class="form-group">
-                        <label class="d-block">SEO-friendly URLs</label>
-                        <input type="hidden" name="use_seo_friendly_urls" value="0">
-                        <label class="mb-0">
-                            <input type="checkbox" name="use_seo_friendly_urls" value="1" {{ ($settings->use_seo_friendly_urls ?? true) ? 'checked' : '' }}>
-                            Use title-based URLs for publications, forums, communities, tags, health topics, and member states (instead of <code>?id=</code> links)
-                        </label>
-                        <small class="info-text d-block">When enabled, links use readable slugs and legacy ID URLs redirect to the slug URL.</small>
-                </div>
-
-                    @php
-                        $currentLogoFile = settings()->logo ? basename(parse_url(settings()->logo, PHP_URL_PATH)) : '';
-                        $currentFaviconFile = settings()->favicon ? basename(parse_url(settings()->favicon, PHP_URL_PATH)) : '';
-                    @endphp
-
-                    <div class="form-section-title mt-4">
-                        <i class="fa fa-images"></i>
-                        Branding
-                    </div>
-
-                    <div class="branding-section-intro">
-                        <i class="fa fa-info-circle"></i>
-                        Manage site logo, favicon, and how the logo appears in the header and footer. Pick from the config gallery or upload a new image. Settings are saved per theme when using Theme1.
-                    </div>
-
-                    <div class="row">
-                        <div class="col-lg-6 mb-3 mb-lg-0">
-                            <div class="branding-asset-card" data-branding-asset="logo">
-                                <div class="branding-asset-card__header">
-                                    <div>
-                                        <h4 class="branding-asset-card__title">Site Logo</h4>
-                                        <span class="branding-asset-spec"><i class="fa fa-arrows-alt"></i> 500 × 230 px</span>
-                                        <small class="info-text d-block mt-2 mb-0">Displayed in the site header and footer.</small>
-                                    </div>
-                                    <div class="branding-asset-preview js-branding-preview">
-                                        @if(settings()->logo)
-                                            <img src="{{ settings()->logo }}" alt="Logo preview">
-                                        @else
-                                            <span class="branding-asset-preview__placeholder">No logo set</span>
-                                        @endif
-                                    </div>
-                                </div>
-                                <div class="branding-asset-card__body">
-                                    <label class="branding-field-label" for="logo_existing">Config gallery</label>
-                                    <select name="logo_existing" id="logo_existing" class="form-control">
-                                        <option value="">— Keep current / upload new —</option>
-                                        @foreach($configGalleryImages ?? [] as $f)
-                                            <option value="{{ $f }}" @if($f === $currentLogoFile) selected @endif>{{ $f }}</option>
-                                        @endforeach
-                                    </select>
-
-                                    <div class="branding-upload-row">
-                                        <input type="file" name="logo" id="logo" accept="image/*">
-                                        <button type="button" class="branding-upload-btn js-branding-upload-trigger" data-target="logo">
-                                            <i class="fa fa-upload mr-1"></i>Choose image
-                                        </button>
-                                        <span class="branding-upload-filename js-branding-filename" id="logo-filename">No file chosen</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6">
-                            <div class="branding-asset-card" data-branding-asset="favicon">
-                                <div class="branding-asset-card__header">
-                                    <div>
-                                        <h4 class="branding-asset-card__title">Favicon</h4>
-                                        <span class="branding-asset-spec"><i class="fa fa-arrows-alt"></i> 350 × 350 px</span>
-                                        <small class="info-text d-block mt-2 mb-0">Browser tab icon shown across the site.</small>
-                                    </div>
-                                    <div class="branding-asset-preview branding-asset-preview--square js-branding-preview">
-                                        @if(settings()->favicon)
-                                            <img src="{{ settings()->favicon }}" alt="Favicon preview">
-                                        @else
-                                            <span class="branding-asset-preview__placeholder">No favicon</span>
-                                        @endif
-                                    </div>
-                                </div>
-                                <div class="branding-asset-card__body">
-                                    <label class="branding-field-label" for="favicon_existing">Config gallery</label>
-                                    <select name="favicon_existing" id="favicon_existing" class="form-control">
-                                        <option value="">— Keep current / upload new —</option>
-                                        @foreach($configGalleryImages ?? [] as $f)
-                                            <option value="{{ $f }}" @if($f === $currentFaviconFile) selected @endif>{{ $f }}</option>
-                                        @endforeach
-                                    </select>
-
-                                    <div class="branding-upload-row">
-                                        <input type="file" name="favicon" id="favicon" accept="image/*">
-                                        <button type="button" class="branding-upload-btn js-branding-upload-trigger" data-target="favicon">
-                                            <i class="fa fa-upload mr-1"></i>Choose image
-                                        </button>
-                                        <span class="branding-upload-filename js-branding-filename" id="favicon-filename">No file chosen</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="branding-options-panel">
-                        <h4 class="branding-options-panel__title">
-                            <i class="fa fa-sliders"></i>Logo display options
-                        </h4>
-                        <div class="row">
-                            <div class="col-md-4 mb-3 mb-md-0">
-                                <div class="branding-toggle-card h-100">
-                                    <label class="branding-field-label" for="logo_scale">Logo size</label>
-                                    <select name="logo_scale" id="logo_scale" class="form-control">
-                                        @foreach([40, 50, 60, 70, 80, 100, 120] as $px)
-                                            <option value="{{ $px }}" @if((settings()->logo_scale ?? 80) == $px) selected @endif>{{ $px }}px height</option>
-                                        @endforeach
-                                    </select>
-                                    <small class="info-text d-block mt-2">Header and footer logo height on front and admin.</small>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3 mb-md-0">
-                                <div class="branding-toggle-card h-100">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="header_logo_inverse" name="header_logo_inverse" value="1" @if(settings()->header_logo_inverse ?? false) checked @endif>
-                                        <label class="form-check-label" for="header_logo_inverse">Inverse logo in header</label>
-                                    </div>
-                                    <small class="info-text">Shows a light/inverted logo style in the header on front and admin.</small>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="branding-toggle-card h-100">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="footer_logo_inverse" name="footer_logo_inverse" value="1" @if(settings()->footer_logo_inverse ?? false) checked @endif>
-                                        <label class="form-check-label" for="footer_logo_inverse">Inverse logo in footer</label>
-                                    </div>
-                                    <small class="info-text">Shows a light/inverted logo style in the site footer.</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-
-                <!-- Appearance Tab -->
-                <div class="tab-pane fade" id="appearance" role="tabpanel">
-                    <div class="form-section-title">
-                        <i class="fa fa-palette"></i>
-                        AU (African Union) Color Palette & Scheme
-                    </div>
-                    <small class="info-text mb-3 d-block">Primary, secondary, navigation, and official AU colors. Applied to both front and admin. Saved per theme (Default vs Theme1).</small>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Primary Color</label>
-                    <div class="input-group colorPicker">
-                                    <input type="text" name="primary_color" value="{{ $settings->primary_color ?? '#119A48' }}" class="form-control" />
-                        <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->primary_color ?? '#119A48' }}"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Secondary Color</label>
-                                <div class="input-group colorPicker">
-                                    <input type="text" name="secondary_color" value="{{ $settings->secondary_color }}" class="form-control" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->secondary_color }}"></span>
-                                    </div>
-                    </div>
-                </div>
-                </div>
-            </div>
-
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Primary Text Color</label>
-                    <div class="input-group colorPicker">
-                                    <input type="text" name="primary_text_color" value="{{ $settings->primary_text_color }}" class="form-control" />
-                        <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->primary_text_color }}"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Links Active Color</label>
-                                <div class="input-group colorPicker">
-                                    <input type="text" name="links_active_color" value="{{ $settings->links_active_color }}" class="form-control" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->links_active_color }}"></span>
-                                    </div>
-                    </div>
-                </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Icon Font Color</label>
-                                <small class="form-text text-muted d-block mb-1">Publication card file-type icons and other icon accents. Default: Agenda 2063 — PANTONE 3415 C (<code>#007749</code>).</small>
-                                <div class="input-group colorPicker">
-                                    <input type="text" name="icon_font_color" value="{{ $settings->icon_font_color }}" class="form-control" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->icon_font_color }}"></span>
-                                    </div>
-                    </div>
-                </div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-2">
-                        <div class="col-md-12">
-                            <div class="form-section-subtitle mb-2">Navigation bar</div>
-                        </div>
-                        <div class="col-md-6">
-                <div class="form-group">
-                                <label>Front nav style <span class="text-muted">(public site only)</span></label>
-                                <select name="nav_style" class="form-control">
-                                    <option value="colored" @if(($settings->nav_style ?? 'colored') === 'colored') selected @endif>Colored (primary/secondary background)</option>
-                                    <option value="light" @if(($settings->nav_style ?? '') === 'light') selected @endif>Light (light background, dark text)</option>
-                                </select>
-                                <small class="info-text">Navigation bar style on the public (front) site only.</small>
-                </div>
-                        </div>
-                        <div class="col-md-6">
-                <div class="form-group">
-                                <label>Admin nav style <span class="text-muted">(admin panel only)</span></label>
-                                <select name="admin_nav_style" class="form-control">
-                                    <option value="colored" @if(($settings->admin_nav_style ?? 'colored') === 'colored') selected @endif>Colored (primary background)</option>
-                                    <option value="light" @if(($settings->admin_nav_style ?? '') === 'light') selected @endif>Light (light background, dark text)</option>
-                                </select>
-                                <small class="info-text">Navigation bar style in the admin panel only. Does not affect the public site.</small>
-                </div>
-                        </div>
-                        <div class="col-md-2">
-                <div class="form-group">
-                                <label>Nav link color</label>
-                                <div class="input-group colorPicker">
-                                    <input type="text" name="nav_link_color" value="{{ $settings->nav_link_color ?? '' }}" class="form-control" placeholder="{{ ($settings->nav_style ?? 'colored') === 'light' ? '#334155' : '#fff' }}" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->nav_link_color ?? (($settings->nav_style ?? 'colored') === 'light' ? '#334155' : '#ffffff') }}"></span>
-                </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                <div class="form-group">
-                                <label>Nav link hover</label>
-                                <div class="input-group colorPicker">
-                                    <input type="text" name="nav_link_hover_color" value="{{ $settings->nav_link_hover_color ?? '' }}" class="form-control" placeholder="{{ ($settings->nav_style ?? 'colored') === 'light' ? '#119A48' : '#e2e8f0' }}" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->nav_link_hover_color ?? (($settings->nav_style ?? 'colored') === 'light' ? ($settings->primary_color ?? '#119A48') : '#e2e8f0') }}"></span>
-                </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                <div class="form-group">
-                                <label>Nav link active</label>
-                                <div class="input-group colorPicker">
-                                    <input type="text" name="nav_link_active_color" value="{{ $settings->nav_link_active_color ?? '' }}" class="form-control" placeholder="{{ ($settings->primary_color ?? '#119A48') }}" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->nav_link_active_color ?? ($settings->primary_color ?? '#119A48') }}"></span>
-                </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                <div class="form-group">
-                                <label>Nav font weight</label>
-                                <select name="nav_font_weight" class="form-control">
-                                    @foreach([['400', 'Normal'], ['500', 'Medium'], ['600', 'Semibold'], ['700', 'Bold']] as $opt)
-                                        <option value="{{ $opt[0] }}" @if(($settings->nav_font_weight ?? '500') == $opt[0]) selected @endif>{{ $opt[1] }}</option>
-                                    @endforeach
-                                </select>
-                                <small class="info-text">Applies to front and admin nav links.</small>
-                            </div>
-                        </div>
-                </div>
-
-                    <div class="row mt-2">
-                        <div class="col-md-6">
-                <div class="form-group">
-                                <label>Show Icons in Main Menu</label>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="menu_icons_enabled" name="menu_icons_enabled" value="1" @if($settings->menu_icons_enabled) checked @endif>
-                                    <label class="form-check-label" for="menu_icons_enabled">Show icons in main menu</label>
-                                </div>
-                                <small class="info-text">When enabled, compact icons appear above nav labels (front header and admin sidebar). When off, text-only navigation is shown.</small>
-                </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Homepage Sections</label>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="show_featured" name="show_featured" value="1" @if(!empty($settings->show_featured)) checked @endif>
-                                    <label class="form-check-label" for="show_featured">Show Featured content</label>
-                                </div>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="show_events" name="show_events" value="1" @if(!empty($settings->show_events)) checked @endif>
-                                    <label class="form-check-label" for="show_events">Show Events slider</label>
-                                </div>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="show_top_searches" name="show_top_searches" value="1" @if(!empty($settings->show_top_searches)) checked @endif>
-                                    <label class="form-check-label" for="show_top_searches">Show Top Searches</label>
-                                </div>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="show_tags" name="show_tags" value="1" @if(!empty($settings->show_tags)) checked @endif>
-                                    <label class="form-check-label" for="show_tags">Show Tags strip</label>
-                                </div>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="show_quotes" name="show_quotes" value="1" @if(!empty($settings->show_quotes)) checked @endif>
-                                    <label class="form-check-label" for="show_quotes">Show Quotes banner</label>
-                                </div>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="show_health_themes" name="show_health_themes" value="1" @if($settings->show_health_themes ?? true) checked @endif>
-                                    <label class="form-check-label" for="show_health_themes">Show health theme tiles below search</label>
-                                </div>
-                                <small class="info-text d-block mb-2">Uncheck to hide the thematic area tiles in the homepage spotlight (under the search box).</small>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="show_quiz" name="show_quiz" value="1" @if(!empty($settings->show_quiz)) checked @endif>
-                                    <label class="form-check-label" for="show_quiz">Show Quiz button on search results</label>
-                                </div>
-                                <small class="info-text">Toggle which sections appear on the homepage.</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Search Page (Records Search)</label>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="search_show_forums" name="search_show_forums" value="1" @if($settings->search_show_forums ?? true) checked @endif>
-                                    <label class="form-check-label" for="search_show_forums">Show forums in search results</label>
-                                </div>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="search_show_communities" name="search_show_communities" value="1" @if($settings->search_show_communities ?? true) checked @endif>
-                                    <label class="form-check-label" for="search_show_communities">Show communities in search results</label>
-                                </div>
-                                @if(Schema::hasColumn('setting', 'communities_listing_show_participants'))
-                                <div class="form-check mt-3">
-                                    <input type="hidden" name="communities_listing_show_participants" value="0">
-                                    <input type="checkbox" class="form-check-input" id="communities_listing_show_participants" name="communities_listing_show_participants" value="1" @if($settings->communities_listing_show_participants ?? true) checked @endif>
-                                    <label class="form-check-label" for="communities_listing_show_participants">Show participants on community directory cards</label>
-                                </div>
-                                @endif
-                                @if(Schema::hasColumn('setting', 'communities_listing_max_faces'))
-                                <div class="form-group mt-2 mb-0">
-                                    <label for="communities_listing_max_faces">Max participant faces per community card</label>
-                                    <input type="number" class="form-control" id="communities_listing_max_faces" name="communities_listing_max_faces" min="1" max="24" value="{{ (int) ($settings->communities_listing_max_faces ?? 8) }}">
-                                    <small class="text-muted">Between 1 and 24. Default 8. Applies to the public communities listing and “My communities” cards.</small>
-                                </div>
-                                @endif
-                                @if(Schema::hasColumn('setting', 'communities_listing_cards_per_row'))
-                                <div class="form-group mt-2 mb-0">
-                                    <label for="communities_listing_cards_per_row">Community cards per row (desktop)</label>
-                                    <select class="form-control" id="communities_listing_cards_per_row" name="communities_listing_cards_per_row">
-                                        @foreach([1 => '1 per row — widest cards, longest descriptions', 2 => '2 per row (default)', 3 => '3 per row — compact cards, shortest descriptions'] as $val => $label)
-                                            <option value="{{ $val }}" @selected((int) ($settings->communities_listing_cards_per_row ?? 2) === $val)>{{ $label }}</option>
-                                        @endforeach
-                                    </select>
-                                    <small class="text-muted">Controls the public communities directory and “My communities” grid. Wider layouts show more description text.</small>
-                                </div>
-                                @endif
-                                @if(Schema::hasColumn('setting', 'show_publication_card_file_type_badge'))
-                                <div class="form-check mt-2">
-                                    <input type="hidden" name="show_publication_card_file_type_badge" value="0">
-                                    <input type="checkbox" class="form-check-input" id="show_publication_card_file_type_badge" name="show_publication_card_file_type_badge" value="1" @if($settings->show_publication_card_file_type_badge ?? true) checked @endif>
-                                    <label class="form-check-label" for="show_publication_card_file_type_badge">Show file type icon on publication cards</label>
-                                </div>
-                                @endif
-                                <small class="info-text d-block mt-1">When enabled, forums and communities appear on the main search page alongside publications.</small>
-                                @if(Schema::hasColumn('setting', 'show_publication_card_file_type_badge'))
-                                <small class="text-muted d-block mt-1">File type badges use <strong>Icon Font Color</strong> (Appearance).</small>
-                                @endif
-                    </div>
-                </div>
-            </div>
-
-                    <div class="form-section-title mt-4">
-                        <i class="fa fa-heading"></i>
-                        Home page section titles
-                    </div>
-                    <small class="info-text mb-2 d-block">Customise the heading text for homepage sections. Leave blank to use the default text shown in the placeholders.</small>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Health themes section</label>
-                                <input type="text" name="section_title_health_themes" class="form-control" value="{{ $settings->section_title_health_themes ?? '' }}" placeholder="Choose a Health Theme to Explore">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Top Searches section</label>
-                                <input type="text" name="section_title_top_searches" class="form-control" value="{{ $settings->section_title_top_searches ?? '' }}" placeholder="Top Searches">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Recommended / Featured section</label>
-                                <input type="text" name="section_title_recommended" class="form-control" value="{{ $settings->section_title_recommended ?? '' }}" placeholder="Recommended">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Flagship Initiatives section</label>
-                                <input type="text" name="section_title_flagship_initiatives" class="form-control" value="{{ $settings->section_title_flagship_initiatives ?? '' }}" placeholder="Flagship Initiatives">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Theme cards opacity</label>
-                                <select name="theme_card_opacity" class="form-control">
-                                    @foreach(['0.5' => '50%', '0.6' => '60%', '0.7' => '70%', '0.8' => '80%', '0.9' => '90%', '1' => '100% (no transparency)'] as $val => $label)
-                                        <option value="{{ $val }}" @if(($settings->theme_card_opacity ?? '1') == $val) selected @endif>{{ $label }}</option>
-                                    @endforeach
-                                </select>
-                                <small class="info-text">Opacity of the health theme cards on the homepage (default: 100%).</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Theme cards per row (desktop)</label>
-                                <input type="number" name="theme_cards_per_row" class="form-control" min="2" max="8" value="{{ (int) ($settings->theme_cards_per_row ?? 4) }}">
-                                <small class="info-text">Controls how many health theme cards appear per row on desktop (default: 4).</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-section-title mt-4">
-                        <i class="fa fa-comments"></i>
-                        Comment Moderation
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="auto_approve_comments" name="auto_approve_comments" value="1" @if($settings->auto_approve_comments ?? 1) checked @endif>
-                                    <label class="form-check-label" for="auto_approve_comments">Auto-approve comments on submission</label>
-                                </div>
-                                <small class="info-text">When enabled, forum and publication comments will be automatically approved upon submission. When disabled, comments will require manual approval.</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-section-title mt-4">
-                        <i class="fa fa-search"></i>
-                        Search Settings
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="enable_ai_search" name="enable_ai_search" value="1" @if($settings->enable_ai_search ?? 1) checked @endif>
-                                    <label class="form-check-label" for="enable_ai_search">Enable AI Search</label>
-                                </div>
-                                <small class="info-text">When enabled, the AI Search button will be displayed in the search bar. When disabled, only the regular search button will be shown.</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="search_pagination_mode">Search results loading</label>
-                                <select class="form-control" id="search_pagination_mode" name="search_pagination_mode">
-                                    <option value="pagination" @if(($settings->search_pagination_mode ?? 'pagination') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
-                                    <option value="infinite_scroll" @if(($settings->search_pagination_mode ?? 'pagination') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
-                                </select>
-                                <small class="info-text">Controls how publication results load on the records search page. Infinite scroll appends results automatically until all matches are shown.</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="forums_pagination_mode">Forums listing loading</label>
-                                <select class="form-control" id="forums_pagination_mode" name="forums_pagination_mode">
-                                    <option value="pagination" @if(($settings->forums_pagination_mode ?? 'pagination') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
-                                    <option value="infinite_scroll" @if(($settings->forums_pagination_mode ?? 'pagination') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
-                                </select>
-                                <small class="info-text">Controls how discussions load on the forums page. Infinite scroll loads 10 threads at a time and appends more as you scroll.</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="communities_pagination_mode">Communities listing loading</label>
-                                <select class="form-control" id="communities_pagination_mode" name="communities_pagination_mode">
-                                    <option value="pagination" @if(($settings->communities_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
-                                    <option value="infinite_scroll" @if(($settings->communities_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
-                                </select>
-                                <small class="info-text">Controls how communities load on the communities page. Infinite scroll loads 6 communities at a time and appends more as you scroll.</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="courses_pagination_mode">Courses listing loading</label>
-                                <select class="form-control" id="courses_pagination_mode" name="courses_pagination_mode">
-                                    <option value="pagination" @if(($settings->courses_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
-                                    <option value="infinite_scroll" @if(($settings->courses_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
-                                </select>
-                                <small class="info-text">Infinite scroll loads 6 courses per batch on the courses page.</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="faqs_pagination_mode">FAQs listing loading</label>
-                                <select class="form-control" id="faqs_pagination_mode" name="faqs_pagination_mode">
-                                    <option value="pagination" @if(($settings->faqs_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
-                                    <option value="infinite_scroll" @if(($settings->faqs_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
-                                </select>
-                                <small class="info-text">Infinite scroll loads 6 FAQs per batch.</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="health_topics_pagination_mode">Health topics listing loading</label>
-                                <select class="form-control" id="health_topics_pagination_mode" name="health_topics_pagination_mode">
-                                    <option value="pagination" @if(($settings->health_topics_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
-                                    <option value="infinite_scroll" @if(($settings->health_topics_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
-                                </select>
-                                <small class="info-text">Infinite scroll loads 6 topics per batch while preserving A–Z letter groups.</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="home_events_pagination_mode">Homepage events loading</label>
-                                <select class="form-control" id="home_events_pagination_mode" name="home_events_pagination_mode">
-                                    <option value="pagination" @if(($settings->home_events_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Fixed batch (first 12 events)</option>
-                                    <option value="infinite_scroll" @if(($settings->home_events_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
-                                </select>
-                                <small class="info-text">Infinite scroll loads 6 events per batch into the homepage events slider.</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="authors_pagination_mode">Contributors &amp; authors listing loading</label>
-                                <select class="form-control" id="authors_pagination_mode" name="authors_pagination_mode">
-                                    <option value="pagination" @if(($settings->authors_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
-                                    <option value="infinite_scroll" @if(($settings->authors_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
-                                </select>
-                                <small class="info-text">Infinite scroll loads 12 contributors per batch on browse/authors.</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="country_publications_pagination_mode">Country page publications loading</label>
-                                <select class="form-control" id="country_publications_pagination_mode" name="country_publications_pagination_mode">
-                                    <option value="pagination" @if(($settings->country_publications_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Classic pagination (page numbers)</option>
-                                    <option value="infinite_scroll" @if(($settings->country_publications_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll (load more as you scroll)</option>
-                                </select>
-                                <small class="info-text">Infinite scroll loads 5 publications per batch on member state detail pages.</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="enable_ai_chat_prune" name="enable_ai_chat_prune" value="1" @if($settings->enable_ai_chat_prune ?? 1) checked @endif>
-                                    <label class="form-check-label" for="enable_ai_chat_prune">Enable scheduled AI chat cleanup</label>
-                                </div>
-                                <small class="info-text">When enabled, old AI chats are automatically deleted by the daily cleanup task. Disable this to retain chat history for further synthesis and user understanding.</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-section-title mt-4">
-                        <i class="fa fa-image"></i>
-                        Background & Gradient
-                </div>
-
-                    <div class="form-group">
-                        <label>Spotlight Banner Image</label>
-                        <label class="small text-muted d-block mb-1">Browse from existing gallery</label>
-                        @php $currentBannerFile = settings()->spotlight_banner ? basename(parse_url(settings()->spotlight_banner, PHP_URL_PATH)) : ''; @endphp
-                        <select name="spotlight_banner_existing" id="spotlight_banner_existing" class="form-control mb-2">
-                            <option value="" @if(!$currentBannerFile) selected @endif>— Keep current / upload new —</option>
-                            @foreach($configGalleryImages ?? [] as $f)
-                                <option value="{{ $f }}" @if($f === $currentBannerFile) selected @endif>{{ $f }}</option>
-                            @endforeach
-                        </select>
-                        <label class="small text-muted d-block mb-1">Or upload new file</label>
-                        <input type="file" name="spotlight_banner" id="spotlight_banner" class="form-control" accept="image/*">
-                        <small class="info-text">Recommended: 1894x658 pixels. This image will be used for the search area background.</small>
-                        @if(settings()->spotlight_banner)
-                            <div class="image-preview mt-2">
-                                <img src="{{ settings()->spotlight_banner }}" alt="Banner Preview">
-                            </div>
-                        @endif
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Gradient Start Color</label>
-                                <div class="input-group colorPicker" id="gradientStartPicker">
-                                    <input type="text" name="gradient_start_color" value="{{ $settings->gradient_start_color ?? '#119A48' }}" class="form-control" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text color-preview gradient-start-preview" style="background-color: {{ $settings->gradient_start_color ?? '#119A48' }}"></span>
-                                    </div>
-                                </div>
-                                <small class="info-text">Used when no banner image is set</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Gradient End Color</label>
-                                <div class="input-group colorPicker" id="gradientEndPicker">
-                                    <input type="text" name="gradient_end_color" value="{{ $settings->gradient_end_color ?? '#16c653' }}" class="form-control" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text color-preview gradient-end-preview" style="background-color: {{ $settings->gradient_end_color ?? '#16c653' }}"></span>
-                                    </div>
-                                </div>
-                                <small class="info-text">Used when no banner image is set</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Gradient Preview</label>
-                        <div class="gradient-preview" id="gradientPreview"></div>
-                        <small class="info-text">Preview of the gradient (shown when no banner image is set)</small>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Spotlight Image Overlay Color</label>
-                                <div class="input-group colorPicker">
-                                    <input type="text" name="spotlight_overlay_color" value="{{ $settings->spotlight_overlay_color ?? '#000000' }}" class="form-control" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->spotlight_overlay_color ?? '#000000' }}"></span>
-                                    </div>
-                                </div>
-                                <small class="info-text">Overlay color applied on top of the spotlight image.</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Spotlight Image Overlay Darkness (%)</label>
-                                <input type="number"
-                                       name="spotlight_overlay_opacity"
-                                       min="0"
-                                       max="100"
-                                       step="1"
-                                       class="form-control"
-                                       value="{{ (int) ($settings->spotlight_overlay_opacity ?? 35) }}" />
-                                <small class="info-text">0 = no overlay, 100 = fully solid overlay.</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-section-subtitle mt-4 mb-2">AU official colors</div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>AU Red <small class="text-muted">(PANTONE 7420 C)</small></label>
-                    <div class="input-group colorPicker">
-                                    <input type="text" name="au_red" value="{{ $settings->au_red ?? '#9F2241' }}" class="form-control" />
-                        <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->au_red ?? '#9F2241' }}"></span>
-                        </div>
-                                </div>
-                                <small class="info-text">RGB: 159, 34, 65 | CMYK: 27, 98, 66, 18</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>AU Gold <small class="text-muted">(PANTONE 4515 C)</small></label>
-                                <div class="input-group colorPicker">
-                                    <input type="text" name="au_gold" value="{{ $settings->au_gold ?? '#B4A269' }}" class="form-control" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->au_gold ?? '#B4A269' }}"></span>
-                                    </div>
-                                </div>
-                                <small class="info-text">RGB: 180, 162, 105 | CMYK: 31, 31, 69, 2</small>
-                            </div>
-                    </div>
-                </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>AU Corporate Green <small class="text-muted">(PANTONE 3415 C)</small></label>
-                    <div class="input-group colorPicker">
-                                    <input type="text" name="au_corporate_green" value="{{ $settings->au_corporate_green ?? '#1A5632' }}" class="form-control" />
-                        <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->au_corporate_green ?? '#1A5632' }}"></span>
-                        </div>
-                    </div>
-                                <small class="info-text">RGB: 26, 86, 50 | CMYK: 86, 40, 91, 39</small>
-                </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>AU Green <small class="text-muted">(PANTONE 7740 C)</small></label>
-                    <div class="input-group colorPicker">
-                                    <input type="text" name="au_green" value="{{ $settings->au_green ?? '#1A5632' }}" class="form-control" />
-                        <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->au_green ?? '#1A5632' }}"></span>
-                        </div>
-                    </div>
-                                <small class="info-text">Official AU Green color</small>
-                </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Agenda 2063 Plum <small class="text-muted">(PANTONE 3415 C)</small></label>
-                    <div class="input-group colorPicker">
-                                    <input type="text" name="au_plum" value="{{ $settings->au_plum ?? '#522B39' }}" class="form-control" />
-                        <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->au_plum ?? '#522B39' }}"></span>
-                        </div>
-                    </div>
-                                <small class="info-text">RGB: 82, 43, 57 | CMYK: 54, 86, 50, 48</small>
-                </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Grey Text <small class="text-muted">(PANTONE 425 C)</small></label>
-                    <div class="input-group colorPicker">
-                                    <input type="text" name="au_grey_text" value="{{ $settings->au_grey_text ?? '#58595B' }}" class="form-control" />
-                        <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->au_grey_text ?? '#58595B' }}"></span>
-                        </div>
-                    </div>
-                                <small class="info-text">RGB: 83, 87, 90 | CMYK: 65, 56, 53, 29</small>
-                </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Bright White</label>
-                    <div class="input-group colorPicker">
-                                    <input type="text" name="au_white" value="{{ $settings->au_white ?? '#FFFFFF' }}" class="form-control" />
-                        <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->au_white ?? '#FFFFFF' }}; border: 1px solid #ddd;"></span>
-                        </div>
-                                </div>
-                                <small class="info-text">RGB: 255, 255, 255 | CMYK: 0, 0, 0, 0</small>
-                            </div>
-                    </div>
-                </div>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                    <div class="form-group">
-                                <label>Banner Text Color</label>
-                                <div class="input-group colorPicker">
-                                    <input type="text" name="banner_text" value="{{ $settings->banner_text ?? '#FFFFFF' }}" class="form-control" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->banner_text ?? '#FFFFFF' }}"></span>
-                        </div>
-                    </div>
-                </div>
-                </div>
-                        <div class="col-md-6">
-                    <div class="form-group">
-                        <label>Footer Style</label>
-                        <select class="form-control" name="footer_style">
-                            <option value="light-footer" @if (settings()->footer_style == 'light-footer') selected @endif>Light</option>
-                            <option value="dark-footer" @if (settings()->footer_style == 'dark-footer') selected @endif>Dark</option>
-                        </select>
-                            </div>
-                    </div>
-                </div>
-
-                    <div class="form-group">
-                        <label>Config name</label>
-                        <input type="text" name="config_name" class="form-control" value="{{ settings()->config_name ?? 'Default' }}" placeholder="e.g. Default, Theme1, ET">
-                        <small class="info-text">Name for this configuration (used to identify this theme's config). Saved with the selected theme.</small>
-                    </div>
-                    <div class="form-group">
-                        <label>Site Theme</label>
-                        <select class="form-control" name="site_theme">
-                            <option value="" @if ((settings()->site_theme ?? '') == '') selected @endif>Default Theme</option>
-                            <option value="theme1." @if ((settings()->site_theme ?? '') == 'theme1.') selected @endif>Theme1</option>
-                            <option value="et" @if ((settings()->site_theme ?? '') == 'et') selected @endif>ET</option>
-                        </select>
-                        <small class="info-text">Changing theme and saving creates or loads that theme's configuration row; the previous theme's config is left unchanged.</small>
-                    </div>
-
-                    <div class="form-section-title mt-4">
-                        <i class="fa fa-language"></i>
-                        Translate Button
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <div class="form-check">
-                                    <input type="hidden" name="translate_button_filled" value="0">
-                                    <input type="checkbox" class="form-check-input" id="translate_button_filled" name="translate_button_filled" value="1" @if(settings()->translate_button_filled ?? true) checked @endif>
-                                    <label class="form-check-label" for="translate_button_filled">Filled translate button (with background color)</label>
-                                </div>
-                                <small class="info-text">When enabled, the language/translate button uses the primary color as background. When disabled, it appears as outline only.</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Translate button text color</label>
-                                <div class="input-group colorPicker">
-                                    <input type="text" name="translate_button_text_color" value="{{ settings()->translate_button_text_color ?? '#ffffff' }}" class="form-control" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ settings()->translate_button_text_color ?? '#ffffff' }}"></span>
-                                    </div>
-                                </div>
-                                <small class="info-text">Text color of the translate/language selector button.</small>
-                            </div>
-                    </div>
-                </div>
-
-                    <div class="form-section-title mt-4">
-                        <i class="fa fa-font"></i>
-                        Typography
-                    </div>
-                    <small class="info-text mb-3 d-block">Primary font and default text color applied across the site. Saved per theme.</small>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Primary font</label>
-                                <select name="primary_font" id="primary_font" class="form-control">
-                                    <option value="">— Default (system) —</option>
-                                    <option value="univers_45_light" @if((settings()->primary_font ?? '') === 'univers_45_light') selected @endif>Univers 45 Light</option>
-                                    <option value="arial" @if((settings()->primary_font ?? '') === 'arial') selected @endif>Arial</option>
-                                    <option value="times_new_roman" @if((settings()->primary_font ?? '') === 'times_new_roman') selected @endif>Times New Roman</option>
-                                    <option value="montserrat" @if((settings()->primary_font ?? '') === 'montserrat') selected @endif>Montserrat</option>
-                                    <option value="brandon_text" @if((settings()->primary_font ?? '') === 'brandon_text') selected @endif>Brandon Text</option>
-                                    @if(isset($customFonts) && $customFonts->count() > 0)
-                                        <option disabled>— Custom fonts —</option>
-                                        @foreach($customFonts as $cf)
-                                            <option value="custom_{{ $cf->id }}" @if((settings()->primary_font ?? '') === 'custom_' . $cf->id) selected @endif>{{ $cf->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Default font color</label>
-                                <div class="input-group colorPicker">
-                                    <input type="text" name="default_font_color" value="{{ $settings->default_font_color ?? '#212529' }}" class="form-control" placeholder="#212529" />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->default_font_color ?? '#212529' }}"></span>
-                                    </div>
-                                </div>
-                                <small class="info-text">Default body text color.</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Front-end body font size (px)</label>
-                                <input type="number" name="front_body_font_size" value="{{ $settings->front_body_font_size ?? '14' }}" class="form-control" min="10" max="24" step="1" placeholder="14">
-                                <small class="info-text">Default body font size on the public site. Default: 14px.</small>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Admin panel body font size (px)</label>
-                                <input type="number" name="admin_body_font_size" value="{{ $settings->admin_body_font_size ?? '14' }}" class="form-control" min="10" max="24" step="1" placeholder="14">
-                                <small class="info-text">Default body font size in the admin panel. Default: 14px.</small>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Main navigation font size (px)</label>
-                                <input type="number" name="nav_font_size" value="{{ $settings->nav_font_size ?? '11' }}" class="form-control" min="9" max="16" step="1" placeholder="11">
-                                <small class="info-text">Top menu labels on the public site and admin sidebar. Default: 11px (LinkedIn-style compact nav).</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-section-subtitle mt-4 mb-2">Custom fonts (upload your own)</div>
-                    <p class="text-muted small">Upload font files to add them to the Primary font dropdown. Formats: .woff2, .woff, .ttf, .otf</p>
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <form action="{{ route('admin.config.custom-font.store') }}" method="post" enctype="multipart/form-data" class="card card-body bg-light">
-                                @csrf
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <input type="text" name="font_name" class="form-control" placeholder="Display name (optional)">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <input type="text" name="font_family" class="form-control" placeholder="Font family / CSS name (optional)">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input type="file" name="font_files[]" class="form-control" accept=".woff,.woff2,.ttf,.otf" multiple>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <button type="submit" class="btn btn-primary btn-sm">Add font</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    @if(isset($customFonts) && $customFonts->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-sm table-bordered">
-                            <thead><tr><th>Name</th><th>Font family</th><th>Files</th><th></th></tr></thead>
-                            <tbody>
-                                @foreach($customFonts as $cf)
-                                <tr>
-                                    <td>{{ $cf->name }}</td>
-                                    <td><code>{{ $cf->font_family }}</code></td>
-                                    <td>{{ $cf->font_files ? implode(', ', array_keys($cf->font_files)) : '—' }}</td>
-                                    <td>
-                                        <form action="{{ route('admin.config.custom-font.delete', $cf->id) }}" method="post" class="d-inline" onsubmit="return confirm('Remove this font?');">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    @endif
-                </div>
+                @include('admin.settings.partials.tab_general')
+                @include('admin.settings.partials.tab_branding', ['configGalleryImages' => $configGalleryImages ?? []])
+                @include('admin.settings.partials.tab_colors')
+                @include('admin.settings.partials.tab_navigation')
+                @include('admin.settings.partials.tab_homepage')
+                @include('admin.settings.partials.tab_search')
+                @include('admin.settings.partials.tab_typography')
 
                 <!-- Contact Tab -->
                 <div class="tab-pane fade" id="contact" role="tabpanel">
@@ -1932,17 +1060,23 @@
                         Contact Information
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
+                    <div class="row settings-grid-row">
+                        <div class="col-md-4">
+                            <div class="form-group settings-field--compact mb-0">
                                 <label>Email</label>
                                 <input type="email" name="email" value="{{ $settings->email }}" class="form-control" placeholder="contact@example.com">
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
+                        <div class="col-md-4">
+                            <div class="form-group settings-field--compact mb-0">
                                 <label>Phone</label>
                                 <input type="text" name="phone" value="{{ $settings->phone }}" class="form-control" placeholder="+1 234 567 8900">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group settings-field--compact mb-0">
+                                <label>Timezone</label>
+                                @include('partials.general.timezones', ['selected' => $settings->timezone])
                             </div>
                         </div>
                     </div>
@@ -1950,11 +1084,6 @@
                     <div class="form-group">
                         <label>Address</label>
                         <textarea name="address" rows="3" class="form-control" placeholder="Enter site address">{{ $settings->address }}</textarea>
-                </div>
-
-                <div class="form-group">
-                        <label>Timezone</label>
-                        @include('partials.general.timezones', ['selected' => $settings->timezone])
                     </div>
                 </div>
 
@@ -2975,85 +2104,104 @@
             $('#email_driver').on('change', syncEmailDriverPanels);
             syncEmailDriverPanels();
 
-            $('.settings-tabs .nav-link').on('click', function(e) {
-                e.preventDefault();
-                
-                var targetTab = $(this).data('tab');
-                
-                // Remove active class from all tabs and panes
+            function activateSettingsTab(tabId) {
+                if (!tabId || !$('#' + tabId).length) {
+                    return;
+                }
                 $('.settings-tabs .nav-link').removeClass('active').attr('aria-selected', 'false');
                 $('.tab-pane').removeClass('show active');
-                
-                // Add active class to clicked tab
-                $(this).addClass('active').attr('aria-selected', 'true');
-                
-                // Show corresponding tab pane
-                $('#' + targetTab).addClass('show active');
-            });
+                $('.settings-tabs .nav-link[data-tab="' + tabId + '"]').addClass('active').attr('aria-selected', 'true');
+                $('#' + tabId).addClass('show active');
+            }
 
-            // Initialize color pickers (Theme1 uses Bootstrap 5 — use native color input; else use bootstrap-colorpicker)
-            var isTheme1 = {{ (settings()->site_theme ?? '') === 'theme1.' ? 'true' : 'false' }};
-            $('.colorPicker').each(function() {
-                var $picker = $(this);
-                var $input = $picker.find('input[type="text"]');
-                var $preview = $picker.find('.color-preview');
-                var defaultColor = $input.val() || '#119A48';
+            var legacyTabMap = { appearance: 'colors' };
 
-                if (isTheme1) {
-                    // Theme1: native color input + sync (no bootstrap-colorpicker — incompatible with Bootstrap 5)
-                    $preview.css('background-color', defaultColor);
-                    $input.on('input change', function() {
-                        var v = $(this).val();
-                        if (/^#[0-9A-Fa-f]{6}$/.test(v) || /^#[0-9A-Fa-f]{3}$/.test(v)) {
-                            $preview.css('background-color', v);
-                        }
-                        if ($picker.attr('id') === 'gradientStartPicker' || $picker.attr('id') === 'gradientEndPicker') {
-                            updateGradientPreview();
-                        }
-                    });
-                    // Add native color input beside preview for easy picking
-                    var $append = $picker.find('.input-group-append');
-                    if ($append.length && !$picker.find('input[type="color"]').length) {
-                        var hex = /^#[0-9A-Fa-f]{6}$/.test(defaultColor) ? defaultColor : '#119A48';
-                        var $native = $('<input type="color" class="form-control form-control-color border-0 p-0" value="' + hex + '" title="Choose color">');
-                        $native.on('input', function() {
-                            $input.val(this.value);
-                            $preview.css('background-color', this.value);
-                            if ($picker.attr('id') === 'gradientStartPicker' || $picker.attr('id') === 'gradientEndPicker') updateGradientPreview();
-                        });
-                        $append.prepend($native);
-                    }
-                } else {
-                    $picker.colorpicker({
-                        format: 'hex',
-                        color: defaultColor
-                    }).on('colorpickerChange colorpickerCreate', function(e) {
-                        $preview.css('background-color', e.color.toString());
-                        $input.val(e.color.toString());
-                        if ($picker.attr('id') === 'gradientStartPicker' || $picker.attr('id') === 'gradientEndPicker') {
-                            updateGradientPreview();
-                        }
-                    });
-                    if ($preview.length) {
-                        $preview.css('background-color', defaultColor);
-                    }
+            $('.settings-tabs .nav-link').on('click', function(e) {
+                e.preventDefault();
+                var targetTab = $(this).data('tab');
+                activateSettingsTab(targetTab);
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState(null, '', '#' + targetTab);
                 }
             });
 
-            // Update gradient preview function
+            var initialHash = window.location.hash.replace('#', '');
+            if (initialHash) {
+                activateSettingsTab(legacyTabMap[initialHash] || initialHash);
+            }
+
+            function normalizeHexColor(value, fallback) {
+                var v = String(value || '').trim();
+                if (v === '') {
+                    return fallback || '#119A48';
+                }
+                if (!v.startsWith('#')) {
+                    v = '#' + v;
+                }
+                if (/^#[0-9A-Fa-f]{3}$/.test(v)) {
+                    var r = v.charAt(1), g = v.charAt(2), b = v.charAt(3);
+                    v = '#' + r + r + g + g + b + b;
+                }
+                return /^#[0-9A-Fa-f]{6}$/.test(v) ? v : (fallback || '#119A48');
+            }
+
+            function syncColorPicker($picker) {
+                var $text = $picker.find('.settings-color-text, input[type="text"]').first();
+                var $native = $picker.find('.settings-color-native, input[type="color"]').first();
+                var $preview = $picker.find('.settings-color-preview, .color-preview').first();
+                if (!$text.length) {
+                    return;
+                }
+
+                var hex = normalizeHexColor($text.val(), $native.val() || '#119A48');
+                $text.val(hex);
+                if ($native.length) {
+                    $native.val(hex);
+                }
+                if ($preview.length) {
+                    $preview.css('background-color', hex);
+                }
+                if ($picker.attr('id') === 'gradientStartPicker' || $picker.attr('id') === 'gradientEndPicker') {
+                    updateGradientPreview();
+                }
+            }
+
+            $('.colorPicker').each(function() {
+                var $picker = $(this);
+                var $text = $picker.find('.settings-color-text, input[type="text"]').first();
+                var $native = $picker.find('.settings-color-native, input[type="color"]').first();
+                var $preview = $picker.find('.settings-color-preview, .color-preview').first();
+                var defaultColor = normalizeHexColor($text.val(), '#119A48');
+
+                syncColorPicker($picker);
+
+                $text.on('input change blur', function() {
+                    syncColorPicker($picker);
+                });
+
+                if ($native.length) {
+                    $native.on('input change', function() {
+                        $text.val(this.value);
+                        syncColorPicker($picker);
+                    });
+                }
+
+                if ($preview.length) {
+                    $preview.on('click', function() {
+                        if ($native.length) {
+                            $native.trigger('click');
+                        }
+                    });
+                }
+            });
+
             function updateGradientPreview() {
-                var startColor = $('#gradientStartPicker input').val() || '#119A48';
-                var endColor = $('#gradientEndPicker input').val() || '#16c653';
+                var startColor = normalizeHexColor($('#gradientStartPicker .settings-color-text').val(), '#119A48');
+                var endColor = normalizeHexColor($('#gradientEndPicker .settings-color-text').val(), '#16c653');
                 $('#gradientPreview').css('background', 'linear-gradient(135deg, ' + startColor + ' 0%, ' + endColor + ' 100%)');
             }
 
-            // Initialize gradient preview on page load
             updateGradientPreview();
-
-            // Update gradient preview when inputs change
-            $('#gradientStartPicker input, #gradientEndPicker input').on('change', function() {
-                updateGradientPreview();
-            });
 
             $('.js-branding-upload-trigger').on('click', function () {
                 var targetId = $(this).data('target');
@@ -3075,10 +2223,14 @@
                 }
             }
 
-            $('#logo, #favicon').on('change', function (e) {
+            $('.branding-asset-card input[type="file"]').on('change', function (e) {
                 var file = e.target.files[0];
                 if (!file) return;
                 var $input = $(this);
+                var existingId = $input.attr('id') + '_existing';
+                if (document.getElementById(existingId)) {
+                    document.getElementById(existingId).value = '';
+                }
                 var reader = new FileReader();
                 reader.onload = function (event) {
                     updateBrandingAssetPreview($input, event.target.result, file.name);
@@ -3086,26 +2238,18 @@
                 reader.readAsDataURL(file);
             });
 
-            $('#logo_existing, #favicon_existing').on('change', function () {
+            $('.js-branding-gallery-select').on('change', function () {
                 var selected = $(this).val();
                 if (!selected) return;
                 var $card = $(this).closest('.branding-asset-card');
                 $card.find('.js-branding-filename').text('Gallery: ' + selected).addClass('has-file');
             });
 
-            // Spotlight banner preview (legacy layout)
-            $('#spotlight_banner').on('change', function(e) {
-                var file = e.target.files[0];
-                if (file) {
-                    $('#spotlight_banner_existing').val('');
-                    var reader = new FileReader();
-                    var $input = $(this);
-                    reader.onload = function(e) {
-                        var previewHtml = '<div class="image-preview mt-2"><img src="' + e.target.result + '" alt="Preview"></div>';
-                        $input.siblings('.image-preview').remove();
-                        $input.after(previewHtml);
-                    };
-                    reader.readAsDataURL(file);
+            $('#font_files').on('change', function () {
+                var file = this.files && this.files[0];
+                var $filename = $('#font_files-filename');
+                if (file && $filename.length) {
+                    $filename.text(file.name).addClass('has-file');
                 }
             });
         });
