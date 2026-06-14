@@ -185,32 +185,29 @@
 
     <div class="branding-asset-card branding-asset-card--feature mb-4">
         <div class="branding-asset-card__body">
-            <form action="{{ route('admin.config.custom-font.store') }}" method="post" enctype="multipart/form-data">
-                @csrf
-                <div class="row settings-grid-row align-items-end">
-                    <div class="col-md-3">
-                        <label class="branding-field-label" for="font_name">Display name</label>
-                        <input type="text" name="font_name" id="font_name" class="form-control" placeholder="Optional">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="branding-field-label" for="font_family">CSS family name</label>
-                        <input type="text" name="font_family" id="font_family" class="form-control" placeholder="Optional">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="branding-field-label" for="font_files">Font files</label>
-                        <div class="branding-upload-row">
-                            <input type="file" name="font_files[]" id="font_files" accept=".woff,.woff2,.ttf,.otf">
-                            <button type="button" class="branding-upload-btn js-branding-upload-trigger" data-target="font_files">
-                                <i class="fa fa-upload mr-1"></i>Choose fonts
-                            </button>
-                            <span class="branding-upload-filename js-branding-filename" id="font_files-filename">No file chosen</span>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary btn-block">Add font</button>
+            <div class="row settings-grid-row align-items-end">
+                <div class="col-md-3">
+                    <label class="branding-field-label" for="font_name">Display name</label>
+                    <input type="text" name="font_name" id="font_name" class="form-control" placeholder="Optional" form="settings-custom-font-upload-form">
+                </div>
+                <div class="col-md-3">
+                    <label class="branding-field-label" for="font_family">CSS family name</label>
+                    <input type="text" name="font_family" id="font_family" class="form-control" placeholder="Optional" form="settings-custom-font-upload-form">
+                </div>
+                <div class="col-md-4">
+                    <label class="branding-field-label" for="font_files">Font files</label>
+                    <div class="branding-upload-row">
+                        <input type="file" name="font_files[]" id="font_files" accept=".woff,.woff2,.ttf,.otf" form="settings-custom-font-upload-form">
+                        <button type="button" class="branding-upload-btn js-branding-upload-trigger" data-target="font_files">
+                            <i class="fa fa-upload mr-1"></i>Choose fonts
+                        </button>
+                        <span class="branding-upload-filename js-branding-filename" id="font_files-filename">No file chosen</span>
                     </div>
                 </div>
-            </form>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-block" form="settings-custom-font-upload-form">Add font</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -232,10 +229,7 @@
                             <td><code>{{ $cf->font_family }}</code></td>
                             <td>{{ $cf->font_files ? implode(', ', array_keys($cf->font_files)) : '—' }}</td>
                             <td class="text-right">
-                                <form action="{{ route('admin.config.custom-font.delete', $cf->id) }}" method="post" class="d-inline" onsubmit="return confirm('Remove this font?');">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
-                                </form>
+                                <button type="submit" class="btn btn-sm btn-outline-danger" form="custom-font-delete-{{ $cf->id }}" onclick="return confirm('Remove this font?');">Remove</button>
                             </td>
                         </tr>
                     @endforeach

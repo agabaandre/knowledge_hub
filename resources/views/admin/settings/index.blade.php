@@ -875,6 +875,14 @@
         }
 
         #settings-main-form {
+            display: contents;
+        }
+
+        #settingsTabContent .tab-pane {
+            display: none;
+        }
+
+        #settingsTabContent .tab-pane.active.show {
             display: block;
         }
 
@@ -1785,6 +1793,17 @@
                 </div>
                 </form>
 
+                <form id="settings-custom-font-upload-form" action="{{ route('admin.config.custom-font.store') }}" method="post" enctype="multipart/form-data" class="d-none" aria-hidden="true">
+                    @csrf
+                </form>
+                @if(isset($customFonts) && $customFonts->count() > 0)
+                    @foreach($customFonts as $cf)
+                        <form id="custom-font-delete-{{ $cf->id }}" action="{{ route('admin.config.custom-font.delete', $cf->id) }}" method="post" class="d-none" aria-hidden="true">
+                            @csrf
+                        </form>
+                    @endforeach
+                @endif
+
                 @include('admin.settings.partials.tab_social_login', ['ssoFields' => $ssoFields ?? []])
             </div>
 
@@ -2100,13 +2119,17 @@
             syncEmailDriverPanels();
 
             function activateSettingsTab(tabId) {
-                if (!tabId || !$('#' + tabId).length) {
+                if (!tabId) {
+                    return;
+                }
+                var $pane = $('#settingsTabContent #' + tabId);
+                if (!$pane.length) {
                     return;
                 }
                 $('.settings-tabs .nav-link').removeClass('active').attr('aria-selected', 'false');
-                $('.tab-pane').removeClass('show active');
+                $('#settingsTabContent .tab-pane').removeClass('show active');
                 $('.settings-tabs .nav-link[data-tab="' + tabId + '"]').addClass('active').attr('aria-selected', 'true');
-                $('#' + tabId).addClass('show active');
+                $pane.addClass('show active');
             }
 
             var legacyTabMap = { appearance: 'colors', typography: 'colors' };
