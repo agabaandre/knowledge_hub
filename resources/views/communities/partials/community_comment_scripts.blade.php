@@ -24,6 +24,24 @@
         }
     };
 
+    window.openCommunityWallPost = function () {
+        var wallTab = document.getElementById('wall-posts');
+        if (wallTab && !wallTab.classList.contains('active')) {
+            window.location.href = @json(community_detail_url($community, true, ['tab' => 'wall', 'post' => 1]));
+            return;
+        }
+        var container = document.getElementById('communityCommentFormContainer');
+        if (!container || container.style.display === 'none' || container.style.display === '') {
+            window.toggleCommunityCommentForm();
+        }
+        var card = document.getElementById('communityWallPostFormCard');
+        if (card && card.scrollIntoView) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        var ta = document.getElementById('communityCommentTextarea');
+        if (ta) ta.focus();
+    };
+
     function updateCharCount(textarea) {
         var maxWords = 300;
         var text = (textarea.value || '').trim();

@@ -89,6 +89,165 @@
         background: rgba(17, 154, 72, 0.08);
     }
 
+    .community-detail-tabs .nav-link .badge {
+        font-size: 0.6875rem;
+        vertical-align: middle;
+    }
+
+    .community-tab-new-badge {
+        background: {{ $primaryColor }} !important;
+        color: #fff !important;
+        font-size: 0.625rem !important;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .community-hero-post-btn {
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(17, 154, 72, 0.35);
+    }
+
+    .community-wall-card--tab {
+        margin-top: 0;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        background: transparent;
+    }
+
+    .community-wall-post-cta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding: 1rem 1.15rem;
+        margin-bottom: 1rem;
+        border-radius: var(--community-ui-radius);
+        border: 1px solid rgba(17, 154, 72, 0.22);
+        background: linear-gradient(135deg, rgba(17, 154, 72, 0.08), rgba(180, 162, 105, 0.08));
+    }
+
+    .community-wall-post-cta__btn {
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .community-recent-wall-notice {
+        padding: 0.75rem 1rem;
+        border-radius: var(--community-ui-radius);
+        background: #ecfdf5;
+        border: 1px solid rgba(17, 154, 72, 0.2);
+        color: #166534;
+        font-size: 0.875rem;
+    }
+
+    .community-recent-wall-notice a {
+        font-weight: 700;
+        color: {{ $primaryColor }};
+    }
+
+    .community-forum-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    }
+
+    .community-forum-card__intro {
+        display: flex;
+        gap: 1rem;
+        padding: 1.15rem 1.15rem 0.75rem;
+    }
+
+    .community-forum-card__thumb-wrap {
+        flex-shrink: 0;
+        width: 4.5rem;
+        height: 4.5rem;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+    }
+
+    .community-forum-card__thumb-wrap--placeholder {
+        color: {{ $primaryColor }};
+        font-size: 1.35rem;
+    }
+
+    .community-forum-card__thumb {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .community-forum-card__body {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .community-forum-card__title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin: 0 0 0.35rem;
+        line-height: 1.35;
+    }
+
+    .community-forum-card__title a {
+        color: #1e293b;
+        text-decoration: none;
+    }
+
+    .community-forum-card__title a:hover {
+        color: {{ $primaryColor }};
+    }
+
+    .community-forum-card__excerpt {
+        margin: 0 0 0.5rem;
+        color: #64748b;
+        font-size: 0.875rem;
+        line-height: 1.55;
+    }
+
+    .community-forum-card__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+
+    .community-forum-card__tag {
+        display: inline-flex;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        background: #ecfdf5;
+        color: #047857;
+        font-size: 0.6875rem;
+        font-weight: 600;
+    }
+
+    .community-forum-card__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        padding: 0.75rem 1.15rem 1rem;
+        border-top: 1px solid #eef2f6;
+        background: #fafbfc;
+    }
+
+    .community-forum-card__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+        color: #64748b;
+    }
+
     .community-wall-card {
         background: #fff;
         border: 1px solid #e2e8f0;

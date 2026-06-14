@@ -343,7 +343,12 @@ class CommunitiesController extends Controller
                 'badgeTypes' => collect(),
                 'isCommunityAdmin' => false,
                 'communityEvents' => collect(),
+                'communityWallPosts' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15),
                 'communityComments' => collect(),
+                'communityForums' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
+                'hasRecentWallPosts' => false,
+                'activeTab' => 'publications',
+                'openWallPostForm' => false,
                 'communityOrganizationLd' => $communityOrganizationLd,
             ]);
         }
@@ -354,14 +359,37 @@ class CommunitiesController extends Controller
         $publications = \App\Models\Publication::whereIn('id', $publicationIds)
             ->with(['author', 'sub_theme.theme', 'data_category', 'favourited', 'comments.user', 'attachments'])
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(10, ['*'], 'page');
+        $publications->appends(['tab' => 'publications']);
 
-        $communityComments = CommunityComment::where('community_of_practice_id', $id)
+        $wallBaseQuery = CommunityComment::query()
+            ->where('community_of_practice_id', $id)
             ->whereNull('parent_id')
-            ->where('status', 'approved')
+            ->where('status', 'approved');
+
+        $hasRecentWallPosts = (clone $wallBaseQuery)
+            ->where('created_at', '>=', now()->subWeek())
+            ->exists();
+
+        $communityWallPosts = (clone $wallBaseQuery)
             ->with(['user', 'likes', 'replies.user', 'replies.likes'])
             ->orderByDesc('created_at')
-            ->get();
+            ->paginate(15, ['*'], 'wall_page');
+        $communityWallPosts->appends(['tab' => 'wall']);
+
+        $allowedTabs = ['wall', 'publications', 'forums', 'processed'];
+        $activeTab = request()->query('tab');
+        if (! in_array($activeTab, $allowedTabs, true)) {
+            if (request()->filled('pcr_page')) {
+                $activeTab = 'processed';
+            } elseif ($hasRecentWallPosts) {
+                $activeTab = 'wall';
+            } else {
+                $activeTab = 'publications';
+            }
+        }
+
+        $openWallPostForm = request()->boolean('post');
 
         // Content requests referred to this community (hub workflow), including multi-community referrals
         $pendingCommunityContentRequests = ContentRequest::query()
@@ -391,6 +419,7 @@ class CommunitiesController extends Controller
             ->with(['country', 'processedBy', 'referralTargets'])
             ->orderByDesc('processed_at')
             ->paginate(10, ['*'], 'pcr_page');
+        $processedCommunityContentRequests->appends(['tab' => 'processed']);
         
         // SEO variables
         $pageTitle = ($community->community_name ?? 'Community') . ' - Communities of Practice - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
@@ -405,9 +434,16 @@ class CommunitiesController extends Controller
             ->pluck('forum_id');
         $forums = \App\Models\Forum::whereIn('id', $forumIds)
             ->with('user')
-            ->orderBy('id', 'desc')
+            ->orderByDesc('created_at')
             ->limit(10)
             ->get();
+
+        $communityForums = \App\Models\Forum::whereIn('id', $forumIds)
+            ->with(['user', 'tags'])
+            ->withCount(['comments', 'likes'])
+            ->orderByDesc('created_at')
+            ->paginate(10, ['*'], 'forum_page');
+        $communityForums->appends(['tab' => 'forums']);
 
         // Get other communities user belongs to
         $otherCommunityIds = \App\Models\CommunityOfPracticeMembers::where('user_id', $userId)
@@ -446,15 +482,20 @@ class CommunitiesController extends Controller
             'pendingCommunityContentRequests',
             'processedCommunityContentRequests',
             'forums',
+            'communityForums',
             'otherCommunities',
             'badgeTypes',
             'isCommunityAdmin',
             'communityEvents',
-            'communityComments',
+            'communityWallPosts',
+            'hasRecentWallPosts',
+            'activeTab',
+            'openWallPostForm',
             'communityOrganizationLd'
         ) + [
             'isCommunityMember' => true,
             'isPendingMember' => false,
+            'communityComments' => $communityWallPosts,
         ]);
     }
 

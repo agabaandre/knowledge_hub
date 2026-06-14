@@ -42,7 +42,19 @@
 @endsection
 
 @php
-    $processedContentRequestsTabActive = request()->filled('pcr_page');
+    $activeTab = $activeTab ?? (request()->filled('pcr_page') ? 'processed' : 'publications');
+    $wallPostTotal = isset($communityWallPosts) && method_exists($communityWallPosts, 'total')
+        ? $communityWallPosts->total()
+        : ($communityComments ?? collect())->count();
+    $forumTabTotal = isset($communityForums) && method_exists($communityForums, 'total')
+        ? $communityForums->total()
+        : ($forums ?? collect())->count();
+    $publicationTabTotal = isset($publications) && method_exists($publications, 'total')
+        ? $publications->total()
+        : 0;
+    $processedTabTotal = isset($processedCommunityContentRequests) && method_exists($processedCommunityContentRequests, 'total')
+        ? $processedCommunityContentRequests->total()
+        : 0;
 @endphp
 
 @section('content')
@@ -74,12 +86,15 @@
                         </span>
                         @if($isCommunityMember ?? false)
                         <span class="community-detail-hero__metric community-detail-hero__metric--comments">
-                            <i class="fa fa-heart"></i>{{ ($communityComments ?? collect())->count() }} Wall posts
+                            <i class="fa fa-heart"></i>{{ $wallPostTotal }} Wall posts
                         </span>
                         @endif
                     </div>
                     @if($isCommunityMember)
                     <div class="mt-3 d-flex justify-content-center flex-wrap" style="gap: 8px;">
+                        <a href="{{ community_detail_url($community, true, ['tab' => 'wall', 'post' => 1]) }}" class="btn btn-sm text-light community-hero-post-btn" style="background-color: {{ settings()->primary_color ?? '#119A48' }}; border-color: {{ settings()->primary_color ?? '#119A48' }};">
+                            <i class="fa fa-pencil-square-o mr-1"></i>Post on community wall
+                        </a>
                         <button type="button" class="btn btn-sm btn-light" data-toggle="modal" data-target="#inviteColleaguesModal">
                             <i class="fa fa-envelope mr-1"></i>Invite colleagues (max 5)
                         </button>
@@ -199,18 +214,40 @@
             </div>
             @endif
 
-            <!-- Tabs -->
+            <!-- Activity tabs -->
             <ul class="nav nav-tabs community-detail-tabs" id="communityTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link {{ $processedContentRequestsTabActive ? '' : 'active' }}" id="publications-tab" data-toggle="tab" href="#publications" role="tab">
-                        <i class="fa fa-book mr-1"></i>Publications
+                    <a class="nav-link {{ $activeTab === 'wall' ? 'active' : '' }}" id="wall-tab" href="{{ community_detail_url($community, true, ['tab' => 'wall']) }}" role="tab">
+                        <i class="fa fa-heart mr-1"></i>Wall posts
+                        @if($wallPostTotal > 0)
+                            <span class="badge badge-light ml-1">{{ $wallPostTotal }}</span>
+                        @endif
+                        @if($hasRecentWallPosts ?? false)
+                            <span class="badge badge-success ml-1 community-tab-new-badge">New</span>
+                        @endif
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link {{ $processedContentRequestsTabActive ? 'active' : '' }}" id="processed-requests-tab" data-toggle="tab" href="#processed-content-requests" role="tab">
+                    <a class="nav-link {{ $activeTab === 'publications' ? 'active' : '' }}" id="publications-tab" href="{{ community_detail_url($community, true, ['tab' => 'publications']) }}" role="tab">
+                        <i class="fa fa-book mr-1"></i>Publications
+                        @if($publicationTabTotal > 0)
+                            <span class="badge badge-light ml-1">{{ $publicationTabTotal }}</span>
+                        @endif
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link {{ $activeTab === 'forums' ? 'active' : '' }}" id="forums-tab" href="{{ community_detail_url($community, true, ['tab' => 'forums']) }}" role="tab">
+                        <i class="fa fa-comments mr-1"></i>Forums
+                        @if($forumTabTotal > 0)
+                            <span class="badge badge-light ml-1">{{ $forumTabTotal }}</span>
+                        @endif
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link {{ $activeTab === 'processed' ? 'active' : '' }}" id="processed-requests-tab" href="{{ community_detail_url($community, true, ['tab' => 'processed']) }}" role="tab">
                         <i class="fa fa-check-circle mr-1"></i>Processed requests
-                        @if(isset($processedCommunityContentRequests) && $processedCommunityContentRequests->total() > 0)
-                            <span class="badge badge-secondary ml-1">{{ $processedCommunityContentRequests->total() }}</span>
+                        @if($processedTabTotal > 0)
+                            <span class="badge badge-secondary ml-1">{{ $processedTabTotal }}</span>
                         @endif
                     </a>
                 </li>
@@ -218,8 +255,26 @@
 
             <!-- Tab Content -->
             <div class="tab-content" id="communityTabsContent">
+                <div class="tab-pane fade {{ $activeTab === 'wall' ? 'show active' : '' }}" id="wall-posts" role="tabpanel">
+                    @include('communities.partials.community_comments', [
+                        'community' => $community,
+                        'communityWallPosts' => $communityWallPosts ?? $communityComments ?? collect(),
+                        'isCommunityMember' => $isCommunityMember,
+                        'openWallPostForm' => $openWallPostForm ?? false,
+                        'embeddedInTab' => true,
+                    ])
+                </div>
+
                 <!-- Publications Tab -->
-                <div class="tab-pane fade {{ $processedContentRequestsTabActive ? '' : 'show active' }}" id="publications" role="tabpanel">
+                <div class="tab-pane fade {{ $activeTab === 'publications' ? 'show active' : '' }}" id="publications" role="tabpanel">
+                    @if(($hasRecentWallPosts ?? false) && ($wallPostTotal ?? 0) > 0)
+                        <div class="community-recent-wall-notice mb-3">
+                            <i class="fa fa-bolt mr-1"></i>
+                            There {{ $wallPostTotal === 1 ? 'is' : 'are' }} recent activity on the
+                            <a href="{{ community_detail_url($community, true, ['tab' => 'wall']) }}">community wall</a>
+                            from the last 7 days.
+                        </div>
+                    @endif
                     @if($publications->count() > 0)
                         @foreach($publications as $index => $publication)
                             @include('communities.partials.publication_card', [
@@ -237,8 +292,22 @@
                     @endif
                 </div>
 
-                <!-- Processed content requests (referred to this community, hub workflow complete) -->
-                <div class="tab-pane fade {{ $processedContentRequestsTabActive ? 'show active' : '' }}" id="processed-content-requests" role="tabpanel">
+                <!-- Forums Tab -->
+                <div class="tab-pane fade {{ $activeTab === 'forums' ? 'show active' : '' }}" id="forums" role="tabpanel">
+                    @if(isset($communityForums) && $communityForums->count() > 0)
+                        @foreach($communityForums as $forum)
+                            @include('communities.partials.community_forum_card', ['forum' => $forum])
+                        @endforeach
+                        <div class="mt-3">{{ $communityForums->links() }}</div>
+                    @else
+                        <div class="alert alert-info mb-0">
+                            <i class="fa fa-info-circle mr-2"></i>No forum discussions linked to this community yet.
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Processed content requests -->
+                <div class="tab-pane fade {{ $activeTab === 'processed' ? 'show active' : '' }}" id="processed-content-requests" role="tabpanel">
                     @if(isset($processedCommunityContentRequests) && $processedCommunityContentRequests->total() > 0)
                         <p class="text-muted small mb-3">Requests that were referred to this community and later completed through the Knowledge Hub (resources shared with the requester).</p>
                         @foreach($processedCommunityContentRequests as $cr)
@@ -274,12 +343,6 @@
                     @endif
                 </div>
             </div>
-
-            @include('communities.partials.community_comments', [
-                'community' => $community,
-                'communityComments' => $communityComments ?? collect(),
-                'isCommunityMember' => $isCommunityMember,
-            ])
         </div>
 
         <div class="col-lg-4">
