@@ -8,6 +8,7 @@ return [
     'flagship_initiatives' => 'Flagship Initiatives',
     'health_themes' => 'Choose a Health Theme to Explore',
     'explore_key_sections' => 'Explore Key Sections',
+    'explore_key_sections_subtitle' => 'Browse the main entry points to health knowledge, sources, geography, and community discussions.',
     'events' => 'Events',
     'health_emergencies' => 'Health Emergencies',
 
