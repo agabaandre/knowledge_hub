@@ -103,7 +103,11 @@
             var INFINITE_STATUS_LOADING = @json(__('publications.search.loading_more'));
             var INFINITE_STATUS_COMPLETE = @json(__('publications.search.all_results_loaded'));
             var INFINITE_STATUS_ERROR = @json(__('publications.search.load_more_error'));
-            var RECORDS_SEARCH_TAG_ID = @json(request()->filled('tag') ? (string) request('tag') : null);
+            var RECORDS_ACTIVE_TAG = @json(
+                ($activeRecordsTag = active_records_tag())
+                    ? ['id' => (string) $activeRecordsTag->id, 'slug' => $activeRecordsTag->slug]
+                    : null
+            );
             var mainEl = document.getElementById('records-search-main');
             var sideDyn = document.getElementById('records-search-sidebar-dynamic');
             var infiniteObserver = null;
@@ -231,6 +235,9 @@
                 if (!slug) {
                     return null;
                 }
+                if (RECORDS_ACTIVE_TAG && RECORDS_ACTIVE_TAG.slug && String(RECORDS_ACTIVE_TAG.slug) === String(slug)) {
+                    return String(RECORDS_ACTIVE_TAG.id);
+                }
                 var escaped = slug.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
                 var link = document.querySelector('a.records-sidebar-tags__link[data-tag-slug="' + escaped + '"]');
                 return link && link.dataset.tagId ? String(link.dataset.tagId) : null;
@@ -262,13 +269,39 @@
             function getActiveRecordsTagId() {
                 var slug = getTagSlugFromPathname();
                 if (slug) {
+                    if (RECORDS_ACTIVE_TAG && RECORDS_ACTIVE_TAG.slug && String(RECORDS_ACTIVE_TAG.slug) === String(slug)) {
+                        return String(RECORDS_ACTIVE_TAG.id);
+                    }
                     var fromSlug = tagIdFromSlug(slug);
                     if (fromSlug) {
                         return fromSlug;
                     }
+                    return null;
                 }
                 var fromQuery = new URLSearchParams(window.location.search).get('tag');
-                return fromQuery ? String(fromQuery) : (RECORDS_SEARCH_TAG_ID || null);
+                if (fromQuery) {
+                    return String(fromQuery);
+                }
+                return RECORDS_ACTIVE_TAG && RECORDS_ACTIVE_TAG.id ? String(RECORDS_ACTIVE_TAG.id) : null;
+            }
+
+            function syncRecordsActiveTagFromUrl() {
+                var slug = getTagSlugFromPathname();
+                if (slug) {
+                    var id = tagIdFromSlug(slug);
+                    if (id) {
+                        RECORDS_ACTIVE_TAG = { id: id, slug: slug };
+                        return;
+                    }
+                }
+                var fromQuery = new URLSearchParams(window.location.search).get('tag');
+                if (fromQuery) {
+                    RECORDS_ACTIVE_TAG = { id: String(fromQuery), slug: slug || null };
+                    return;
+                }
+                if (!slug) {
+                    RECORDS_ACTIVE_TAG = null;
+                }
             }
 
             function updateFacetClearVisibility() {
@@ -281,6 +314,7 @@
             }
 
             function updateSidebarTagActiveState() {
+                syncRecordsActiveTagFromUrl();
                 var curTagSlug = getTagSlugFromPathname();
                 var curTagId = getActiveRecordsTagId();
 
@@ -297,10 +331,9 @@
                             linkSlug = tagSlugMatch ? decodeURIComponent(tagSlugMatch[1]) : null;
                         }
                         var active = false;
-                        if (curTagId && linkTagId && String(linkTagId) === String(curTagId)) {
-                            active = true;
-                        }
                         if (curTagSlug && linkSlug && String(linkSlug) === String(curTagSlug)) {
+                            active = true;
+                        } else if (!curTagSlug && curTagId && linkTagId && String(linkTagId) === String(curTagId)) {
                             active = true;
                         }
                         if (a.classList.contains('records-sidebar-tags__link')) {
@@ -312,7 +345,7 @@
                 });
 
                 document.querySelectorAll('.records-sidebar-card--tags .records-sidebar-clear-wrap').forEach(function (wrap) {
-                    wrap.classList.toggle('d-none', !curTagId);
+                    wrap.classList.toggle('d-none', !curTagId && !curTagSlug);
                 });
             }
 
@@ -644,10 +677,10 @@
                 Promise.all([fragmentPromise, aiPromise])
                     .then(function (results) {
                         var data = results[0];
-                        applyRecordsSearchFragment(data, { mainEl: mainEl });
                         if (push) {
                             history.pushState({ recordsSearchAjax: 1 }, '', browserUrl);
                         }
+                        applyRecordsSearchFragment(data, { mainEl: mainEl });
                     })
                     .catch(function () {
                         window.location.assign(window.location.origin + browserUrl);

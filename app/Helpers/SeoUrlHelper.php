@@ -403,6 +403,41 @@ if (! function_exists('tag_records_url')) {
     }
 }
 
+if (! function_exists('active_records_tag')) {
+  /**
+   * Resolve the active records tag from the path slug (authoritative) or request input.
+   */
+  function active_records_tag(): ?Tag
+  {
+      $request = request();
+
+      if ($request->routeIs('records.tag')) {
+          $slug = $request->route('slug');
+          if ($slug) {
+              $fromSlug = Tag::query()->where('slug', $slug)->first();
+              if ($fromSlug) {
+                  return $fromSlug;
+              }
+          }
+      }
+
+      if ($request->filled('tag')) {
+          return Tag::query()->find((int) $request->tag);
+      }
+
+      return null;
+  }
+}
+
+if (! function_exists('active_records_tag_id')) {
+  function active_records_tag_id(): ?int
+  {
+      $tag = active_records_tag();
+
+      return $tag ? (int) $tag->id : null;
+  }
+}
+
 if (! function_exists('health_topic_url')) {
     /**
      * @param  Tag|object|int|string|null  $tag

@@ -1,16 +1,14 @@
 @php
     use App\Models\Tag;
 
+    $activeTag = active_records_tag();
+    $activeTagId = $activeTag?->id;
     $recordsSearchTagQuery = request()->except('page', 'tag');
-    $activeTagId = request('tag');
 
     $sidebarTagsList = Tag::popularByEngagement(5);
 
-    if ($activeTagId) {
-        $activeTag = Tag::query()->find((int) $activeTagId);
-        if ($activeTag && ! $sidebarTagsList->firstWhere('id', $activeTag->id)) {
-            $sidebarTagsList = $sidebarTagsList->take(4)->prepend($activeTag);
-        }
+    if ($activeTag && ! $sidebarTagsList->firstWhere('id', $activeTag->id)) {
+        $sidebarTagsList = $sidebarTagsList->take(4)->prepend($activeTag);
     }
 
     $tagResourceCounts = collect();

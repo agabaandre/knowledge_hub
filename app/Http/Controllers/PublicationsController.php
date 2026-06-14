@@ -192,7 +192,7 @@ class PublicationsController extends Controller
 
         $request->merge(['tag' => $tag->id]);
 
-        if ($request->query()->has('tag')) {
+        if (array_key_exists('tag', $request->query())) {
             $target = tag_records_url($tag, true, $request->except('tag', 'page'));
             if ($target !== $request->fullUrl()) {
                 return redirect()->to($target, 301);
