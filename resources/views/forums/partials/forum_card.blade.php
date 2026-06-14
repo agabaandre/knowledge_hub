@@ -10,32 +10,40 @@
             #{{ (int) $forum->popularity_rank }}
         </span>
     @endif
-    <div class="forum-header">
-        @if($forum->forum_image)
-        <img src="{{ $forum->forum_image }}" alt="{{ $forum->forum_title }} - Forum Discussion" class="forum-image" loading="lazy">
-        @else
-        <div class="forum-image" style="background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 2rem; border: 1px solid #e2e8f0;">
-            <i class="fa fa-comments"></i>
-        </div>
-        @endif
 
-        <div class="forum-content">
-            @php
-                $authorPhotoUrl = null;
-                if ($forum->user && !empty($forum->user->photo)) {
-                    $authorPhotoUrl = $forum->user->photo;
-                    $baseUrl = url('/');
-                    if (strpos($authorPhotoUrl, 'http://') === 0 || strpos($authorPhotoUrl, 'https://') === 0) {
-                        // full URL
-                    } elseif (strpos($authorPhotoUrl, $baseUrl) !== false) {
-                        // already absolute
-                    } elseif (strpos($authorPhotoUrl, '/storage/') === 0) {
-                        $authorPhotoUrl = $baseUrl . $authorPhotoUrl;
-                    } elseif (strpos($authorPhotoUrl, 'storage/') === 0) {
-                        $authorPhotoUrl = $baseUrl . '/' . $authorPhotoUrl;
-                    }
-                }
-            @endphp
+    @php
+        $authorPhotoUrl = null;
+        if ($forum->user && !empty($forum->user->photo)) {
+            $authorPhotoUrl = $forum->user->photo;
+            $baseUrl = url('/');
+            if (strpos($authorPhotoUrl, 'http://') === 0 || strpos($authorPhotoUrl, 'https://') === 0) {
+                // full URL
+            } elseif (strpos($authorPhotoUrl, $baseUrl) !== false) {
+                // already absolute
+            } elseif (strpos($authorPhotoUrl, '/storage/') === 0) {
+                $authorPhotoUrl = $baseUrl . $authorPhotoUrl;
+            } elseif (strpos($authorPhotoUrl, 'storage/') === 0) {
+                $authorPhotoUrl = $baseUrl . '/' . $authorPhotoUrl;
+            }
+        }
+        $totalComments = $forum->total_comments ?? count($forum->comments);
+        $totalLikes = $forum->total_likes ?? count($forum->likes);
+        $isLiked = auth()->check() && $forum->isLikedBy(auth()->id());
+        $totalViews = isset($forum->views) ? (int) $forum->views : 0;
+    @endphp
+
+    <div class="forum-card-intro">
+        <div class="forum-intro-media">
+            @if($forum->forum_image)
+                <img src="{{ $forum->forum_image }}" alt="{{ $forum->forum_title }} - Forum Discussion" class="forum-image" loading="lazy">
+            @else
+                <div class="forum-image forum-image--placeholder">
+                    <i class="fa fa-comments" aria-hidden="true"></i>
+                </div>
+            @endif
+        </div>
+
+        <div class="forum-intro-text">
             <h2 class="forum-title" itemprop="headline">
                 <a href="{{ forum_thread_url($forum)}}">{!! $forum->forum_title !!}</a>
                 @if(!empty($forum->engagement_score))
@@ -52,115 +60,110 @@
                 @endphp
                 {!! $processedDescription !!}
             </p>
+        </div>
+    </div>
 
-            @if(count($forum->tags) > 0)
+    <div class="forum-card-body">
+        @if(count($forum->tags) > 0)
             <div class="forum-tags">
                 @foreach($forum->tags as $tag)
-                <span class="tag">#{{ $tag->tag }}</span>
+                    <span class="tag">#{{ $tag->tag }}</span>
                 @endforeach
             </div>
-            @endif
+        @endif
 
-            @include('forums.partials.contributor_carousel', ['forum' => $forum])
+        @include('forums.partials.contributor_carousel', ['forum' => $forum])
 
-            @php
-                $totalComments = $forum->total_comments ?? count($forum->comments);
-            @endphp
-            <div class="forum-meta-actions-wrap">
-                <div class="forum-author-avatar-large">
-                    @if($authorPhotoUrl)
-                        <img src="{{ $authorPhotoUrl }}" alt="{{ $forum->user->name ?? 'User' }}"
-                             onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa fa-user\' aria-hidden=\'true\'></i>';">
-                    @else
-                        <i class="fa fa-user" aria-hidden="true"></i>
+        <div class="forum-meta-actions-wrap">
+            <div class="forum-author-avatar-large">
+                @if($authorPhotoUrl)
+                    <img src="{{ $authorPhotoUrl }}" alt="{{ $forum->user->name ?? 'User' }}"
+                         onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa fa-user\' aria-hidden=\'true\'></i>';">
+                @else
+                    <i class="fa fa-user" aria-hidden="true"></i>
+                @endif
+            </div>
+            <div class="forum-meta-actions-body">
+                <div class="forum-meta">
+                    <div class="meta-item forum-meta-author-text">
+                        <div>
+                            <span class="forum-meta-author-name notranslate" translate="no">{{ $forum->user->name ?? 'Unknown' }}</span>
+                            @if($forum->user && trim((string) ($forum->user->job_title ?? '')) !== '')
+                                <span class="forum-meta-author-title notranslate" translate="no">{{ $forum->user->job_title }}</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="meta-item meta-item--chip">
+                        <i class="fa fa-clock" aria-hidden="true"></i>
+                        <span>{{ time_ago($forum->created_at) }}</span>
+                    </div>
+                    @if($totalComments > 0)
+                        <div class="meta-item meta-item--chip comments-toggle-inline collapsed"
+                             data-forum-id="{{ $forum->id }}"
+                             onclick="toggleComments({{ $forum->id }})"
+                             style="cursor: pointer;">
+                            <i class="fa fa-comments" aria-hidden="true"></i>
+                            <span>{{ $totalComments }} {{ $totalComments === 1 ? 'Comment' : 'Comments' }}</span>
+                        </div>
                     @endif
-                </div>
-                <div class="forum-meta-actions-body">
-            <div class="forum-meta">
-                <div class="meta-item forum-meta-author-text">
-                    <div>
-                        <span class="forum-meta-author-name notranslate" translate="no">{{ $forum->user->name ?? 'Unknown' }}</span>
-                        @if($forum->user && trim((string) ($forum->user->job_title ?? '')) !== '')
-                            <span class="forum-meta-author-title notranslate" translate="no">{{ $forum->user->job_title }}</span>
-                        @endif
+                    <div class="meta-item meta-item--chip meta-item--likes like-forum-btn"
+                         data-forum-id="{{ $forum->id }}"
+                         onclick="likeForum({{ $forum->id }})"
+                         style="cursor: pointer; {{ $isLiked ? 'color: #ef4444;' : '' }}">
+                        <i class="fa {{ $isLiked ? 'fa-heart' : 'fa-heart-o' }}" style="color: {{ $isLiked ? '#ef4444' : 'inherit' }};" aria-hidden="true"></i>
+                        <span class="like-count-{{ $forum->id }}">{{ $totalLikes }}</span>
+                        <span>{{ $totalLikes === 1 ? ' like' : ' likes' }}</span>
+                    </div>
+                    <div class="meta-item meta-item--chip meta-item--views">
+                        <i class="fa fa-eye" aria-hidden="true"></i>
+                        <span>{{ format_view_count($totalViews) }} {{ $totalViews === 1 ? 'view' : 'views' }}</span>
                     </div>
                 </div>
-                <div class="meta-item">
-                    <i class="fa fa-clock"></i>
-                    <span>{{ time_ago($forum->created_at) }}</span>
-                </div>
-                @if($totalComments > 0)
-                <div class="meta-item comments-toggle-inline collapsed"
-                     data-forum-id="{{ $forum->id }}"
-                     onclick="toggleComments({{ $forum->id }})"
-                     style="cursor: pointer;">
-                    <i class="fa fa-comments"></i>
-                    <span>{{ $totalComments }} {{ $totalComments === 1 ? 'Comment' : 'Comments' }}</span>
-                </div>
-                @endif
-                @php
-                    $totalLikes = $forum->total_likes ?? count($forum->likes);
-                    $isLiked = auth()->check() && $forum->isLikedBy(auth()->id());
-                    $totalViews = isset($forum->views) ? (int)$forum->views : 0;
-                @endphp
-                <div class="meta-item like-forum-btn"
-                     data-forum-id="{{ $forum->id }}"
-                     onclick="likeForum({{ $forum->id }})"
-                     style="cursor: pointer; {{ $isLiked ? 'color: #ef4444;' : '' }}">
-                    <i class="fa {{ $isLiked ? 'fa-heart' : 'fa-heart-o' }}" style="color: {{ $isLiked ? '#ef4444' : 'inherit' }};"></i>
-                    <span class="like-count-{{ $forum->id }}">{{ $totalLikes }}</span>
-                    <span>{{ $totalLikes === 1 ? ' like' : ' likes' }}</span>
-                </div>
-                <div class="meta-item">
-                    <i class="fa fa-eye"></i>
-                    <span>{{ format_view_count($totalViews) }} {{ $totalViews === 1 ? 'view' : 'views' }}</span>
-                </div>
-            </div>
 
-            <div class="forum-actions">
-                <a href="{{ forum_thread_url($forum)}}" class="btn btn-sm btn-outline-secondary">
-                    <i class="fa fa-info-circle"></i> Details
-                </a>
-                @include('forums.partials.khub_ai_thread_button', [
-                    'forum' => $forum,
-                    'redirectUrl' => url('forums'),
-                ])
-                @auth
-                    @if(in_array($forum->id, $my_forums))
-                        <a href="{{ forum_thread_url($forum)}}" class="btn btn-sm theme-bg text-white">
-                            <i class="fa fa-comments"></i> View Discussion
-                        </a>
-                        <button type="button" class="btn btn-sm theme-bg text-white"
-                                onclick="showInlineCommentForm({{ $forum->id }})"
-                                id="show-comment-btn-{{ $forum->id }}">
-                            <i class="fa fa-plus-circle me-1"></i> Add Comment
-                        </button>
-                    @else
-                        <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn btn-sm btn-dark" id="join{{ $forum->id }}">
-                            <i class="fa fa-link"></i> Join Discussion
-                        </a>
-                        <button type="button" class="btn btn-sm theme-bg text-white"
-                                onclick="showInlineCommentJoinPanel({{ $forum->id }})"
-                                id="show-comment-btn-join-{{ $forum->id }}">
-                            <i class="fa fa-plus-circle me-1"></i> Add Comment
-                        </button>
-                    @endif
-                @else
-                    <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn btn-sm btn-dark" id="join{{ $forum->id }}">
-                        <i class="fa fa-link"></i> Join Discussion
+                <div class="forum-actions">
+                    <a href="{{ forum_thread_url($forum)}}" class="btn btn-sm btn-outline-secondary forum-action-btn">
+                        <i class="fa fa-info-circle" aria-hidden="true"></i> Details
                     </a>
-                @endauth
-                @include('forums.partials.share_buttons', ['forum' => $forum, 'variant' => 'inline'])
-            </div>
+                    @include('forums.partials.khub_ai_thread_button', [
+                        'forum' => $forum,
+                        'redirectUrl' => url('forums'),
+                    ])
+                    @auth
+                        @if(in_array($forum->id, $my_forums))
+                            <a href="{{ forum_thread_url($forum)}}" class="btn btn-sm theme-bg text-white forum-action-btn forum-action-btn--primary">
+                                <i class="fa fa-comments" aria-hidden="true"></i> View Discussion
+                            </a>
+                            <button type="button" class="btn btn-sm theme-bg text-white forum-action-btn forum-action-btn--primary"
+                                    onclick="showInlineCommentForm({{ $forum->id }})"
+                                    id="show-comment-btn-{{ $forum->id }}">
+                                <i class="fa fa-plus-circle me-1" aria-hidden="true"></i> Add Comment
+                            </button>
+                        @else
+                            <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn btn-sm btn-dark forum-action-btn" id="join{{ $forum->id }}">
+                                <i class="fa fa-link" aria-hidden="true"></i> Join Discussion
+                            </a>
+                            <button type="button" class="btn btn-sm theme-bg text-white forum-action-btn forum-action-btn--primary"
+                                    onclick="showInlineCommentJoinPanel({{ $forum->id }})"
+                                    id="show-comment-btn-join-{{ $forum->id }}">
+                                <i class="fa fa-plus-circle me-1" aria-hidden="true"></i> Add Comment
+                            </button>
+                        @endif
+                    @else
+                        <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn btn-sm btn-dark forum-action-btn" id="join{{ $forum->id }}">
+                            <i class="fa fa-link" aria-hidden="true"></i> Join Discussion
+                        </a>
+                    @endauth
+                    @include('forums.partials.share_buttons', ['forum' => $forum, 'variant' => 'inline'])
                 </div>
             </div>
+        </div>
 
-            @php
-                $forumComments = $forum->comments->take(5);
-                $commentsToShow = max(2, min(5, min($totalComments ?? 0, 5)));
-            @endphp
+        @php
+            $forumComments = $forum->comments->take(5);
+            $commentsToShow = max(2, min(5, min($totalComments ?? 0, 5)));
+        @endphp
 
-            @if($totalComments > 0 || auth()->check())
+        @if($totalComments > 0 || auth()->check())
             <div class="comments-panel">
                 <div class="comments-list" id="comments-list-{{ $forum->id }}" style="display: none;">
                     @if($totalComments > 0)
@@ -184,17 +187,17 @@
                                         <img src="{{ $photoUrl }}" alt="Avatar for {{ $comment->user->name ?? 'User' }}"
                                              onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa fa-user\'></i>';">
                                     @else
-                                        <i class="fa fa-user"></i>
+                                        <i class="fa fa-user" aria-hidden="true"></i>
                                     @endif
                                 </div>
                                 <div class="comment-content-mini">
                                     <div class="comment-author-mini notranslate" translate="no">{{ $comment->user->name ?? 'Unknown' }}</div>
                                     <div class="comment-text-mini">{!! Str::limit(strip_tags($comment->comment ?? ''), 150) !!}</div>
                                     <div class="comment-time-mini">
-                                        <i class="fa fa-clock me-1"></i>{{ time_ago($comment->created_at ?? now()) }}
+                                        <i class="fa fa-clock me-1" aria-hidden="true"></i>{{ time_ago($comment->created_at ?? now()) }}
                                         @if($comment->likes && count($comment->likes) > 0)
                                             <span class="ms-2">
-                                                <i class="fa fa-heart text-danger me-1"></i>{{ count($comment->likes) }}
+                                                <i class="fa fa-heart text-danger me-1" aria-hidden="true"></i>{{ count($comment->likes) }}
                                             </span>
                                         @endif
                                     </div>
@@ -220,7 +223,7 @@
                             <div class="inline-forum-upload-widget" data-forum-id="{{ $forum->id }}">
                                 <div class="file-upload-area inline-file-upload-area" style="cursor: pointer;">
                                     <div class="file-upload-text">
-                                        <i class="fa fa-paperclip me-1"></i>
+                                        <i class="fa fa-paperclip me-1" aria-hidden="true"></i>
                                         <span>Attach images, PDF, office, audio, or video (max 2MB per file)</span>
                                     </div>
                                     <div class="file-upload-hint">Images · PDF · Word/Excel/PowerPoint (saved as PDF) · Audio · Video</div>
@@ -235,7 +238,7 @@
                             <button type="button" class="btn btn-sm btn-outline-secondary"
                                     onclick="cancelInlineComment({{ $forum->id }})">Cancel</button>
                             <button type="submit" class="btn btn-sm theme-bg text-white">
-                                <i class="fa fa-paper-plane me-1"></i>Post Comment
+                                <i class="fa fa-paper-plane me-1" aria-hidden="true"></i>Post Comment
                             </button>
                         </div>
                         @csrf
@@ -245,14 +248,13 @@
                 <div class="inline-comment-form" id="comment-form-join-{{ $forum->id }}" style="display: none;">
                     <p class="mb-2 text-muted small">Join this discussion to post a comment from the listing.</p>
                     <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn btn-sm theme-bg text-white">
-                        <i class="fa fa-link me-1"></i>Join discussion
+                        <i class="fa fa-link me-1" aria-hidden="true"></i>Join discussion
                     </a>
                     <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="cancelInlineCommentJoin({{ $forum->id }})">Cancel</button>
                 </div>
                 @endif
                 @endauth
             </div>
-            @endif
-        </div>
+        @endif
     </div>
 </div>
