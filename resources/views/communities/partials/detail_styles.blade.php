@@ -28,11 +28,6 @@
         border-bottom-right-radius: var(--community-ui-radius) !important;
     }
 
-    .community-detail-page .js-open-pdf-chat {
-        border: none !important;
-        box-shadow: none;
-    }
-
     .theme-text {
         color: {{ $primaryColor }};
     }
@@ -480,8 +475,8 @@
     }
 
     .community-pub-intro__image {
-        width: 176px;
-        height: 176px;
+        width: 250px;
+        height: 300px;
         object-fit: contain;
         border-radius: var(--community-ui-radius);
         border: 1px solid rgba(17, 154, 72, 0.15);
@@ -523,7 +518,7 @@
         line-height: 1.65;
         font-size: 0.9375rem;
         display: -webkit-box;
-        -webkit-line-clamp: 5;
+        -webkit-line-clamp: 8;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
@@ -1032,8 +1027,9 @@
             width: 100%;
             max-width: 250px;
             height: auto;
-            min-height: 136px;
-            max-height: 178px;
+            min-height: 200px;
+            max-height: 300px;
+            aspect-ratio: 250 / 300;
         }
 
         .community-pub-body {
