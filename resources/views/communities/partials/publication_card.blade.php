@@ -10,112 +10,141 @@
             $authorPhoto = url('/' . $authorPhoto);
         }
     }
+    $authorName = $author->name ?? ($row->associated_authors ? clean_unicode($row->associated_authors) : 'Unknown author');
+    $authorSubtitle = trim((string) ($row->author_affiliation ?? ''));
+    $commentCount = count($row->comments);
+    $viewCount = (int) ($row->visits ?? 0);
+
+    $raw_cover = $row->getRawOriginal('cover');
+    $cover_is_external = $row->cover_is_exteranl ?? false;
+    if (! empty($raw_cover)) {
+        $image_link = $cover_is_external ? $raw_cover : storage_link('uploads/publications/' . $raw_cover);
+    } else {
+        $image_link = null;
+    }
+    $default_image = asset('assets/images/cover.png');
+    $final_image = (! empty($image_link) && filter_var($image_link, FILTER_VALIDATE_URL)) ? $image_link : $default_image;
 @endphp
 
-<div class="card col-lg-12 single-border mb-2 publication-list-card pub-card-file-type-corner-wrap" data-aos="{{ $i > 2 ? 'zoom-in' : '' }}" data-aos-delay="100">
-    <div class="card-body text-left">
+<div class="card col-lg-12 community-pub-card pub-card-file-type-corner-wrap mb-2" data-aos="{{ $i > 2 ? 'zoom-in' : '' }}" data-aos-delay="100">
+    <div class="card-body text-left p-0">
         @include('partials.publications.file_type_corner_badge', ['row' => $row])
 
-        <div class="row publication-card-row" style="display: flex; flex-wrap: nowrap; align-items: stretch;">
-            @php
-                $raw_cover = $row->getRawOriginal('cover');
-                $cover_is_external = $row->cover_is_exteranl ?? false;
-                if (! empty($raw_cover)) {
-                    $image_link = $cover_is_external ? $raw_cover : storage_link('uploads/publications/' . $raw_cover);
-                } else {
-                    $image_link = null;
-                }
-                $default_image = asset('assets/images/cover.png');
-                $final_image = (! empty($image_link) && filter_var($image_link, FILTER_VALIDATE_URL)) ? $image_link : $default_image;
-            @endphp
-            <div class="col-md-3 publication-image-col" style="min-height: 150px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: transparent; width: 35%; flex: 0 0 35%; max-width: 35%; padding-right: 0; position: relative; border: none;">
-                <a href="{{ publication_url($row) }}" class="publication-image-link" style="display: block; width: 100%; height: 100%; cursor: pointer;">
+        <div class="community-pub-intro">
+            <div class="community-pub-intro__media">
+                <a href="{{ publication_url($row) }}" class="community-pub-intro__image-link" aria-label="{{ clean_unicode($row->title) }}">
                     <img src="{{ $final_image }}"
                          alt="{{ clean_unicode($row->title) }}"
-                         class="publication-image"
-                         style="width: 100%; height: 100%; min-height: 150px; object-fit: contain; transition: transform 0.3s ease; background-color: transparent;"
+                         class="community-pub-intro__image"
+                         loading="lazy"
                          onerror="this.onerror=null; this.src='{{ $default_image }}';">
                 </a>
             </div>
-            <div class="col-md-9 publication-content-col" style="width: 65%; flex: 1 1 65%; max-width: 65%; padding-left: 1rem;">
-                <div class="community-pub-author">
-                    <div class="community-pub-author__avatar">
-                        @if($author && $authorPhoto)
-                            <img src="{{ $authorPhoto }}" alt="{{ $author->name ?? 'Author' }}"
-                                 onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
-                            <i class="fa fa-user" style="display:none;"></i>
-                        @else
-                            <i class="fa fa-user"></i>
-                        @endif
+
+            <div class="community-pub-intro__text">
+                <h5 class="community-pub-title">
+                    <a href="{{ publication_url($row) }}">{!! truncate(clean_unicode($row->title), 500) !!}</a>
+                </h5>
+                <p class="community-pub-description">
+                    <a href="{{ publication_url($row) }}">
+                        {!! Str::words(strip_tags(clean_unicode(publication_description_for_list($row->description ?? ''))), 40, '...') !!}
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <div class="community-pub-body">
+            <div class="community-pub-meta-list">
+                @if(! empty($row->theme->description ?? ''))
+                    <div class="community-pub-meta-row">
+                        <i class="lni lni-briefcase" aria-hidden="true"></i>
+                        <span><strong>Theme:</strong> {!! clean_unicode($row->theme->description) !!}</span>
                     </div>
-                    <div>
-                        <span class="community-pub-author__name notranslate" translate="no">
-                            {{ $author->name ?? ($row->associated_authors ? clean_unicode($row->associated_authors) : 'Unknown author') }}
-                        </span>
-                        <span class="community-pub-author__meta">
-                            <i class="fa fa-clock-o mr-1"></i>{{ publication_content_updated_ago($row) }}
-                            @if(publication_last_visited_at($row))
-                                · <i class="fa fa-history mr-1"></i>Last visit {{ time_ago(publication_last_visited_at($row)) }}
-                            @endif
-                        </span>
+                @endif
+                @if(! empty($row->sub_theme->description ?? ''))
+                    <div class="community-pub-meta-row">
+                        <i class="lni lni-archive" aria-hidden="true"></i>
+                        <span><strong>Sub Theme:</strong> {!! clean_unicode($row->sub_theme->description) !!}</span>
                     </div>
+                @endif
+                @if(! empty($row->associated_authors))
+                    <div class="community-pub-meta-row">
+                        <i class="fa fa-users" aria-hidden="true"></i>
+                        <span><strong>Associated Authors:</strong> <span class="notranslate" translate="no">{{ clean_unicode($row->associated_authors) }}</span></span>
+                    </div>
+                @endif
+                @if(! empty($row->data_category->category_name ?? ''))
+                    <div class="community-pub-meta-row">
+                        <i class="lni lni-empty-file" aria-hidden="true"></i>
+                        <span><strong>Category:</strong> {{ $row->data_category->category_name }}</span>
+                    </div>
+                @endif
+            </div>
+
+            <div class="community-pub-stats">
+                <span class="community-pub-stat community-pub-stat--views">
+                    <i class="fa fa-eye" aria-hidden="true"></i>
+                    {{ format_view_count($viewCount) }} {{ $viewCount === 1 ? 'view' : 'views' }}
+                </span>
+                <a href="{{ publication_url($row) }}" class="community-pub-stat community-pub-stat--comments comments{{ $i }}" data-bs-toggle="popover" data-bs-placement="bottom">
+                    <i class="fa fa-comments" aria-hidden="true"></i>
+                    {{ $commentCount }} {{ $commentCount === 1 ? 'Comment' : 'Comments' }}
+                </a>
+                @if ($likes > 0)
+                    <span class="community-pub-stat community-pub-stat--likes">
+                        <i class="fa fa-heart" aria-hidden="true"></i>
+                        {{ $likes }} {{ $likes === 1 ? 'Like' : 'Likes' }}
+                    </span>
+                @endif
+                @include('home.partials.comments')
+            </div>
+
+            <div class="community-pub-footer">
+                <div class="community-pub-footer__avatar">
+                    @if($author && $authorPhoto)
+                        <img src="{{ $authorPhoto }}" alt="{{ $authorName }}"
+                             onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+                        <i class="fa fa-user" style="display:none;" aria-hidden="true"></i>
+                    @else
+                        <i class="fa fa-user" aria-hidden="true"></i>
+                    @endif
                 </div>
 
-                <h5 class="text-bold text-lg publication-title-desktop">
-                    <a href="{{ publication_url($row) }}">
-                        {!! truncate(clean_unicode($row->title), 500) !!}
-                    </a>
-                </h5>
-
-                <a href="{{ publication_url($row) }}" style="text-align: justify; overflow-wrap: break-word; white-space: normal !important; margin-bottom: 10px; display: block;">
-                    {!! Str::words(strip_tags(clean_unicode(publication_description_for_list($row->description ?? ''))), 40, '...') !!}
-                </a>
-
-                <span class="muted medium theme-cl"><i class="lni lni-briefcase mr-1"></i>Theme: {!! clean_unicode($row->theme->description ?? '') !!}</span>
-                <span class="muted medium ml-1 theme-cl"><br><i class="lni lni-archive mr-1"></i>Sub Theme: {!! clean_unicode($row->sub_theme->description ?? '') !!}</span>
-                @if(! empty($row->associated_authors))
-                    <span class="muted medium ml-1 theme-cl"><br><i class="fa fa-users mr-1"></i>Associated Authors: <span class="notranslate" translate="no">{{ clean_unicode($row->associated_authors) }}</span></span>
-                @endif
-                @if ($likes > 0)
-                    <span><br><i class="lni lni-heart mr-1"></i> {{ $likes }} Like{{ $likes > 1 ? 's' : '' }}</span>
-                @endif
-                <span class="muted medium ml-1 text-muted mt-1"><br><i class="lni lni-empty-file mr-1"></i>Category: {{ @$row->data_category->category_name }}</span>
-
-                <span class="text-muted medium d-block mt-1">
-                    @include('partials.publications.card_timestamps', ['row' => $row])
-                    <a href="{{ publication_url($row) }}">
-                        <span class="mr-2"><i class="fa fa-eye mr-1"></i>{{ format_view_count($row->visits ?? 0) }} Views</span>
-                        <span class="mr-1 ml-2 comments{{ $i }}" data-bs-toggle="popover" data-bs-placement="bottom">
-                            <i class="fa fa-comments"></i> {{ count($row->comments) }} Comments
+                <div class="community-pub-footer__body">
+                    <div class="community-pub-footer__meta">
+                        <div class="community-pub-footer__author-text">
+                            <span class="community-pub-footer__name notranslate" translate="no">{{ $authorName }}</span>
+                            @if($authorSubtitle !== '')
+                                <span class="community-pub-footer__subtitle notranslate" translate="no">{{ clean_unicode($authorSubtitle) }}</span>
+                            @endif
+                        </div>
+                        <span class="community-pub-stat community-pub-stat--time">
+                            <i class="fa fa-clock-o" aria-hidden="true"></i>
+                            {{ publication_content_updated_ago($row) }}
                         </span>
-                    </a>
-                    @include('home.partials.comments')
-                </span>
+                    </div>
 
-                <div class="d-flex align-items-center mt-2 publication-card-actions" style="flex-wrap: wrap; gap: 4px; justify-content: flex-start;" onclick="event.stopPropagation();">
-                    @auth
-                        <button type="button"
-                            class="btn btn-sm btn-outline-danger js-favourite-pub-btn"
-                            data-publication-id="{{ $row->id }}"
-                            data-favourited="{{ $row->is_favourite ? '1' : '0' }}"
-                            style="border-color: #ef4444; color: #ef4444; background-color: transparent; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; cursor: pointer;"
-                            onclick="if(window.handlePubFavourite){event.preventDefault();event.stopPropagation();window.handlePubFavourite(this);}">
-                            <i class="fa fa-heart{{ $row->is_favourite ? '' : '-o' }} mr-1"></i>
-                            <span class="js-fav-label">{{ $row->is_favourite ? 'Favorite' : 'Add favorite' }}</span>
-                        </button>
-                    @else
-                        <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}"
-                           class="btn btn-sm btn-outline-danger"
-                           style="border-color: #ef4444; color: #ef4444; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; background-color: transparent;">
-                            <i class="fa fa-heart-o mr-1"></i> Add favorite
+                    <div class="community-pub-footer__actions publication-card-actions" onclick="event.stopPropagation();">
+                        @auth
+                            <button type="button"
+                                class="btn btn-sm btn-outline-danger js-favourite-pub-btn"
+                                data-publication-id="{{ $row->id }}"
+                                data-favourited="{{ $row->is_favourite ? '1' : '0' }}"
+                                onclick="if(window.handlePubFavourite){event.preventDefault();event.stopPropagation();window.handlePubFavourite(this);}">
+                                <i class="fa fa-heart{{ $row->is_favourite ? '' : '-o' }} mr-1"></i>
+                                <span class="js-fav-label">{{ $row->is_favourite ? 'Favorite' : 'Add favorite' }}</span>
+                            </button>
+                        @else
+                            <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}"
+                               class="btn btn-sm btn-outline-danger">
+                                <i class="fa fa-heart-o mr-1"></i> Add favorite
+                            </a>
+                        @endauth
+                        <a href="{{ publication_url($row) }}" class="btn btn-sm btn-primary community-pub-action-btn--primary">
+                            <i class="fa fa-eye mr-1"></i> Read more
                         </a>
-                    @endauth
-                    <a href="{{ publication_url($row) }}"
-                       class="btn btn-sm btn-primary"
-                       style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500;">
-                        <i class="fa fa-eye mr-1"></i> Read more
-                    </a>
-                    @include('common.khub_ai_publication_button', ['publication' => $row])
+                        @include('common.khub_ai_publication_button', ['publication' => $row])
+                    </div>
                 </div>
             </div>
         </div>
