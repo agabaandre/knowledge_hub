@@ -12,7 +12,8 @@
         }
     }
     $posterName = $author->name ?? 'Unknown';
-    $authorSubtitle = trim((string) ($row->author_affiliation ?? ''));
+    $authorUser = $author->user ?? null;
+    $authorSubtitle = contributor_profile_organization($author, $authorUser) ?? '';
     $approvedComments = collect($row->comments)->filter(function ($comment) {
         $status = $comment->status ?? null;
         if ($status === 'rejected' || $status === 'pending') {

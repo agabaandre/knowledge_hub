@@ -1301,32 +1301,21 @@ function clear_cache(){
  * Two-letter initials for avatar fallback on community cards, etc.
  */
 /**
- * Organization / institution label for a contributor profile (user profile field, then publication affiliation).
+ * Organization / institution from the contributor's account profile (not publication metadata).
  */
 function contributor_profile_organization(?\App\Models\Author $author, ?\App\Models\User $user = null): ?string
 {
-    if ($user !== null) {
-        $fromUser = trim((string) ($user->organization_name ?? ''));
-        if ($fromUser !== '') {
-            return $fromUser;
-        }
+    if ($user === null && $author !== null) {
+        $user = $author->user ?? null;
     }
 
-    if ($author === null) {
+    if ($user === null) {
         return null;
     }
 
-    $affiliation = \App\Models\Publication::query()
-        ->where('author_id', $author->id)
-        ->whereNotNull('author_affiliation')
-        ->where('author_affiliation', '!=', '')
-        ->orderByDesc('content_updated_at')
-        ->orderByDesc('updated_at')
-        ->value('author_affiliation');
+    $fromUser = trim((string) ($user->organization_name ?? ''));
 
-    $affiliation = trim((string) ($affiliation ?? ''));
-
-    return $affiliation !== '' ? $affiliation : null;
+    return $fromUser !== '' ? $fromUser : null;
 }
 
 /**
