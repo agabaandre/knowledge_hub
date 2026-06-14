@@ -190,13 +190,18 @@ Please summarize this forum discussion, including:
     {
         try {
             $response = [];
+            $langInstruction = publication_ai_summary_language_instruction($language);
+            $combinedPrompt = $langInstruction;
+            if ($additional_prompt) {
+                $combinedPrompt .= ' ' . $additional_prompt;
+            }
             
             // Check if file is PDF
             if (strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) === 'pdf') {
                 $this->aiModel = app('chatpdf');
                 
                 // Extract description/summary
-                $summaryResponse = $this->aiModel->summarizeFile($file_path, $language, $additional_prompt);
+                $summaryResponse = $this->aiModel->summarizeFile($file_path, null, $combinedPrompt);
                 $formattedContent = $this->formatResponse($summaryResponse);
                 $response['content'] = clean_unicode(normalize_ai_publication_summary_html($formattedContent['content'] ?? ''));
                 
@@ -208,7 +213,7 @@ Please summarize this forum discussion, including:
                 }
                 If information is not found, use empty strings. Return ONLY the JSON, no additional text.";
                 
-                $metadataResponse = $this->aiModel->summarizeFile($file_path, $language, $metadataPrompt);
+                $metadataResponse = $this->aiModel->summarizeFile($file_path, null, $metadataPrompt);
                 $metadataContent = $this->formatResponse($metadataResponse)['content'];
                 
                 // Parse metadata from response
@@ -226,11 +231,9 @@ Please summarize this forum discussion, including:
                 
                 // Extract description/summary (HTML for publication description field)
                 $prompt = "Summarize this document content as raw HTML inside a single div (no html/head/body). CRITICAL: The first content must be normal <p> paragraph(s) with full sentences—no h3/h4/h5 before them, and no opening <p> that is only a short bold title line. Use h3/h4 only for later sections after the opening paragraphs. Document content follows:\n\n" . $file_content;
+                $prompt .= "\n\n" . $langInstruction;
                 if ($additional_prompt) {
                     $prompt .= "\n\nPay attention to: " . $additional_prompt;
-                }
-                if ($language && $language !== 'en') {
-                    $prompt .= "\n\nTranslate summary to: $language";
                 }
                 
                 $summaryResponse = $this->aiModel->summarize($prompt, $additional_prompt);

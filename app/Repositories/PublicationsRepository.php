@@ -546,6 +546,9 @@ public function getPublicationIds(Request $request, int $limit = 80): array
         // Clean Unicode characters from text fields before saving
         $pub->title                     = format_title_with_ai_fallback($request->title ?? '');
         $pub->description               = sanitize_rich_text_for_storage(clean_unicode($request->description ?? ''));
+        if (Schema::hasColumn('publication', 'publication_language')) {
+            $pub->publication_language = $request->publication_language ?: null;
+        }
         $pub->associated_authors        = clean_unicode($request->associated_authors ?? '');
         $pub->author_affiliation        = clean_unicode($request->author_affiliation ?? '');
         $pub->publication               = clean_unicode($request->link ?? '');

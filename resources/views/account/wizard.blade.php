@@ -73,6 +73,13 @@
     $publicationMinWords = (int) (settings()->publication_min_words ?? 150);
     $publicationMinChars = $publicationMinWords * 5;
     $adminMustSelectAuthor = is_admin() && ! optional(current_user())->author_id;
+    $publicationLanguageOptions = \App\Models\SiteLanguage::selectorMap();
+    $defaultPublicationLanguage = old(
+        'publication_language',
+        optional($publication)->publication_language
+            ?? optional(auth()->user())->langauge
+            ?? (settings()->language ?? 'en')
+    );
 
 @endphp
 
@@ -327,6 +334,18 @@
                     </div>
                 </div>
 
+                <div class="col-md-6 mb-2">
+                    <label class="form-label" for="publication_language">Publication language <span class="text-danger">*</span></label>
+                    <select class="form-control select2" name="publication_language" id="publication_language" required>
+                        @foreach($publicationLanguageOptions as $code => $langRow)
+                            <option value="{{ $code }}" {{ (string) $defaultPublicationLanguage === (string) $code ? 'selected' : '' }}>
+                                {{ $langRow['name'] ?? $code }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <small class="text-muted d-block">Primary language of this resource. AI summary extraction uses this language by default.</small>
+                </div>
+
                 <div class="col-md-12 mb-2">
                     <div class="wizard-inline-50-50">
                         <div class="mb-0 wizard-field-wrap" data-wizard-field="data_category_id">
@@ -502,6 +521,21 @@
             </div>
 
             <h3 class="mb-2 mt-3" style="font-weight:600;">Publication Details</h3>
+
+            <div class="mb-3 p-2" style="background:#ffffff; border:1px solid #e8edf2; border-radius:4px;" id="ai-summary-language-choice">
+                <label class="form-label d-block mb-2">AI summary language</label>
+                <div class="d-flex flex-wrap align-items-center" style="gap: 1rem;">
+                    <label class="form-check-inline mb-0">
+                        <input type="radio" class="form-check-input" name="ai_summary_language_mode" value="publication" checked>
+                        Use publication language (<span id="ai-summary-pub-lang-label">{{ publication_language_label($defaultPublicationLanguage) }}</span>)
+                    </label>
+                    <label class="form-check-inline mb-0">
+                        <input type="radio" class="form-check-input" name="ai_summary_language_mode" value="english">
+                        Extract in English
+                    </label>
+                </div>
+                <small class="text-muted d-block mt-1">When you upload an attachment, the AI draft description follows this choice. Default matches the publication language from Step 1.</small>
+            </div>
             
             <!-- AI Description Loader -->
             <div id="ai-description-loader" style="display: none; margin-top: 10px; margin-bottom: 15px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #119A48; border-radius: 4px;">
@@ -1344,12 +1378,32 @@
         }
 
         // AI summary extraction from first selected file
+        function getAiSummaryExtractLanguage() {
+            var mode = $('input[name="ai_summary_language_mode"]:checked').val() || 'publication';
+            if (mode === 'english') {
+                return 'en';
+            }
+            var pubLang = ($('#publication_language').val() || '').trim();
+            return pubLang || 'document';
+        }
+
+        function updateAiSummaryPublicationLanguageLabel() {
+            var $select = $('#publication_language');
+            if (!$select.length) {
+                return;
+            }
+            var label = $select.find('option:selected').text() || 'publication language';
+            $('#ai-summary-pub-lang-label').text(label.trim());
+        }
+
+        $(document).on('change', '#publication_language', updateAiSummaryPublicationLanguageLabel);
+
         function extractSummaryFromFile(file){
             window.wizardSetAiProcessingState(true);
             
             var formData = new FormData();
             formData.append('file', file);
-            formData.append('language', 'en');
+            formData.append('language', getAiSummaryExtractLanguage());
             formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
 
             $.ajax({

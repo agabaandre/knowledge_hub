@@ -1301,6 +1301,39 @@ function clear_cache(){
  * Two-letter initials for avatar fallback on community cards, etc.
  */
 /**
+ * Resolve a human-readable label for a publication language locale code.
+ */
+function publication_language_label(?string $localeCode): string
+{
+    $localeCode = strtolower(trim((string) $localeCode));
+    if ($localeCode === '') {
+        return 'English';
+    }
+
+    $map = \App\Models\SiteLanguage::selectorMap();
+
+    return $map[$localeCode]['name'] ?? $localeCode;
+}
+
+/**
+ * Instruction for AI file summary based on locale code (en, fr, document, etc.).
+ */
+function publication_ai_summary_language_instruction(?string $localeCode): string
+{
+    $localeCode = strtolower(trim((string) $localeCode));
+
+    if ($localeCode === '' || $localeCode === 'document') {
+        return 'Write the summary in the same language as the source document.';
+    }
+
+    if ($localeCode === 'en' || $localeCode === 'english') {
+        return 'Write the summary in English.';
+    }
+
+    return 'Write the summary in ' . publication_language_label($localeCode) . '.';
+}
+
+/**
  * Organization / institution from the contributor's account profile (not publication metadata).
  */
 function contributor_profile_organization(?\App\Models\Author $author, ?\App\Models\User $user = null): ?string

@@ -60,12 +60,12 @@ class AIController extends Controller
     {
         $request->validate([
             'file' => 'required|file|mimes:pdf,doc,docx,txt|max:10240', // 10MB max
-            'language' => 'nullable|string|max:10'
+            'language' => 'nullable|string|max:32',
         ]);
 
         try {
             $file = $request->file('file');
-            $language = $request->input('language', 'en');
+            $language = $request->input('language', 'document');
             
             // Store file temporarily
             $temp_path = $file->storeAs('temp', uniqid() . '_' . $file->getClientOriginalName(), 'public');

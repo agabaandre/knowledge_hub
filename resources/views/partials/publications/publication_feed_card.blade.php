@@ -34,6 +34,11 @@
     }
     $default_image = asset('assets/images/cover.png');
     $final_image = (! empty($image_link) && filter_var($image_link, FILTER_VALIDATE_URL)) ? $image_link : $default_image;
+
+    // Intro block word budget (title + description), matched to live card density (~82 words total).
+    $feedIntroWordBudget = 82;
+    $titleWordCount = Str::wordCount(strip_tags(clean_unicode($row->title ?? '')));
+    $descriptionWordLimit = max(20, $feedIntroWordBudget - $titleWordCount);
 @endphp
 
 <div class="card col-lg-12 community-pub-card pub-card-file-type-corner-wrap mb-2"
@@ -60,7 +65,7 @@
                 </h5>
                 <p class="community-pub-description">
                     <a href="{{ publication_url($row) }}">
-                        {!! Str::words(strip_tags(clean_unicode(publication_description_for_list($row->description ?? ''))), 105, '...') !!}
+                        {!! Str::words(strip_tags(clean_unicode(publication_description_for_list($row->description ?? ''))), $descriptionWordLimit, '...') !!}
                     </a>
                 </p>
             </div>
