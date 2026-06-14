@@ -67,34 +67,7 @@
     </div>
     @endif
 
-    <div class="community-detail-sidebar-card">
-        <div class="community-detail-sidebar-card__head">
-            <span class="community-detail-sidebar-card__icon community-detail-sidebar-card__icon--gold" aria-hidden="true">
-                <i class="fa fa-users"></i>
-            </span>
-            <div>
-                <h2 class="community-detail-sidebar-card__title">My other communities</h2>
-                <p class="community-detail-sidebar-card__hint">Quick links to your other memberships.</p>
-            </div>
-        </div>
-        <div class="community-detail-sidebar-card__body">
-            @if($otherCommunities->count() > 0)
-                @foreach($otherCommunities as $otherCommunity)
-                    <a href="{{ community_detail_url($otherCommunity) }}" class="community-sidebar-community-link">
-                        <div class="community-sidebar-community-link__name notranslate" translate="no">{{ $otherCommunity->community_name }}</div>
-                        <p class="small text-muted mb-1">{!! Str::words(strip_tags($otherCommunity->description ?? ''), 16, '...') !!}</p>
-                        <div class="community-sidebar-stats">
-                            <span><i class="fa fa-book mr-1"></i>{{ $otherCommunity->community_publications_count ?? 0 }} pubs</span>
-                            <span><i class="fa fa-comments mr-1"></i>{{ $otherCommunity->community_forums_count ?? 0 }} forums</span>
-                            <span><i class="fa fa-users mr-1"></i>{{ $otherCommunity->approved_members_count ?? 0 }} members</span>
-                        </div>
-                    </a>
-                @endforeach
-            @else
-                <p class="text-muted mb-0">You are not a member of any other communities.</p>
-            @endif
-        </div>
-    </div>
+    <div id="community-other-communities-root" aria-live="polite"></div>
 
     <div class="community-detail-sidebar-card">
         <div class="community-detail-sidebar-card__head community-detail-sidebar-card__head--members">

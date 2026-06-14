@@ -28,21 +28,30 @@
     };
 
     window.openCommunityWallPost = function () {
+        function openWallPostUi() {
+            var container = document.getElementById('communityCommentFormContainer');
+            if (!container || container.style.display === 'none' || container.style.display === '') {
+                window.toggleCommunityCommentForm();
+            }
+            var card = document.getElementById('communityWallPostFormCard');
+            if (card && card.scrollIntoView) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            var ta = document.getElementById('communityCommentTextarea');
+            if (ta) ta.focus();
+        }
+
         var wallTab = document.getElementById('wall-posts');
         if (wallTab && !wallTab.classList.contains('active')) {
+            if (typeof window.communityDetailSwitchTab === 'function') {
+                window.communityDetailSwitchTab('wall', { keepPost: true });
+                setTimeout(openWallPostUi, 100);
+                return;
+            }
             window.location.href = @json($communityWallPostUrl);
             return;
         }
-        var container = document.getElementById('communityCommentFormContainer');
-        if (!container || container.style.display === 'none' || container.style.display === '') {
-            window.toggleCommunityCommentForm();
-        }
-        var card = document.getElementById('communityWallPostFormCard');
-        if (card && card.scrollIntoView) {
-            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        var ta = document.getElementById('communityCommentTextarea');
-        if (ta) ta.focus();
+        openWallPostUi();
     };
 
     function updateCharCount(textarea) {

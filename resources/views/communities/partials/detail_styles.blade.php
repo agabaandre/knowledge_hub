@@ -112,6 +112,148 @@
         vertical-align: middle;
     }
 
+    .community-detail-tab-btn {
+        background: transparent;
+        border: none;
+        width: 100%;
+        text-align: inherit;
+        cursor: pointer;
+        font: inherit;
+        color: inherit;
+        line-height: inherit;
+    }
+
+    .community-detail-tab-btn:focus {
+        outline: 2px solid rgba(17, 154, 72, 0.35);
+        outline-offset: 2px;
+    }
+
+    .community-detail-sidebar-card--other {
+        overflow: visible;
+    }
+
+    .community-other-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        padding-top: 0.15rem;
+    }
+
+    .community-other-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.85rem;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--community-ui-radius);
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        position: relative;
+    }
+
+    .community-other-card:hover {
+        text-decoration: none;
+        color: inherit;
+        border-color: rgba(17, 154, 72, 0.35);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+        transform: translateY(-1px);
+    }
+
+    .community-other-card__avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: var(--community-ui-radius);
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+    }
+
+    .community-other-card__body {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .community-other-card__name {
+        display: block;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #1e293b;
+        line-height: 1.35;
+    }
+
+    .community-other-card:hover .community-other-card__name {
+        color: {{ $primaryColor }};
+    }
+
+    .community-other-card__desc {
+        display: block;
+        font-size: 0.78rem;
+        color: #64748b;
+        line-height: 1.45;
+    }
+
+    .community-other-card__stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin-top: 0.15rem;
+    }
+
+    .community-other-card__stat {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.15rem 0.45rem;
+        border-radius: var(--community-ui-radius);
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: #475569;
+        white-space: nowrap;
+    }
+
+    .community-other-card__stat i {
+        color: {{ $primaryColor }};
+        opacity: 0.85;
+    }
+
+    .community-other-card__arrow {
+        flex-shrink: 0;
+        align-self: center;
+        font-size: 0.7rem;
+        color: #94a3b8;
+        transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    .community-other-card:hover .community-other-card__arrow {
+        color: {{ $primaryColor }};
+        transform: translateX(2px);
+    }
+
+    .community-other-empty {
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+
+    .community-detail-sidebar-card {
+        transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .community-detail-sidebar-card:hover {
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.07);
+    }
+
     .community-tab-new-badge {
         background: {{ $primaryColor }} !important;
         color: #fff !important;
