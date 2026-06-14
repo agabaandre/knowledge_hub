@@ -1,6 +1,7 @@
+@include('errors.partials.resolve_error_message')
 @php
-    $deniedMessage = $exception?->getMessage() ?: ($message ?? null);
-    if ($deniedMessage === '' || $deniedMessage === 'Forbidden') {
+    $deniedMessage = $resolvedErrorMessage;
+    if ($deniedMessage === '' || $deniedMessage === 'Forbidden' || $deniedMessage === null) {
         $deniedMessage = 'You do not have permission to access this area.';
     }
 @endphp

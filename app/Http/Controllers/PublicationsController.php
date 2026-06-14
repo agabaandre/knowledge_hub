@@ -451,6 +451,14 @@ class PublicationsController extends Controller
     {
         $request->validate([
             'term' => 'nullable|string|max:255',
+            'rcc' => ['nullable', function (string $attribute, mixed $value, \Closure $fail): void {
+                if ($value === null || $value === '' || $value === 'all') {
+                    return;
+                }
+                if (! is_numeric($value) || (int) $value < 1) {
+                    $fail(__('Invalid region filter.'));
+                }
+            }],
             'thematic_area_id' => 'nullable|integer',
             'theme' => 'nullable|integer',
             'subtheme' => 'nullable|integer',
