@@ -35,10 +35,22 @@
     $default_image = asset('assets/images/cover.png');
     $final_image = (! empty($image_link) && filter_var($image_link, FILTER_VALIDATE_URL)) ? $image_link : $default_image;
 
-    // Intro block word budget (title + description), matched to live card density (~82 words total).
-    $feedIntroWordBudget = 82;
-    $titleWordCount = Str::wordCount(strip_tags(clean_unicode($row->title ?? '')));
-    $descriptionWordLimit = max(20, $feedIntroWordBudget - $titleWordCount);
+    // Intro block: shared word budget for title + description (balanced card).
+    $feedIntroWordBudget = 112; // 82 baseline + 30 for description
+    $minDescriptionWords = 30;
+    $titlePlain = strip_tags(clean_unicode($row->title ?? ''));
+    $titleWordCount = Str::wordCount($titlePlain);
+    $maxTitleWords = max(12, $feedIntroWordBudget - $minDescriptionWords);
+
+    if ($titleWordCount > $maxTitleWords) {
+        $titleDisplayWords = $maxTitleWords;
+        $titleDisplay = Str::words($titlePlain, $titleDisplayWords, '...');
+        $descriptionWordLimit = $minDescriptionWords;
+    } else {
+        $titleDisplayWords = $titleWordCount;
+        $titleDisplay = $titlePlain;
+        $descriptionWordLimit = max($minDescriptionWords, $feedIntroWordBudget - $titleWordCount);
+    }
 @endphp
 
 <div class="card col-lg-12 community-pub-card pub-card-file-type-corner-wrap mb-2"
@@ -61,7 +73,7 @@
 
             <div class="community-pub-intro__text">
                 <h5 class="community-pub-title">
-                    <a href="{{ publication_url($row) }}">{!! truncate(clean_unicode($row->title), 500) !!}</a>
+                    <a href="{{ publication_url($row) }}">{!! truncate($titleDisplay, 500) !!}</a>
                 </h5>
                 <p class="community-pub-description">
                     <a href="{{ publication_url($row) }}">

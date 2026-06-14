@@ -65,6 +65,10 @@
         color: #1e293b;
         margin: 0 0 0.65rem;
         line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     .community-pub-title a {
@@ -83,7 +87,7 @@
         line-height: 1.65;
         font-size: 0.9375rem;
         display: -webkit-box;
-        -webkit-line-clamp: 5;
+        -webkit-line-clamp: 7;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
