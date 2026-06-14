@@ -18,19 +18,34 @@ class AuthorsRepository extends SharedRepo{
         // Per-user forum totals, then sum those by author_id so one row per author (multiple users may share author_id).
         if (Schema::hasTable('forum_engagements')) {
             $forumEngagementPerUser = DB::table('forum_engagements')
-                ->select('user_id', DB::raw('SUM(forum_posts + forum_comments) as forum_engagement_total'))
+                ->select(
+                    'user_id',
+                    DB::raw('SUM(forum_posts) as forum_posts_total'),
+                    DB::raw('SUM(forum_comments) as forum_comments_total'),
+                    DB::raw('SUM(forum_posts + forum_comments) as forum_engagement_total')
+                )
                 ->groupBy('user_id');
             $forumEngagementByAuthor = DB::table('users')
                 ->leftJoinSub($forumEngagementPerUser, 'fe_sum', function ($join) {
                     $join->on('fe_sum.user_id', '=', 'users.id');
                 })
                 ->whereNotNull('users.author_id')
-                ->select('users.author_id', DB::raw('SUM(COALESCE(fe_sum.forum_engagement_total, 0)) as forum_engagement_total'))
+                ->select(
+                    'users.author_id',
+                    DB::raw('SUM(COALESCE(fe_sum.forum_posts_total, 0)) as forum_posts_total'),
+                    DB::raw('SUM(COALESCE(fe_sum.forum_comments_total, 0)) as forum_comments_total'),
+                    DB::raw('SUM(COALESCE(fe_sum.forum_engagement_total, 0)) as forum_engagement_total')
+                )
                 ->groupBy('users.author_id');
         } else {
             $forumEngagementByAuthor = DB::table('users')
                 ->whereNotNull('users.author_id')
-                ->select('users.author_id', DB::raw('0 as forum_engagement_total'))
+                ->select(
+                    'users.author_id',
+                    DB::raw('0 as forum_posts_total'),
+                    DB::raw('0 as forum_comments_total'),
+                    DB::raw('0 as forum_engagement_total')
+                )
                 ->groupBy('users.author_id');
         }
 
@@ -49,6 +64,8 @@ class AuthorsRepository extends SharedRepo{
             })
             ->select('author.*')
             ->selectRaw('COALESCE(publication_totals.publications_count, 0) as publications_count')
+            ->selectRaw('COALESCE(forum_by_author.forum_posts_total, 0) as forum_posts_total')
+            ->selectRaw('COALESCE(forum_by_author.forum_comments_total, 0) as forum_comments_total')
             ->selectRaw('COALESCE(forum_by_author.forum_engagement_total, 0) as forum_engagement_total')
             ->selectRaw('(COALESCE(publication_totals.publications_count, 0) + COALESCE(forum_by_author.forum_engagement_total, 0)) as total_contributions');
 

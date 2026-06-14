@@ -7,8 +7,33 @@
     .af-card-body{padding:16px}
     .authors-admin-table td,.authors-admin-table th{vertical-align:middle}
     .authors-admin-table .col-actions{white-space:nowrap;width:1%}
-    .authors-admin-table .author-name{word-break:break-word}
+    .authors-admin-table .author-name{word-break:break-word;min-width:160px}
     .authors-admin-table .text-placeholder{color:#94a3b8;font-style:italic}
+    .authors-admin-table-wrap{overflow-x:auto}
+    .authors-admin-avatar{
+        width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;
+        border:1px solid #e2e8f0;background:#f8fafc;display:flex;align-items:center;justify-content:center;
+    }
+    .authors-admin-avatar img{width:100%;height:100%;object-fit:cover}
+    .authors-admin-avatar i{font-size:1.1rem;color:#64748b}
+    .authors-admin-stat{
+        display:inline-flex;align-items:center;justify-content:center;min-width:2rem;
+        padding:0.15rem 0.45rem;border-radius:999px;font-size:0.78rem;font-weight:700;line-height:1.2;
+    }
+    .authors-admin-stat--pub{background:rgba(37,99,235,0.12);color:#2563eb}
+    .authors-admin-stat--forum{background:rgba(124,58,237,0.12);color:#7c3aed}
+    .authors-admin-stat--total{background:rgba(17,154,72,0.12);color:#119A48}
+    .authors-admin-stat--zero{background:#f1f5f9;color:#94a3b8;font-weight:600}
+    .authors-admin-meta{font-size:0.78rem;color:#64748b;line-height:1.35}
+    .authors-admin-badge{
+        display:inline-flex;align-items:center;gap:0.25rem;padding:0.12rem 0.45rem;border-radius:999px;
+        font-size:0.72rem;font-weight:700;color:#fff;white-space:nowrap;
+    }
+    .authors-admin-type{
+        display:inline-block;padding:0.12rem 0.45rem;border-radius:999px;font-size:0.72rem;font-weight:600;
+        background:#f1f5f9;color:#475569;
+    }
+    .authors-admin-type--org{background:rgba(234,88,12,0.12);color:#ea580c}
  </style>
 @endsection
 
@@ -32,11 +57,21 @@
         </div>
         <div class="af-card-body">
             @include('layouts.partials.alerts')
+            <div class="authors-admin-table-wrap">
             <table class="table table-striped table-hover table-bordered authors-admin-table mb-0">
                 <thead class="thead-light">
                     <tr>
                         <th style="width:60px;">#</th>
+                        <th style="width:56px;">Photo</th>
                         <th>Name</th>
+                        <th style="width:90px;">Type</th>
+                        <th style="width:170px;">Linked account</th>
+                        <th style="width:90px;" class="text-center" title="Published resources credited to this author">Publications</th>
+                        <th style="width:90px;" class="text-center" title="Forum threads started by linked account">Forum threads</th>
+                        <th style="width:90px;" class="text-center" title="Forum comments by linked account">Forum comments</th>
+                        <th style="width:80px;" class="text-center">Total</th>
+                        <th style="width:120px;">Badge</th>
+                        <th style="width:70px;">Profile</th>
                         <th class="col-actions">Actions</th>
                     </tr>
                 </thead>
@@ -45,16 +80,95 @@
                     @php
                         $displayName = trim((string) ($a->name ?? ''));
                         $labelForAttrs = $displayName !== '' ? $displayName : ('Author #'.$a->id);
+                        $isOrg = strtolower((string) ($a->is_organsiation ?? '')) === 'yes';
+                        $avatarUrl = null;
+                        if (! empty($a->logo) && $a->logo !== 'author.png') {
+                            $avatarUrl = filter_var($a->logo, FILTER_VALIDATE_URL)
+                                ? $a->logo
+                                : asset(ltrim($a->logo, '/'));
+                        } elseif ($a->user && ! empty($a->user->photo)) {
+                            $avatarUrl = $a->user->photo;
+                        }
+                        $publicationsCount = (int) ($a->publications_count ?? 0);
+                        $forumPostsCount = (int) ($a->forum_posts_total ?? 0);
+                        $forumCommentsCount = (int) ($a->forum_comments_total ?? 0);
+                        $totalContributions = (int) ($a->total_contributions ?? ($publicationsCount + $forumPostsCount + $forumCommentsCount));
+                        $lifetimeBadge = $a->user ? ($a->user->lifetimeBadge ?? null) : null;
+                        $badgeType = $lifetimeBadge ? ($lifetimeBadge->badgeType ?? null) : null;
+                        $profileUrl = author_publications_url($a);
                     @endphp
                     <tr>
                         <td>{{ $authors->firstItem() + $idx }}</td>
+                        <td>
+                            <div class="authors-admin-avatar" aria-hidden="true">
+                                @if($avatarUrl)
+                                    <img src="{{ $avatarUrl }}" alt="" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
+                                    <i class="fa {{ $isOrg ? 'fa-building' : 'fa-user' }} d-none"></i>
+                                @else
+                                    <i class="fa {{ $isOrg ? 'fa-building' : 'fa-user' }}"></i>
+                                @endif
+                            </div>
+                        </td>
                         <td class="author-name">
                             @if($displayName !== '')
-                                {{ $displayName }}
+                                <div class="font-weight-semibold">{{ $displayName }}</div>
                             @else
                                 <span class="text-placeholder" title="No name in database">Untitled source</span>
                                 <span class="text-muted small">(ID {{ $a->id }})</span>
                             @endif
+                            @if($a->user && ($a->user->job_title || $a->user->organization_name))
+                                <div class="authors-admin-meta mt-1">
+                                    @if($a->user->job_title)
+                                        <div>{{ truncate($a->user->job_title, 40) }}</div>
+                                    @endif
+                                    @if($a->user->organization_name)
+                                        <div><i class="fa fa-building mr-1"></i>{{ truncate($a->user->organization_name, 40) }}</div>
+                                    @endif
+                                </div>
+                            @elseif($isOrg && ! empty($a->email))
+                                <div class="authors-admin-meta mt-1">{{ $a->email }}</div>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="authors-admin-type {{ $isOrg ? 'authors-admin-type--org' : '' }}">
+                                {{ $isOrg ? 'Organisation' : 'Contributor' }}
+                            </span>
+                        </td>
+                        <td>
+                            @if($a->user)
+                                <div class="authors-admin-meta">
+                                    <div class="text-truncate" style="max-width:160px;" title="{{ $a->user->email }}">{{ $a->user->email }}</div>
+                                    @if($a->user->country && $a->user->country->name)
+                                        <div><i class="fa fa-map-marker-alt mr-1"></i>{{ $a->user->country->name }}</div>
+                                    @endif
+                                </div>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            <span class="authors-admin-stat {{ $publicationsCount > 0 ? 'authors-admin-stat--pub' : 'authors-admin-stat--zero' }}">{{ number_format($publicationsCount) }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="authors-admin-stat {{ $forumPostsCount > 0 ? 'authors-admin-stat--forum' : 'authors-admin-stat--zero' }}">{{ number_format($forumPostsCount) }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="authors-admin-stat {{ $forumCommentsCount > 0 ? 'authors-admin-stat--forum' : 'authors-admin-stat--zero' }}">{{ number_format($forumCommentsCount) }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="authors-admin-stat {{ $totalContributions > 0 ? 'authors-admin-stat--total' : 'authors-admin-stat--zero' }}">{{ number_format($totalContributions) }}</span>
+                        </td>
+                        <td>
+                            @if($badgeType)
+                                <span class="authors-admin-badge" style="background-color: {{ $badgeType->badge_color ?? '#64748b' }};" title="{{ number_format((int) ($lifetimeBadge->lifetime_contributions ?? 0)) }} lifetime contributions">
+                                    {{ participant_badge_emoji($badgeType->slug ?? null) }} {{ $badgeType->name }}
+                                </span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ $profileUrl }}" class="btn btn-outline-success btn-sm" target="_blank" rel="noopener" title="View public contributor profile"><i class="fa fa-external-link-alt"></i></a>
                         </td>
                         <td class="col-actions">
                             @canany(['delete_publication_metadata', 'update_sources', 'add_authors'])
@@ -74,6 +188,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
             <div class="py-2">{{ $authors->links() }}</div>
         </div>
     </div>
