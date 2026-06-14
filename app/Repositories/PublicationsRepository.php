@@ -1629,9 +1629,7 @@ public function getPublicationIds(Request $request, int $limit = 80): array
     
     // Check if auto-approve comments is enabled (defaults to true)
     $autoApprove = settings()->auto_approve_comments ?? true;
-    if ($autoApprove) {
-        $comment->status = 'approved';
-    }
+    $comment->status = $autoApprove ? 'approved' : 'pending';
     
     $comment->save();
 

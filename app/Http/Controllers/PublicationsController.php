@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\Tag;
+use App\Models\Publication;
 use App\Models\SubThemeticArea;
 use App\Models\ThemeticArea;
 use App\Support\ContributorsSeo;
@@ -902,30 +903,85 @@ class PublicationsController extends Controller
     }
 
     public function comment(Request $request){
-        // Validate reCAPTCHA if not on localhost
+        if (! auth()->check()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'Please login to comment.'], 401);
+            }
+            abort(403, 'Please login to comment.');
+        }
+
+        $request->validate([
+            'publication_id' => 'required|integer|exists:publication,id',
+            'comment' => 'required|string|max:20000',
+        ]);
+
+        $commentText = trim((string) $request->input('comment'));
+        if ($commentText === '') {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'Comment is required.'], 422);
+            }
+            return back()->withErrors(['comment' => 'Comment is required.'])->withInput();
+        }
+
+        $wordCount = count(preg_split('/\s+/u', $commentText, -1, PREG_SPLIT_NO_EMPTY));
+        if ($wordCount > 300) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'Comments are limited to 300 words.'], 422);
+            }
+            return back()->withErrors(['comment' => 'Comments are limited to 300 words.'])->withInput();
+        }
+
+        $request->merge(['comment' => $commentText]);
+
+        // Validate reCAPTCHA for full-page submissions only
         $recaptchaSiteKey = config('recaptcha.api_site_key');
-        $isLocalhost = in_array($request->getHost(), ['localhost', '127.0.0.1']) || 
+        $isLocalhost = in_array($request->getHost(), ['localhost', '127.0.0.1']) ||
                        app()->environment('local', 'testing');
-        
-        if ($recaptchaSiteKey && !empty($recaptchaSiteKey) && !$isLocalhost) {
-            // Check if reCAPTCHA response is provided
-            if (!$request->filled('g-recaptcha-response')) {
+
+        if (! $request->ajax() && ! $request->wantsJson() && $recaptchaSiteKey && ! empty($recaptchaSiteKey) && ! $isLocalhost) {
+            if (! $request->filled('g-recaptcha-response')) {
                 return back()->withErrors([
                     'g-recaptcha-response' => 'Please complete the CAPTCHA to proceed.',
                 ])->withInput();
             }
-            
-            // Validate the reCAPTCHA response
+
             $recaptchaResponse = $request->input('g-recaptcha-response');
-            if (!\Biscolab\ReCaptcha\Facades\ReCaptcha::validate($recaptchaResponse)) {
+            if (! \Biscolab\ReCaptcha\Facades\ReCaptcha::validate($recaptchaResponse)) {
                 return back()->withErrors([
                     'g-recaptcha-response' => 'CAPTCHA verification failed. Please try again.',
                 ])->withInput();
             }
         }
-        
-        $this->publicationsRepo->save_comment($request);
-        return back();
+
+        $comment = $this->publicationsRepo->save_comment($request);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            $comment->load('user');
+            $publication = Publication::with(['comments.user'])->find($request->publication_id);
+            $approvedCount = $publication
+                ? $publication->comments->filter(function ($row) {
+                    $status = $row->status ?? null;
+                    if ($status === 'rejected' || $status === 'pending') {
+                        return false;
+                    }
+                    return $status === 'approved' || $status === null;
+                })->count()
+                : 0;
+            $isApproved = ($comment->status ?? null) === 'approved' || ($comment->status ?? null) === null;
+
+            return response()->json([
+                'success' => true,
+                'message' => $isApproved ? 'Comment posted successfully.' : 'Comment submitted and awaiting approval.',
+                'pending_approval' => ! $isApproved,
+                'comment_count' => $approvedCount,
+                'comment' => $comment,
+                'comment_html' => $isApproved
+                    ? view('communities.partials.publication_comment_item_mini', ['comment' => $comment])->render()
+                    : null,
+            ]);
+        }
+
+        return back()->with('success', 'Comment saved successfully.');
     }
 
     public function request_content(Request $request){

@@ -352,7 +352,7 @@ class CommunitiesController extends Controller
         $publicationIds = \App\Models\PublicationCommunityOfPractice::where('community_of_practice_id', $id)
             ->pluck('publication_id');
         $publications = \App\Models\Publication::whereIn('id', $publicationIds)
-            ->with(['author', 'sub_theme.theme', 'data_category', 'favourited', 'comments'])
+            ->with(['author', 'sub_theme.theme', 'data_category', 'favourited', 'comments.user', 'attachments'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

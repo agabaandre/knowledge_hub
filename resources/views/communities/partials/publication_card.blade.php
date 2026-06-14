@@ -1,8 +1,9 @@
 @php
     $i = (int) ($i ?? 1);
+    $pubId = (int) $row->id;
     $likes = count($row->favourited);
     $author = $row->author;
-    $authorPhoto = $author->photo ?? null;
+    $authorPhoto = $author->photo ?? ($author->logo ?? null);
     if ($authorPhoto && ! preg_match('/^https?:\/\//', $authorPhoto)) {
         if (strpos($authorPhoto, '/storage/') === 0) {
             $authorPhoto = url($authorPhoto);
@@ -10,10 +11,18 @@
             $authorPhoto = url('/' . $authorPhoto);
         }
     }
-    $authorName = $author->name ?? ($row->associated_authors ? clean_unicode($row->associated_authors) : 'Unknown author');
+    $posterName = $author->name ?? 'Unknown';
     $authorSubtitle = trim((string) ($row->author_affiliation ?? ''));
-    $commentCount = count($row->comments);
+    $approvedComments = collect($row->comments)->filter(function ($comment) {
+        $status = $comment->status ?? null;
+        if ($status === 'rejected' || $status === 'pending') {
+            return false;
+        }
+        return $status === 'approved' || $status === null;
+    });
+    $commentCount = $approvedComments->count();
     $viewCount = (int) ($row->visits ?? 0);
+    $commentsToShow = $approvedComments->take(5);
 
     $raw_cover = $row->getRawOriginal('cover');
     $cover_is_external = $row->cover_is_exteranl ?? false;
@@ -26,7 +35,10 @@
     $final_image = (! empty($image_link) && filter_var($image_link, FILTER_VALIDATE_URL)) ? $image_link : $default_image;
 @endphp
 
-<div class="card col-lg-12 community-pub-card pub-card-file-type-corner-wrap mb-2" data-aos="{{ $i > 2 ? 'zoom-in' : '' }}" data-aos-delay="100">
+<div class="card col-lg-12 community-pub-card pub-card-file-type-corner-wrap mb-2"
+     data-publication-id="{{ $pubId }}"
+     data-aos="{{ $i > 2 ? 'zoom-in' : '' }}"
+     data-aos-delay="100">
     <div class="card-body text-left p-0">
         @include('partials.publications.file_type_corner_badge', ['row' => $row])
 
@@ -81,28 +93,40 @@
                 @endif
             </div>
 
+            @include('communities.partials.publication_attachments_strip', ['row' => $row])
+
             <div class="community-pub-stats">
                 <span class="community-pub-stat community-pub-stat--views">
                     <i class="fa fa-eye" aria-hidden="true"></i>
                     {{ format_view_count($viewCount) }} {{ $viewCount === 1 ? 'view' : 'views' }}
                 </span>
-                <a href="{{ publication_url($row) }}" class="community-pub-stat community-pub-stat--comments comments{{ $i }}" data-bs-toggle="popover" data-bs-placement="bottom">
-                    <i class="fa fa-comments" aria-hidden="true"></i>
-                    {{ $commentCount }} {{ $commentCount === 1 ? 'Comment' : 'Comments' }}
-                </a>
+                @if($commentCount > 0)
+                    <button type="button"
+                            class="community-pub-stat community-pub-stat--comments pub-comments-toggle collapsed"
+                            data-publication-id="{{ $pubId }}"
+                            onclick="togglePublicationComments({{ $pubId }})">
+                        <i class="fa fa-comments" aria-hidden="true"></i>
+                        <span class="pub-comment-count-{{ $pubId }}">{{ $commentCount }}</span>
+                        {{ $commentCount === 1 ? 'Comment' : 'Comments' }}
+                    </button>
+                @else
+                    <span class="community-pub-stat community-pub-stat--comments">
+                        <i class="fa fa-comments" aria-hidden="true"></i>
+                        <span class="pub-comment-count-{{ $pubId }}">0</span> Comments
+                    </span>
+                @endif
                 @if ($likes > 0)
                     <span class="community-pub-stat community-pub-stat--likes">
                         <i class="fa fa-heart" aria-hidden="true"></i>
                         {{ $likes }} {{ $likes === 1 ? 'Like' : 'Likes' }}
                     </span>
                 @endif
-                @include('home.partials.comments')
             </div>
 
             <div class="community-pub-footer">
                 <div class="community-pub-footer__avatar">
                     @if($author && $authorPhoto)
-                        <img src="{{ $authorPhoto }}" alt="{{ $authorName }}"
+                        <img src="{{ $authorPhoto }}" alt="{{ $posterName }}"
                              onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
                         <i class="fa fa-user" style="display:none;" aria-hidden="true"></i>
                     @else
@@ -113,7 +137,8 @@
                 <div class="community-pub-footer__body">
                     <div class="community-pub-footer__meta">
                         <div class="community-pub-footer__author-text">
-                            <span class="community-pub-footer__name notranslate" translate="no">{{ $authorName }}</span>
+                            <span class="community-pub-footer__posted-label">Posted by:</span>
+                            <span class="community-pub-footer__name notranslate" translate="no">{{ $posterName }}</span>
                             @if($authorSubtitle !== '')
                                 <span class="community-pub-footer__subtitle notranslate" translate="no">{{ clean_unicode($authorSubtitle) }}</span>
                             @endif
@@ -144,8 +169,53 @@
                             <i class="fa fa-eye mr-1"></i> Read more
                         </a>
                         @include('common.khub_ai_publication_button', ['publication' => $row])
+                        @auth
+                            <button type="button"
+                                    class="btn btn-sm btn-primary community-pub-action-btn--primary"
+                                    id="pub-show-comment-btn-{{ $pubId }}"
+                                    onclick="showInlinePublicationCommentForm({{ $pubId }})">
+                                <i class="fa fa-plus-circle mr-1"></i> Add Comment
+                            </button>
+                        @else
+                            <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}"
+                               class="btn btn-sm btn-outline-secondary">
+                                <i class="fa fa-plus-circle mr-1"></i> Add Comment
+                            </a>
+                        @endauth
+                        @include('communities.partials.publication_share_buttons', ['row' => $row, 'variant' => 'inline'])
                     </div>
                 </div>
+            </div>
+
+            <div class="comments-panel community-pub-comments-panel">
+                <div class="comments-list" id="pub-comments-list-{{ $pubId }}" style="display: {{ $commentCount > 0 ? 'none' : 'none' }};">
+                    @forelse($commentsToShow as $comment)
+                        @include('communities.partials.publication_comment_item_mini', ['comment' => $comment])
+                    @empty
+                        <div class="no-comments">No comments yet. Be the first to comment!</div>
+                    @endforelse
+                </div>
+
+                @auth
+                <div class="inline-comment-form" id="pub-comment-form-{{ $pubId }}" style="display: none;">
+                    <form onsubmit="submitInlinePublicationComment(event, {{ $pubId }})" method="post" action="{{ url('records/comment') }}">
+                        @csrf
+                        <input type="hidden" name="publication_id" value="{{ $pubId }}">
+                        <div class="inline-comment-field">
+                            <textarea name="comment" id="inline-pub-comment-{{ $pubId }}"
+                                      class="comment-textarea"
+                                      placeholder="Add a comment on this publication..." required maxlength="20000" rows="3"></textarea>
+                        </div>
+                        <div class="inline-comment-actions">
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="cancelInlinePublicationComment({{ $pubId }})">Cancel</button>
+                            <button type="submit" class="btn btn-sm btn-primary community-pub-action-btn--primary">
+                                <i class="fa fa-paper-plane mr-1"></i>Post Comment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                @endauth
             </div>
         </div>
     </div>

@@ -580,5 +580,7 @@
     })();
 </script>
 @endif
+@include('publications.partials.preview_modal')
+@include('communities.partials.publication_card_scripts')
 @endsection
 
