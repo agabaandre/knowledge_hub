@@ -1452,6 +1452,70 @@ function communities_listing_description_line_clamp(?int $cardsPerRow = null): i
     return $limits[$cardsPerRow] ?? 4;
 }
 
+/**
+ * Max recommended communities shown (always fills complete grid rows).
+ */
+function communities_listing_recommended_max_count(?int $cardsPerRow = null): int
+{
+    $cardsPerRow = $cardsPerRow ?? communities_listing_cards_per_row();
+
+    return match ($cardsPerRow) {
+        1 => 4,
+        2 => 4,
+        3 => 6,
+        default => 4,
+    };
+}
+
+function communities_listing_recommended_fetch_limit(): int
+{
+    return max(communities_listing_recommended_max_count(), 9);
+}
+
+/**
+ * Drop trailing items so the grid never has empty cells on the last row.
+ *
+ * @param  \Illuminate\Support\Collection|\Illuminate\Support\Enumerable|array  $items
+ * @return \Illuminate\Support\Collection
+ */
+function communities_listing_trim_to_full_rows($items, ?int $cardsPerRow = null)
+{
+    $items = collect($items);
+    $cols = $cardsPerRow ?? communities_listing_cards_per_row();
+
+    if ($items->isEmpty() || $cols === 1) {
+        return $items->values();
+    }
+
+    $count = $items->count();
+    $remainder = $count % $cols;
+    if ($remainder !== 0) {
+        $items = $items->take($count - $remainder);
+    }
+
+    return $items->values();
+}
+
+/**
+ * Cap and trim recommended communities to full grid rows for the active layout.
+ *
+ * @param  \Illuminate\Support\Collection|\Illuminate\Support\Enumerable|array  $items
+ * @return \Illuminate\Support\Collection
+ */
+function communities_listing_prepare_recommended($items)
+{
+    $items = collect($items)->take(communities_listing_recommended_max_count());
+
+    return communities_listing_trim_to_full_rows($items);
+}
+
+function communities_listing_grid_wrapper_class(?int $cardsPerRow = null): string
+{
+    $cardsPerRow = $cardsPerRow ?? communities_listing_cards_per_row();
+
+    return 'communities-card-grid communities-card-grid--per-row-' . $cardsPerRow;
+}
+
 function community_africa_cdc_staff_name(): string
 {
     return 'Africa CDC Staff';

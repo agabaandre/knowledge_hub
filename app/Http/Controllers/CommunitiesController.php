@@ -81,8 +81,12 @@ class CommunitiesController extends Controller
 
         $recommendedCommunities = collect();
         if (Auth::check()) {
-            $recommendedCommunities = $this->commsOfPracticeRepository->recommendedForUser((int) Auth::id(), 9);
-            $this->commsOfPracticeRepository->attachListingMeta($recommendedCommunities);
+            $rawRecommended = $this->commsOfPracticeRepository->recommendedForUser(
+                (int) Auth::id(),
+                communities_listing_recommended_fetch_limit()
+            );
+            $this->commsOfPracticeRepository->attachListingMeta($rawRecommended);
+            $recommendedCommunities = communities_listing_prepare_recommended($rawRecommended);
         }
         
         $communitiesCollectionPageSchema = $this->buildCommunitiesCollectionPageSchema(

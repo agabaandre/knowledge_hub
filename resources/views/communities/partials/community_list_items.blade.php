@@ -1,5 +1,5 @@
 @foreach ($communities as $community)
-    <div class="{{ communities_listing_grid_column_class() }} mb-3 communities-list-item"
+    <div class="communities-card-grid__item communities-list-item"
          data-community-id="{{ $community->id }}"
          data-joined="{{ Auth::check() && ($community->user_joined ?? false) ? 'true' : 'false' }}"
          data-public="{{ ($community->is_public ?? false) ? 'true' : 'false' }}"
