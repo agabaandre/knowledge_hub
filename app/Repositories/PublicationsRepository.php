@@ -1976,15 +1976,40 @@ private function applyFilters($query, $request) {
 
     if ($request->boolean('contributor_profile_scope')) {
         $authorId = (int) $request->input('contributor_profile_author_id');
-        $userId = (int) $request->input('contributor_profile_user_id');
-        $corporateAuthorId = (int) $request->input('contributor_profile_corporate_author_id');
+        $linkedUserIds = collect($request->input('contributor_profile_user_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+        $creditAuthorIds = collect($request->input('contributor_profile_credit_author_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->filter(fn (int $id) => $id > 0 && $id !== $authorId)
+            ->unique()
+            ->values()
+            ->all();
 
-        $query->where(function ($q) use ($authorId, $userId, $corporateAuthorId) {
+        if ($linkedUserIds === []) {
+            $fallbackUserId = (int) $request->input('contributor_profile_user_id');
+            if ($fallbackUserId > 0) {
+                $linkedUserIds = [$fallbackUserId];
+            }
+        }
+
+        if ($creditAuthorIds === []) {
+            $fallbackCorporateAuthorId = (int) $request->input('contributor_profile_corporate_author_id');
+            if ($fallbackCorporateAuthorId > 0 && $fallbackCorporateAuthorId !== $authorId) {
+                $creditAuthorIds = [$fallbackCorporateAuthorId];
+            }
+        }
+
+        $query->where(function ($q) use ($authorId, $linkedUserIds, $creditAuthorIds) {
             $q->where('author_id', $authorId);
-            if ($userId > 0 && $corporateAuthorId > 0) {
-                $q->orWhere(function ($sub) use ($userId, $corporateAuthorId) {
-                    $sub->where('user_id', $userId)
-                        ->where('author_id', $corporateAuthorId);
+
+            if ($linkedUserIds !== [] && $creditAuthorIds !== []) {
+                $q->orWhere(function ($sub) use ($linkedUserIds, $creditAuthorIds) {
+                    $sub->whereIn('user_id', $linkedUserIds)
+                        ->whereIn('author_id', $creditAuthorIds);
                 });
             }
         });

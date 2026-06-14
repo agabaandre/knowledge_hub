@@ -689,6 +689,8 @@ class PublicationsController extends Controller
             'contributor_profile_author_id' => $author->id,
             'contributor_profile_user_id' => (int) ($contributorUser?->id ?? 0),
             'contributor_profile_corporate_author_id' => (int) ($profileContext->corporateAuthor?->id ?? 0),
+            'contributor_profile_user_ids' => $profileContext->linkedUserIds,
+            'contributor_profile_credit_author_ids' => $profileContext->corporateCreditAuthorIds,
             'search_listing' => true,
         ]);
 

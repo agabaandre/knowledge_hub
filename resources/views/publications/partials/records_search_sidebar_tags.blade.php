@@ -1,9 +1,18 @@
 @php
-    $recordsSearchTagQuery = request()->except('page');
-    $sidebarTagsList = (isset($tags) && count($tags) > 0)
-        ? $tags->take(12)
-        : \App\Models\Tag::query()->orderBy('tag_text', 'asc')->limit(12)->get();
+    use App\Models\Tag;
+
+    $recordsSearchTagQuery = request()->except('page', 'tag');
     $activeTagId = request('tag');
+
+    $sidebarTagsList = Tag::popularByEngagement(5);
+
+    if ($activeTagId) {
+        $activeTag = Tag::query()->find((int) $activeTagId);
+        if ($activeTag && ! $sidebarTagsList->firstWhere('id', $activeTag->id)) {
+            $sidebarTagsList = $sidebarTagsList->take(4)->prepend($activeTag);
+        }
+    }
+
     $tagResourceCounts = collect();
     if ($sidebarTagsList->isNotEmpty()) {
         $tagResourceCounts = \Illuminate\Support\Facades\DB::table('publication_tags')
@@ -38,6 +47,8 @@
             @endphp
             <a href="{{ $tagHref }}"
                class="records-sidebar-tags__link js-records-search-ajax{{ $tagActive ? ' is-active' : '' }}"
+               data-tag-id="{{ $tag->id }}"
+               data-tag-slug="{{ $tag->slug }}"
                title="{{ $tag->tag_text }}">
                 <span class="records-sidebar-tags__label">
                     <span class="records-sidebar-tags__label-hash">#</span>{{ truncate($tag->tag_text, 28) }}

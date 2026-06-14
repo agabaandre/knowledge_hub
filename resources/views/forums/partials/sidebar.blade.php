@@ -2,10 +2,52 @@
     $recentForums = collect($forumSidebarRecent ?? []);
     $topForums = collect($forumTopByEngagement ?? []);
     $categories = collect($forumSidebarCategories ?? []);
+    $popularTags = collect($forumPopularTags ?? $categories->take(5));
+    $popularTagNames = $popularTags
+        ->map(fn ($row) => mb_strtolower(trim((string) ($row->tag ?? ''))))
+        ->filter()
+        ->values()
+        ->all();
+    $moreTopics = $categories->filter(function ($row) use ($popularTagNames) {
+        $tag = mb_strtolower(trim((string) ($row->tag ?? '')));
+        return $tag !== '' && ! in_array($tag, $popularTagNames, true);
+    });
     $activeTag = request('tag');
 @endphp
 
 <aside class="forums-sidebar" aria-label="Forum navigation">
+    @if($popularTags->isNotEmpty())
+    <div class="forums-sidebar-card forums-sidebar-card--popular">
+        <div class="forums-sidebar-card__head">
+            <span class="forums-sidebar-card__icon forums-sidebar-card__icon--popular" aria-hidden="true">
+                <i class="fa fa-hashtag"></i>
+            </span>
+            <div>
+                <h2 class="forums-sidebar-card__title mb-0">{{ __('ui_body.footer_popular_tags') }}</h2>
+                <p class="forums-sidebar-card__hint mb-0">Browse discussions by popular health topics.</p>
+            </div>
+        </div>
+        <ul class="forums-sidebar-topics list-unstyled mb-0">
+            @foreach($popularTags as $row)
+                @php
+                    $tag = (string) ($row->tag ?? '');
+                    $isActive = $activeTag !== null && strcasecmp((string) $activeTag, $tag) === 0;
+                @endphp
+                <li>
+                    <a href="{{ url('forums') }}?tag={{ urlencode($tag) }}"
+                       class="forums-sidebar-topics__link {{ $isActive ? 'is-active' : '' }}">
+                        <span class="forums-sidebar-topics__label">#{{ truncate($tag, 28) }}</span>
+                        <span class="forums-sidebar-topics__count">{{ number_format((int) ($row->topics_count ?? 0)) }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+        @if($activeTag)
+            <a href="{{ url('forums') }}" class="forums-sidebar-clear small">Clear topic filter</a>
+        @endif
+    </div>
+    @endif
+
     @if($recentForums->isNotEmpty())
     <div class="forums-sidebar-card forums-sidebar-card--recent">
         <div class="forums-sidebar-card__head">
@@ -76,7 +118,7 @@
     </div>
     @endif
 
-    @if($categories->isNotEmpty())
+    @if($moreTopics->isNotEmpty())
     <div class="forums-sidebar-card forums-sidebar-card--topics">
         <div class="forums-sidebar-card__head">
             <span class="forums-sidebar-card__icon forums-sidebar-card__icon--topics" aria-hidden="true">
@@ -88,7 +130,7 @@
             </div>
         </div>
         <ul class="forums-sidebar-topics list-unstyled mb-0">
-            @foreach($categories as $row)
+            @foreach($moreTopics as $row)
                 @php
                     $tag = (string) ($row->tag ?? '');
                     $isActive = $activeTag !== null && strcasecmp((string) $activeTag, $tag) === 0;
@@ -102,9 +144,6 @@
                 </li>
             @endforeach
         </ul>
-        @if($activeTag)
-            <a href="{{ url('forums') }}" class="forums-sidebar-clear small">Clear topic filter</a>
-        @endif
     </div>
     @endif
 

@@ -252,6 +252,27 @@
     position: sticky;
     top: 5.5rem;
     align-self: flex-start;
+    max-height: calc(100vh - 5.5rem - 1.25rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(15, 23, 42, 0.22) transparent;
+    padding-right: 0.2rem;
+    padding-bottom: 1rem;
+}
+
+.forums-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.forums-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(15, 23, 42, 0.2);
+    border-radius: 999px;
+}
+
+.forums-sidebar::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 .forums-sidebar-card {
@@ -282,6 +303,11 @@
     align-items: center;
     justify-content: center;
     font-size: 0.95rem;
+}
+
+.forums-sidebar-card__icon--popular {
+    background: linear-gradient(135deg, #dcfce7, #ecfdf5);
+    color: #047857;
 }
 
 .forums-sidebar-card__icon--recent {
@@ -578,6 +604,10 @@
     .forums-sidebar {
         position: static;
         margin-top: 1.5rem;
+        max-height: none;
+        overflow: visible;
+        padding-right: 0;
+        padding-bottom: 0;
     }
 }
 
@@ -1446,6 +1476,7 @@
 
             <div class="col-lg-4 col-md-12">
                 @include('forums.partials.sidebar', [
+                    'forumPopularTags' => $forumPopularTags ?? collect(),
                     'forumSidebarCategories' => $forumSidebarCategories ?? collect(),
                     'forumSidebarRecent' => $forumSidebarRecent ?? collect(),
                     'forumTopByEngagement' => $forumTopByEngagement ?? collect(),

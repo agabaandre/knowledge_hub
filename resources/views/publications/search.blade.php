@@ -103,6 +103,7 @@
             var INFINITE_STATUS_LOADING = @json(__('publications.search.loading_more'));
             var INFINITE_STATUS_COMPLETE = @json(__('publications.search.all_results_loaded'));
             var INFINITE_STATUS_ERROR = @json(__('publications.search.load_more_error'));
+            var RECORDS_SEARCH_TAG_ID = @json(request()->filled('tag') ? (string) request('tag') : null);
             var mainEl = document.getElementById('records-search-main');
             var sideDyn = document.getElementById('records-search-sidebar-dynamic');
             var infiniteObserver = null;
@@ -220,13 +221,54 @@
                 });
             };
 
+            function getRecordsSearchTagId() {
+                var params = new URLSearchParams(window.location.search);
+                if (params.get('tag')) {
+                    return String(params.get('tag'));
+                }
+                var pathMatch = window.location.pathname.match(/\/records\/tag\/([^/]+)/);
+                if (pathMatch) {
+                    var slug = decodeURIComponent(pathMatch[1]);
+                    var escaped = slug.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+                    var link = document.querySelector('a.records-sidebar-tags__link[data-tag-slug="' + escaped + '"]');
+                    if (link && link.dataset.tagId) {
+                        return String(link.dataset.tagId);
+                    }
+                }
+                return RECORDS_SEARCH_TAG_ID || null;
+            }
+
+            function ensureTagInSearchParams(params) {
+                var tagId = getRecordsSearchTagId();
+                if (tagId && !params.get('tag')) {
+                    params.set('tag', tagId);
+                }
+                return params;
+            }
+
             function updateSidebarTagActiveState() {
-                var cur = new URLSearchParams(window.location.search).get('tag');
-                document.querySelectorAll('a.js-records-search-ajax.sidebar-tag-pill').forEach(function (a) {
+                var pathMatch = window.location.pathname.match(/\/records\/tag\/([^/]+)/);
+                var curTagSlug = pathMatch ? decodeURIComponent(pathMatch[1]) : null;
+                var curTagId = new URLSearchParams(window.location.search).get('tag');
+
+                document.querySelectorAll('a.js-records-search-ajax.records-sidebar-tags__link, a.js-records-search-ajax.sidebar-tag-pill').forEach(function (a) {
                     try {
                         var u = new URL(a.getAttribute('href'), window.location.origin);
-                        var t = u.searchParams.get('tag');
-                        a.classList.toggle('sidebar-tag-pill--active', cur !== null && cur !== '' && String(t) === String(cur));
+                        var tId = u.searchParams.get('tag');
+                        var tagSlugMatch = u.pathname.match(/\/records\/tag\/([^/]+)/);
+                        var tSlug = tagSlugMatch ? decodeURIComponent(tagSlugMatch[1]) : null;
+                        var active = false;
+                        if (curTagId && tId && String(tId) === String(curTagId)) {
+                            active = true;
+                        }
+                        if (curTagSlug && tSlug && String(tSlug) === String(curTagSlug)) {
+                            active = true;
+                        }
+                        if (a.classList.contains('records-sidebar-tags__link')) {
+                            a.classList.toggle('is-active', active);
+                        } else {
+                            a.classList.toggle('sidebar-tag-pill--active', active);
+                        }
                     } catch (e) { /* ignore */ }
                 });
             }
@@ -427,6 +469,7 @@
                 }
 
                 var params = new URLSearchParams(window.location.search);
+                ensureTagInSearchParams(params);
                 params.delete('page');
                 params.set('page', String(currentPage + 1));
                 normalizeFacetArrayQueryKeys(params);
@@ -526,6 +569,7 @@
                     return;
                 }
                 var fragParams = new URLSearchParams(u.search);
+                ensureTagInSearchParams(fragParams);
                 normalizeFacetArrayQueryKeys(fragParams);
                 var qs = fragParams.toString();
                 var fragUrl = FRAGMENT_URL + (qs ? '?' + qs : '');
@@ -579,6 +623,7 @@
                     facetDebounceTimer = null;
                 }
                 var params = new URLSearchParams(window.location.search);
+                ensureTagInSearchParams(params);
                 removeFacetParams(params);
                 params.delete('page');
                 var groups = [

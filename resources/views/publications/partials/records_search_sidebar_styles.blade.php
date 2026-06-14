@@ -3,6 +3,27 @@
         position: sticky;
         top: 5.5rem;
         align-self: flex-start;
+        max-height: calc(100vh - 5.5rem - 1.25rem);
+        overflow-y: auto;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(15, 23, 42, 0.22) transparent;
+        padding-right: 0.2rem;
+        padding-bottom: 1rem;
+    }
+
+    .records-search-sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .records-search-sidebar::-webkit-scrollbar-thumb {
+        background: rgba(15, 23, 42, 0.2);
+        border-radius: 999px;
+    }
+
+    .records-search-sidebar::-webkit-scrollbar-track {
+        background: transparent;
     }
 
     .records-sidebar-card {
@@ -316,5 +337,9 @@
         .records-search-sidebar {
             position: static;
             top: auto;
+            max-height: none;
+            overflow: visible;
+            padding-right: 0;
+            padding-bottom: 0;
         }
     }
