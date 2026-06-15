@@ -30,7 +30,7 @@
                 $isSelected = $selected !== null && $selected !== '' && is_numeric($selected) && (int) $selected === (int) $country->id;
             }
         @endphp
-        <option {{ $isSelected ? 'selected' : '' }} value="{{$country->id}}">
+        <option {{ $isSelected ? 'selected' : '' }} value="{{$country->id}}" data-region-id="{{ (int) ($country->region_id ?? 0) }}">
             {{$country->name}}
         </option>
     @endforeach

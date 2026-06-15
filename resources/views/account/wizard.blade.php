@@ -422,6 +422,7 @@
                             'all_option' => true,
                             'allfield' => 'All',
                         ])
+                        <small class="text-muted d-block mt-1">After choosing region(s), pick <strong>All</strong> or select specific member states from those regions only.</small>
             </div>
 
             @include('partials.publications.public_availability_toggle', ['row' => $row ?? null])
@@ -830,13 +831,126 @@
                 if (region.countries && Array.isArray(region.countries)) {
                     region.countries.forEach(function(country) {
                         allCountries.push({
-                            id: country.id,
+                            id: parseInt(country.id, 10),
                             name: country.name,
-                            region_id: region.id
+                            region_id: parseInt(region.id, 10)
                         });
                     });
                 }
             });
+        }
+
+        function wizardBootstrapAllCountriesFromDom() {
+            if (allCountries.length) {
+                return;
+            }
+            wizardStep1Field('select[name="countries[]"] option').each(function() {
+                var id = parseInt($(this).val(), 10);
+                var regionId = parseInt($(this).attr('data-region-id'), 10);
+                if (id > 0 && regionId > 0) {
+                    allCountries.push({
+                        id: id,
+                        name: $.trim($(this).text()),
+                        region_id: regionId
+                    });
+                }
+            });
+        }
+
+        wizardBootstrapAllCountriesFromDom();
+
+        function wizardNormalizeRegionIds(selectedValues) {
+            var list = Array.isArray(selectedValues) ? selectedValues : (selectedValues ? [selectedValues] : []);
+            return list.filter(function(val) {
+                return val !== 'all' && val !== '' && val !== null && val !== undefined && !isNaN(parseInt(val, 10));
+            }).map(function(id) {
+                return parseInt(id, 10);
+            });
+        }
+
+        function wizardCountriesForRegionIds(regionIds) {
+            if (!regionIds.length) {
+                return [];
+            }
+            return allCountries.filter(function(country) {
+                return regionIds.indexOf(parseInt(country.region_id, 10)) !== -1;
+            });
+        }
+
+        function wizardNormalizeCountrySelection(values) {
+            var list = Array.isArray(values) ? values.slice() : (values ? [values] : []);
+            list = list.filter(function(v) {
+                return v !== '' && v !== null && v !== undefined;
+            });
+            var hasAll = list.some(function(v) {
+                return String(v).toLowerCase() === 'all';
+            });
+            var specifics = list.filter(function(v) {
+                return String(v).toLowerCase() !== 'all';
+            });
+            if (hasAll && specifics.length) {
+                return specifics;
+            }
+            if (hasAll) {
+                return ['all'];
+            }
+            return specifics;
+        }
+
+        function wizardApplyRegionToCountries(selectedValues, options) {
+            options = options || {};
+            var preserveSelection = options.preserveSelection !== false;
+            var countrySelect = wizardStep1Field('select[name="countries[]"]');
+            if (!countrySelect.length) {
+                return;
+            }
+
+            countrySelect.prop('disabled', false);
+
+            if (!Array.isArray(selectedValues)) {
+                selectedValues = selectedValues ? [selectedValues] : [];
+            }
+
+            if (wizardRegionSelectionIncludesAll(selectedValues)) {
+                userManuallyChangedCountries = false;
+                wizardRebuildCountryOptions(countrySelect, allCountries, true);
+                wizardSetCountrySelection(countrySelect, ['all']);
+                return;
+            }
+
+            var regionIds = wizardNormalizeRegionIds(selectedValues);
+            if (!regionIds.length) {
+                return;
+            }
+
+            var regionCountries = wizardCountriesForRegionIds(regionIds);
+            wizardRebuildCountryOptions(countrySelect, regionCountries, true);
+
+            var nextSelection = ['all'];
+            if (preserveSelection) {
+                var currentVal = wizardGetSelectValue(countrySelect);
+                var currentValues = wizardNormalizeCountrySelection(currentVal);
+                var validSpecific = currentValues.filter(function(v) {
+                    if (String(v).toLowerCase() === 'all') {
+                        return false;
+                    }
+                    return regionCountries.some(function(c) {
+                        return String(c.id) === String(v);
+                    });
+                });
+                if (validSpecific.length) {
+                    nextSelection = validSpecific;
+                    userManuallyChangedCountries = true;
+                } else if (currentValues.indexOf('all') !== -1 || String(currentVal).toLowerCase() === 'all') {
+                    nextSelection = ['all'];
+                    userManuallyChangedCountries = false;
+                } else if (!options.fromUserRegionChange) {
+                    nextSelection = ['all'];
+                    userManuallyChangedCountries = false;
+                }
+            }
+
+            wizardSetCountrySelection(countrySelect, nextSelection);
         }
 
         // Track if user has manually changed countries to prevent auto-override on subsequent region changes
@@ -904,10 +1018,11 @@
             }
         }
 
-        // Publication wizard: do not use search fields_js region handler (it disables countries).
+        // Publication wizard: search fields_js must not bind region → country (it disables multi-region picks).
         $('.rcc').off('change');
 
         setTimeout(function() {
+            wizardBootstrapAllCountriesFromDom();
             $('#step-1 select.select2').each(function() {
                 wizardSyncSelect2FromDom($(this));
             });
@@ -922,100 +1037,46 @@
             var regionVal = wizardGetSelectValue($region);
             var regionValues = Array.isArray(regionVal) ? regionVal : (regionVal ? [regionVal] : []);
 
-            if (wizardRegionSelectionIncludesAll(regionValues)) {
-                userManuallyChangedCountries = false;
-                wizardRebuildCountryOptions($countries, allCountries, true);
-                wizardSetCountrySelection($countries, ['all']);
-                return;
-            }
-
             if (!regionValues.length) {
                 return;
             }
 
             var countryVal = wizardGetSelectValue($countries);
-            var countryValues = Array.isArray(countryVal) ? countryVal : (countryVal ? [countryVal] : []);
+            var countryValues = wizardNormalizeCountrySelection(countryVal);
             var hasSavedCountries = countryValues.some(function(v) {
-                return v && String(v).toLowerCase() !== 'all' && !isNaN(parseInt(v, 10)) && parseInt(v, 10) > 0;
+                return v && String(v).toLowerCase() !== 'all' && parseInt(v, 10) > 0;
             });
-            if (hasSavedCountries) {
-                userManuallyChangedCountries = true;
-                return;
-            }
-            $region.trigger('change');
+
+            wizardApplyRegionToCountries(regionValues, {
+                preserveSelection: hasSavedCountries,
+                fromUserRegionChange: false
+            });
         }, 600);
         
-        // Handle region selection logic:
-        // - If "all" is selected (alone or with regions) → auto-select all countries
-        // - If ONE specific region is selected → auto-select all countries in that region
-        // - If MULTIPLE regions are selected → auto-select all countries in all those regions
-        // - User can ALWAYS manually change countries after auto-selection
+        // Region → member states: filter options to selected region(s); user can pick All or specific countries.
         $(document).on('change', '#step-1 .rcc.select2, #step-1 select[name="rccs[]"]', function() {
-            var selectedValues = $(this).val();
-            var countrySelect = wizardStep1Field('select[name="countries[]"]');
-            
-            if (!countrySelect.length) {
-                return;
-            }
-            
-            wizardEnsureCountriesAllOption(countrySelect);
-            
-            // Normalize to array
-            if (!Array.isArray(selectedValues)) {
-                selectedValues = selectedValues ? [selectedValues] : [];
-            }
-            
-            var hasAll = wizardRegionSelectionIncludesAll(selectedValues);
-            var regionIds = selectedValues.filter(function(val) {
-                return val !== 'all' && val !== '' && val !== null && isNumeric(val);
-            }).map(function(id) { return parseInt(id); });
-            
-            function isNumeric(value) {
-                return !isNaN(parseFloat(value)) && isFinite(value);
-            }
-            
-            // Region "All" always rebuilds member states (create + edit) — never skip on edit
-            if (hasAll) {
-                userManuallyChangedCountries = false;
-                wizardRebuildCountryOptions(countrySelect, allCountries, true);
-                wizardSetCountrySelection(countrySelect, ['all']);
+            wizardApplyRegionToCountries($(this).val(), {
+                preserveSelection: true,
+                fromUserRegionChange: true
+            });
+        });
+        
+        // Member states: "All" and specific countries are mutually exclusive.
+        $(document).on('change', '#step-1 .country.select2, #step-1 select[name="countries[]"]', function(e) {
+            var $select = $(this);
+            var normalized = wizardNormalizeCountrySelection(wizardGetSelectValue($select));
+            var currentRaw = wizardGetSelectValue($select);
+            var currentArr = Array.isArray(currentRaw) ? currentRaw : (currentRaw ? [currentRaw] : []);
+
+            if (JSON.stringify(normalized.slice().sort()) !== JSON.stringify(currentArr.slice().sort())) {
+                wizardSetCountrySelection($select, normalized.length ? normalized : ['all']);
                 return;
             }
 
-            if (userManuallyChangedCountries) {
-                return;
-            }
-            
-            // Specific region(s) → default to All member states in those regions
-            if (regionIds.length > 0) {
-                var regionCountries = allCountries.filter(function(country) {
-                    return regionIds.includes(country.region_id);
-                });
-                wizardRebuildCountryOptions(countrySelect, regionCountries, true);
-                wizardSetCountrySelection(countrySelect, ['all']);
-            }
-        });
-        
-        // Track when user manually changes countries
-        $(document).on('change', '.country.select2, select[name="countries[]"]', function(e) {
-            // Check if this is a user-initiated change (not programmatic)
             if (e.originalEvent) {
-                var currentValues = $(this).val();
-                // Check if current selection is different from what was auto-selected
-                if (lastAutoSelectedCountries && currentValues) {
-                    var currentArray = Array.isArray(currentValues) ? currentValues.sort() : [currentValues].sort();
-                    var lastArray = lastAutoSelectedCountries.slice().sort();
-                    
-                    // If different, user manually changed it
-                    if (JSON.stringify(currentArray) !== JSON.stringify(lastArray)) {
-                        userManuallyChangedCountries = true;
-                    }
-                } else if (currentValues && lastAutoSelectedCountries === null) {
-                    // If there was no auto-selection but user selected something, it's manual
-                    userManuallyChangedCountries = true;
-                } else if (!currentValues || (Array.isArray(currentValues) && currentValues.length === 0)) {
-                    // User cleared selection - this is also a manual change
-                    userManuallyChangedCountries = true;
+                userManuallyChangedCountries = true;
+                if (normalized.length && normalized[0] !== 'all') {
+                    lastAutoSelectedCountries = normalized.slice();
                 }
             }
         });

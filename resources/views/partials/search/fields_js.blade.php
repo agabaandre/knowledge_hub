@@ -1,11 +1,6 @@
 <script>
+    if (!$('#publication_form').length && !$('#smartwizard').length) {
     $('.rcc').on('change', function(e) {
-        // Publication wizard has its own region → member state linking (supports All for both).
-        if ($('#publication_form').length || $('#smartwizard').length) {
-            return;
-        }
-
-        console.log($(this).val());
 
         if (typeof $(this).val() == 'object' && $(this).val().length > 1) {
             $('.country').html('<option value="all" selected >All</option>');
@@ -44,7 +39,7 @@
         }
 
     });
-
+    }
 
     $('.theme').on('change', function(e) {
 
