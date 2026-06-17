@@ -717,8 +717,12 @@
       body: JSON.stringify(sessionPayload)
     })
       .then(function (r) {
-        if (!r.ok) throw new Error('Session failed');
-        return r.json();
+        return r.json().catch(function () { return {}; }).then(function (data) {
+          if (!r.ok) {
+            throw new Error((data && data.error) ? data.error : 'Could not start chat. Please try again.');
+          }
+          return data;
+        });
       })
       .then(function (data) {
         if (data.error) {
@@ -755,7 +759,7 @@
       })
       .catch(function (err) {
         container.innerHTML = '';
-        showError('Could not start chat. Please try again.');
+        showError((err && err.message) ? err.message : 'Could not start chat. Please try again.');
       });
   }
 

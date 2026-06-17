@@ -39,6 +39,22 @@ class PdfChatController extends Controller
     }
 
     /**
+     * @return list<array{role: string, content: string}>
+     */
+    private function sessionMessagesForUser(PdfChatSession $session, ?int $userId): array
+    {
+        if (! $userId) {
+            return [];
+        }
+
+        return $session->messages()
+            ->get()
+            ->map(fn ($m) => ['role' => $m->role, 'content' => $m->content])
+            ->values()
+            ->all();
+    }
+
+    /**
      * Get or create a chat session: forum thread (GPT), publication (ChatPDF or GPT), reusing pdf_chat_sessions.
      */
     public function getOrCreateSession(Request $request)
@@ -123,11 +139,14 @@ class PdfChatController extends Controller
 
             if ($assistantMode === 'publication') {
                 if ($session) {
-                    $messages = $userId
-                        ? $session->messages()->get()->map(fn ($m) => ['role' => $m->role, 'content' => $m->content])
-                        : [];
-
-                    return response()->json($this->publicationSessionPayload($session, $publication, 'publication', null, null, $messages));
+                    return response()->json($this->publicationSessionPayload(
+                        $session,
+                        $publication,
+                        'publication',
+                        null,
+                        null,
+                        $this->sessionMessagesForUser($session, $userId)
+                    ));
                 }
 
                 $data = [
@@ -163,17 +182,13 @@ class PdfChatController extends Controller
             }
 
             if ($session && ! empty($session->source_id)) {
-                $messages = $userId
-                    ? $session->messages()->get()->map(fn ($m) => ['role' => $m->role, 'content' => $m->content])
-                    : [];
-
                 return response()->json($this->publicationSessionPayload(
                     $session,
                     $publication,
                     'chatpdf',
                     $session->source_id,
                     $attachmentId,
-                    $messages
+                    $this->sessionMessagesForUser($session, $userId)
                 ));
             }
 
@@ -206,17 +221,13 @@ class PdfChatController extends Controller
 
             $session->update(['source_id' => $sourceId, 'assistant_mode' => 'chatpdf']);
 
-            $messages = $userId
-                ? $session->messages()->get()->map(fn ($m) => ['role' => $m->role, 'content' => $m->content])
-                : [];
-
             return response()->json($this->publicationSessionPayload(
                 $session,
                 $publication,
                 'chatpdf',
                 $sourceId,
                 $attachmentId,
-                $messages
+                $this->sessionMessagesForUser($session, $userId)
             ));
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
