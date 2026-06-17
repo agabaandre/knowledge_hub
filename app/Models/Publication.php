@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PublicationChatPdfResolver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -384,18 +385,21 @@ class Publication extends Model
     /**
      * Default Khub AI mode for this publication: ChatPDF on the first PDF when any exist.
      *
-     * @return array{assistant_mode: string, attachment_id: int|null}
+     * @return array{assistant_mode: string, attachment_id: int|null, pdf_source_keys: list<string>}
      */
     public function defaultKhubAiConfig(): array
     {
         $sources = $this->pdf_sources;
         if ($sources === []) {
-            return ['assistant_mode' => 'publication', 'attachment_id' => null];
+            return ['assistant_mode' => 'publication', 'attachment_id' => null, 'pdf_source_keys' => []];
         }
+
+        $firstKey = PublicationChatPdfResolver::sourceKey($sources[0]);
 
         return [
             'assistant_mode' => 'chatpdf',
             'attachment_id' => $sources[0]['attachment_id'] ?? null,
+            'pdf_source_keys' => [$firstKey],
         ];
     }
 

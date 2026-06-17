@@ -169,12 +169,23 @@
 #pdf-chat-modal .khub-ai-doc-select {
   width: 100%;
   max-width: 420px;
+  min-height: 2.5rem;
   font-size: 0.85rem;
   padding: 0.45rem 0.65rem;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: #fff;
   color: #0f172a;
+}
+#pdf-chat-modal .khub-ai-doc-select[multiple] {
+  min-height: 6.5rem;
+  padding-right: 0.45rem;
+}
+#pdf-chat-modal .khub-ai-doc-select-help {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  line-height: 1.35;
 }
 #pdf-chat-modal .khub-ai-doc-select:focus {
   outline: none;
@@ -553,8 +564,9 @@
               <p class="khub-ai-doc-title" id="pdf-chat-doc-title">—</p>
               <p class="khub-ai-doc-hint" id="pdf-chat-doc-hint">Ask questions grounded in this resource. Export or share responses anytime.</p>
               <div class="khub-ai-doc-select-wrap is-hidden" id="pdf-chat-doc-select-wrap" aria-hidden="true">
-                <label for="pdf-chat-doc-select">PDF document</label>
-                <select id="pdf-chat-doc-select" class="khub-ai-doc-select" aria-label="Choose PDF document to chat with"></select>
+                <label for="pdf-chat-doc-select">PDF documents</label>
+                <select id="pdf-chat-doc-select" class="khub-ai-doc-select" multiple size="4" aria-label="Choose one or more PDF documents to chat with"></select>
+                <p class="khub-ai-doc-select-help">The first file is selected by default. Hold Ctrl (Windows) or Cmd (Mac) to add or remove files.</p>
               </div>
             </div>
             <div class="khub-ai-toolbar">

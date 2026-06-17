@@ -9,7 +9,20 @@ class PdfChatSession extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'publication_id', 'forum_id', 'attachment_id', 'source_id', 'assistant_mode'];
+    protected $fillable = [
+        'user_id',
+        'publication_id',
+        'forum_id',
+        'attachment_id',
+        'pdf_selection_key',
+        'chatpdf_meta',
+        'source_id',
+        'assistant_mode',
+    ];
+
+    protected $casts = [
+        'chatpdf_meta' => 'array',
+    ];
 
     public function user()
     {

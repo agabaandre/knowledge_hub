@@ -13,6 +13,7 @@
   var attachmentId = typeof pdfChatAttachmentId !== 'undefined' ? pdfChatAttachmentId : null;
   var pdfChatAssistantMode = typeof window.pdfChatAssistantMode !== 'undefined' ? window.pdfChatAssistantMode : 'auto';
   var pdfSources = Array.isArray(window.pdfChatPdfSources) ? window.pdfChatPdfSources : [];
+  var selectedPdfSourceKeys = Array.isArray(window.pdfChatPdfSourceKeys) ? window.pdfChatPdfSourceKeys.slice() : [];
   var activeSourceLabel = null;
   if (chatType === 'forum') {
     pdfChatAssistantMode = 'forum';
@@ -35,6 +36,14 @@
     }
     sessionId = null;
     sourceId = null;
+    if (Array.isArray(window.pdfChatPdfSourceKeys) && window.pdfChatPdfSourceKeys.length) {
+      selectedPdfSourceKeys = window.pdfChatPdfSourceKeys.map(String);
+    } else if (attId !== undefined && attId !== null && attId !== '') {
+      selectedPdfSourceKeys = [String(attId)];
+    } else {
+      selectedPdfSourceKeys = [];
+    }
+    syncAttachmentIdFromSelectedKeys();
     var titleEl = document.getElementById('pdf-chat-doc-title');
     if (titleEl) titleEl.textContent = (typeof docTitle === 'string' && docTitle) ? docTitle : (typeof pdfChatDocumentTitle !== 'undefined' ? pdfChatDocumentTitle : 'Document');
     setupWelcomeForMode(pdfChatAssistantMode === 'forum' ? 'forum' : (pdfChatAssistantMode === 'chatpdf' ? 'chatpdf' : 'publication'));
@@ -241,7 +250,7 @@
       if (icon) icon.innerHTML = '<i class="fa fa-file-pdf"></i>';
       if (hint) {
         hint.textContent = activeSourceLabel
-          ? ('Answers are grounded in: ' + activeSourceLabel + '. Switch PDFs using the selector above when multiple files are attached.')
+          ? ('Answers are grounded in: ' + activeSourceLabel + '. Select one or more PDFs above; each is uploaded to ChatPDF separately.')
           : 'Answers are grounded in the PDF attached to this resource.';
       }
     }
@@ -259,6 +268,55 @@
     }
   }
 
+  function defaultSelectedPdfSourceKeys() {
+    if (selectedPdfSourceKeys.length) {
+      return selectedPdfSourceKeys.slice();
+    }
+    if (pdfSources.length) {
+      return [sourceKey(pdfSources[0])];
+    }
+    return [];
+  }
+
+  function keysEqual(a, b) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+    var sortedA = a.slice().sort();
+    var sortedB = b.slice().sort();
+    return sortedA.every(function (val, idx) { return val === sortedB[idx]; });
+  }
+
+  function syncAttachmentIdFromSelectedKeys() {
+    if (!selectedPdfSourceKeys.length) {
+      attachmentId = null;
+      return;
+    }
+    var firstKey = selectedPdfSourceKeys[0];
+    if (firstKey === 'main') {
+      attachmentId = null;
+      return;
+    }
+    var parsed = parseInt(firstKey, 10);
+    attachmentId = isNaN(parsed) ? null : parsed;
+  }
+
+  function updateActiveSourceLabelFromKeys() {
+    if (!selectedPdfSourceKeys.length) {
+      activeSourceLabel = null;
+      return;
+    }
+    var labels = [];
+    pdfSources.forEach(function (src) {
+      if (selectedPdfSourceKeys.indexOf(sourceKey(src)) !== -1) {
+        labels.push(src.label || 'Document');
+      }
+    });
+    if (!labels.length) {
+      activeSourceLabel = null;
+      return;
+    }
+    activeSourceLabel = labels.length === 1 ? labels[0] : (labels.length + ' PDF documents selected');
+  }
+
   function updateDocSelectUi() {
     var wrap = document.getElementById('pdf-chat-doc-select-wrap');
     var select = document.getElementById('pdf-chat-doc-select');
@@ -274,36 +332,59 @@
       return;
     }
 
-    var currentKey = attachmentId === null || attachmentId === undefined || attachmentId === '' ? 'main' : String(attachmentId);
+    if (!selectedPdfSourceKeys.length) {
+      selectedPdfSourceKeys = defaultSelectedPdfSourceKeys();
+    }
+
     select.innerHTML = '';
     pdfSources.forEach(function (src) {
       var opt = document.createElement('option');
       var key = sourceKey(src);
       opt.value = key;
       opt.textContent = src.label || 'Document';
-      if (key === currentKey) opt.selected = true;
+      opt.selected = selectedPdfSourceKeys.indexOf(key) !== -1;
       select.appendChild(opt);
     });
   }
 
-  function switchPdfDocument(nextKey) {
-    if (!nextKey || isStreaming) return;
-    var nextAttachmentId = nextKey === 'main' ? null : parseInt(nextKey, 10);
-    if (nextKey !== 'main' && isNaN(nextAttachmentId)) return;
+  function applyPdfDocumentSelection(fromSelect) {
+    if (isStreaming) return;
 
-    var currentKey = attachmentId === null || attachmentId === undefined || attachmentId === '' ? 'main' : String(attachmentId);
-    if (currentKey === nextKey) return;
+    var select = fromSelect || document.getElementById('pdf-chat-doc-select');
+    if (!select) return;
 
-    attachmentId = nextAttachmentId;
+    var nextKeys = [];
+    Array.prototype.forEach.call(select.selectedOptions || [], function (opt) {
+      if (opt.value) nextKeys.push(opt.value);
+    });
+
+    if (!nextKeys.length) {
+      nextKeys = defaultSelectedPdfSourceKeys();
+      updateDocSelectUi();
+      return;
+    }
+
+    nextKeys.sort(function (a, b) {
+      var indexA = -1;
+      var indexB = -1;
+      pdfSources.forEach(function (src, idx) {
+        var key = sourceKey(src);
+        if (key === a) indexA = idx;
+        if (key === b) indexB = idx;
+      });
+      return indexA - indexB;
+    });
+
+    if (keysEqual(nextKeys, selectedPdfSourceKeys)) {
+      return;
+    }
+
+    selectedPdfSourceKeys = nextKeys;
+    syncAttachmentIdFromSelectedKeys();
+    updateActiveSourceLabelFromKeys();
     pdfChatAssistantMode = 'chatpdf';
     sessionId = null;
     sourceId = null;
-
-    pdfSources.forEach(function (src) {
-      if (sourceKey(src) === nextKey) {
-        activeSourceLabel = src.label || 'Document';
-      }
-    });
     updateModeBadge('chatpdf');
     loadPdfChatSession();
   }
@@ -343,9 +424,10 @@
       };
     }
     return {
-      text: 'Chat directly with the PDF document. Ask for summaries, section explanations, or targeted questions.',
+      text: 'Chat directly with the PDF document(s). Ask for summaries, section explanations, or targeted questions.',
       tips: [
         'Start with a high-level summary of the document.',
+        'Select multiple PDFs above to compare language versions or related files.',
         'Ask about specific sections, figures, or data points.',
         'Request bullet-point highlights for quick reading.'
       ],
@@ -704,6 +786,7 @@
         : {
             publication_id: publicationId,
             attachment_id: attachmentId || null,
+            pdf_source_keys: selectedPdfSourceKeys.length ? selectedPdfSourceKeys : defaultSelectedPdfSourceKeys(),
             assistant_mode: pdfChatAssistantMode || 'auto'
           });
 
@@ -739,13 +822,19 @@
           pdfSources = data.pdf_sources;
           window.pdfChatPdfSources = data.pdf_sources;
         }
+        if (Array.isArray(data.pdf_source_keys) && data.pdf_source_keys.length) {
+          selectedPdfSourceKeys = data.pdf_source_keys.map(String);
+          window.pdfChatPdfSourceKeys = selectedPdfSourceKeys.slice();
+        }
         if (data.attachment_id !== undefined && data.attachment_id !== null) {
           attachmentId = parseInt(data.attachment_id, 10);
           if (isNaN(attachmentId)) attachmentId = null;
         } else if (data.assistant_mode === 'chatpdf') {
           attachmentId = null;
         }
+        syncAttachmentIdFromSelectedKeys();
         activeSourceLabel = data.active_source_label || activeSourceLabel;
+        updateActiveSourceLabelFromKeys();
         var activeMode = data.assistant_mode || pdfChatAssistantMode || (chatType === 'forums_index' ? 'forums_index' : (chatType === 'forum' ? 'forum' : 'publication'));
         setupWelcomeForMode(activeMode);
         container.innerHTML = '';
@@ -818,6 +907,7 @@
             publication_id: publicationId,
             session_id: sessionId,
             attachment_id: attachmentId || null,
+            pdf_source_keys: selectedPdfSourceKeys.length ? selectedPdfSourceKeys : defaultSelectedPdfSourceKeys(),
             assistant_mode: pdfChatAssistantMode || 'auto',
             message: text,
             stream: true
@@ -883,7 +973,7 @@
     var docSelect = document.getElementById('pdf-chat-doc-select');
     if (docSelect) {
       docSelect.addEventListener('change', function () {
-        switchPdfDocument(this.value);
+        applyPdfDocumentSelection(this);
       });
     }
     if (input) {

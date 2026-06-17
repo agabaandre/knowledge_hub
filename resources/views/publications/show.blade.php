@@ -527,8 +527,9 @@
                         $khubAiConfig = $publication->defaultKhubAiConfig();
                         $defaultAssistantMode = $khubAiConfig['assistant_mode'];
                         $defaultAssistantAttachmentId = $khubAiConfig['attachment_id'];
+                        $defaultPdfSourceKeys = $khubAiConfig['pdf_source_keys'] ?? [];
                     @endphp
-                    <!-- Action Buttons - Favorite, Khub AI (ChatPDF per PDF; GPT context when no PDF) -->
+                    <!-- Action Buttons - Favorite, Khub AI (ChatPDF; multi-PDF selectable in assistant) -->
                     <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
                         <div class="d-flex gap-2 flex-wrap align-items-center">
                     @include('common.favourites_btn',['row'=>$publication])
@@ -538,7 +539,7 @@
                             data-attachment-id="{{ $defaultAssistantAttachmentId !== null ? $defaultAssistantAttachmentId : '' }}"
                             data-assistant-mode="{{ $defaultAssistantMode }}"
                             data-doc-title="{{ e(Str::limit(strip_tags($publication->title ?? 'Document'), 200)) }}"
-                            title="{{ $pdfSourceCount > 1 ? 'Chat with one PDF at a time (choose document in the assistant)' : '' }}"
+                            title="{{ $pdfSourceCount > 1 ? 'Chat with one or more PDFs (choose documents in the assistant)' : '' }}"
                             onclick="typeof openPdfChat === 'function' && openPdfChat({{ $publication->id }}, @json($defaultAssistantAttachmentId), @json(Str::limit(strip_tags($publication->title ?? 'Document'), 200)), @json($defaultAssistantMode))">
                         <i class="fa-solid fa-microchip"></i> Khub AI
                     </button>
@@ -1101,6 +1102,7 @@
   var pdfChatDocumentTitle = @json(Str::limit(strip_tags($publication->title ?? 'Document'), 200));
   window.pdfChatAssistantMode = @json($defaultAssistantMode ?? 'publication');
   window.pdfChatPdfSources = @json($pdfSourcesList ?? []);
+  window.pdfChatPdfSourceKeys = @json($defaultPdfSourceKeys ?? []);
 </script>
 @include('common.pdf-chat-js')
 @endauth

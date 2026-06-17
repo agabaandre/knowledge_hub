@@ -13,6 +13,7 @@ use App\Support\AiConfig;
 use App\Support\ForumAssistantContext;
 use App\Support\ForumsListingAssistantContext;
 use App\Support\PublicationAssistantContext;
+use App\Support\PublicationChatPdfResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -31,6 +32,16 @@ class PdfChatController extends Controller
     private function hasAttachmentIdColumn(): bool
     {
         return Schema::hasColumn('pdf_chat_sessions', 'attachment_id');
+    }
+
+    private function hasPdfSelectionKeyColumn(): bool
+    {
+        return Schema::hasColumn('pdf_chat_sessions', 'pdf_selection_key');
+    }
+
+    private function hasChatpdfMetaColumn(): bool
+    {
+        return Schema::hasColumn('pdf_chat_sessions', 'chatpdf_meta');
     }
 
     private function resolveUserId(Request $request): ?int
@@ -66,6 +77,8 @@ class PdfChatController extends Controller
                 'forum_ids' => 'nullable|array',
                 'forum_ids.*' => 'integer|exists:forums,id',
                 'attachment_id' => 'nullable|integer',
+                'pdf_source_keys' => 'nullable|array',
+                'pdf_source_keys.*' => 'nullable|string|max:32',
                 'assistant_mode' => 'nullable|string|in:chatpdf,publication,auto,forum,forums_index',
             ]);
 
@@ -89,16 +102,31 @@ class PdfChatController extends Controller
 
             $publicationId = (int) $request->publication_id;
             $attachmentId = $request->attachment_id ? (int) $request->attachment_id : null;
+            $requestedPdfSourceKeys = $this->normalizePdfSourceKeysInput($request->input('pdf_source_keys'));
 
             $publication = Publication::with('attachments')->find($publicationId);
             if (! $publication) {
                 return response()->json(['error' => 'Publication not found.'], 404);
             }
 
-            $assistantMode = $this->resolveAssistantMode((string) $request->input('assistant_mode', 'auto'), $publication, $attachmentId);
+            $selectedPdfSourceKeys = PublicationChatPdfResolver::normalizeSelectedKeys(
+                $publication,
+                $requestedPdfSourceKeys !== [] ? $requestedPdfSourceKeys : $this->pdfSourceKeysFromAttachmentId($publication, $attachmentId)
+            );
 
-            if ($assistantMode === 'chatpdf' && ! $attachmentId) {
-                $attachmentId = $this->resolveChatPdfAttachmentId($publication, null);
+            $assistantMode = $this->resolveAssistantMode(
+                (string) $request->input('assistant_mode', 'auto'),
+                $publication,
+                PublicationChatPdfResolver::primaryAttachmentId($selectedPdfSourceKeys)
+            );
+
+            if ($assistantMode === 'publication') {
+                $attachmentId = null;
+                $selectedPdfSourceKeys = [];
+            } elseif ($selectedPdfSourceKeys === []) {
+                return response()->json(['error' => 'This publication has no PDF available for chat.'], 422);
+            } else {
+                $attachmentId = PublicationChatPdfResolver::primaryAttachmentId($selectedPdfSourceKeys);
             }
 
             if ($assistantMode === 'chatpdf' && $attachmentId) {
@@ -110,9 +138,9 @@ class PdfChatController extends Controller
                 }
             }
 
-            if ($assistantMode === 'publication') {
-                $attachmentId = null;
-            }
+            $pdfSelectionKey = $selectedPdfSourceKeys !== []
+                ? PublicationChatPdfResolver::selectionKey($selectedPdfSourceKeys)
+                : null;
 
             $sessionQuery = PdfChatSession::where('publication_id', $publicationId)
                 ->where(function ($q) use ($assistantMode) {
@@ -125,7 +153,9 @@ class PdfChatController extends Controller
                 ->when($userId !== null, fn ($q) => $q->where('user_id', $userId))
                 ->when($userId === null, fn ($q) => $q->whereNull('user_id'));
 
-            if ($this->hasAttachmentIdColumn()) {
+            if ($assistantMode === 'chatpdf' && $this->hasPdfSelectionKeyColumn() && $pdfSelectionKey !== null) {
+                $sessionQuery->where('pdf_selection_key', $pdfSelectionKey);
+            } elseif ($this->hasAttachmentIdColumn()) {
                 $sessionQuery->where(function ($q) use ($attachmentId) {
                     if ($attachmentId === null) {
                         $q->whereNull('attachment_id');
@@ -163,32 +193,20 @@ class PdfChatController extends Controller
                 return response()->json($this->publicationSessionPayload($session, $publication, 'publication', null, null, []));
             }
 
-            // --- ChatPDF (PDF attachment or main PDF) ---
-            $pdfUrl = null;
-            $pdfPath = null;
-            if ($attachmentId) {
-                $attachment = PublicationAttachment::where('id', $attachmentId)
-                    ->where('publication_id', $publicationId)
-                    ->first();
-                $pdfUrl = $attachment->file_url ?? null;
-                $pdfPath = $attachment->file_path ?? null;
-            } else {
-                $pdfUrl = $publication->publication_pdf_url;
-                $pdfPath = $publication->publication_pdf_path;
-            }
+            // --- ChatPDF (one or more PDF attachments / main PDF) ---
+            $existingMeta = ($session && $this->hasChatpdfMetaColumn())
+                ? ($session->chatpdf_meta ?? null)
+                : null;
 
-            if (! $pdfUrl && ! $pdfPath) {
-                return response()->json(['error' => 'This publication has no PDF available for chat.'], 422);
-            }
-
-            if ($session && ! empty($session->source_id)) {
+            if ($session && $this->sessionHasReadyChatPdfSources($session, $selectedPdfSourceKeys, $existingMeta)) {
                 return response()->json($this->publicationSessionPayload(
                     $session,
                     $publication,
                     'chatpdf',
                     $session->source_id,
                     $attachmentId,
-                    $this->sessionMessagesForUser($session, $userId)
+                    $this->sessionMessagesForUser($session, $userId),
+                    $selectedPdfSourceKeys
                 ));
             }
 
@@ -202,32 +220,55 @@ class PdfChatController extends Controller
                 if ($this->hasAttachmentIdColumn()) {
                     $data['attachment_id'] = $attachmentId;
                 }
+                if ($this->hasPdfSelectionKeyColumn()) {
+                    $data['pdf_selection_key'] = $pdfSelectionKey;
+                }
                 $session = PdfChatSession::create($data);
             }
 
-            $sourceId = null;
-            if ($pdfUrl) {
-                $sourceId = $this->chatPdf->getSourceIdFromUrl($pdfUrl);
-            }
-            if (! $sourceId && $pdfPath) {
-                $sourceId = $this->chatPdf->getSourceIdFromFile($pdfPath);
+            try {
+                $chatpdfMeta = $this->ensureChatPdfMetaForSelection(
+                    $publication,
+                    $selectedPdfSourceKeys,
+                    is_array($existingMeta) ? $existingMeta : null
+                );
+            } catch (\RuntimeException $e) {
+                Log::warning('ChatPDF: could not upload selected PDFs for publication '.$publicationId, [
+                    'keys' => $selectedPdfSourceKeys,
+                    'message' => $e->getMessage(),
+                ]);
+
+                return response()->json(['error' => $e->getMessage()], 502);
             }
 
-            if (! $sourceId) {
-                Log::warning('ChatPDF: could not obtain sourceId for publication '.$publicationId.' attachment '.$attachmentId);
-
+            $primarySourceId = $this->primaryChatPdfSourceId($chatpdfMeta, $selectedPdfSourceKeys);
+            if ($primarySourceId === null) {
                 return response()->json(['error' => 'Could not load the PDF for chat. Please try again later.'], 502);
             }
 
-            $session->update(['source_id' => $sourceId, 'assistant_mode' => 'chatpdf']);
+            $updateData = [
+                'source_id' => $primarySourceId,
+                'assistant_mode' => 'chatpdf',
+            ];
+            if ($this->hasAttachmentIdColumn()) {
+                $updateData['attachment_id'] = $attachmentId;
+            }
+            if ($this->hasPdfSelectionKeyColumn()) {
+                $updateData['pdf_selection_key'] = $pdfSelectionKey;
+            }
+            if ($this->hasChatpdfMetaColumn()) {
+                $updateData['chatpdf_meta'] = $chatpdfMeta;
+            }
+            $session->update($updateData);
 
             return response()->json($this->publicationSessionPayload(
                 $session,
                 $publication,
                 'chatpdf',
-                $sourceId,
+                $primarySourceId,
                 $attachmentId,
-                $this->sessionMessagesForUser($session, $userId)
+                $this->sessionMessagesForUser($session, $userId),
+                $selectedPdfSourceKeys
             ));
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
@@ -440,29 +481,8 @@ class PdfChatController extends Controller
     }
 
     /**
-     * Resolve which PDF attachment ChatPDF should use (null = main publication PDF).
-     */
-    private function resolveChatPdfAttachmentId(Publication $publication, ?int $attachmentId): ?int
-    {
-        if ($attachmentId) {
-            return $attachmentId;
-        }
-
-        $sources = $publication->pdf_sources;
-        if ($sources === []) {
-            return null;
-        }
-
-        $first = $sources[0];
-        if (($first['type'] ?? '') === 'attachment' && ! empty($first['attachment_id'])) {
-            return (int) $first['attachment_id'];
-        }
-
-        return null;
-    }
-
-    /**
      * @param  list<array{role: string, content: string}>  $messages
+     * @param  list<string>  $selectedPdfSourceKeys
      * @return array<string, mixed>
      */
     private function publicationSessionPayload(
@@ -471,34 +491,227 @@ class PdfChatController extends Controller
         string $assistantMode,
         ?string $sourceId,
         ?int $attachmentId,
-        array $messages
+        array $messages,
+        array $selectedPdfSourceKeys = []
     ): array {
-        $activeLabel = $this->pdfSourceLabel($publication, $attachmentId);
+        if ($selectedPdfSourceKeys === [] && $assistantMode === 'chatpdf') {
+            $meta = is_array($session->chatpdf_meta ?? null) ? $session->chatpdf_meta : [];
+            $selectedPdfSourceKeys = is_array($meta['selected_keys'] ?? null) ? $meta['selected_keys'] : PublicationChatPdfResolver::defaultSelectedKeys($publication);
+        }
+
+        $activeLabel = $this->activeSourceLabel($publication, $selectedPdfSourceKeys);
 
         return [
             'session_id' => $session->id,
             'source_id' => $sourceId,
             'assistant_mode' => $assistantMode,
             'attachment_id' => $attachmentId,
+            'pdf_source_keys' => $selectedPdfSourceKeys,
             'active_source_label' => $activeLabel,
             'pdf_sources' => $publication->pdf_sources,
             'messages' => $messages,
         ];
     }
 
-    private function pdfSourceLabel(Publication $publication, ?int $attachmentId): ?string
+    /**
+     * @param  list<string>  $selectedPdfSourceKeys
+     */
+    private function activeSourceLabel(Publication $publication, array $selectedPdfSourceKeys): ?string
     {
-        foreach ($publication->pdf_sources as $src) {
-            $srcAttachmentId = $src['attachment_id'] ?? null;
-            if ($attachmentId === null && ($src['type'] ?? '') === 'main') {
-                return (string) ($src['label'] ?? 'Main document');
+        if ($selectedPdfSourceKeys === []) {
+            return null;
+        }
+
+        $labels = PublicationChatPdfResolver::labelsForKeys($publication, $selectedPdfSourceKeys);
+        if ($labels === []) {
+            return null;
+        }
+
+        if (count($labels) === 1) {
+            return reset($labels);
+        }
+
+        return count($labels).' PDF documents selected';
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function normalizePdfSourceKeysInput(mixed $raw): array
+    {
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map(
+            static fn ($key) => is_string($key) || is_int($key) ? (string) $key : null,
+            $raw
+        )));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function pdfSourceKeysFromAttachmentId(Publication $publication, ?int $attachmentId): array
+    {
+        if ($attachmentId) {
+            return [(string) $attachmentId];
+        }
+
+        return PublicationChatPdfResolver::defaultSelectedKeys($publication);
+    }
+
+    /**
+     * @param  list<string>  $selectedPdfSourceKeys
+     */
+    private function sessionHasReadyChatPdfSources(PdfChatSession $session, array $selectedPdfSourceKeys, ?array $existingMeta): bool
+    {
+        if (empty($session->source_id)) {
+            return false;
+        }
+
+        $meta = is_array($existingMeta) ? $existingMeta : (is_array($session->chatpdf_meta ?? null) ? $session->chatpdf_meta : null);
+        if (! is_array($meta) || empty($meta['sources']) || ! is_array($meta['sources'])) {
+            return count($selectedPdfSourceKeys) <= 1;
+        }
+
+        foreach ($selectedPdfSourceKeys as $key) {
+            if (empty($meta['sources'][$key])) {
+                return false;
             }
-            if ($attachmentId !== null && (int) $srcAttachmentId === $attachmentId) {
-                return (string) ($src['label'] ?? 'Document');
+        }
+
+        return true;
+    }
+
+    /**
+     * @param  list<string>  $selectedPdfSourceKeys
+     * @param  array<string, mixed>|null  $existingMeta
+     * @return array{selected_keys: list<string>, sources: array<string, string>, labels: array<string, string>}
+     */
+    private function ensureChatPdfMetaForSelection(Publication $publication, array $selectedPdfSourceKeys, ?array $existingMeta): array
+    {
+        $meta = [
+            'selected_keys' => $selectedPdfSourceKeys,
+            'sources' => is_array($existingMeta['sources'] ?? null) ? $existingMeta['sources'] : [],
+            'labels' => is_array($existingMeta['labels'] ?? null) ? $existingMeta['labels'] : [],
+        ];
+
+        foreach ($selectedPdfSourceKeys as $key) {
+            if (! empty($meta['sources'][$key])) {
+                continue;
+            }
+
+            $pdf = PublicationChatPdfResolver::resolvePdfForKey($publication, $key);
+            if ($pdf === null || (($pdf['url'] ?? null) === null && ($pdf['path'] ?? null) === null)) {
+                continue;
+            }
+
+            $sourceId = null;
+            if (! empty($pdf['url'])) {
+                $sourceId = $this->chatPdf->getSourceIdFromUrl($pdf['url']);
+            }
+            if (! $sourceId && ! empty($pdf['path'])) {
+                $sourceId = $this->chatPdf->getSourceIdFromFile($pdf['path']);
+            }
+
+            if (! $sourceId) {
+                continue;
+            }
+
+            $meta['sources'][$key] = $sourceId;
+            $meta['labels'][$key] = $pdf['label'];
+        }
+
+        foreach ($selectedPdfSourceKeys as $key) {
+            if (empty($meta['sources'][$key])) {
+                $label = $meta['labels'][$key] ?? $key;
+                throw new \RuntimeException('Could not load "'.$label.'" for chat. Please try again or choose a different file.');
+            }
+        }
+
+        return $meta;
+    }
+
+    /**
+     * @param  array{selected_keys?: list<string>, sources?: array<string, string>}  $chatpdfMeta
+     * @param  list<string>  $selectedPdfSourceKeys
+     */
+    private function primaryChatPdfSourceId(array $chatpdfMeta, array $selectedPdfSourceKeys): ?string
+    {
+        $sources = $chatpdfMeta['sources'] ?? [];
+        foreach ($selectedPdfSourceKeys as $key) {
+            if (! empty($sources[$key])) {
+                return (string) $sources[$key];
             }
         }
 
         return null;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function chatPdfSourcesForSession(PdfChatSession $session): array
+    {
+        $meta = is_array($session->chatpdf_meta ?? null) ? $session->chatpdf_meta : null;
+        if (is_array($meta) && ! empty($meta['sources']) && is_array($meta['sources'])) {
+            $keys = is_array($meta['selected_keys'] ?? null) ? $meta['selected_keys'] : array_keys($meta['sources']);
+            $out = [];
+            foreach ($keys as $key) {
+                if (! empty($meta['sources'][$key])) {
+                    $out[(string) $key] = (string) $meta['sources'][$key];
+                }
+            }
+            if ($out !== []) {
+                return $out;
+            }
+        }
+
+        if (! empty($session->source_id)) {
+            return ['default' => (string) $session->source_id];
+        }
+
+        return [];
+    }
+
+    /**
+     * @param  array<string, string>  $sourceIdsByKey
+     * @param  array<string, string>  $labelsByKey
+     * @param  list<array{role: string, content: string}>  $messages
+     */
+    private function mergeChatPdfResponses(array $sourceIdsByKey, array $labelsByKey, array $messages): string
+    {
+        if (count($sourceIdsByKey) <= 1) {
+            $sourceId = reset($sourceIdsByKey);
+            $response = $this->chatPdf->chat($sourceId, $messages, true);
+
+            return (string) ($response->content ?? ($response->error ?? ''));
+        }
+
+        $sections = [];
+        foreach ($sourceIdsByKey as $key => $sourceId) {
+            $label = $labelsByKey[$key] ?? 'Document';
+            $response = $this->chatPdf->chat($sourceId, $messages, true);
+            $content = trim((string) ($response->content ?? ''));
+            if ($content === '' && isset($response->error)) {
+                $content = (string) $response->error;
+            }
+            if ($content === '') {
+                continue;
+            }
+            $sections[] = '### '.$label."\n\n".$content;
+        }
+
+        if ($sections === []) {
+            return 'Sorry, no answer could be generated from the selected PDFs.';
+        }
+
+        if (count($sections) === 1) {
+            return preg_replace('/^### .+\n\n/s', '', $sections[0]) ?? $sections[0];
+        }
+
+        return implode("\n\n", $sections);
     }
 
     /**
@@ -580,15 +793,16 @@ class PdfChatController extends Controller
             }
 
             $messages = $this->buildMessagesForApi($session, $userId, $userMessage);
+            $chatPdfSources = $this->chatPdfSourcesForSession($session);
+            $labelsByKey = is_array($session->chatpdf_meta['labels'] ?? null) ? $session->chatpdf_meta['labels'] : [];
 
             if ($stream) {
-                return $this->streamResponse($session, $userId, $userMessage, $messages);
+                return $this->streamResponse($session, $userId, $userMessage, $messages, $chatPdfSources, $labelsByKey);
             }
 
-            $response = $this->chatPdf->chat($session->source_id, $messages, true);
-            $content = $response->content ?? '';
-            if (isset($response->error)) {
-                return response()->json(['error' => $response->error], 502);
+            $content = $this->mergeChatPdfResponses($chatPdfSources, $labelsByKey, $messages);
+            if ($content === '') {
+                return response()->json(['error' => 'Could not get a response from ChatPDF.'], 502);
             }
 
             if ($userId) {
@@ -597,7 +811,7 @@ class PdfChatController extends Controller
 
             return response()->json([
                 'content' => $content,
-                'references' => $response->references ?? [],
+                'references' => [],
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
@@ -798,18 +1012,43 @@ class PdfChatController extends Controller
         ]);
     }
 
-    private function streamResponse(PdfChatSession $session, ?int $userId, string $userMessage, array $messages): StreamedResponse
-    {
-        return new StreamedResponse(function () use ($session, $userId, $userMessage, $messages) {
+    /**
+     * @param  array<string, string>  $chatPdfSources
+     * @param  array<string, string>  $labelsByKey
+     */
+    private function streamResponse(
+        PdfChatSession $session,
+        ?int $userId,
+        string $userMessage,
+        array $messages,
+        array $chatPdfSources = [],
+        array $labelsByKey = []
+    ): StreamedResponse {
+        if ($chatPdfSources === [] && ! empty($session->source_id)) {
+            $chatPdfSources = ['default' => (string) $session->source_id];
+        }
+
+        return new StreamedResponse(function () use ($session, $userId, $userMessage, $messages, $chatPdfSources, $labelsByKey) {
             $buffer = '';
-            $this->chatPdf->chatStream($session->source_id, $messages, function ($chunk) use (&$buffer) {
-                $buffer .= $chunk;
-                echo $chunk;
+
+            if (count($chatPdfSources) <= 1) {
+                $sourceId = reset($chatPdfSources);
+                $this->chatPdf->chatStream($sourceId, $messages, function ($chunk) use (&$buffer) {
+                    $buffer .= $chunk;
+                    echo $chunk;
+                    if (ob_get_level()) {
+                        ob_flush();
+                    }
+                    flush();
+                });
+            } else {
+                $buffer = $this->mergeChatPdfResponses($chatPdfSources, $labelsByKey, $messages);
+                echo $buffer;
                 if (ob_get_level()) {
                     ob_flush();
                 }
                 flush();
-            });
+            }
 
             if ($userId && $buffer !== '') {
                 $this->savePair($session, $userMessage, $buffer);
