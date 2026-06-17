@@ -524,20 +524,11 @@
                     @php
                         $pdfSourcesList = $publication->pdf_sources;
                         $pdfSourceCount = count($pdfSourcesList);
-                        // Multiple PDFs (main + attachments or several attachments): GPT context with text from all. Single PDF: ChatPDF on that file.
-                        $defaultAssistantAttachmentId = null;
-                        $defaultAssistantMode = 'publication';
-                        if ($publication->has_any_pdf) {
-                            if ($pdfSourceCount > 1) {
-                                $defaultAssistantMode = 'publication';
-                                $defaultAssistantAttachmentId = null;
-                            } elseif ($pdfSourceCount === 1) {
-                                $defaultAssistantMode = 'chatpdf';
-                                $defaultAssistantAttachmentId = $pdfSourcesList[0]['attachment_id'] ?? null;
-                            }
-                        }
+                        $khubAiConfig = $publication->defaultKhubAiConfig();
+                        $defaultAssistantMode = $khubAiConfig['assistant_mode'];
+                        $defaultAssistantAttachmentId = $khubAiConfig['attachment_id'];
                     @endphp
-                    <!-- Action Buttons - Favorite, Khub AI (PDF via ChatPDF; other formats via GPT context) -->
+                    <!-- Action Buttons - Favorite, Khub AI (ChatPDF per PDF; GPT context when no PDF) -->
                     <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
                         <div class="d-flex gap-2 flex-wrap align-items-center">
                     @include('common.favourites_btn',['row'=>$publication])
@@ -547,7 +538,7 @@
                             data-attachment-id="{{ $defaultAssistantAttachmentId !== null ? $defaultAssistantAttachmentId : '' }}"
                             data-assistant-mode="{{ $defaultAssistantMode }}"
                             data-doc-title="{{ e(Str::limit(strip_tags($publication->title ?? 'Document'), 200)) }}"
-                            title="{{ $pdfSourceCount > 1 ? 'Chat using all PDFs on this resource' : '' }}"
+                            title="{{ $pdfSourceCount > 1 ? 'Chat with one PDF at a time (choose document in the assistant)' : '' }}"
                             onclick="typeof openPdfChat === 'function' && openPdfChat({{ $publication->id }}, @json($defaultAssistantAttachmentId), @json(Str::limit(strip_tags($publication->title ?? 'Document'), 200)), @json($defaultAssistantMode))">
                         <i class="fa-solid fa-microchip"></i> Khub AI
                     </button>
@@ -1109,6 +1100,7 @@
   var pdfChatAttachmentId = @json($defaultAssistantAttachmentId ?? null);
   var pdfChatDocumentTitle = @json(Str::limit(strip_tags($publication->title ?? 'Document'), 200));
   window.pdfChatAssistantMode = @json($defaultAssistantMode ?? 'publication');
+  window.pdfChatPdfSources = @json($pdfSourcesList ?? []);
 </script>
 @include('common.pdf-chat-js')
 @endauth

@@ -4,18 +4,11 @@
     if (! $publication) {
         return;
     }
-    $pdfSourcesList = $publication->pdf_sources ?? [];
-    $pdfSourceCount = count($pdfSourcesList);
-    $defaultAssistantAttachmentId = null;
-    $defaultAssistantMode = 'publication';
-    if ($publication->has_any_pdf ?? false) {
-        if ($pdfSourceCount > 1) {
-            $defaultAssistantMode = 'publication';
-        } elseif ($pdfSourceCount === 1) {
-            $defaultAssistantMode = 'chatpdf';
-            $defaultAssistantAttachmentId = $pdfSourcesList[0]['attachment_id'] ?? null;
-        }
-    }
+    $khubAiConfig = method_exists($publication, 'defaultKhubAiConfig')
+        ? $publication->defaultKhubAiConfig()
+        : ['assistant_mode' => 'publication', 'attachment_id' => null];
+    $defaultAssistantMode = $khubAiConfig['assistant_mode'] ?? 'publication';
+    $defaultAssistantAttachmentId = $khubAiConfig['attachment_id'] ?? null;
     $docTitle = \Illuminate\Support\Str::limit(strip_tags($publication->title ?? 'Document'), 200);
     $btnClass = $btnClass ?? 'btn btn-sm btn-primary';
     $btnStyle = $btnStyle ?? 'background-color: var(--theme-color-primary, #119A48); border: none; color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500;';

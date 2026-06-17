@@ -81,6 +81,10 @@ class PdfChatController extends Controller
 
             $assistantMode = $this->resolveAssistantMode((string) $request->input('assistant_mode', 'auto'), $publication, $attachmentId);
 
+            if ($assistantMode === 'chatpdf' && ! $attachmentId) {
+                $attachmentId = $this->resolveChatPdfAttachmentId($publication, null);
+            }
+
             if ($assistantMode === 'chatpdf' && $attachmentId) {
                 $attachment = PublicationAttachment::where('id', $attachmentId)
                     ->where('publication_id', $publicationId)
@@ -123,12 +127,7 @@ class PdfChatController extends Controller
                         ? $session->messages()->get()->map(fn ($m) => ['role' => $m->role, 'content' => $m->content])
                         : [];
 
-                    return response()->json([
-                        'session_id' => $session->id,
-                        'source_id' => null,
-                        'assistant_mode' => 'publication',
-                        'messages' => $messages,
-                    ]);
+                    return response()->json($this->publicationSessionPayload($session, $publication, 'publication', null, null, $messages));
                 }
 
                 $data = [
@@ -142,12 +141,7 @@ class PdfChatController extends Controller
                 }
                 $session = PdfChatSession::create($data);
 
-                return response()->json([
-                    'session_id' => $session->id,
-                    'source_id' => null,
-                    'assistant_mode' => 'publication',
-                    'messages' => [],
-                ]);
+                return response()->json($this->publicationSessionPayload($session, $publication, 'publication', null, null, []));
             }
 
             // --- ChatPDF (PDF attachment or main PDF) ---
@@ -173,12 +167,14 @@ class PdfChatController extends Controller
                     ? $session->messages()->get()->map(fn ($m) => ['role' => $m->role, 'content' => $m->content])
                     : [];
 
-                return response()->json([
-                    'session_id' => $session->id,
-                    'source_id' => $session->source_id,
-                    'assistant_mode' => 'chatpdf',
-                    'messages' => $messages,
-                ]);
+                return response()->json($this->publicationSessionPayload(
+                    $session,
+                    $publication,
+                    'chatpdf',
+                    $session->source_id,
+                    $attachmentId,
+                    $messages
+                ));
             }
 
             if (! $session) {
@@ -214,12 +210,14 @@ class PdfChatController extends Controller
                 ? $session->messages()->get()->map(fn ($m) => ['role' => $m->role, 'content' => $m->content])
                 : [];
 
-            return response()->json([
-                'session_id' => $session->id,
-                'source_id' => $sourceId,
-                'assistant_mode' => 'chatpdf',
-                'messages' => $messages,
-            ]);
+            return response()->json($this->publicationSessionPayload(
+                $session,
+                $publication,
+                'chatpdf',
+                $sourceId,
+                $attachmentId,
+                $messages
+            ));
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
         } catch (\Throwable $e) {
@@ -400,25 +398,18 @@ class PdfChatController extends Controller
 
     private function resolveAssistantMode(string $requested, Publication $publication, ?int $attachmentId): string
     {
-        $publication->loadMissing('attachments');
-        $pdfSources = $publication->pdf_sources;
-        $pdfSourceCount = is_array($pdfSources) ? count($pdfSources) : 0;
-
-        // ChatPDF is single-document. Multiple PDFs on the resource → GPT context with text from all PDFs.
-        if ($pdfSourceCount > 1 && ! $attachmentId) {
-            if ($requested === 'chatpdf') {
-                return 'publication';
-            }
-
-            return 'publication';
-        }
-
         if ($requested === 'publication') {
             return 'publication';
         }
+
+        $publication->loadMissing('attachments');
+        $pdfSources = $publication->pdf_sources;
+        $hasPdf = is_array($pdfSources) && count($pdfSources) > 0;
+
         if ($requested === 'chatpdf') {
-            return 'chatpdf';
+            return $hasPdf ? 'chatpdf' : 'publication';
         }
+
         if ($attachmentId) {
             $attachment = PublicationAttachment::where('id', $attachmentId)
                 ->where('publication_id', $publication->id)
@@ -430,11 +421,73 @@ class PdfChatController extends Controller
             return 'publication';
         }
 
-        if ($publication->publication_pdf_url || $publication->publication_pdf_path) {
+        if ($hasPdf) {
             return 'chatpdf';
         }
 
         return 'publication';
+    }
+
+    /**
+     * Resolve which PDF attachment ChatPDF should use (null = main publication PDF).
+     */
+    private function resolveChatPdfAttachmentId(Publication $publication, ?int $attachmentId): ?int
+    {
+        if ($attachmentId) {
+            return $attachmentId;
+        }
+
+        $sources = $publication->pdf_sources;
+        if ($sources === []) {
+            return null;
+        }
+
+        $first = $sources[0];
+        if (($first['type'] ?? '') === 'attachment' && ! empty($first['attachment_id'])) {
+            return (int) $first['attachment_id'];
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  list<array{role: string, content: string}>  $messages
+     * @return array<string, mixed>
+     */
+    private function publicationSessionPayload(
+        PdfChatSession $session,
+        Publication $publication,
+        string $assistantMode,
+        ?string $sourceId,
+        ?int $attachmentId,
+        array $messages
+    ): array {
+        $activeLabel = $this->pdfSourceLabel($publication, $attachmentId);
+
+        return [
+            'session_id' => $session->id,
+            'source_id' => $sourceId,
+            'assistant_mode' => $assistantMode,
+            'attachment_id' => $attachmentId,
+            'active_source_label' => $activeLabel,
+            'pdf_sources' => $publication->pdf_sources,
+            'messages' => $messages,
+        ];
+    }
+
+    private function pdfSourceLabel(Publication $publication, ?int $attachmentId): ?string
+    {
+        foreach ($publication->pdf_sources as $src) {
+            $srcAttachmentId = $src['attachment_id'] ?? null;
+            if ($attachmentId === null && ($src['type'] ?? '') === 'main') {
+                return (string) ($src['label'] ?? 'Main document');
+            }
+            if ($attachmentId !== null && (int) $srcAttachmentId === $attachmentId) {
+                return (string) ($src['label'] ?? 'Document');
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -153,6 +153,34 @@
   color: #64748b;
   line-height: 1.4;
 }
+#pdf-chat-modal .khub-ai-doc-select-wrap {
+  margin-top: 0.55rem;
+  max-width: 100%;
+}
+#pdf-chat-modal .khub-ai-doc-select-wrap label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+}
+#pdf-chat-modal .khub-ai-doc-select {
+  width: 100%;
+  max-width: 420px;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #0f172a;
+}
+#pdf-chat-modal .khub-ai-doc-select:focus {
+  outline: none;
+  border-color: var(--theme-color-primary, #119A48);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color-primary, #119A48) 18%, transparent);
+}
 #pdf-chat-modal .khub-ai-toolbar {
   display: flex;
   align-items: center;
@@ -195,6 +223,9 @@
   border: 1px solid #e2e8f0;
   border-radius: 14px;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+#pdf-chat-modal .khub-ai-doc-select-wrap.is-hidden {
+  display: none;
 }
 #pdf-chat-modal .khub-ai-welcome.is-hidden {
   display: none;
@@ -521,6 +552,10 @@
             <div class="khub-ai-doc-meta">
               <p class="khub-ai-doc-title" id="pdf-chat-doc-title">—</p>
               <p class="khub-ai-doc-hint" id="pdf-chat-doc-hint">Ask questions grounded in this resource. Export or share responses anytime.</p>
+              <div class="khub-ai-doc-select-wrap is-hidden" id="pdf-chat-doc-select-wrap" aria-hidden="true">
+                <label for="pdf-chat-doc-select">PDF document</label>
+                <select id="pdf-chat-doc-select" class="khub-ai-doc-select" aria-label="Choose PDF document to chat with"></select>
+              </div>
             </div>
             <div class="khub-ai-toolbar">
               <button type="button" class="btn btn-outline-secondary btn-sm" id="pdf-chat-export-all-pdf" title="Export full conversation as PDF">

@@ -381,6 +381,24 @@ class Publication extends Model
         return $sources;
     }
 
+    /**
+     * Default Khub AI mode for this publication: ChatPDF on the first PDF when any exist.
+     *
+     * @return array{assistant_mode: string, attachment_id: int|null}
+     */
+    public function defaultKhubAiConfig(): array
+    {
+        $sources = $this->pdf_sources;
+        if ($sources === []) {
+            return ['assistant_mode' => 'publication', 'attachment_id' => null];
+        }
+
+        return [
+            'assistant_mode' => 'chatpdf',
+            'attachment_id' => $sources[0]['attachment_id'] ?? null,
+        ];
+    }
+
     // Ensure the content is UTF-8 encoded
     public function getDescriptionAttribute($value)
     {

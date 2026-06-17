@@ -12,6 +12,8 @@
 
   var attachmentId = typeof pdfChatAttachmentId !== 'undefined' ? pdfChatAttachmentId : null;
   var pdfChatAssistantMode = typeof window.pdfChatAssistantMode !== 'undefined' ? window.pdfChatAssistantMode : 'auto';
+  var pdfSources = Array.isArray(window.pdfChatPdfSources) ? window.pdfChatPdfSources : [];
+  var activeSourceLabel = null;
   if (chatType === 'forum') {
     pdfChatAssistantMode = 'forum';
   }
@@ -237,8 +239,73 @@
     } else {
       badge.textContent = 'PDF document';
       if (icon) icon.innerHTML = '<i class="fa fa-file-pdf"></i>';
-      if (hint) hint.textContent = 'Answers are grounded in the PDF attached to this resource.';
+      if (hint) {
+        hint.textContent = activeSourceLabel
+          ? ('Answers are grounded in: ' + activeSourceLabel + '. Switch PDFs using the selector above when multiple files are attached.')
+          : 'Answers are grounded in the PDF attached to this resource.';
+      }
     }
+  }
+
+  function sourceKey(src) {
+    if (!src) return '';
+    var attId = src.attachment_id;
+    return attId === null || attId === undefined || attId === '' ? 'main' : String(attId);
+  }
+
+  function syncPdfSourcesFromWindow() {
+    if (Array.isArray(window.pdfChatPdfSources) && window.pdfChatPdfSources.length) {
+      pdfSources = window.pdfChatPdfSources;
+    }
+  }
+
+  function updateDocSelectUi() {
+    var wrap = document.getElementById('pdf-chat-doc-select-wrap');
+    var select = document.getElementById('pdf-chat-doc-select');
+    if (!wrap || !select) return;
+
+    syncPdfSourcesFromWindow();
+    var show = chatType === 'publication' && pdfSources.length > 1 && (pdfChatAssistantMode === 'chatpdf' || pdfChatAssistantMode === 'auto');
+    wrap.classList.toggle('is-hidden', !show);
+    wrap.setAttribute('aria-hidden', show ? 'false' : 'true');
+
+    if (!show) {
+      select.innerHTML = '';
+      return;
+    }
+
+    var currentKey = attachmentId === null || attachmentId === undefined || attachmentId === '' ? 'main' : String(attachmentId);
+    select.innerHTML = '';
+    pdfSources.forEach(function (src) {
+      var opt = document.createElement('option');
+      var key = sourceKey(src);
+      opt.value = key;
+      opt.textContent = src.label || 'Document';
+      if (key === currentKey) opt.selected = true;
+      select.appendChild(opt);
+    });
+  }
+
+  function switchPdfDocument(nextKey) {
+    if (!nextKey || isStreaming) return;
+    var nextAttachmentId = nextKey === 'main' ? null : parseInt(nextKey, 10);
+    if (nextKey !== 'main' && isNaN(nextAttachmentId)) return;
+
+    var currentKey = attachmentId === null || attachmentId === undefined || attachmentId === '' ? 'main' : String(attachmentId);
+    if (currentKey === nextKey) return;
+
+    attachmentId = nextAttachmentId;
+    pdfChatAssistantMode = 'chatpdf';
+    sessionId = null;
+    sourceId = null;
+
+    pdfSources.forEach(function (src) {
+      if (sourceKey(src) === nextKey) {
+        activeSourceLabel = src.label || 'Document';
+      }
+    });
+    updateModeBadge('chatpdf');
+    loadPdfChatSession();
   }
 
   function welcomeCopyForMode(mode) {
@@ -314,6 +381,7 @@
     }
     renderSuggestions(copy.prompts);
     updateModeBadge(mode);
+    updateDocSelectUi();
   }
 
   function appendMessage(role, content, isStreamingPlaceholder) {
@@ -663,6 +731,17 @@
         if (data.assistant_mode === 'publication' || data.assistant_mode === 'chatpdf' || data.assistant_mode === 'forum' || data.assistant_mode === 'forums_index') {
           pdfChatAssistantMode = data.assistant_mode;
         }
+        if (Array.isArray(data.pdf_sources) && data.pdf_sources.length) {
+          pdfSources = data.pdf_sources;
+          window.pdfChatPdfSources = data.pdf_sources;
+        }
+        if (data.attachment_id !== undefined && data.attachment_id !== null) {
+          attachmentId = parseInt(data.attachment_id, 10);
+          if (isNaN(attachmentId)) attachmentId = null;
+        } else if (data.assistant_mode === 'chatpdf') {
+          attachmentId = null;
+        }
+        activeSourceLabel = data.active_source_label || activeSourceLabel;
         var activeMode = data.assistant_mode || pdfChatAssistantMode || (chatType === 'forums_index' ? 'forums_index' : (chatType === 'forum' ? 'forum' : 'publication'));
         setupWelcomeForMode(activeMode);
         container.innerHTML = '';
@@ -797,6 +876,12 @@
     if (exportAllWord) exportAllWord.addEventListener('click', function() { exportAll('word'); });
     if (shareAllBtn) shareAllBtn.addEventListener('click', function(e) { e.stopPropagation(); shareConversation(); });
     if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+    var docSelect = document.getElementById('pdf-chat-doc-select');
+    if (docSelect) {
+      docSelect.addEventListener('change', function () {
+        switchPdfDocument(this.value);
+      });
+    }
     if (input) {
       input.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && !e.shiftKey) {

@@ -7,7 +7,8 @@ use App\Models\PublicationAttachment;
 
 /**
  * Builds a text context for Khub AI on publications (GPT), including extracted PDF text
- * from the main document and every PDF attachment when in "publication" mode.
+ * when no single PDF is available for ChatPDF. Multi-PDF resources should use ChatPDF
+ * one document at a time instead of bundling all PDF text here.
  */
 final class PublicationAssistantContext
 {
