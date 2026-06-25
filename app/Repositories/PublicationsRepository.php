@@ -23,6 +23,7 @@ use App\Models\Tag;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\User;
 use App\Support\CommunityTargeting;
+use App\Support\ContentModeration;
 use App\Support\ContributorProfileContext;
 use App\Support\SeoSlugger;
 use App\Services\OfficeDocumentToPdfService;
@@ -611,31 +612,16 @@ public function getPublicationIds(Request $request, int $limit = 80): array
             }
         }
         else {
-            // Auto-publish when submitted by privileged roles (IDs), configurable via ENV
-            try {
-                $autoRoleIds = collect(explode(',', env('AUTO_PUBLISH_ROLE_IDS', '')))
-                    ->filter(function($v){ return trim($v) !== ''; })
-                    ->map(function($v){ return (int) trim($v); });
-
-                $hasAutoRole = false;
-                if ($user && method_exists($user, 'roles')) {
-                    $userRoleIds = $user->roles ? $user->roles->pluck('id') : collect();
-                    $hasAutoRole = $autoRoleIds->isNotEmpty() && $userRoleIds->intersect($autoRoleIds)->isNotEmpty();
+            if (ContentModeration::shouldAutoApprovePublication($user)) {
+                $pub->is_active   = 'Active';
+                $pub->is_approved = 1;
+                $pub->is_rejected = 0;
+                if (Schema::hasColumn($pub->getTable(), 'approved_by') && current_user()) {
+                    $pub->approved_by = current_user()->id;
                 }
-
-                if ($hasAutoRole || is_admin()) {
-                    $pub->is_active   = 'Active';
-                    $pub->is_approved = 1;
-                    $pub->is_rejected = 0;
-                    if (Schema::hasColumn($pub->getTable(), 'approved_by') && current_user()) {
-                        $pub->approved_by = current_user()->id;
-                    }
-                    if (Schema::hasColumn($pub->getTable(), 'rejected_by')) {
-                        $pub->rejected_by = null;
-                    }
+                if (Schema::hasColumn($pub->getTable(), 'rejected_by')) {
+                    $pub->rejected_by = null;
                 }
-            } catch (\Throwable $e) {
-                // no-op; fallback to default behaviour
             }
         }
 
@@ -2630,6 +2616,7 @@ public function togglePublicationActive(int $id): ?Publication
 
         $rows = $base->skip($start)->take($length)->get();
         $canDelete = auth()->user() && auth()->user()->can('delete_publications');
+        $canModerate = ContentModeration::canModeratePublications();
         $currentUserId = current_user() ? current_user()->id : null;
         $isAdmin = is_admin();
 
@@ -2652,7 +2639,9 @@ public function togglePublicationActive(int $id): ?Publication
             }
 
             $data[] = [
-                'checkbox' => '<input type="checkbox" name="publication_ids[]" value="'.$publication->id.'" class="pending-pub-cb">',
+                'checkbox' => $canModerate
+                    ? '<input type="checkbox" name="publication_ids[]" value="'.$publication->id.'" class="pending-pub-cb">'
+                    : '',
                 'index' => '<span class="text-muted">'.$index++.'</span>',
                 'title' => '<a href="'.e($publication->publication).'" target="_blank" rel="noopener">'.truncate($publication->title, 30).'</a>',
                 'description' => truncate(html_to_text($publication->description), 50),

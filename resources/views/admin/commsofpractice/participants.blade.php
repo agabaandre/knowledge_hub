@@ -301,12 +301,14 @@
             <div class="cop-pending-panel__body">
                 <p class="text-muted small mb-2">Review join requests below. Each row is one subscription awaiting approval. Use bulk actions or approve individually.</p>
                 <div class="cop-pending-actions">
+                    @can('moderate_cop_participants')
                     <button type="button" class="btn btn-success btn-sm" id="bulkApprovePending" disabled>
                         <i class="fa fa-check mr-1"></i> Approve selected
                     </button>
                     <button type="button" class="btn btn-outline-danger btn-sm" id="bulkRejectPending" disabled>
                         <i class="fa fa-times mr-1"></i> Reject selected
                     </button>
+                    @endcan
                 </div>
                 <p class="kh-table-mobile-hint"><i class="fa fa-mobile-alt mr-1"></i> Rows are shown as cards on small screens.</p>
                 <div class="publication-table-wrap kh-table-mobile-scroll">
@@ -314,9 +316,11 @@
                         <thead>
                             <tr>
                                 <th class="part-col-select" data-mobile-label="Select">
+                                    @can('moderate_cop_participants')
                                     <span class="cop-pending-checkbox-wrap">
                                         <input type="checkbox" id="pendingSelectAll" class="cop-pending-checkbox" aria-label="Select all pending">
                                     </span>
+                                    @endcan
                                 </th>
                                 <th class="part-col-index">#</th>
                                 <th class="part-col-name">Applicant</th>

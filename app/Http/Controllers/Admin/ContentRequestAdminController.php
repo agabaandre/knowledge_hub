@@ -113,7 +113,7 @@ class ContentRequestAdminController extends Controller
             $data[] = [
                 'index' => $index++,
                 'subject' => '<strong>'.e($row->subject).'</strong>',
-                'description' => '<div style="max-height:60px;overflow:hidden;">'.e(Str::limit(strip_tags($row->description), 100)).'</div>',
+                'description' => $this->contentRequestDescriptionCell($row->description),
                 'country' => e($row->country->name ?? 'N/A'),
                 'email' => e($row->email ?? 'N/A'),
                 'status' => $statusHtml,
@@ -156,21 +156,32 @@ class ContentRequestAdminController extends Controller
         return $html;
     }
 
+    private function contentRequestDescriptionCell(?string $description): string
+    {
+        $safe = sanitize_rich_text_for_display($description ?? '');
+        if ($safe === '') {
+            return '<span class="text-muted">—</span>';
+        }
+
+        return '<div class="cr-description-cell">'.$safe.'</div>';
+    }
+
     private function contentRequestActionsHtml(ContentRequest $request, bool $canManage): string
     {
-        $html = '<div class="btn-group btn-group-sm flex-wrap" role="group" style="gap:2px;">';
+        $descriptionB64 = base64_encode(sanitize_rich_text_for_display($request->description ?? ''));
+        $html = '<div class="cr-actions-inline">';
 
         if (!$request->isProcessed()) {
-            $html .= '<button type="button" class="btn btn-success btn-sm process-request-btn" data-id="'.$request->id.'" data-subject="'.e($request->subject).'" data-description="'.e(strip_tags($request->description)).'" title="Process Request"><i class="fa fa-check mr-1"></i>Process</button>';
+            $html .= '<button type="button" class="btn btn-success btn-sm process-request-btn" data-id="'.$request->id.'" data-subject="'.e($request->subject).'" data-description-b64="'.e($descriptionB64).'" title="Process Request"><i class="fa fa-check"></i><span class="d-none d-xl-inline ml-1">Process</span></button>';
         } else {
-            $html .= '<button type="button" class="btn btn-info btn-sm view-processed-btn" data-id="'.$request->id.'" data-subject="'.e($request->subject).'" data-links="'.e($request->content_links ?? '').'" data-comments="'.e($request->admin_comments ?? '').'" data-processed-by="'.e($request->processedBy->name ?? 'Unknown').'" data-processed-at="'.e($request->processed_at ? $request->processed_at->format('M d, Y H:i') : '').'" data-process-method="'.e($request->processingMethodLabel()).'" title="View Processed Details"><i class="fa fa-eye mr-1"></i>View</button>';
+            $html .= '<button type="button" class="btn btn-info btn-sm view-processed-btn" data-id="'.$request->id.'" data-subject="'.e($request->subject).'" data-links="'.e($request->content_links ?? '').'" data-comments="'.e($request->admin_comments ?? '').'" data-processed-by="'.e($request->processedBy->name ?? 'Unknown').'" data-processed-at="'.e($request->processed_at ? $request->processed_at->format('M d, Y H:i') : '').'" data-process-method="'.e($request->processingMethodLabel()).'" title="View Processed Details"><i class="fa fa-eye"></i><span class="d-none d-xl-inline ml-1">View</span></button>';
         }
 
         if ($canManage) {
             if (!$request->isReferred()) {
-                $html .= '<button type="button" class="btn btn-primary btn-sm refer-request-btn" data-id="'.$request->id.'" data-subject="'.e($request->subject).'" title="Refer to user or community"><i class="fa fa-share mr-1"></i>Refer</button>';
+                $html .= '<button type="button" class="btn btn-primary btn-sm refer-request-btn" data-id="'.$request->id.'" data-subject="'.e($request->subject).'" title="Refer to user or community"><i class="fa fa-share"></i><span class="d-none d-xl-inline ml-1">Refer</span></button>';
             } else {
-                $html .= '<a href="'.e($request->discussionUrl()).'" class="btn btn-secondary btn-sm" title="Open discussion"><i class="fa fa-comments mr-1"></i>Discuss</a>';
+                $html .= '<a href="'.e($request->discussionUrl()).'" class="btn btn-secondary btn-sm" title="Open discussion"><i class="fa fa-comments"></i><span class="d-none d-xl-inline ml-1">Discuss</span></a>';
                 if ($request->trackUrl() !== '') {
                     $html .= '<button type="button" class="btn btn-outline-secondary btn-sm copy-track-btn" data-url="'.e($request->trackUrl()).'" title="Copy requester tracking link"><i class="fa fa-link"></i></button>';
                 }
@@ -178,7 +189,7 @@ class ContentRequestAdminController extends Controller
         }
 
         $html .= '<a href="'.route('admin.content-requests.edit', $request->id).'" class="btn btn-warning btn-sm" title="Edit"><i class="fa fa-edit"></i></a>';
-        $html .= '<form action="'.route('admin.content-requests.destroy', $request->id).'" method="POST" style="display:inline;" onsubmit="return confirm(\'Are you sure you want to delete this content request?\');">'
+        $html .= '<form action="'.route('admin.content-requests.destroy', $request->id).'" method="POST" class="cr-actions-inline__form" onsubmit="return confirm(\'Are you sure you want to delete this content request?\');">'
             .csrf_field().method_field('DELETE')
             .'<button type="submit" class="btn btn-danger btn-sm" title="Delete"><i class="fa fa-trash"></i></button></form>';
         $html .= '</div>';

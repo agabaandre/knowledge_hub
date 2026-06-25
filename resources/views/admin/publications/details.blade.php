@@ -95,17 +95,21 @@
                         <i class="fa fa-external-link-alt mr-1"></i>Preview Public
                     </a>
                     {{-- External link moved to Resources & Attachments card below --}}
+                    @can('moderate_publication')
                     @if ($publication->is_approved == 0)
                         <a href="#approval-modal" data-toggle="modal" class="btn btn-success btn-sm ml-2"><i class="fa fa-check-circle mr-1"></i>{{ $publication->is_rejected == 0 ? 'Approve' : 'Reconsider' }}</a>
                     @endif
                     @if (($publication->is_rejected == 0 && $publication->is_approved == 1) || ($publication->is_rejected == 0 && $publication->is_approved == 0))
                         <a href="#reject-modal" data-toggle="modal" class="btn btn-danger btn-sm ml-2"><i class="fa fa-times-circle mr-1"></i>{{ $publication->is_approved == 1 ? 'Recall' : 'Reject' }}</a>
                     @endif
+                    @endcan
                 </div>
             </div>
         </div>
+        @can('moderate_publication')
         @include('admin.publications.partials.approval-modal', [ 'action' => url('admin/publications/approval'), 'record' => $publication ])
         @include('admin.publications.partials.reject-modal', [ 'action' => url('admin/publications/approval'), 'record' => $publication ])
+        @endcan
     </div>
     <!-- ======================= Publication Info ======================== -->
 

@@ -38,6 +38,15 @@ Central index for operators, administrators, and developers. Start with [install
 | [deployment/STORAGE.md](deployment/STORAGE.md) | Ops / admin | Host paths, cloud drivers, SQL backups, migration, file manager, live metrics |
 | [deployment/PERMISSIONS.md](deployment/PERMISSIONS.md) | Ops | `fix-storage-permissions.sh`, ownership |
 
+### Architecture & design
+
+| Document | Audience | Description |
+|----------|----------|-------------|
+| [architecture/KH_Portal_Architecture.md](architecture/KH_Portal_Architecture.md) | All | Three-tier architecture: portal, admin, API, AI, storage, federation |
+| [architecture/KH_Knowledge_Flow.md](architecture/KH_Knowledge_Flow.md) | All | Knowledge lifecycle from onboarding through impact |
+| [../KH_Portal_Architecture_Structure.png](../KH_Portal_Architecture_Structure.png) | All | Architecture diagram (PNG) |
+| [../Knowledge Flow structure.png](../Knowledge%20Flow%20structure.png) | All | Knowledge flow diagram (PNG) |
+
 ### Features & modules
 
 | Document | Audience | Description |
@@ -47,6 +56,12 @@ Central index for operators, administrators, and developers. Start with [install
 | [features/CONTENT_REQUEST_REFERRALS.md](features/CONTENT_REQUEST_REFERRALS.md) | Admin, dev | Content request referrals |
 | [features/FORUM_ATTACHMENTS_PDF.md](features/FORUM_ATTACHMENTS_PDF.md) | Dev / ops | Forum Office → PDF conversion |
 | [features/FEDERATION.md](features/FEDERATION.md) | Admin, dev | Federated hubs, central metadata/branding sync, federation API |
+
+### Security
+
+| Document | Audience | Description |
+|----------|----------|-------------|
+| [security/RECORDS_SEARCH_SECURITY_TESTING.md](security/RECORDS_SEARCH_SECURITY_TESTING.md) | Dev, ops | Records search SQL-injection probes and production smoke results |
 
 ### Project root
 

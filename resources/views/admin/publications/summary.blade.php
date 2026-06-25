@@ -40,7 +40,7 @@
 
                             <div class="jbl_button mb-2">
 
-
+                                @can('moderate_publication')
                                 @if ($summary->is_approved == 0)
                                     <div class="row col-12 d-flex">
                                         @if ($summary->is_rejected == 1)
@@ -79,6 +79,7 @@
                                     'record' => $summary,
                                     'is_summary' => 1,
                                 ])
+                                @endcan
                             </div>
                         </div>
                     </div>

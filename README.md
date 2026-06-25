@@ -1,19 +1,41 @@
 
 # Africa CDC Knowledge Hub
 
-Web platform for health knowledge management: publications, forums, communities of practice, KPI indicators, and admin tooling.
+Web platform for health knowledge management: publications, forums, communities of practice, KPI indicators, federation, AI-assisted search, and institution admin tooling.
 
 **Full documentation:** [docs/README.md](docs/README.md)
+
+---
+
+## System overview
+
+| Layer | Channels |
+|-------|----------|
+| **Public portal** | Records search, publications, forums, CoP, events, quiz, publish wizard |
+| **Admin portal** | Dashboards, KPIs, metrics, target-audience insights, moderation, configure, federation |
+| **Mobile & API** | REST API (Passport OAuth2), iOS/Android clients, federation API |
+
+**Architecture diagrams** (project root):
+
+| Diagram | Description |
+|---------|-------------|
+| [KH_Portal_Architecture_Structure.png](KH_Portal_Architecture_Structure.png) | Three-tier system architecture (presentation · application · data) |
+| [Knowledge Flow structure.png](Knowledge%20Flow%20structure.png) | Knowledge lifecycle: onboarding → availability → accessibility → usability → impact |
+
+Detailed specs: [docs/architecture/KH_Portal_Architecture.md](docs/architecture/KH_Portal_Architecture.md) · [docs/architecture/KH_Knowledge_Flow.md](docs/architecture/KH_Knowledge_Flow.md)
 
 ### Recent features (June 2026)
 
 | Area | Highlights |
 |------|------------|
-| **Community detail** | Tabbed activity (Wall · Publications · Forums · Processed requests), React-powered tab switching without page reload, collapsible publication attachments, forum-style publication cards |
-| **Contributors** | Poster organisation from account profile (not publication metadata) on community cards and author profile pages |
-| **Admin CoP** | Communities DataTables fix, region→country linking on create/edit |
+| **Khub AI** | Multi-PDF ChatPDF support; per-document Q&A; merged answers for selected sources |
+| **Moderation** | Permission-gated approve/reject for publications, forums, CoP participants; pending badge on Participants menu; optional auto-approve publications (Admin → Configure) |
+| **Publications** | Office→PDF on upload (admin toggle); file-type badges on search cards; publication card author/date layout |
+| **Admin configure** | Reorganized tabs, 3-column grids, color pickers, social login tab fix |
+| **Community detail** | Tabbed activity (Wall · Publications · Forums · Processed requests), React tab switching, collapsible attachments |
+| **Security** | Records search SQL-injection tests documented — [security guide](docs/security/RECORDS_SEARCH_SECURITY_TESTING.md) |
 
-Details: [docs/features/FEATURE_ENHANCEMENTS.md](docs/features/FEATURE_ENHANCEMENTS.md#frontend--communities-of-practice-detail)
+Details: [docs/features/FEATURE_ENHANCEMENTS.md](docs/features/FEATURE_ENHANCEMENTS.md)
 
 ---
 
@@ -73,17 +95,22 @@ Details: [docs/installation/WEB_INSTALLER.md](docs/installation/WEB_INSTALLER.md
 | Section | Index |
 |---------|--------|
 | **All docs** | [docs/README.md](docs/README.md) |
+| **Architecture** | [docs/architecture/](docs/architecture/KH_Portal_Architecture.md) |
 | Installation | [docs/installation/](docs/installation/README.md) |
 | Deployment & storage | [docs/deployment/](docs/deployment/README.md) |
 | Features | [docs/features/](docs/features/FEATURE_ENHANCEMENTS.md) |
 
 | Topic | Document |
 |-------|----------|
+| System architecture (3-tier) | [docs/architecture/KH_Portal_Architecture.md](docs/architecture/KH_Portal_Architecture.md) |
+| Knowledge flow (lifecycle) | [docs/architecture/KH_Knowledge_Flow.md](docs/architecture/KH_Knowledge_Flow.md) |
+| Federated hubs (continental ↔ country) | [docs/features/FEDERATION.md](docs/features/FEDERATION.md) |
 | File storage, cloud drivers, SQL backups | [docs/deployment/STORAGE.md](docs/deployment/STORAGE.md) |
 | Docker, volumes, queue, Meilisearch | [docs/deployment/DOCKER.md](docs/deployment/DOCKER.md) |
 | Permissions script | [docs/deployment/PERMISSIONS.md](docs/deployment/PERMISSIONS.md) |
 | KPI / OWID indicators | [docs/features/KPI_INDICATORS_OWID.md](docs/features/KPI_INDICATORS_OWID.md) |
 | Forum Office → PDF | [docs/features/FORUM_ATTACHMENTS_PDF.md](docs/features/FORUM_ATTACHMENTS_PDF.md) |
+| Records search security testing | [docs/security/RECORDS_SEARCH_SECURITY_TESTING.md](docs/security/RECORDS_SEARCH_SECURITY_TESTING.md) |
 | Community detail (tabs, React, publications) | [docs/features/FEATURE_ENHANCEMENTS.md](docs/features/FEATURE_ENHANCEMENTS.md#frontend--communities-of-practice-detail) |
 
 ---
@@ -93,12 +120,13 @@ Details: [docs/installation/WEB_INSTALLER.md](docs/installation/WEB_INSTALLER.md
 | Component | Version / notes |
 |-----------|-----------------|
 | PHP | 8.0+ (extensions checked at `/install`) |
-| Database | MySQL or MariaDB |
+| Database | **MySQL**, **MariaDB**, or **PostgreSQL** (`DB_CONNECTION=mysql` or `pgsql`) |
 | Web server | Apache or Nginx with URL rewriting |
 | Composer | PHP dependencies |
 | Node.js | 16.x+ (front-end assets) |
 | Redis | Optional; recommended for cache, sessions, queues |
-| LibreOffice | Recommended for forum attachment PDF conversion |
+| Meilisearch | Optional; recommended for full-text search (Laravel Scout) |
+| LibreOffice | Recommended for Office→PDF conversion (forums & publications) |
 | Host data path | `/var/khubdata` (Linux), `C:\khubdata` (Windows) — outside app tree |
 
 Manual LAMP setup steps: [docs/installation/README.md](docs/installation/README.md#before-you-start)
@@ -112,10 +140,14 @@ APP_URL=https://your-hub.example
 APP_INSTALLED=false
 
 DB_CONNECTION=mysql
+# DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
 DB_DATABASE=knowledge_hub
 DB_USERNAME=root
 DB_PASSWORD=
+
+# Object storage: local/NFS hub-media, AWS S3, or Google Cloud Storage
+# FILESYSTEM_DRIVER=local
 
 # Persistent uploads & SQL backups (outside container; {site-id} from APP_URL)
 HUB_SITE_ID=
@@ -159,6 +191,16 @@ Forum comment uploads (Word, Excel, PowerPoint, etc.) are converted to PDF when 
 | Writable upload path | `hub_storage_path('uploads/forum')` — typically under `/var/khubdata/files` |
 
 Full guide: [docs/features/FORUM_ATTACHMENTS_PDF.md](docs/features/FORUM_ATTACHMENTS_PDF.md)
+
+---
+
+## AI & integrations
+
+Configurable AI providers (Admin → Learning / AI config): OpenAI, ChatPDF, Gemini, DeepSeek, Serper web search, and custom endpoints (e.g. **LLaMA** on-prem). Features include Khub AI PDF chat, forum summarization, AI search, and translation.
+
+External integrations: Microsoft / Google / LinkedIn OAuth, SMTP / Exchange email, Firebase push (mobile), federation API for peer hubs, RSS ingestion.
+
+See [docs/architecture/KH_Portal_Architecture.md](docs/architecture/KH_Portal_Architecture.md) for the full integration map.
 
 ---
 

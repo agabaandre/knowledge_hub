@@ -26,6 +26,15 @@
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
                 <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="auto_approve_publications" name="auto_approve_publications" value="1" @if($settings->auto_approve_publications ?? 0) checked @endif>
+                    <label class="form-check-label" for="auto_approve_publications">Auto-approve publications</label>
+                </div>
+                <small class="info-text">When enabled, admin and configured roles publish without moderation.</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group settings-field--compact mb-0">
+                <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="enable_ai_chat_prune" name="enable_ai_chat_prune" value="1" @if($settings->enable_ai_chat_prune ?? 1) checked @endif>
                     <label class="form-check-label" for="enable_ai_chat_prune">Scheduled AI chat cleanup</label>
                 </div>

@@ -10,6 +10,7 @@ use App\Models\ContentRequest;
 use App\Models\Forum;
 use App\Models\ForumComment;
 use App\Services\ChatGPTService;
+use App\Support\ContentModeration;
 
 class ForumsAdminController extends Controller
 {
@@ -125,6 +126,7 @@ class ForumsAdminController extends Controller
 
 
     public function approve(Request $request){
+        ContentModeration::ensureCanModerateForums();
         $this->forumsRepo->approve($request->id);
         return back();
     }
@@ -155,6 +157,8 @@ class ForumsAdminController extends Controller
 
     public function reject(Request $request)
     {
+        ContentModeration::ensureCanModerateForums();
+
         $validated = $request->validate([
             'id' => 'required|integer',
             'rejected_reason' => 'required|string|min:10|max:5000',

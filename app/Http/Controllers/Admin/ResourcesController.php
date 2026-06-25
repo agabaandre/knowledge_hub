@@ -8,6 +8,7 @@ use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
 use App\Http\Controllers\Controller;
 use App\Support\PublicationSubmissionValidation;
+use App\Support\ContentModeration;
 use Illuminate\Validation\ValidationException;
 
 class ResourcesController extends Controller
@@ -133,6 +134,7 @@ class ResourcesController extends Controller
     }
 
     public function approval(Request $request){
+        ContentModeration::ensureCanModeratePublications();
 
         $saved   = $this->publicationsRepo->change_approval_status($request);
 
@@ -150,6 +152,8 @@ class ResourcesController extends Controller
      */
     public function bulkApproval(Request $request)
     {
+        ContentModeration::ensureCanModeratePublications();
+
         $ids = $request->input('publication_ids', []);
         $action = $request->input('action');
         $reason = $request->input('rejected_reason', '');
@@ -187,6 +191,7 @@ class ResourcesController extends Controller
     }
 
     public function summary_approval(Request $request){
+        ContentModeration::ensureCanModeratePublications();
 
         $saved   = $this->publicationsRepo->change_approval_status($request);
 

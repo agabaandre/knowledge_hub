@@ -83,6 +83,7 @@
                             </button>
                         </div>
                         @if($pendingCount > 0)
+                        @can('moderate_cop_participants')
                         <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
                             <span class="text-muted small">Select participants to approve or reject:</span>
                             <button type="button" class="btn btn-success btn-sm" id="bulk-approve-btn" disabled>
@@ -92,6 +93,7 @@
                                 <i class="fa fa-times mr-1"></i>Reject selected
                             </button>
                         </div>
+                        @endcan
                         @endif
                         <div class="row mb-3">
                             <div class="col-lg-6">
@@ -137,7 +139,7 @@
                     <thead>
                         <tr>
                                     <th style="width:42px;" class="text-center align-middle">
-                                        @if($pendingCount > 0)
+                                        @if($pendingCount > 0 && auth()->user()?->can('moderate_cop_participants'))
                                         <input type="checkbox" id="select-all-pending" class="form-check-input" title="Select all pending on this page" aria-label="Select all pending">
                                         @else
                                         <span class="text-muted">—</span>
@@ -157,7 +159,7 @@
                         @foreach ($membership as $member)
                             <tr class="{{ $member->is_approved == 0 ? 'member-row-pending' : '' }}" data-member-id="{{ $member->id }}">
                                         <td class="text-center align-middle">
-                                            @if ($member->is_approved == 0)
+                                            @if ($member->is_approved == 0 && auth()->user()?->can('moderate_cop_participants'))
                                                 <input type="checkbox" class="form-check-input member-pending-cb" value="{{ $member->id }}" data-member-id="{{ $member->id }}" aria-label="Select member">
                                             @else
                                                 <span class="text-muted">—</span>
@@ -214,13 +216,19 @@
                                                 @else
                                                     <button type="button" class="btn btn-outline-success btn-sm mr-1 js-member-action" data-member-id="{{ $member->id }}" data-action="activate"><i class="fa fa-play mr-1"></i>Mark active</button>
                                                 @endif
+                                                @can('moderate_cop_participants')
                                                 <button type="button" class="btn btn-outline-danger btn-sm js-member-action" data-member-id="{{ $member->id }}" data-action="reject"><i class="fa fa-times mr-1"></i>Remove</button>
+                                                @endcan
                                             @elseif ($member->is_approved == 2)
+                                                @can('moderate_cop_participants')
                                                 <button type="button" class="btn btn-outline-success btn-sm mr-1 js-member-action" data-member-id="{{ $member->id }}" data-action="approve"><i class="fa fa-undo mr-1"></i>Reconsider</button>
+                                                @endcan
                                                 <button type="button" class="btn btn-outline-danger btn-sm js-member-action" data-member-id="{{ $member->id }}" data-action="delete" title="Permanently remove this rejected request"><i class="fa fa-trash mr-1"></i>Delete</button>
                                             @else
+                                                @can('moderate_cop_participants')
                                                 <button type="button" class="btn btn-outline-success btn-sm mr-1 js-member-action" data-member-id="{{ $member->id }}" data-action="approve"><i class="fa fa-check mr-1"></i>Approve</button>
                                                 <button type="button" class="btn btn-outline-danger btn-sm js-member-action" data-member-id="{{ $member->id }}" data-action="reject"><i class="fa fa-times mr-1"></i>Reject</button>
+                                                @endcan
                                             @endif
                                         </td>
                                     </tr>

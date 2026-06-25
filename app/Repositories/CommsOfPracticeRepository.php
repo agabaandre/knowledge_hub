@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use App\Services\OfficeDocumentToPdfService;
 use App\Support\SeoSlugger;
+use App\Support\ContentModeration;
 
 class CommsOfPracticeRepository{
 
@@ -1988,18 +1989,23 @@ class CommsOfPracticeRepository{
 
         $data = [];
         $index = $start + 1;
+        $canModerateParticipants = ContentModeration::canModerateCopParticipants();
         foreach ($rows as $row) {
             $membershipId = (int) $row->membership_id;
             $communityId = (int) $row->community_of_practice_id;
             $requested = $row->requested_at ? Carbon::parse($row->requested_at)->format('M j, Y') : '—';
-            $actions = '<div class="d-flex flex-wrap gap-1 justify-content-center">'
-                .'<button type="button" class="btn btn-success btn-sm js-pending-approve" data-member-id="'.$membershipId.'" data-community-id="'.$communityId.'" title="Approve"><i class="fa fa-check"></i></button>'
-                .'<button type="button" class="btn btn-outline-danger btn-sm js-pending-reject" data-member-id="'.$membershipId.'" data-community-id="'.$communityId.'" title="Reject"><i class="fa fa-times"></i></button>'
-                .'<a href="'.e(route('admin.commsofpractice.details', $communityId)).'" class="btn btn-outline-secondary btn-sm" title="View community"><i class="fa fa-external-link-alt"></i></a>'
+            $actions = '<div class="d-flex flex-wrap gap-1 justify-content-center">';
+            if ($canModerateParticipants) {
+                $actions .= '<button type="button" class="btn btn-success btn-sm js-pending-approve" data-member-id="'.$membershipId.'" data-community-id="'.$communityId.'" title="Approve"><i class="fa fa-check"></i></button>'
+                    .'<button type="button" class="btn btn-outline-danger btn-sm js-pending-reject" data-member-id="'.$membershipId.'" data-community-id="'.$communityId.'" title="Reject"><i class="fa fa-times"></i></button>';
+            }
+            $actions .= '<a href="'.e(route('admin.commsofpractice.details', $communityId)).'" class="btn btn-outline-secondary btn-sm" title="View community"><i class="fa fa-external-link-alt"></i></a>'
                 .'</div>';
 
             $data[] = [
-                'select' => '<span class="cop-pending-checkbox-wrap"><input type="checkbox" class="cop-pending-checkbox js-pending-select" value="'.$membershipId.'" data-community-id="'.$communityId.'" aria-label="Select request"></span>',
+                'select' => $canModerateParticipants
+                    ? '<span class="cop-pending-checkbox-wrap"><input type="checkbox" class="cop-pending-checkbox js-pending-select" value="'.$membershipId.'" data-community-id="'.$communityId.'" aria-label="Select request"></span>'
+                    : '',
                 'index' => '<span class="text-muted">'.$index++.'</span>',
                 'name' => $cell($row->name),
                 'contact' => $contactCell($row->email ?? null, $row->phone_number ?? null),

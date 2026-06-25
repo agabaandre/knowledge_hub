@@ -64,12 +64,14 @@
                         <input type="hidden" name="rejected_reason" id="bulkRejectReasonHidden" value="">
 
                         <div class="mb-3 d-flex align-items-center flex-wrap" style="gap:8px;">
+                            @can('moderate_publication')
                             <button type="button" class="btn btn-sm btn-success" id="bulkApproveBtn" disabled>
                                 <i class="fa fa-check-circle mr-1"></i> Approve selected
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-danger" id="bulkRejectBtn" disabled>
                                 <i class="fa fa-times-circle mr-1"></i> Reject selected
                             </button>
+                            @endcan
                             <span class="text-muted small" id="bulkSelectionCount"></span>
                         </div>
 
@@ -77,7 +79,7 @@
                             <table id="publicationTable" class="table table-striped table-bordered table-hover w-100">
                                 <thead>
                                     <tr>
-                                        <th width="40"><input type="checkbox" id="selectAllPending"></th>
+                                        <th width="40">@can('moderate_publication')<input type="checkbox" id="selectAllPending">@endcan</th>
                                         <th width="60">#</th>
                                         <th>Title</th>
                                         <th>Description</th>

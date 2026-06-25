@@ -186,12 +186,14 @@
                         $statusText  = $forum->is_approved ? 'Approved' : ($forum->is_rejected ? 'Rejected' : 'Pending');
                     @endphp
                     <span class="af-badge {{ $statusBadge }}">{{ $statusText }}</span>
+                    @can('moderate_forum')
                     @if($forum->is_approved == 0)
                         <a href="#approval-modal" data-toggle="modal" class="btn btn-success btn-sm"><i class="fa fa-check-circle mr-1"></i>{{ ($forum->is_rejected== 0)?'Approve':'Reconsider'}}</a>
                     @endif
                     @if(($forum->is_rejected== 0 && $forum->is_approved==1) || ($forum->is_rejected== 0 && $forum->is_approved==0))
                         <a href="#reject-modal" data-toggle="modal" class="btn btn-danger btn-sm"><i class="fa fa-times-circle mr-1"></i>{{ ($forum->is_approved==1)?'Recall':'Reject'}}</a>
                     @endif
+                    @endcan
                 </div>
             </div>
             @if($forumPendingModeration)

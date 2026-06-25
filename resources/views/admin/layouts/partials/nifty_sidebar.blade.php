@@ -89,7 +89,7 @@
             <a href="#" class="mininav-toggle nav-link collapsed" data-bs-toggle="collapse" data-bs-target="#nav-cops"><i class="fa fa-users fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.cops') }}</span>@if(isset($pending_cop_approvals_count) && $pending_cop_approvals_count > 0)<span class="badge bg-danger rounded-pill ms-1" style="background:#dc3545!important;color:#fff!important;">{{ $pending_cop_approvals_count }}</span>@endif</a>
             <ul class="mininav-content nav collapse" id="nav-cops">
                 <li class="nav-item"><a href="{{ url('admin/commsofpractice') }}" class="nav-link">{{ __('admin_nav.manage_cops') }}</a></li>
-                <li class="nav-item"><a href="{{ route('admin.commsofpractice.participants') }}" class="nav-link">{{ __('admin_nav.cop_participants_directory') }}</a></li>
+                <li class="nav-item"><a href="{{ route('admin.commsofpractice.participants') }}" class="nav-link">{{ __('admin_nav.cop_participants_directory') }}@if(isset($pending_cop_approvals_count) && $pending_cop_approvals_count > 0)<span class="badge bg-danger rounded-pill ms-1" style="background:#dc3545!important;color:#fff!important;">{{ $pending_cop_approvals_count }}</span>@endif</a></li>
             </ul>
         </li>
         @endcan

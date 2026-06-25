@@ -2,6 +2,33 @@
 
 @section('styles')
     @include('common.table')
+    <style>
+        #contentRequestsTable .cr-description-cell {
+            max-height: 140px;
+            overflow: auto;
+            font-size: 0.875rem;
+            line-height: 1.45;
+        }
+        #contentRequestsTable .cr-description-cell img {
+            max-width: 100%;
+            height: auto;
+        }
+        #contentRequestsTable .cr-actions-inline {
+            display: inline-flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        #contentRequestsTable .cr-actions-inline__form {
+            display: inline-flex;
+            margin: 0;
+        }
+        #contentRequestsTable td:last-child {
+            white-space: nowrap;
+            width: 1%;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -311,12 +338,12 @@ $(document).ready(function() {
         columns: [
             { data: 'index', orderable: false },
             { data: 'subject' },
-            { data: 'description', orderable: false },
+            { data: 'description', orderable: false, render: function (data) { return data; } },
             { data: 'country', orderable: false },
             { data: 'email' },
             { data: 'status', orderable: false },
             { data: 'date' },
-            { data: 'actions', orderable: false }
+            { data: 'actions', orderable: false, render: function (data) { return data; } }
         ]
     });
 
@@ -333,15 +360,22 @@ $(document).ready(function() {
     $(document).on('click', '.process-request-btn', function() {
         var requestId = $(this).data('id');
         var subject = $(this).data('subject');
-        var description = $(this).data('description');
-        
-        // Set form action
+        var descriptionB64 = $(this).attr('data-description-b64') || '';
+        var descriptionHtml = '';
+        if (descriptionB64) {
+            try {
+                descriptionHtml = atob(descriptionB64);
+            } catch (e) {
+                descriptionHtml = '';
+            }
+        }
+
         $('#processRequestForm').attr('action', '{{ url("admin/content-requests") }}/' + requestId + '/process');
-        
-        // Set request details
+
         $('#requestDetails').html(
-            '<strong>Subject:</strong> ' + subject + '<br>' +
-            '<strong>Description:</strong> ' + description
+            '<strong>Subject:</strong> ' + $('<div/>').text(subject).html() +
+            '<div class="mt-2"><strong>Description:</strong></div>' +
+            '<div class="cr-description-cell rich-text-content mt-1">' + descriptionHtml + '</div>'
         );
         
         // Clear form fields

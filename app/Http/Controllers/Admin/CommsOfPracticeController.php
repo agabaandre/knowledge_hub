@@ -12,6 +12,7 @@ use App\Models\CommunityOfPracticeMembers;
 use App\Models\UserBadge;
 use App\Models\User;
 use App\Services\UITableService;
+use App\Support\ContentModeration;
 use Illuminate\Support\Facades\DB;
 
 class CommsOfPracticeController extends Controller
@@ -435,6 +436,10 @@ class CommsOfPracticeController extends Controller
 
         if (empty($ids)) {
             return response()->json(['status' => 'error', 'message' => 'No members selected.'], 422);
+        }
+
+        if (in_array($request->action, ['approve', 'reject'], true)) {
+            ContentModeration::ensureCanModerateCopParticipants();
         }
 
         $communityId = (int) $request->get('community_id');

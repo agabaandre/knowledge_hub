@@ -177,6 +177,7 @@
                     </div>
                     <div class="row mt-auto">
                         <div class="col-md-12 text-right">
+                            @can('moderate_forum')
                             <div class="btn-group" role="group" aria-label="Actions">
                                 <a class="btn btn-sm btn-success" href="{{ route('forums.approve', $forum->id) }}">
                                     <i class="fas fa-check"></i>
@@ -187,6 +188,7 @@
                                     <span>Decline</span>
                                 </a>
                             </div>
+                            @endcan
                         </div>
                     </div>
                 </div>
