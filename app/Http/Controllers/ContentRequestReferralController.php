@@ -61,7 +61,7 @@ class ContentRequestReferralController extends Controller
             'content_request_id' => $contentRequest->id,
             'user_id' => $user->id,
             'posted_via_track' => false,
-            'body' => strip_tags($request->input('body')),
+            'body' => sanitize_rich_text_for_storage($request->input('body')),
         ]);
 
         ContentRequestReferralNotifier::notifyRequestorNewMessage($contentRequest, $message);

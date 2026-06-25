@@ -4,6 +4,8 @@
 @section('styles')
 <link rel="stylesheet" href="{{ asset('assets/plugins/highcharts/css/highcharts.css') }}"/>
 <style>
+@include('partials.publications.publication_feed_card_styles')
+@include('publications.partials.preview_modal_styles')
     .country-kpi-section {
         margin-top: 0;
     }
@@ -182,6 +184,12 @@
         background: #f8fafc;
         border-top: 1px solid #e2e8f0;
     }
+    .country-publications-section {
+        margin-top: 0.5rem;
+    }
+    .country-publications-section .publication-feed-card-scope {
+        max-width: 100%;
+    }
 </style>
 @endsection
 @section('content')      	
@@ -313,22 +321,23 @@
 
     @if(count($publications)>0)
     
-        <div class="row justify-content-center" data-aos="slide-down">
+        <div class="row justify-content-center country-publications-section" data-aos="slide-down">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                <div class="sec_title position-relative text-center mb-5 mt-3">
+                <div class="sec_title position-relative text-center mb-4 mt-3">
                     <h2 class="ft-bold">Published Resources</h2>
-                    <h4 class="ft-bold text-muted">Member State: {{$country->name}}</h4>
+                    <h4 class="ft-bold text-muted">Member State: {{ $country->name }}</h4>
                 </div>
+                @include('publications.partials.publications')
             </div>
-        </div>
-      
-        <div class="container">
-            @include('publications.partials.publications')
         </div>
     @endif
         
     </div>
 </section>
+
+@auth
+    @include('common.pdf-chat-modal')
+@endauth
 
 @if((!empty($kpi_groups) || count($kpis ?? []) > 0) && !empty($kpi_chart_payload))
     @include('countries.partials.kpi_drilldown_modal')
@@ -600,4 +609,10 @@
 </script>
 <script src="{{ asset('js/publications-listing-infinite.js') }}?v={{ @filemtime(public_path('js/publications-listing-infinite.js')) }}"></script>
 @endif
+@auth
+    @include('common.pdf-chat-js')
+@endauth
+@include('common.attachment_js')
+@include('publications.partials.preview_modal')
+@include('partials.publications.publication_feed_card_scripts')
 @endsection

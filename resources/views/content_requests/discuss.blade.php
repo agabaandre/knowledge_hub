@@ -1,6 +1,10 @@
 @php $hide_search = true; @endphp
 @extends('layouts.app')
 
+@section('styles')
+@include('content_requests.partials.message_thread_styles')
+@endsection
+
 @section('content')
 <div class="container py-4" style="max-width: 900px;">
     <h1 class="h4 mb-2">Content request discussion</h1>
