@@ -214,7 +214,14 @@
                     </a>
                     <ul class="sub-menu">
                         <li aria-haspopup="true"><a href="{{ url('admin/commsofpractice') }}" class="slide-item">Manage COPs</a></li>
-                        <li aria-haspopup="true"><a href="{{ route('admin.commsofpractice.participants') }}" class="slide-item">COP Participants Directory@if(isset($pending_cop_approvals_count) && $pending_cop_approvals_count > 0)<span class="badge badge-danger badge-pill ms-1" style="background:#dc3545!important;color:#fff!important;">{{ $pending_cop_approvals_count }}</span>@endif</a></li>
+                        <li aria-haspopup="true">
+                            <a href="{{ route('admin.commsofpractice.participants') }}" class="slide-item">
+                                COP Participants Directory
+                                @if(isset($pending_cop_approvals_count) && $pending_cop_approvals_count > 0)
+                                    <span class="badge badge-danger badge-pill ms-1" style="background:#dc3545!important;color:#fff!important;">{{ $pending_cop_approvals_count }}</span>
+                                @endif
+                            </a>
+                        </li>
                     </ul>
                 </li>
             @endcan
