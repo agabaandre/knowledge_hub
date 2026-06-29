@@ -17,11 +17,11 @@
 
 @include('layouts.partials.alerts')
 
-<div id="khub-page-content" class="khub-page-content">
+@include('layouts.partials.content_preloader')
+
+<div id="khub-page-content" class="khub-page-content position-relative">
 @yield('content')
 </div>
-
-@include('layouts.partials.content_preloader')
 
 
 

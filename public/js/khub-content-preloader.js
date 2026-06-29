@@ -1,60 +1,88 @@
 /**
- * Helpdesk-style content preloader — fixed band between header and footer.
+ * Helpdesk-style content preloader: centered in the viewport band between header and footer.
  */
 (function () {
-    var MIN_VISIBLE_MS = 1200;
+    var MIN_MS = 600;
+    var shownAt = Date.now();
+    var preloader = null;
 
-    function syncChromeOffsets() {
-        if (typeof window.khubSyncPreloaderChrome === 'function') {
-            window.khubSyncPreloaderChrome();
-        }
+    function findChrome() {
+        return {
+            header: document.getElementById('header')
+                || document.querySelector('header.header')
+                || document.querySelector('#main-wrapper .header')
+                || document.querySelector('.header'),
+            footer: document.querySelector('footer.footer')
+                || document.querySelector('footer')
+                || document.querySelector('.footer'),
+            secondary: document.getElementById('khub-secondary-nav')
+                || document.querySelector('.secondary-nav'),
+            search: document.querySelector('.custom-bg')
+        };
     }
 
-    function syncFooterOffset() {
-        var footer = document.querySelector('footer.footer, footer');
-        if (footer) {
-            document.documentElement.style.setProperty('--khub-chrome-footer', footer.offsetHeight + 'px');
-        }
-    }
-
-    function hidePreloader() {
-        var el = document.getElementById('khub-content-preloader');
-        if (!el || el.classList.contains('is-hidden')) {
+    function positionPreloader() {
+        if (!preloader) {
             return;
         }
 
-        syncChromeOffsets();
+        var chrome = findChrome();
+        var top = 0;
 
-        var shownAt = window.__khubPreloaderShownAt || Date.now();
-        var wait = Math.max(0, MIN_VISIBLE_MS - (Date.now() - shownAt));
+        if (chrome.header) {
+            top = Math.max(top, chrome.header.getBoundingClientRect().bottom);
+        }
+        if (chrome.secondary && chrome.secondary.offsetParent !== null) {
+            top = Math.max(top, chrome.secondary.getBoundingClientRect().bottom);
+        }
+        if (chrome.search && chrome.search.offsetParent !== null) {
+            var searchRect = chrome.search.getBoundingClientRect();
+            if (searchRect.height > 0) {
+                top = Math.max(top, searchRect.bottom);
+            }
+        }
 
+        var footerHeight = chrome.footer ? chrome.footer.offsetHeight : 72;
+
+        preloader.style.top = Math.max(0, Math.round(top)) + 'px';
+        preloader.style.bottom = Math.max(48, footerHeight) + 'px';
+    }
+
+    function hidePreloader() {
+        if (!preloader || preloader.classList.contains('khub-content-preloader--out')) {
+            return;
+        }
+
+        var wait = Math.max(0, MIN_MS - (Date.now() - shownAt));
         window.setTimeout(function () {
-            if (!el || el.classList.contains('is-hidden')) {
+            if (!preloader) {
                 return;
             }
-
-            el.classList.add('is-hidden');
-            el.setAttribute('aria-busy', 'false');
+            preloader.classList.add('khub-content-preloader--out');
+            preloader.setAttribute('aria-busy', 'false');
 
             var remove = function () {
-                if (el.parentNode) {
-                    el.parentNode.removeChild(el);
+                if (preloader && preloader.parentNode) {
+                    preloader.parentNode.removeChild(preloader);
                 }
+                preloader = null;
             };
 
-            el.addEventListener('transitionend', remove, { once: true });
+            preloader.addEventListener('transitionend', remove, { once: true });
             window.setTimeout(remove, 450);
         }, wait);
     }
 
     function init() {
-        var el = document.getElementById('khub-content-preloader');
-        if (!el) {
+        preloader = document.getElementById('khub-content-preloader');
+        if (!preloader) {
             return;
         }
 
-        syncFooterOffset();
-        window.addEventListener('resize', syncChromeOffsets, { passive: true });
+        shownAt = Date.now();
+        positionPreloader();
+        window.addEventListener('resize', positionPreloader);
+        window.addEventListener('scroll', positionPreloader, { passive: true });
 
         if (document.readyState === 'complete') {
             hidePreloader();

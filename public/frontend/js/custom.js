@@ -1,20 +1,16 @@
 $(function() {
     "use strict";
 
-	//Loader — helpdesk-style fade for any legacy .preloader nodes
+	//Loader
 	$(function preloaderLoad() {
-        var $loaders = $('.preloader');
+        var $loaders = $('.preloader, #khub-content-preloader, .khub-content-preloader');
         if ($loaders.length) {
-            $loaders.each(function () {
-                var $el = $(this);
-                window.setTimeout(function () {
-                    $el.addClass('is-hidden');
-                    window.setTimeout(function () { $el.remove(); }, 450);
-                }, 450);
+            $loaders.delay(200).fadeOut(300, function () {
+                $(this).addClass('khub-content-preloader--out').remove();
             });
         }
         $(".preloader_disabler").on('click', function() {
-            $("#preloader, .preloader").addClass('is-hidden').remove();
+            $("#preloader, #khub-content-preloader, .khub-content-preloader").addClass('khub-content-preloader--out').hide();
         });
     });
 	

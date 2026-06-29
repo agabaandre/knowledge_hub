@@ -19,11 +19,13 @@
     </div>
 @endif
 
+@include('layouts.partials.content_preloader')
+
 @if ($theme === 'theme1.')
-<div id="content" class="content front-bg khub-gt-content">
+<div id="content" class="content front-bg khub-gt-content position-relative">
 <div class="content__boxed"><div class="content__wrap">
 @else
-<div id="khub-page-content" class="khub-page-content">
+<div id="khub-page-content" class="khub-page-content position-relative">
 @endif
 @yield('content')
 @if ($theme === 'theme1.')
@@ -31,8 +33,6 @@
 @else
 </div>
 @endif
-
-@include('layouts.partials.content_preloader')
 
 @include('layouts.' . $theme . 'partials.footer')
 
