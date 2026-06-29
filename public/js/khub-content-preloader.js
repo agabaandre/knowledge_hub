@@ -1,57 +1,62 @@
 /**
- * Helpdesk-style content preloader: centered in the viewport band between header and footer.
+ * Content preloader — single fixed band below header/nav (helpdesk-style).
+ * Position is set once; no scroll/search remeasure (avoids jump while loading).
  */
 (function () {
     var MIN_MS = 600;
     var shownAt = Date.now();
     var preloader = null;
+    var positioned = false;
 
-    function findChrome() {
-        return {
-            header: document.getElementById('header')
-                || document.querySelector('header.header')
-                || document.querySelector('#main-wrapper .header')
-                || document.querySelector('.header'),
-            footer: document.querySelector('footer.footer')
-                || document.querySelector('footer')
-                || document.querySelector('.footer'),
-            secondary: document.getElementById('khub-secondary-nav')
-                || document.querySelector('.secondary-nav'),
-            search: document.querySelector('.custom-bg')
-        };
+    function findHeaderBottom() {
+        var top = 0;
+        var header = document.getElementById('header')
+            || document.querySelector('header.header')
+            || document.querySelector('.header');
+        var secondary = document.getElementById('khub-secondary-nav')
+            || document.querySelector('.secondary-nav');
+
+        if (header) {
+            top = Math.max(top, header.getBoundingClientRect().bottom);
+        }
+        if (secondary && secondary.offsetParent !== null) {
+            top = Math.max(top, secondary.getBoundingClientRect().bottom);
+        }
+
+        return Math.max(0, Math.round(top));
     }
 
-    function positionPreloader() {
-        if (!preloader) {
+    function findFooterHeight() {
+        var footer = document.querySelector('footer.footer') || document.querySelector('footer');
+        return footer ? Math.max(48, footer.offsetHeight) : 72;
+    }
+
+    function positionPreloader(force) {
+        if (!preloader || (positioned && !force)) {
             return;
         }
 
-        var chrome = findChrome();
-        var top = 0;
+        preloader.style.transition = 'none';
+        preloader.style.top = findHeaderBottom() + 'px';
+        preloader.style.bottom = findFooterHeight() + 'px';
 
-        if (chrome.header) {
-            top = Math.max(top, chrome.header.getBoundingClientRect().bottom);
-        }
-        if (chrome.secondary && chrome.secondary.offsetParent !== null) {
-            top = Math.max(top, chrome.secondary.getBoundingClientRect().bottom);
-        }
-        if (chrome.search && chrome.search.offsetParent !== null) {
-            var searchRect = chrome.search.getBoundingClientRect();
-            if (searchRect.height > 0) {
-                top = Math.max(top, searchRect.bottom);
-            }
-        }
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                if (preloader) {
+                    preloader.style.transition = '';
+                }
+            });
+        });
 
-        var footerHeight = chrome.footer ? chrome.footer.offsetHeight : 72;
-
-        preloader.style.top = Math.max(0, Math.round(top)) + 'px';
-        preloader.style.bottom = Math.max(48, footerHeight) + 'px';
+        positioned = true;
     }
 
     function hidePreloader() {
         if (!preloader || preloader.classList.contains('khub-content-preloader--out')) {
             return;
         }
+
+        positionPreloader(true);
 
         var wait = Math.max(0, MIN_MS - (Date.now() - shownAt));
         window.setTimeout(function () {
@@ -80,9 +85,13 @@
         }
 
         shownAt = Date.now();
-        positionPreloader();
-        window.addEventListener('resize', positionPreloader);
-        window.addEventListener('scroll', positionPreloader, { passive: true });
+        positionPreloader(true);
+
+        window.addEventListener('resize', function () {
+            if (preloader && !preloader.classList.contains('khub-content-preloader--out')) {
+                positionPreloader(true);
+            }
+        });
 
         if (document.readyState === 'complete') {
             hidePreloader();

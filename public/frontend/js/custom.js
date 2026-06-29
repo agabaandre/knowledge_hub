@@ -1,16 +1,15 @@
 $(function() {
     "use strict";
 
-	//Loader
+	//Loader — legacy .preloader gif only (khub-content-preloader handled by khub-content-preloader.js)
 	$(function preloaderLoad() {
-        var $loaders = $('.preloader, #khub-content-preloader, .khub-content-preloader');
-        if ($loaders.length) {
-            $loaders.delay(200).fadeOut(300, function () {
-                $(this).addClass('khub-content-preloader--out').remove();
+        if ($('.preloader').length) {
+            $('.preloader').delay(200).fadeOut(300, function () {
+                $(this).remove();
             });
         }
         $(".preloader_disabler").on('click', function() {
-            $("#preloader, #khub-content-preloader, .khub-content-preloader").addClass('khub-content-preloader--out').hide();
+            $("#preloader, .preloader").hide();
         });
     });
 	

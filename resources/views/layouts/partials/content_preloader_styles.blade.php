@@ -4,7 +4,8 @@
 @endphp
 <style>
     :root {
-        --khub-chrome-top: 5.5rem;
+        /* Fallback until inline script measures #header (theme1 ≈ 7rem with nav) */
+        --khub-chrome-top: 7.25rem;
         --khub-chrome-footer: 4.5rem;
         --khub-preloader-accent: {{ $primaryColor }};
         --khub-preloader-accent-dark: {{ $secondaryColor }};
@@ -30,8 +31,8 @@
         background: rgba(248, 249, 250, 0.97);
         backdrop-filter: blur(6px);
         -webkit-backdrop-filter: blur(6px);
-        transition: opacity 0.35s ease, visibility 0.35s ease;
         pointer-events: auto;
+        transition: opacity 0.35s ease, visibility 0.35s ease;
     }
 
     .khub-content-preloader.khub-content-preloader--out,
