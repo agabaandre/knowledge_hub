@@ -16,13 +16,13 @@
 
 @include('layouts.' . $theme . 'partials.alerts')
 
-@if ($theme === 'theme1.')
-<div id="content" class="content front-bg khub-gt-content position-relative">
 @include('layouts.partials.content_preloader')
+
+@if ($theme === 'theme1.')
+<div id="content" class="content front-bg khub-gt-content">
 <div class="content__boxed"><div class="content__wrap">
 @else
-<div id="khub-page-content" class="khub-page-content position-relative">
-@include('layouts.partials.content_preloader')
+<div id="khub-page-content" class="khub-page-content">
 @endif
 @yield('content')
 @if ($theme === 'theme1.')

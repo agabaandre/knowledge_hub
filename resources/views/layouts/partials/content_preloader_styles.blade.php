@@ -3,16 +3,24 @@
     $secondaryColor = settings()->secondary_color ?? '#0d7a3a';
 @endphp
 <style>
+    :root {
+        /* Fallbacks; JS sets exact values from header/footer/content top */
+        --khub-chrome-top: 96px;
+        --khub-chrome-footer: 4.5rem;
+    }
+
     .khub-page-content,
     #content.content.khub-gt-content {
-        position: relative;
         min-height: 12rem;
     }
 
     .khub-content-preloader {
-        position: absolute;
-        inset: 0;
-        z-index: 50;
+        position: fixed;
+        top: var(--khub-chrome-top);
+        right: 0;
+        bottom: var(--khub-chrome-footer);
+        left: 0;
+        z-index: 900;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -33,6 +41,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
         gap: 1.25rem;
         text-align: center;
         padding: 1.5rem;
@@ -42,13 +51,14 @@
         position: relative;
         width: 2.75rem;
         height: 2.75rem;
+        flex-shrink: 0;
     }
 
     .khub-content-preloader__ring {
         position: absolute;
         inset: 0;
         border-radius: 50%;
-        border: 3px solid color-mix(in srgb, {{ $primaryColor }} 14%, transparent);
+        border: 3px solid rgba(17, 154, 72, 0.14);
         border-top-color: {{ $primaryColor }};
         animation: khub-preloader-spin 0.72s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
     }
@@ -65,7 +75,7 @@
 
     .khub-content-preloader__label {
         margin: 0;
-        max-width: 16rem;
+        max-width: 18rem;
         font-family: inherit;
         font-size: 0.72rem;
         font-weight: 600;
@@ -80,12 +90,12 @@
     }
 
     [data-bs-theme="dark"] .khub-content-preloader__ring {
-        border-color: color-mix(in srgb, {{ $primaryColor }} 22%, transparent);
+        border-color: rgba(74, 222, 128, 0.16);
         border-top-color: {{ $primaryColor }};
     }
 
     [data-bs-theme="dark"] .khub-content-preloader__label {
-        color: color-mix(in srgb, {{ $primaryColor }} 85%, #fff);
+        color: {{ $primaryColor }};
     }
 
     @keyframes khub-preloader-spin {
@@ -101,18 +111,5 @@
             transform: scale(1);
             opacity: 1;
         }
-    }
-
-    /* Legacy gif preloader inside content shell */
-    #khub-page-content > .preloader,
-    #content.content > .preloader,
-    .khub-page-content > .preloader {
-        position: absolute;
-        inset: 0;
-        width: auto;
-        height: auto;
-        z-index: 50;
-        background: rgba(248, 249, 250, 0.97) !important;
-        backdrop-filter: blur(6px);
     }
 </style>

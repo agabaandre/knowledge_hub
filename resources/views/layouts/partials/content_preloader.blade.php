@@ -9,3 +9,4 @@
         <p class="khub-content-preloader__label">{{ $preloaderLabel }}</p>
     </div>
 </div>
+<script>window.__khubPreloaderShownAt = Date.now();</script>
