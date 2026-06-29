@@ -16,13 +16,7 @@
         <p class="khub-content-preloader__label">{{ $preloaderText }}</p>
     </div>
 </div>
-<script>
-window.KHUB_PRELOADER_CONFIG = {
-    enabled: true,
-    minMs: {{ $preloaderMinSeconds * 1000 }},
-    text: @json($preloaderText)
-};
-</script>
+<script>window.KHUB_PRELOADER_CONFIG={enabled:true,minMs:{{ $preloaderMinSeconds * 1000 }},text:@json($preloaderText)};</script>
 @else
-<script>window.KHUB_PRELOADER_CONFIG = { enabled: false, minMs: 0, text: 'Loading' };</script>
+<script>window.KHUB_PRELOADER_CONFIG={enabled:false,minMs:0,text:'Loading'};</script>
 @endif

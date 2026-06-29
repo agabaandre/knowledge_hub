@@ -3,29 +3,21 @@
 @endphp
 <style>
     :root {
-        --khub-chrome-top: 5.5rem;
-        --khub-chrome-footer: 4.5rem;
+        --khub-preloader-top: 5.5rem;
         --khub-preloader-accent: {{ $primaryColor }};
     }
 
-    .khub-page-content,
-    #content.content.khub-gt-content {
-        position: relative;
-        min-height: 12rem;
-    }
-
-    .khub-page-content.khub-content-loading,
-    #content.content.khub-content-loading {
-        min-height: calc(100vh - var(--khub-chrome-top) - var(--khub-chrome-footer));
+    body.khub-preloader-active {
+        overflow: hidden;
     }
 
     .khub-content-preloader {
         position: fixed;
-        top: var(--khub-chrome-top);
+        top: var(--khub-preloader-top);
         right: 0;
-        bottom: var(--khub-chrome-footer);
+        bottom: 0;
         left: 0;
-        z-index: 900;
+        z-index: 1010;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -34,6 +26,8 @@
         -webkit-backdrop-filter: blur(6px);
         transition: opacity 0.35s ease, visibility 0.35s ease;
         pointer-events: auto;
+        /* Lock visual center — never shifts when content below loads */
+        will-change: opacity;
     }
 
     .khub-content-preloader.is-hidden {
@@ -46,15 +40,18 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
         gap: 1.25rem;
         text-align: center;
         padding: 1rem;
+        flex-shrink: 0;
     }
 
     .khub-content-preloader__spinner {
         position: relative;
         width: 2.75rem;
         height: 2.75rem;
+        flex-shrink: 0;
     }
 
     .khub-content-preloader__ring {
@@ -84,6 +81,7 @@
         letter-spacing: 0.14em;
         text-transform: uppercase;
         color: var(--khub-preloader-accent);
+        max-width: 16rem;
     }
 
     @keyframes khub-preloader-spin {
@@ -103,11 +101,5 @@
 
     [data-bs-theme="dark"] .khub-content-preloader {
         background: rgba(15, 23, 42, 0.97);
-    }
-
-    @media (max-width: 991.98px) {
-        :root {
-            --khub-chrome-top: 4.25rem;
-        }
     }
 </style>

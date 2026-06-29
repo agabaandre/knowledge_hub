@@ -1,6 +1,5 @@
 /**
- * Content-area preloader (helpdesk-style): centered below header, above footer.
- * Respects admin min display time from window.KHUB_PRELOADER_CONFIG.
+ * Content-area preloader: fixed band below header, centered once (no shift on load).
  */
 (function () {
     var config = window.KHUB_PRELOADER_CONFIG || { enabled: true, minMs: 3000 };
@@ -10,23 +9,49 @@
 
     var shownAt = Date.now();
     var hideTimer = null;
+    var topLocked = false;
 
-    function measureChrome() {
-        var header = document.getElementById('header') || document.querySelector('.header, #main-wrapper > .header');
-        var secondary = document.getElementById('khub-secondary-nav') || document.querySelector('.secondary-nav');
-        var footer = document.querySelector('footer.footer, footer.skin-dark-footer, .footer.pt-5, footer');
-        var top = 0;
-
-        if (header) {
-            top += header.getBoundingClientRect().height;
-        }
-        if (secondary) {
-            top += secondary.getBoundingClientRect().height;
+    function chromeBottomPx() {
+        var content = document.getElementById('content') || document.getElementById('khub-page-content');
+        if (content) {
+            var contentTop = content.getBoundingClientRect().top;
+            if (contentTop > 0) {
+                return Math.ceil(contentTop);
+            }
         }
 
-        var footerHeight = footer ? footer.getBoundingClientRect().height : 72;
-        document.documentElement.style.setProperty('--khub-chrome-top', Math.round(top) + 'px');
-        document.documentElement.style.setProperty('--khub-chrome-footer', Math.round(footerHeight) + 'px');
+        var bottom = 0;
+        var selectors = [
+            '#header',
+            '.header',
+            '.custom-bg',
+            '#khub-secondary-nav',
+            '.secondary-nav',
+            '#root > .clearfix',
+            '.front-container > .clearfix'
+        ];
+
+        selectors.forEach(function (sel) {
+            document.querySelectorAll(sel).forEach(function (node) {
+                if (!node || !node.getBoundingClientRect) {
+                    return;
+                }
+                var rect = node.getBoundingClientRect();
+                if (rect.height > 0 && rect.bottom > bottom) {
+                    bottom = rect.bottom;
+                }
+            });
+        });
+
+        return Math.max(0, Math.ceil(bottom));
+    }
+
+    function lockPreloaderTopOnce() {
+        if (topLocked) {
+            return;
+        }
+        topLocked = true;
+        document.documentElement.style.setProperty('--khub-preloader-top', chromeBottomPx() + 'px');
     }
 
     function hidePreloader() {
@@ -37,11 +62,7 @@
 
         el.classList.add('is-hidden');
         el.setAttribute('aria-busy', 'false');
-
-        var shell = document.getElementById('khub-page-content') || document.getElementById('content');
-        if (shell) {
-            shell.classList.remove('khub-content-loading');
-        }
+        document.body.classList.remove('khub-preloader-active');
 
         window.setTimeout(function () {
             if (el && el.parentNode) {
@@ -63,24 +84,33 @@
         hideTimer = window.setTimeout(hidePreloader, wait);
     }
 
-    function onReady() {
-        measureChrome();
-        var shell = document.getElementById('khub-page-content') || document.getElementById('content');
-        if (shell) {
-            shell.classList.add('khub-content-loading');
-        }
-        window.addEventListener('resize', measureChrome);
+    function initPreloader() {
+        document.body.classList.add('khub-preloader-active');
+
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                lockPreloaderTopOnce();
+            });
+        });
+    }
+
+    function onDomReady() {
+        initPreloader();
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', onReady);
+        document.addEventListener('DOMContentLoaded', onDomReady);
     } else {
-        onReady();
+        onDomReady();
     }
 
     if (document.readyState === 'complete') {
+        lockPreloaderTopOnce();
         scheduleHide();
     } else {
-        window.addEventListener('load', scheduleHide);
+        window.addEventListener('load', function () {
+            lockPreloaderTopOnce();
+            scheduleHide();
+        });
     }
 })();
