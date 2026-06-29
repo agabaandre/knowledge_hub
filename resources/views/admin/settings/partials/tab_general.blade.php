@@ -72,4 +72,40 @@
         </label>
         <small class="info-text d-block">When enabled, links use readable slugs and legacy ID URLs redirect to the slug URL.</small>
     </div>
+
+    <div class="form-section-title mt-4">
+        <i class="fa fa-spinner"></i>
+        Page preloader
+    </div>
+
+    <div class="row settings-grid-row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="d-block">Enable preloader</label>
+                <input type="hidden" name="preloader_enabled" value="0">
+                <label class="mb-0">
+                    <input type="checkbox" name="preloader_enabled" value="1"
+                        {{ ($settings->preloader_enabled ?? true) ? 'checked' : '' }}>
+                    Show loading indicator while page content loads
+                </label>
+                <small class="info-text d-block">Header and footer stay visible; the spinner is centered in the main content area.</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Preloader text</label>
+                <input type="text" name="preloader_text" class="form-control" maxlength="120"
+                       value="{{ $settings->preloader_text ?? 'Loading' }}" placeholder="Loading">
+                <small class="info-text">Short label shown under the spinner (e.g. Loading, Please wait).</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Minimum display time (seconds)</label>
+                <input type="number" name="preloader_min_seconds" class="form-control" min="0" max="30" step="1"
+                       value="{{ (int) ($settings->preloader_min_seconds ?? 3) }}">
+                <small class="info-text">How long the preloader stays visible at minimum (0–30). Default: 3 seconds.</small>
+            </div>
+        </div>
+    </div>
 </div>

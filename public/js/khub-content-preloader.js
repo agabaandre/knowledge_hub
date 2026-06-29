@@ -1,108 +1,86 @@
 /**
- * Content preloader — single fixed band below header/nav (helpdesk-style).
- * Position is set once; no scroll/search remeasure (avoids jump while loading).
+ * Content-area preloader (helpdesk-style): centered below header, above footer.
+ * Respects admin min display time from window.KHUB_PRELOADER_CONFIG.
  */
 (function () {
-    var MIN_MS = 600;
-    var shownAt = Date.now();
-    var preloader = null;
-    var positioned = false;
+    var config = window.KHUB_PRELOADER_CONFIG || { enabled: true, minMs: 3000 };
+    if (!config.enabled) {
+        return;
+    }
 
-    function findHeaderBottom() {
+    var shownAt = Date.now();
+    var hideTimer = null;
+
+    function measureChrome() {
+        var header = document.getElementById('header') || document.querySelector('.header, #main-wrapper > .header');
+        var secondary = document.getElementById('khub-secondary-nav') || document.querySelector('.secondary-nav');
+        var footer = document.querySelector('footer.footer, footer.skin-dark-footer, .footer.pt-5, footer');
         var top = 0;
-        var header = document.getElementById('header')
-            || document.querySelector('header.header')
-            || document.querySelector('.header');
-        var secondary = document.getElementById('khub-secondary-nav')
-            || document.querySelector('.secondary-nav');
 
         if (header) {
-            top = Math.max(top, header.getBoundingClientRect().bottom);
+            top += header.getBoundingClientRect().height;
         }
-        if (secondary && secondary.offsetParent !== null) {
-            top = Math.max(top, secondary.getBoundingClientRect().bottom);
-        }
-
-        return Math.max(0, Math.round(top));
-    }
-
-    function findFooterHeight() {
-        var footer = document.querySelector('footer.footer') || document.querySelector('footer');
-        return footer ? Math.max(48, footer.offsetHeight) : 72;
-    }
-
-    function positionPreloader(force) {
-        if (!preloader || (positioned && !force)) {
-            return;
+        if (secondary) {
+            top += secondary.getBoundingClientRect().height;
         }
 
-        preloader.style.transition = 'none';
-        preloader.style.top = findHeaderBottom() + 'px';
-        preloader.style.bottom = findFooterHeight() + 'px';
-
-        requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-                if (preloader) {
-                    preloader.style.transition = '';
-                }
-            });
-        });
-
-        positioned = true;
+        var footerHeight = footer ? footer.getBoundingClientRect().height : 72;
+        document.documentElement.style.setProperty('--khub-chrome-top', Math.round(top) + 'px');
+        document.documentElement.style.setProperty('--khub-chrome-footer', Math.round(footerHeight) + 'px');
     }
 
     function hidePreloader() {
-        if (!preloader || preloader.classList.contains('khub-content-preloader--out')) {
+        var el = document.getElementById('khub-content-preloader');
+        if (!el || el.classList.contains('is-hidden')) {
             return;
         }
 
-        positionPreloader(true);
+        el.classList.add('is-hidden');
+        el.setAttribute('aria-busy', 'false');
 
-        var wait = Math.max(0, MIN_MS - (Date.now() - shownAt));
+        var shell = document.getElementById('khub-page-content') || document.getElementById('content');
+        if (shell) {
+            shell.classList.remove('khub-content-loading');
+        }
+
         window.setTimeout(function () {
-            if (!preloader) {
-                return;
+            if (el && el.parentNode) {
+                el.parentNode.removeChild(el);
             }
-            preloader.classList.add('khub-content-preloader--out');
-            preloader.setAttribute('aria-busy', 'false');
-
-            var remove = function () {
-                if (preloader && preloader.parentNode) {
-                    preloader.parentNode.removeChild(preloader);
-                }
-                preloader = null;
-            };
-
-            preloader.addEventListener('transitionend', remove, { once: true });
-            window.setTimeout(remove, 450);
-        }, wait);
+        }, 400);
     }
 
-    function init() {
-        preloader = document.getElementById('khub-content-preloader');
-        if (!preloader) {
-            return;
+    function scheduleHide() {
+        var minMs = parseInt(config.minMs, 10);
+        if (isNaN(minMs) || minMs < 0) {
+            minMs = 3000;
         }
+        var wait = Math.max(0, minMs - (Date.now() - shownAt));
 
-        shownAt = Date.now();
-        positionPreloader(true);
-
-        window.addEventListener('resize', function () {
-            if (preloader && !preloader.classList.contains('khub-content-preloader--out')) {
-                positionPreloader(true);
-            }
-        });
-
-        if (document.readyState === 'complete') {
-            hidePreloader();
-        } else {
-            window.addEventListener('load', hidePreloader);
+        if (hideTimer) {
+            clearTimeout(hideTimer);
         }
+        hideTimer = window.setTimeout(hidePreloader, wait);
+    }
+
+    function onReady() {
+        measureChrome();
+        var shell = document.getElementById('khub-page-content') || document.getElementById('content');
+        if (shell) {
+            shell.classList.add('khub-content-loading');
+        }
+        window.addEventListener('resize', measureChrome);
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', onReady);
     } else {
-        init();
+        onReady();
+    }
+
+    if (document.readyState === 'complete') {
+        scheduleHide();
+    } else {
+        window.addEventListener('load', scheduleHide);
     }
 })();
