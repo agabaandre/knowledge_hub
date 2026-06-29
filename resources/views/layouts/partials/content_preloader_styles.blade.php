@@ -27,7 +27,15 @@
         background: rgba(248, 249, 250, 0.97);
         backdrop-filter: blur(6px);
         -webkit-backdrop-filter: blur(6px);
+        opacity: 0;
+        visibility: hidden;
         transition: opacity 0.35s ease, visibility 0.35s ease;
+        pointer-events: none;
+    }
+
+    .khub-content-preloader.is-ready {
+        opacity: 1;
+        visibility: visible;
         pointer-events: auto;
     }
 

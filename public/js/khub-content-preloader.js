@@ -3,25 +3,17 @@
  */
 (function () {
     var MIN_VISIBLE_MS = 1200;
-    var shownAt = window.__khubPreloaderShownAt || Date.now();
-    window.__khubPreloaderShownAt = shownAt;
 
     function syncChromeOffsets() {
-        var content = document.getElementById('content') || document.getElementById('khub-page-content');
-        var footer = document.querySelector('footer.footer, footer');
-        var root = document.documentElement;
-
-        if (content) {
-            var top = content.getBoundingClientRect().top;
-            root.style.setProperty('--khub-chrome-top', Math.max(0, Math.round(top)) + 'px');
-        } else {
-            var header = document.getElementById('header') || document.getElementById('navigation') || document.querySelector('.header');
-            var topFallback = header ? header.getBoundingClientRect().bottom : 96;
-            root.style.setProperty('--khub-chrome-top', Math.max(0, Math.round(topFallback)) + 'px');
+        if (typeof window.khubSyncPreloaderChrome === 'function') {
+            window.khubSyncPreloaderChrome();
         }
+    }
 
+    function syncFooterOffset() {
+        var footer = document.querySelector('footer.footer, footer');
         if (footer) {
-            root.style.setProperty('--khub-chrome-footer', footer.offsetHeight + 'px');
+            document.documentElement.style.setProperty('--khub-chrome-footer', footer.offsetHeight + 'px');
         }
     }
 
@@ -33,7 +25,9 @@
 
         syncChromeOffsets();
 
+        var shownAt = window.__khubPreloaderShownAt || Date.now();
         var wait = Math.max(0, MIN_VISIBLE_MS - (Date.now() - shownAt));
+
         window.setTimeout(function () {
             if (!el || el.classList.contains('is-hidden')) {
                 return;
@@ -59,8 +53,7 @@
             return;
         }
 
-        syncChromeOffsets();
-        window.requestAnimationFrame(syncChromeOffsets);
+        syncFooterOffset();
         window.addEventListener('resize', syncChromeOffsets, { passive: true });
 
         if (document.readyState === 'complete') {

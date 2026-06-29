@@ -16,8 +16,6 @@
 
 @include('layouts.' . $theme . 'partials.alerts')
 
-@include('layouts.partials.content_preloader')
-
 @if ($theme === 'theme1.')
 <div id="content" class="content front-bg khub-gt-content">
 <div class="content__boxed"><div class="content__wrap">
@@ -30,6 +28,9 @@
 @else
 </div>
 @endif
+
+@include('layouts.partials.content_preloader')
+
 @yield('scripts')
 
 @auth
