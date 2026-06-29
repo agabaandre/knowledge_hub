@@ -74,6 +74,7 @@
 <script src="{{ asset('frontend/js/snackbar.min.js')}}"></script>
 <script src="{{ asset('frontend/js/jQuery.style.switcher.js')}}"></script>
 <script src="{{ asset('frontend/js/custom.js')}}"></script>
+<script src="{{ asset('js/khub-content-preloader.js') }}?v={{ @filemtime(public_path('js/khub-content-preloader.js')) }}"></script>
 <script src="{{ asset('assets/plugins/select2/js/select2.min.js')}}"></script>
 <script src="{{ asset('frontend/js/jquery-ui.js') }}"></script>
 <script src="{{ asset('frontend/js/aos/dist/aos.js')}}"></script>

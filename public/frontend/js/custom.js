@@ -1,13 +1,20 @@
 $(function() {
     "use strict";
 
-	//Loader	
+	//Loader — helpdesk-style fade for any legacy .preloader nodes
 	$(function preloaderLoad() {
-        if($('.preloader').length){
-            $('.preloader').delay(200).fadeOut(300);
+        var $loaders = $('.preloader');
+        if ($loaders.length) {
+            $loaders.each(function () {
+                var $el = $(this);
+                window.setTimeout(function () {
+                    $el.addClass('is-hidden');
+                    window.setTimeout(function () { $el.remove(); }, 450);
+                }, 450);
+            });
         }
         $(".preloader_disabler").on('click', function() {
-            $("#preloader").hide();
+            $("#preloader, .preloader").addClass('is-hidden').remove();
         });
     });
 	

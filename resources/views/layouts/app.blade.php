@@ -17,11 +17,18 @@
 @include('layouts.' . $theme . 'partials.alerts')
 
 @if ($theme === 'theme1.')
-<div id="content" class="content front-bg khub-gt-content"><div class="content__boxed"><div class="content__wrap">
+<div id="content" class="content front-bg khub-gt-content position-relative">
+@include('layouts.partials.content_preloader')
+<div class="content__boxed"><div class="content__wrap">
+@else
+<div id="khub-page-content" class="khub-page-content position-relative">
+@include('layouts.partials.content_preloader')
 @endif
 @yield('content')
 @if ($theme === 'theme1.')
 </div></div></div>
+@else
+</div>
 @endif
 @yield('scripts')
 

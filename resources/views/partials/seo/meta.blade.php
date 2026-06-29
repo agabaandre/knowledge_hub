@@ -106,6 +106,7 @@
 
 {{-- Sitemap Reference --}}
 <link rel="sitemap" type="application/xml" href="{{ url('sitemap.xml') }}">
+<link rel="llms-txt" type="text/markdown" href="{{ url('llms.txt') }}" title="LLM site map">
 
 {{-- Preconnect to external domains for performance --}}
 <link rel="preconnect" href="https://fonts.googleapis.com">

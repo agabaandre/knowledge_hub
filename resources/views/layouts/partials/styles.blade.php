@@ -20,5 +20,4 @@
 </head>
 
 <body onload="">
-<div class="preloader"></div>
 <div id="main-wrapper">

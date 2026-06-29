@@ -38,6 +38,7 @@
 <link rel="stylesheet" href="{{ asset('assets/webfont-medical-icons/css/wfmi-style.css') }}">
 {{-- Theme (typography + colors) after frontend CSS so body/nav font settings override styles.css --}}
 @include('partials.theming.colors')
+@include('layouts.partials.content_preloader_styles')
 @include('layouts.partials.rtl_stylesheet')
 <script src="{{ asset('frontend/js/jquery.min.js') }}"></script>
 

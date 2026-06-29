@@ -88,6 +88,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\DocsController;
 use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\LlmsTxtController;
 
 
 /*
@@ -140,6 +141,7 @@ Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('
 //Route::get('/test', [TestController::class, 'chat'])->name('test');
 Route::get('/favicon.ico', [CommonController::class, 'favicon'])->name('favicon');
 Route::get('/robots.txt', [RobotsController::class, 'show'])->name('robots');
+Route::get('/llms.txt', [LlmsTxtController::class, 'show'])->name('llms');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
 Route::get('/sitemaps/{name}.xml', [SitemapController::class, 'section'])->where('name', '[a-z0-9\-]+')->name('sitemap.section');
 Route::post('/locale/apply', [LocaleSwitchController::class, 'apply'])->name('locale.apply');

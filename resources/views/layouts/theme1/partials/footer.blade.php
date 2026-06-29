@@ -170,6 +170,7 @@
     }
     setTimeout(function() { document.querySelectorAll('.alert').forEach(function(a) { a.style.display = 'none'; }); }, 10000);
 </script>
+<script src="{{ asset('js/khub-content-preloader.js') }}?v={{ @filemtime(public_path('js/khub-content-preloader.js')) }}"></script>
 </div>
 </body>
 </html>
