@@ -436,6 +436,22 @@ If uploads still exist under `storage/app/public` and `/var/khubdata` is empty, 
 
 ---
 
+## Staff portal ecosystem (sibling repo)
+
+When the Africa CDC Staff portal repo is on the same host, **Storage Management → Staff ecosystem** manages uploads for CI3, APM, Helpdesk, and staff-portal.
+
+| Setting | Purpose |
+|---------|---------|
+| `HUB_STAFF_STORAGE_ENABLED` | Show Staff ecosystem tab (default `true`) |
+| `STAFF_REPO_ROOT` | Absolute path to staff git repo |
+| `STAFF_BASE_URL` | Used to derive `STAFF_SITE_ID` (e.g. `http://localhost/staff`) |
+| `STAFF_HOST_DATA_ROOT` | Default `/var/staffdata` |
+| `STAFF_FILES_BACKUP_RETENTION_DAYS` | Prune staff file backups after N days |
+
+Staff migration scripts live in `{STAFF_REPO_ROOT}/scripts/storage/`. See staff repo `docs/STORAGE.md`.
+
+---
+
 ## Key files (developers)
 
 | Area | Path |
@@ -454,6 +470,7 @@ If uploads still exist under `storage/app/public` and `/var/khubdata` is empty, 
 | Filesystem disk stub | `config/filesystems.php` (`hub` disk; root set at runtime) |
 | Settings model | `app/Models/HubStorageSetting.php` |
 | Admin UI | `resources/views/admin/storage/index.blade.php` |
+| Staff ecosystem service | `app/Services/StaffEcosystemStorageService.php` |
 | File manager assets | `public/vendor/file-manager/` |
 | Media route | `GET /hub-media/{path}` → `HubMediaController` |
 | Helpers | `hub_storage()`, `hub_storage_path()`, `storage_link()` in `app/Helpers/UtilsHelper.php` |

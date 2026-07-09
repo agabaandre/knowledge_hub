@@ -764,12 +764,44 @@ class CommsOfPracticeRepository{
         return $query->first();
     }
 
-   function delete($id)
+    public function delete($id)
     {
-        
-        $deleted = CommunityOfPractice::find($id)->delete();
+        $community = CommunityOfPractice::find($id);
+        if (! $community) {
+            return false;
+        }
+
+        DB::transaction(function () use ($community) {
+            $communityId = $community->id;
+
+            CommunityOfPracticeMembers::where('community_of_practice_id', $communityId)->delete();
+            PublicationCommunityOfPractice::where('community_of_practice_id', $communityId)->delete();
+            ForumCommunityOfPractice::where('community_of_practice_id', $communityId)->delete();
+            CommunityInvitation::where('community_of_practice_id', $communityId)->delete();
+            DB::table('community_of_practice_tags')->where('community_of_practice_id', $communityId)->delete();
+
+            $commentIds = CommunityComment::where('community_of_practice_id', $communityId)->pluck('id');
+            if ($commentIds->isNotEmpty()) {
+                CommunityCommentLike::whereIn('community_comment_id', $commentIds)->delete();
+                CommunityComment::whereIn('id', $commentIds)->delete();
+            }
+
+            if (Schema::hasTable('events') && Schema::hasColumn('events', 'community_of_practice_id')) {
+                Event::where('community_of_practice_id', $communityId)->update(['community_of_practice_id' => null]);
+            }
+
+            if (Schema::hasTable('content_request_referral_targets') && Schema::hasColumn('content_request_referral_targets', 'community_of_practice_id')) {
+                DB::table('content_request_referral_targets')
+                    ->where('community_of_practice_id', $communityId)
+                    ->update(['community_of_practice_id' => null]);
+            }
+
+            $community->delete();
+        });
+
         clear_cache();
-        return $deleted;
+
+        return true;
     }
     
     public function getAllWithMembership()
@@ -1545,7 +1577,8 @@ class CommsOfPracticeRepository{
             ->groupBy('community_of_practice_id')
             ->pluck('total', 'community_of_practice_id');
 
-        $canDelete = auth()->user() && auth()->user()->can('delete_publication_metadata');
+        $user = auth()->user();
+        $canDelete = $user && ($user->can('delete_publication_metadata') || $user->can('delete_meta_data'));
         $data = [];
         $index = $start + 1;
 
@@ -1562,7 +1595,8 @@ class CommsOfPracticeRepository{
             $actions .= '</a>'
                 .'<button type="button" class="btn btn-outline-dark btn-sm" onclick="openEditCommunity('.$community->id.')"><i class="fa fa-edit mr-1"></i>Edit</button>';
             if ($canDelete) {
-                $actions .= '<button type="button" class="btn btn-outline-danger btn-sm" onclick="openDeleteModal('.$community->id.')"><i class="fa fa-trash mr-1"></i>Delete</button>';
+                $communityName = e($community->community_name);
+                $actions .= '<button type="button" class="btn btn-outline-danger btn-sm js-delete-community" data-community-id="'.$community->id.'" data-community-name="'.$communityName.'"><i class="fa fa-trash mr-1"></i>Delete</button>';
             }
             $actions .= '</div>';
 

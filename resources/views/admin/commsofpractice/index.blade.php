@@ -363,5 +363,75 @@ $(document).ready(function() {
         rebuildCopCountryOptions($(this).val(), null);
     });
 });
+
+var copDeleteCommunityId = null;
+
+function openDeleteCommunityModal(communityId, communityName) {
+    copDeleteCommunityId = communityId;
+    $('#copDeleteCommunityName').text(communityName || ('Community #' + communityId));
+    $('#copDeleteError').addClass('d-none').text('');
+    $('#copConfirmDeleteBtn').prop('disabled', false);
+    $('.cop-delete-btn-label').removeClass('d-none');
+    $('.cop-delete-btn-loading').addClass('d-none');
+    $('#cop-delete-modal').modal('show');
+}
+
+$(document).on('click', '.js-delete-community', function () {
+    var btn = $(this);
+    openDeleteCommunityModal(btn.data('community-id'), btn.data('community-name'));
+});
+
+$(document).on('click', '#copConfirmDeleteBtn', function () {
+    if (!copDeleteCommunityId) {
+        return;
+    }
+
+    var $btn = $(this);
+    var $error = $('#copDeleteError');
+    $error.addClass('d-none').text('');
+    $btn.prop('disabled', true);
+    $('.cop-delete-btn-label').addClass('d-none');
+    $('.cop-delete-btn-loading').removeClass('d-none');
+
+    var url = @json(url('admin/commsofpractice/delete')) + '?id=' + encodeURIComponent(copDeleteCommunityId);
+
+    fetch(url, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+    })
+    .then(function (res) {
+        return res.json().then(function (body) {
+            return { ok: res.ok, status: res.status, body: body };
+        }).catch(function () {
+            return { ok: res.ok, status: res.status, body: {} };
+        });
+    })
+    .then(function (result) {
+        if (result.ok && result.body.status === 'success') {
+            $('#cop-delete-modal').modal('hide');
+            if (typeof communitiesTable !== 'undefined' && communitiesTable) {
+                communitiesTable.ajax.reload(null, false);
+            } else {
+                window.location.reload();
+            }
+            return;
+        }
+
+        var message = result.body.message || 'Failed to delete community. Please try again.';
+        $error.removeClass('d-none').text(message);
+        $btn.prop('disabled', false);
+        $('.cop-delete-btn-label').removeClass('d-none');
+        $('.cop-delete-btn-loading').addClass('d-none');
+    })
+    .catch(function () {
+        $error.removeClass('d-none').text('Failed to delete community. Please try again.');
+        $btn.prop('disabled', false);
+        $('.cop-delete-btn-label').removeClass('d-none');
+        $('.cop-delete-btn-loading').addClass('d-none');
+    });
+});
 </script>
 @endsection

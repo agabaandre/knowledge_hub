@@ -129,18 +129,30 @@ class CommsOfPracticeController extends Controller
 
 
     public function destroy(Request $request){
-        if (!auth()->user() || !auth()->user()->can('delete_meta_data')) {
-            return response(['status'=>'failure','message'=>'Unauthorized'], 403);
+        $user = auth()->user();
+        if (! $user || (! $user->can('delete_publication_metadata') && ! $user->can('delete_meta_data'))) {
+            return response()->json(['status' => 'failure', 'message' => 'Unauthorized'], 403);
         }
-        $deleted  = $this->commsOfPracticeRepository->delete($request->id);
 
-        if($deleted):
-            $data = ['alert-success'=>'Comunity deleted successfully','status'=>'success','data'=>$deleted];
-        else:
-            $data = ['alert-danger'=>'Operation failed, try again','status'=>'failure','data'=>$deleted];   
-        endif;
+        $id = (int) $request->input('id');
+        if ($id <= 0) {
+            return response()->json(['status' => 'failure', 'message' => 'Invalid community selected.'], 422);
+        }
 
-        return response($data,200);
+        $deleted = $this->commsOfPracticeRepository->delete($id);
+
+        if ($deleted) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Community deleted successfully.',
+                'data' => $deleted,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'failure',
+            'message' => 'Operation failed. The community may no longer exist or could not be removed.',
+        ], 422);
     }
 
     public function moderate(Request $request){

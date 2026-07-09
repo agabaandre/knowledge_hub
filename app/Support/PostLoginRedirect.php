@@ -16,6 +16,7 @@ class PostLoginRedirect
         '/admin/storage-management/browse-backups',
         '/admin/storage-management/backup-tables',
         '/admin/storage-management/publication-references',
+        '/admin/storage-management/staff-ecosystem/metrics',
     ];
 
     public static function isSafe(?string $url): bool
