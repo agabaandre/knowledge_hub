@@ -39,7 +39,8 @@
         "spatie/laravel-ignition": "^1.6",
         "spatie/laravel-permission": "^5.10",
         "spatie/pdf-to-text": "^1.52",
-        "superbalist/flysystem-google-storage": "^7.2"
+        "superbalist/flysystem-google-storage": "^7.2",
+        "laravel/ui": "^3.4"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.14",
@@ -47,7 +48,6 @@
         "fakerphp/faker": "^1.9.1",
         "laravel/sail": "^1.0.1",
         "laravel/telescope": "^5.0",
-        "laravel/ui": "^3.4",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^5.10",
         "phpunit/phpunit": "^9.5.10"
