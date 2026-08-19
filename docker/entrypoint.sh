@@ -6,8 +6,11 @@ cd /var/www/html
 mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache public/uploads \
     /var/log/php /var/log/php-fpm
 
-chown -R www-data:www-data storage bootstrap/cache public/uploads /var/log/php /var/log/php-fpm 2>/dev/null || true
-chmod -R ug+rwx storage bootstrap/cache 2>/dev/null || true
+if [ "${FIX_PERMISSIONS_ON_BOOT:-false}" = "true" ]; then
+    echo "Applying recursive ownership/permissions..."
+    chown -R www-data:www-data storage bootstrap/cache public/uploads /var/log/php /var/log/php-fpm 2>/dev/null || true
+    chmod -R ug+rwx storage bootstrap/cache 2>/dev/null || true
+fi
 
 echo "Waiting for MySQL at ${DB_HOST:-mysql}:${DB_PORT:-3306}..."
 for i in $(seq 1 60); do
@@ -17,7 +20,10 @@ for i in $(seq 1 60); do
                 'mysql:host='.getenv('DB_HOST').';port='.getenv('DB_PORT'),
                 getenv('DB_USERNAME'),
                 getenv('DB_PASSWORD'),
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_TIMEOUT => (int) (getenv('DB_CONNECT_TIMEOUT') ?: 2),
+                ]
             );
             exit(0);
         } catch (Throwable \$e) {
