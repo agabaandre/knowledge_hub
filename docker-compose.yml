@@ -66,8 +66,6 @@ services:
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-false}
       GENERATE_APP_KEY_ON_BOOT: "false"
       WAIT_FOR_MEILISEARCH: "false"
-      FIX_PERMISSIONS_ON_BOOT: "false"
-      DB_CONNECT_TIMEOUT: ${DB_CONNECT_TIMEOUT:-2}
       DB_CONNECTION: mysql
       DB_HOST: mysql
       DB_PORT: 3306
@@ -146,8 +144,6 @@ services:
       MEILISEARCH_KEY: ${MEILISEARCH_KEY:-masterKey}
       WAIT_FOR_MEILISEARCH: "false"
       GENERATE_APP_KEY_ON_BOOT: "false"
-      FIX_PERMISSIONS_ON_BOOT: "false"
-      DB_CONNECT_TIMEOUT: ${DB_CONNECT_TIMEOUT:-2}
     depends_on:
       mysql:
         condition: service_healthy
@@ -190,8 +186,6 @@ services:
       MEILISEARCH_KEY: ${MEILISEARCH_KEY:-masterKey}
       WAIT_FOR_MEILISEARCH: "false"
       GENERATE_APP_KEY_ON_BOOT: "false"
-      FIX_PERMISSIONS_ON_BOOT: "false"
-      DB_CONNECT_TIMEOUT: ${DB_CONNECT_TIMEOUT:-2}
     depends_on:
       mysql:
         condition: service_healthy

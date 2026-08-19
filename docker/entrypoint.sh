@@ -12,33 +12,42 @@ if [ "${FIX_PERMISSIONS_ON_BOOT:-false}" = "true" ]; then
     chmod -R ug+rwx storage bootstrap/cache 2>/dev/null || true
 fi
 
-echo "Waiting for MySQL at ${DB_HOST:-mysql}:${DB_PORT:-3306}..."
-for i in $(seq 1 60); do
-    if php -r "
-        try {
-            new PDO(
-                'mysql:host='.getenv('DB_HOST').';port='.getenv('DB_PORT'),
-                getenv('DB_USERNAME'),
-                getenv('DB_PASSWORD'),
-                [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_TIMEOUT => (int) (getenv('DB_CONNECT_TIMEOUT') ?: 2),
-                ]
-            );
-            exit(0);
-        } catch (Throwable \$e) {
-            exit(1);
-        }
-    " 2>/dev/null; then
-        echo "MySQL is ready."
-        break
-    fi
-    if [ "$i" -eq 60 ]; then
-        echo "MySQL did not become ready in time." >&2
+WAIT_FOR_MYSQL="${WAIT_FOR_MYSQL:-true}"
+MYSQL_WAIT_SECONDS="${MYSQL_WAIT_SECONDS:-180}"
+MYSQL_WAIT_INTERVAL_SECONDS="${MYSQL_WAIT_INTERVAL_SECONDS:-2}"
+
+if [ "${WAIT_FOR_MYSQL}" = "true" ]; then
+    DB_HOST_SAFE="${DB_HOST:-mysql}"
+    DB_PORT_SAFE="${DB_PORT:-3306}"
+    DB_USERNAME_SAFE="${DB_USERNAME:-root}"
+
+    echo "Waiting for MySQL at ${DB_HOST_SAFE}:${DB_PORT_SAFE}..."
+
+    # Use mysqladmin ping (faster + doesn't repeatedly boot PHP + PDO).
+    end_time=$((SECONDS + MYSQL_WAIT_SECONDS))
+    while [ $SECONDS -lt $end_time ]; do
+        if mysqladmin ping \
+            -h"${DB_HOST_SAFE}" \
+            -P"${DB_PORT_SAFE}" \
+            -u"${DB_USERNAME_SAFE}" \
+            -p"${DB_PASSWORD:-}" \
+            --silent >/dev/null 2>&1; then
+            echo "MySQL is ready."
+            break
+        fi
+        sleep "${MYSQL_WAIT_INTERVAL_SECONDS}"
+    done
+
+    if ! mysqladmin ping \
+        -h"${DB_HOST_SAFE}" \
+        -P"${DB_PORT_SAFE}" \
+        -u"${DB_USERNAME_SAFE}" \
+        -p"${DB_PASSWORD:-}" \
+        --silent >/dev/null 2>&1; then
+        echo "MySQL did not become ready in time (${MYSQL_WAIT_SECONDS}s)." >&2
         exit 1
     fi
-    sleep 2
-done
+fi
 
 if [ "${WAIT_FOR_MEILISEARCH:-true}" = "true" ] && [ "${SCOUT_DRIVER:-}" = "meilisearch" ]; then
     MEILI_HOST="${MEILISEARCH_HOST:-http://meilisearch:7700}"
