@@ -30,7 +30,16 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 COPY . /var/www/html
 
 ENV APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN set -eux; \
+    composer install \
+        --no-interaction \
+        --prefer-dist \
+        --no-dev \
+        --no-scripts \
+        --optimize-autoloader \
+        --no-progress; \
+    composer clear-cache
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm"]
