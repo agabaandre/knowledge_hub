@@ -788,9 +788,6 @@
         <button type="button" class="storage-tab" data-storage-tab="migration">Migration</button>
         <button type="button" class="storage-tab" data-storage-tab="backups">Backups</button>
         <button type="button" class="storage-tab" data-storage-tab="browse">Browse files</button>
-        @if($staffEcosystemEnabled ?? false)
-        <button type="button" class="storage-tab" data-storage-tab="staff">Staff ecosystem</button>
-        @endif
         <button type="button" class="storage-tab" data-storage-tab="server">Server setup</button>
     </nav>
 
@@ -1478,8 +1475,6 @@
             </div>
             <p class="small text-muted mt-2 mb-0">Active files root: <code>{{ $filesRoot }}</code></p>
         </section>
-
-        @include('admin.storage.partials.staff_ecosystem')
 
         {{-- Server setup (developer) --}}
         <section class="storage-section" id="storage-section-server">

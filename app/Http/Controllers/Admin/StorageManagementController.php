@@ -12,7 +12,6 @@ use App\Services\HubOffsiteBackupService;
 use App\Services\HubStorageMetricsService;
 use App\Services\HubStoragePublicationIndexService;
 use App\Services\HubStorageService;
-use App\Services\StaffEcosystemStorageService;
 use App\Support\QueueHealth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -27,8 +26,7 @@ class StorageManagementController extends Controller
         HubStorageService $storage,
         HubDatabaseBackupService $backup,
         HubEnvBackupService $envBackup,
-        HubStorageMetricsService $metrics,
-        StaffEcosystemStorageService $staffStorage
+        HubStorageMetricsService $metrics
     )
     {
         $settings = $storage->settings();
@@ -65,15 +63,6 @@ class StorageManagementController extends Controller
             'backupTableGroups' => $backup->backupTableGroups(),
             'kpiExcludedTables' => config('hub_storage.backup_kpi_tables', []),
             'systemMetrics' => $metrics->snapshot($storage, $freshMetrics),
-            'staffEcosystemEnabled' => $staffStorage->enabled(),
-            'staffEcosystem' => $staffStorage->enabled() ? [
-                'site_id' => $staffStorage->siteId(),
-                'data_root' => $staffStorage->dataRoot(),
-                'repo_root' => $staffStorage->repoRoot(),
-                'backup_root' => $staffStorage->filesBackupRoot(),
-                'modules' => $staffStorage->moduleMetrics(),
-                'backups' => $staffStorage->listFileBackups(),
-            ] : null,
         ]);
     }
 
@@ -558,69 +547,5 @@ class StorageManagementController extends Controller
         }
 
         return $config;
-    }
-
-    public function staffEcosystemMetrics(StaffEcosystemStorageService $staffStorage)
-    {
-        if (! $staffStorage->enabled()) {
-            return response()->json(['enabled' => false]);
-        }
-
-        return response()->json([
-            'enabled' => true,
-            'site_id' => $staffStorage->siteId(),
-            'data_root' => $staffStorage->dataRoot(),
-            'modules' => $staffStorage->moduleMetrics(),
-            'backups' => $staffStorage->listFileBackups(),
-        ]);
-    }
-
-    public function staffMigrate(Request $request, StaffEcosystemStorageService $staffStorage)
-    {
-        if (! $staffStorage->enabled()) {
-            return redirect()->route('admin.storage.index')->with('alert-danger', 'Staff ecosystem storage is disabled.');
-        }
-
-        $validated = $request->validate([
-            'module' => 'required|in:ci,apm,helpdesk,staff-portal,all',
-        ]);
-
-        if ($validated['module'] === 'all') {
-            $messages = [];
-            foreach (array_keys($staffStorage->moduleDefinitions()) as $module) {
-                $result = $staffStorage->runMigration($module);
-                $messages[] = $result['message'];
-            }
-
-            return redirect()
-                ->route('admin.storage.index')
-                ->withFragment('storage-staff')
-                ->with('alert-success', implode(' ', $messages));
-        }
-
-        $result = $staffStorage->runMigration($validated['module']);
-        $flash = ($result['status'] ?? '') === 'completed' ? 'alert-success' : 'alert-danger';
-
-        return redirect()
-            ->route('admin.storage.index')
-            ->withFragment('storage-staff')
-            ->with($flash, $result['message']);
-    }
-
-    public function staffFileBackup(Request $request, StaffEcosystemStorageService $staffStorage)
-    {
-        if (! $staffStorage->enabled()) {
-            return redirect()->route('admin.storage.index')->with('alert-danger', 'Staff ecosystem storage is disabled.');
-        }
-
-        $modules = $request->input('modules');
-        $moduleList = is_array($modules) ? array_values($modules) : null;
-        $result = $staffStorage->runFileBackup($moduleList);
-        $flash = ($result['status'] ?? '') === 'completed' ? 'alert-success' : 'alert-danger';
-
-        return redirect()
-            ->route('admin.storage.index')
-            ->withFragment('storage-staff')
-            ->with($flash, ($result['message'] ?? 'Backup finished.').' '.$result['path']);
     }
 }

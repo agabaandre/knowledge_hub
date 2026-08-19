@@ -187,49 +187,4 @@ return [
     'offsite_backup_schedule_day' => 0,
     'offsite_backup_schedule_time' => '02:15',
 
-    /*
-    | Staff portal ecosystem (sibling repo). Managed from Storage Management UI.
-    */
-    'staff_ecosystem' => [
-        'enabled' => filter_var(env('HUB_STAFF_STORAGE_ENABLED', true), FILTER_VALIDATE_BOOL),
-        'repo_root' => rtrim(env('STAFF_REPO_ROOT', '/opt/homebrew/var/www/staff'), '/\\'),
-        'host_data_root' => env('STAFF_HOST_DATA_ROOT', '/var/staffdata'),
-        'host_data_root_windows' => env('STAFF_HOST_DATA_ROOT_WINDOWS', 'C:\\staffdata'),
-        'site_id' => env('STAFF_SITE_ID', ''),
-        'base_url' => env('STAFF_BASE_URL', 'http://localhost/staff'),
-        'backup_root' => env('STAFF_FILES_BACKUP_ROOT', ''),
-        'backup_retention_days' => (int) env('STAFF_FILES_BACKUP_RETENTION_DAYS', 30),
-
-        'modules' => [
-            'ci' => [
-                'label' => 'CodeIgniter (legacy staff)',
-                'legacy_relative' => 'uploads',
-                'host_subdir' => 'ci',
-                'env_root' => 'STAFF_PORTAL_UPLOADS_ROOT',
-                'migrate_script' => 'scripts/storage/migrate-ci-uploads.sh',
-            ],
-            'apm' => [
-                'label' => 'APM',
-                'legacy_relative' => 'apm/storage/app/public',
-                'host_subdir' => 'apm',
-                'env_root' => 'STAFF_APM_FILES_ROOT',
-                'migrate_script' => 'scripts/storage/migrate-apm-uploads.sh',
-            ],
-            'helpdesk' => [
-                'label' => 'Helpdesk',
-                'legacy_relative' => 'helpdesk/backend/storage/app/public',
-                'host_subdir' => 'helpdesk',
-                'env_root' => 'STAFF_HELPDESK_FILES_ROOT',
-                'migrate_script' => 'scripts/storage/migrate-helpdesk-uploads.sh',
-            ],
-            'staff-portal' => [
-                'label' => 'Staff Portal (Laravel)',
-                'legacy_relative' => 'staff-portal/storage/app/public',
-                'host_subdir' => 'staff-portal',
-                'env_root' => 'STAFF_PORTAL_MODULE_FILES_ROOT',
-                'migrate_script' => 'scripts/storage/migrate-staff-portal-uploads.sh',
-            ],
-        ],
-    ],
-
 ];

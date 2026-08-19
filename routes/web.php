@@ -337,9 +337,6 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web', 'admin.access
     Route::get('/storage-management/migration-status', [StorageManagementController::class, 'migrationStatus'])->name('admin.storage.migration-status');
     Route::get('/storage-management/system-metrics', [StorageManagementController::class, 'systemMetrics'])->name('admin.storage.system-metrics');
     Route::post('/storage-management/retry-failed-jobs', [StorageManagementController::class, 'retryFailedJobs'])->name('admin.storage.retry-failed-jobs');
-    Route::get('/storage-management/staff-ecosystem/metrics', [StorageManagementController::class, 'staffEcosystemMetrics'])->name('admin.storage.staff-metrics');
-    Route::post('/storage-management/staff-ecosystem/migrate', [StorageManagementController::class, 'staffMigrate'])->name('admin.storage.staff-migrate');
-    Route::post('/storage-management/staff-ecosystem/backup', [StorageManagementController::class, 'staffFileBackup'])->name('admin.storage.staff-backup');
 
     Route::get('/maps', [MapsController::class, 'index'])->name('admin.maps.index');
     Route::get('/maps/topology/status', [MapsController::class, 'topologyVersionStatus'])->name('admin.maps.topology.status');
