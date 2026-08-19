@@ -5,7 +5,7 @@ set -euo pipefail
 # Knowledge Hub – Docker production setup (single command)
 #
 # Usage:
-#   chmod +x set-production.sh && ./set-production.sh
+#   chmod +x set-production.sh && ./set-production.sh [--rebuild]
 #
 # This script:
 #   1. Prompts for super-admin credentials and site settings
@@ -13,6 +13,26 @@ set -euo pipefail
 #   3. Builds and starts all containers
 #   4. Runs migrations and installs the application
 #
+
+REBUILD=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --rebuild)
+            REBUILD=true
+            ;;
+        -h|--help)
+            echo "Usage: ./set-production.sh [--rebuild]"
+            echo "  --rebuild   Force full image rebuild (pull latest base images, no cache)."
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $arg" >&2
+            echo "Usage: ./set-production.sh [--rebuild]" >&2
+            exit 1
+            ;;
+    esac
+done
 
 BOLD="\033[1m"
 GREEN="\033[0;32m"
@@ -132,7 +152,12 @@ echo -e "${GREEN}✓ .env written${RESET}"
 
 echo -e "\n${CYAN}Building and starting Docker containers...${RESET}"
 docker compose down --remove-orphans 2>/dev/null || true
-docker compose build
+if [ "$REBUILD" = "true" ]; then
+    echo -e "${CYAN}Rebuild mode enabled: pulling latest base images and building without cache...${RESET}"
+    docker compose build --pull --no-cache
+else
+    docker compose build
+fi
 docker compose up -d
 
 echo -e "${CYAN}Waiting for services to become healthy...${RESET}"
