@@ -223,7 +223,12 @@ docker compose exec -T app php artisan khub:install \
 
 docker compose exec -T app php artisan khub:mark-installed 2>/dev/null || true
 docker compose exec -T app php artisan config:cache
-docker compose exec -T app php artisan route:cache
+# Route cache can fail on some Laravel 8 deployments when stale compiled route files exist.
+# Clear first, then try caching without aborting the full setup.
+docker compose exec -T app php artisan route:clear || true
+if ! docker compose exec -T app php artisan route:cache; then
+    echo -e "${RED}Warning: route:cache failed; continuing setup without route cache.${RESET}"
+fi
 docker compose exec -T app php artisan view:cache
 
 # ─── Done ─────────────────────────────────────────────────────────────────────
