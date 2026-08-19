@@ -823,13 +823,17 @@ class InstallerService
                 'first_name' => $first !== '' ? $first : $name,
                 'last_name' => $last,
                 'password' => Hash::make($admin['password']),
-                'is_approved' => 1,
-                'is_verified' => 1,
-                'status' => 1,
-                'photo' => 'avatar.jpg',
-                'is_photo_external' => 0,
             ]
         );
+
+        $user->is_approved = 1;
+        $user->is_verified = 1;
+        $user->verification_token = null;
+        $user->email_verified_at = now();
+        $user->status = 1;
+        $user->photo = 'avatar.jpg';
+        $user->is_photo_external = 0;
+        $user->save();
 
         $role = Role::query()->where('name', 'Admin')->first();
         if ($role && ! $user->hasRole('Admin')) {
