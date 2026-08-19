@@ -2,16 +2,19 @@ FROM php:8.2-fpm-bookworm
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git unzip curl default-mysql-client \
-    libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
-    libicu-dev libxml2-dev libonig-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-        bcmath exif gd intl mbstring opcache pcntl pdo_mysql zip \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
-    && rm -rf /var/lib/apt/lists/*
+RUN set -eux; \
+    apt-get update -o Acquire::Retries=5; \
+    apt-get install -y --no-install-recommends \
+        git unzip curl default-mysql-client \
+        libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
+        libicu-dev libxml2-dev libonig-dev; \
+    docker-php-ext-configure gd --with-freetype --with-jpeg; \
+    docker-php-ext-install -j"$(nproc)" \
+        bcmath exif gd intl mbstring opcache pcntl pdo_mysql zip; \
+    pecl channel-update pecl.php.net || true; \
+    (printf "\n" | pecl install redis) || (printf "\n" | pecl install redis-6.0.2); \
+    docker-php-ext-enable redis; \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
