@@ -28,7 +28,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['federated_knowledge_hub_id', 'content_type', 'remote_id'], 'fed_content_hub_type_remote');
-            $table->index(['central_approved', 'central_rejected', 'is_active']);
+            $table->index(['central_approved', 'central_rejected', 'is_active'], 'fed_content_approved_rejected_active');
             $table->foreign('federated_knowledge_hub_id')
                 ->references('id')
                 ->on('federated_knowledge_hubs')
