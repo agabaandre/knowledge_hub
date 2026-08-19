@@ -88,6 +88,29 @@ APP_URL="${APP_URL:-http://localhost:8081}"
 read -rp "$(echo -e "${BOLD}HTTP Port [8081]:${RESET} ")" APP_PORT
 APP_PORT="${APP_PORT:-8081}"
 
+prompt_bool() {
+    local label="$1"
+    local default_value="$2"
+    local input
+    while true; do
+        read -rp "$(echo -e "${BOLD}${label} [${default_value}]:${RESET} ")" input
+        input="${input:-$default_value}"
+        input="$(echo "$input" | tr '[:upper:]' '[:lower:]')"
+        case "$input" in
+            true|false)
+                echo "$input"
+                return 0
+                ;;
+            *)
+                echo -e "${RED}Please enter true or false.${RESET}"
+                ;;
+        esac
+    done
+}
+
+STATES_ENABLED="$(prompt_bool "STATES_ENABLED" "false")"
+ADMIN_UNITS_ENABLED="$(prompt_bool "ADMIN_UNITS_ENABLED" "true")"
+
 # ─── Generate secure passwords ───────────────────────────────────────────────
 
 generate_password() {
@@ -118,6 +141,8 @@ APP_PORT=${APP_PORT}
 RUN_MIGRATIONS=false
 WAIT_FOR_MEILISEARCH=false
 GENERATE_APP_KEY_ON_BOOT=false
+STATES_ENABLED=${STATES_ENABLED}
+ADMIN_UNITS_ENABLED=${ADMIN_UNITS_ENABLED}
 
 LOG_CHANNEL=stack
 LOG_LEVEL=warning
