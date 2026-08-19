@@ -141,6 +141,7 @@ APP_PORT=${APP_PORT}
 RUN_MIGRATIONS=false
 WAIT_FOR_MEILISEARCH=false
 GENERATE_APP_KEY_ON_BOOT=false
+FIX_PERMISSIONS_ON_BOOT=true
 STATES_ENABLED=${STATES_ENABLED}
 ADMIN_UNITS_ENABLED=${ADMIN_UNITS_ENABLED}
 
@@ -208,6 +209,10 @@ echo -e "${GREEN}✓ MySQL ready${RESET}"
 
 wait_for_container "khub_app" 60
 echo -e "${GREEN}✓ Application ready${RESET}"
+
+# Enforce writable storage before running installer.
+echo -e "${CYAN}Fixing storage permissions inside app container...${RESET}"
+docker compose exec -T app sh -lc "chown -R www-data:www-data storage bootstrap/cache public/uploads /var/log/php /var/log/php-fpm 2>/dev/null || true; chmod -R ug+rwx storage bootstrap/cache 2>/dev/null || true"
 
 # ─── Run installer ────────────────────────────────────────────────────────────
 
