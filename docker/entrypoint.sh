@@ -34,7 +34,7 @@ for i in $(seq 1 60); do
     sleep 2
 done
 
-if [ "${SCOUT_DRIVER:-}" = "meilisearch" ]; then
+if [ "${WAIT_FOR_MEILISEARCH:-true}" = "true" ] && [ "${SCOUT_DRIVER:-}" = "meilisearch" ]; then
     MEILI_HOST="${MEILISEARCH_HOST:-http://meilisearch:7700}"
     echo "Waiting for Meilisearch at ${MEILI_HOST}..."
     for i in $(seq 1 45); do
@@ -58,12 +58,12 @@ if [ ! -f .env ] && [ -f .env.docker.example ]; then
     cp .env.docker.example .env
 fi
 
-if [ ! -d vendor/bin ]; then
+if [ ! -d vendor ]; then
     echo "Installing Composer dependencies..."
     composer install --no-interaction --prefer-dist --optimize-autoloader
 fi
 
-if ! grep -q '^APP_KEY=base64:' .env 2>/dev/null; then
+if [ "${GENERATE_APP_KEY_ON_BOOT:-true}" = "true" ] && ! grep -q '^APP_KEY=base64:' .env 2>/dev/null; then
     php artisan key:generate --force
 fi
 

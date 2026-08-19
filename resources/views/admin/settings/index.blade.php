@@ -990,7 +990,7 @@
         </span>
     </div>
 
-    <div class="settings-container {{ (settings()->site_theme ?? '') === 'theme1.' ? 'settings-theme1' : '' }}">
+        <div class="settings-container {{ (settings()->site_theme ?? '') === 'theme1.' ? 'settings-theme1' : '' }}">
             <div class="settings-header">
                 <h2><i class="fa fa-cog me-2"></i>System Configuration</h2>
                 <p>Manage your site settings and preferences</p>
@@ -1084,20 +1084,20 @@
                             <div class="form-group settings-field--compact mb-0">
                                 <label>Phone</label>
                                 <input type="text" name="phone" value="{{ $settings->phone }}" class="form-control" placeholder="+1 234 567 8900">
-                            </div>
+                </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group settings-field--compact mb-0">
                                 <label>Timezone</label>
                                 @include('partials.general.timezones', ['selected' => $settings->timezone])
-                            </div>
+                </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
+                <div class="form-group">
                         <label>Address</label>
                         <textarea name="address" rows="3" class="form-control" placeholder="Enter site address">{{ $settings->address }}</textarea>
-                    </div>
+                        </div>
                 </div>
 
                 <!-- Email Tab -->
@@ -1106,7 +1106,7 @@
                         <div class="alert alert-warning mb-0">
                             <i class="fa fa-exclamation-triangle mr-1"></i>
                             Email settings require a database migration. Run <code>php artisan migrate</code> to enable this section.
-                        </div>
+                                </div>
                     @else
                         @php
                             $emailDriverForm = $emailFields['email_driver']['form_value'] ?? $emailFields['email_driver']['value'] ?? 'exchange';
@@ -1117,28 +1117,28 @@
                         <div class="form-section-title">
                             <i class="fa fa-paper-plane"></i>
                             Outbound Email
-                        </div>
+                    </div>
 
                         <div class="email-section-intro">
                             <i class="fa fa-info-circle"></i>
                             Choose the default sending method for system emails (password reset, notifications, reminders).
                             Values saved here are stored in the database and <strong>override</strong> any matching <code>.env</code> mail settings.
-                        </div>
+                    </div>
 
                         <div class="form-group" style="max-width: 360px;">
                             <label class="branding-field-label d-block" for="email_driver">Default sending method</label>
                             <select name="email_driver" id="email_driver" class="form-control">
                                 <option value="exchange" {{ $emailDriverForm === 'exchange' ? 'selected' : '' }}>Microsoft Exchange</option>
                                 <option value="smtp" {{ $emailDriverForm === 'smtp' ? 'selected' : '' }}>SMTP</option>
-                            </select>
-                        </div>
+                        </select>
+                            </div>
                         <p class="email-effective-hint mb-3">Currently active: <strong>{{ strtoupper($emailDriverEffective) }}</strong></p>
 
                         <div class="email-config-panel" id="email-panel-shared">
                             <h4 class="email-config-panel__title"><i class="fa fa-user"></i>Sender identity</h4>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
                                         <label>From address
                                             @if($emailFields['mail_from_address']['env_locked'] ?? false)
                                                 <span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>
@@ -1150,9 +1150,9 @@
                                         @if($emailFields['mail_from_address']['has_env_override'] ?? false)
                                             <div class="email-effective-hint">.env fallback: <strong>{{ $emailFields['mail_from_address']['value'] }}</strong> (database value overrides after save)</div>
                                         @endif
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
                                     <div class="form-group mb-0">
                                         <label>From name
                                             @if($emailFields['mail_from_name']['env_locked'] ?? false)
@@ -1166,24 +1166,24 @@
                                             <div class="email-effective-hint">.env fallback: <strong>{{ $emailFields['mail_from_name']['value'] }}</strong> (database value overrides after save)</div>
                                         @endif
                                     </div>
-                                </div>
                             </div>
                         </div>
+                    </div>
 
                         <div class="email-config-panel js-email-driver-panel" id="email-panel-exchange" style="{{ $showExchange ? '' : 'display:none;' }}">
                             <h4 class="email-config-panel__title"><i class="fa fa-windows"></i>Microsoft Exchange / Graph API</h4>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
                                         <label>Tenant ID
                                             @if($emailFields['exchange_tenant_id']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="exchange_tenant_id" class="form-control"
                                                value="{{ $emailFields['exchange_tenant_id']['form_value'] ?? '' }}">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
                                         <label>Client ID
                                             @if($emailFields['exchange_client_id']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
@@ -1191,37 +1191,37 @@
                                                value="{{ $emailFields['exchange_client_id']['form_value'] ?? '' }}">
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
+                        <div class="col-md-6">
+                            <div class="form-group">
                                         <label>Client secret
                                             @if($emailFields['exchange_client_secret']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="password" name="exchange_client_secret" class="form-control" autocomplete="new-password"
                                                placeholder="{{ !empty($emailFields['exchange_client_secret']['db_value']) ? '•••••••• (leave blank to keep)' : 'Enter client secret' }}"
                                                {{ ($emailFields['exchange_client_secret']['env_locked'] ?? false) ? 'readonly' : '' }}>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
+                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
                                         <label>Auth method</label>
                                         @php $exchangeAuth = $emailFields['exchange_auth_method']['form_value'] ?? 'client_credentials'; @endphp
                                         <select name="exchange_auth_method" class="form-control">
                                             <option value="client_credentials" {{ $exchangeAuth === 'client_credentials' ? 'selected' : '' }}>Client credentials</option>
                                             <option value="authorization_code" {{ $exchangeAuth === 'authorization_code' ? 'selected' : '' }}>Authorization code</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
+                        </select>
+                            </div>
+                    </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
                                         <label>Redirect URI
                                             @if($emailFields['exchange_redirect_uri']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="exchange_redirect_uri" class="form-control"
                                                value="{{ $emailFields['exchange_redirect_uri']['form_value'] ?? '' }}"
                                                placeholder="{{ url('/auth/microsoft/callback') }}">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
                                     <div class="form-group mb-0">
                                         <label>Scope
                                             @if($emailFields['exchange_scope']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
@@ -1230,44 +1230,44 @@
                                                value="{{ $emailFields['exchange_scope']['form_value'] ?? '' }}"
                                                placeholder="https://graph.microsoft.com/.default">
                                     </div>
-                                </div>
                             </div>
-                        </div>
+                    </div>
+                </div>
 
                         <div class="email-config-panel js-email-driver-panel" id="email-panel-smtp" style="{{ $showExchange ? 'display:none;' : '' }}">
                             <h4 class="email-config-panel__title"><i class="fa fa-server"></i>SMTP server</h4>
-                            <div class="row">
+                    <div class="row">
                                 <div class="col-md-8">
-                                    <div class="form-group">
+                            <div class="form-group">
                                         <label>Host
                                             @if($emailFields['mail_host']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="mail_host" class="form-control"
                                                value="{{ $emailFields['mail_host']['form_value'] ?? '' }}"
                                                placeholder="{{ $emailFields['mail_host']['value'] ?? 'smtp.office365.com' }}">
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
                                         <label>Port
                                             @if($emailFields['mail_port']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="mail_port" class="form-control"
                                                value="{{ $emailFields['mail_port']['form_value'] ?? '' }}"
                                                placeholder="{{ $emailFields['mail_port']['value'] ?? '587' }}">
-                                    </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
+                            </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
                                         <label>Username
                                             @if($emailFields['mail_username']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="mail_username" class="form-control"
                                                value="{{ $emailFields['mail_username']['form_value'] ?? '' }}">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
                                         <label>Password
                                             @if($emailFields['mail_password']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
@@ -1276,7 +1276,7 @@
                                                {{ ($emailFields['mail_password']['env_locked'] ?? false) ? 'readonly' : '' }}>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                        <div class="col-md-6">
                                     <div class="form-group mb-0">
                                         <label>Encryption
                                             @if($emailFields['mail_encryption']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
@@ -1287,10 +1287,10 @@
                                             <option value="ssl" {{ $encForm === 'ssl' ? 'selected' : '' }}>SSL</option>
                                             <option value="none" {{ in_array($encForm, ['none', ''], true) ? 'selected' : '' }}>None</option>
                                         </select>
-                                    </div>
-                                </div>
                             </div>
                         </div>
+                            </div>
+                    </div>
                     @endif
                 </div>
 
@@ -1459,17 +1459,17 @@
                                     <i class="fa fa-bullhorn"></i>
                                     Platform Content & Tracking
                                 </div>
-                                <div class="form-group">
-                                    <label>Google Analytics Script</label>
-                                    <textarea name="analytics_script" rows="6" class="form-control" placeholder="Paste your Google Analytics script here">{{ $settings->analytics_script }}</textarea>
-                                    <small class="info-text">Paste the complete Google Analytics tracking code.</small>
-                                </div>
+                    <div class="form-group">
+                        <label>Google Analytics Script</label>
+                        <textarea name="analytics_script" rows="6" class="form-control" placeholder="Paste your Google Analytics script here">{{ $settings->analytics_script }}</textarea>
+                        <small class="info-text">Paste the complete Google Analytics tracking code.</small>
+                    </div>
                                 <div class="form-group mb-0">
-                                    <label>Content Disclaimer</label>
-                                    <textarea name="content_disclaimer" rows="5" class="form-control" placeholder="Enter content disclaimer text">{{ $settings->content_disclaimer }}</textarea>
+                    <label>Content Disclaimer</label>
+                        <textarea name="content_disclaimer" rows="5" class="form-control" placeholder="Enter content disclaimer text">{{ $settings->content_disclaimer }}</textarea>
                                 </div>
                             </div>
-                        </div>
+                </div>
 
                         <div class="col-lg-6">
                             <div class="settings-group-card">
@@ -1684,111 +1684,111 @@
                         <div class="col-lg-12">
                             <div class="settings-group-card">
                                 <div class="settings-group-title">
-                                    <i class="fa fa-file-alt"></i>
+                        <i class="fa fa-file-alt"></i>
                                     Publication Submission Workflow
+                    </div>
+
+                    <div class="form-group">
+                        <label>Minimum Publication Description Words</label>
+                        <input type="number" name="publication_min_words" value="{{ $settings->publication_min_words ?? 150 }}" class="form-control" min="10" max="1000" step="10">
+                        <small class="info-text">Set the minimum number of words required for publication descriptions. Default is 150 words.</small>
+                </div>
+
+                    <div class="form-group">
+                        <label>Required Fields on Publication Form</label>
+                        <small class="info-text d-block mb-3">Select which fields should be required when users submit publications:</small>
+                        
+                        @php
+                            $requiredFields = json_decode($settings->publication_required_fields ?? '{}', true);
+                            if (empty($requiredFields)) {
+                                $requiredFields = [
+                                    'title' => true,
+                                    'description' => true,
+                                    'associated_authors' => true,
+                                    'tags' => true,
+                                    'theme' => true,
+                                    'sub_theme' => true,
+                                    'data_category_id' => true,
+                                ];
+                            }
+                        @endphp
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[title]" value="1" id="req_title" @if($requiredFields['title'] ?? true) checked @endif>
+                                    <label class="form-check-label" for="req_title">Title</label>
                                 </div>
-
-                                <div class="form-group">
-                                    <label>Minimum Publication Description Words</label>
-                                    <input type="number" name="publication_min_words" value="{{ $settings->publication_min_words ?? 150 }}" class="form-control" min="10" max="1000" step="10">
-                                    <small class="info-text">Set the minimum number of words required for publication descriptions. Default is 150 words.</small>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[description]" value="1" id="req_description" @if($requiredFields['description'] ?? true) checked @endif>
+                                    <label class="form-check-label" for="req_description">Description</label>
                                 </div>
-
-                                <div class="form-group">
-                                    <label>Required Fields on Publication Form</label>
-                                    <small class="info-text d-block mb-3">Select which fields should be required when users submit publications:</small>
-                                    
-                                    @php
-                                        $requiredFields = json_decode($settings->publication_required_fields ?? '{}', true);
-                                        if (empty($requiredFields)) {
-                                            $requiredFields = [
-                                                'title' => true,
-                                                'description' => true,
-                                                'associated_authors' => true,
-                                                'tags' => true,
-                                                'theme' => true,
-                                                'sub_theme' => true,
-                                                'data_category_id' => true,
-                                            ];
-                                        }
-                                    @endphp
-
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[title]" value="1" id="req_title" @if($requiredFields['title'] ?? true) checked @endif>
-                                                <label class="form-check-label" for="req_title">Title</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[description]" value="1" id="req_description" @if($requiredFields['description'] ?? true) checked @endif>
-                                                <label class="form-check-label" for="req_description">Description</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[associated_authors]" value="1" id="req_associated_authors" @if($requiredFields['associated_authors'] ?? true) checked @endif>
-                                                <label class="form-check-label" for="req_associated_authors">Associated Authors</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[tags]" value="1" id="req_tags" @if($requiredFields['tags'] ?? true) checked @endif>
-                                                <label class="form-check-label" for="req_tags">Tags/Health Topics</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[theme]" value="1" id="req_theme" @if($requiredFields['theme'] ?? true) checked @endif>
-                                                <label class="form-check-label" for="req_theme">Theme</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[sub_theme]" value="1" id="req_sub_theme" @if($requiredFields['sub_theme'] ?? true) checked @endif>
-                                                <label class="form-check-label" for="req_sub_theme">Sub Theme</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[data_category_id]" value="1" id="req_data_category_id" @if($requiredFields['data_category_id'] ?? true) checked @endif>
-                                                <label class="form-check-label" for="req_data_category_id">Category</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[year_published]" value="1" id="req_year_published" @if($requiredFields['year_published'] ?? false) checked @endif>
-                                                <label class="form-check-label" for="req_year_published">Year Published</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[author]" value="1" id="req_author" @if($requiredFields['author'] ?? false) checked @endif>
-                                                <label class="form-check-label" for="req_author">Source/Author</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[doi]" value="1" id="req_doi" @if($requiredFields['doi'] ?? false) checked @endif>
-                                                <label class="form-check-label" for="req_doi">DOI</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[issn]" value="1" id="req_issn" @if($requiredFields['issn'] ?? false) checked @endif>
-                                                <label class="form-check-label" for="req_issn">ISSN</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[isbn]" value="1" id="req_isbn" @if($requiredFields['isbn'] ?? false) checked @endif>
-                                                <label class="form-check-label" for="req_isbn">ISBN</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[license_id]" value="1" id="req_license_id" @if($requiredFields['license_id'] ?? false) checked @endif>
-                                                <label class="form-check-label" for="req_license_id">License</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[copyright_info]" value="1" id="req_copyright_info" @if($requiredFields['copyright_info'] ?? false) checked @endif>
-                                                <label class="form-check-label" for="req_copyright_info">Copyright Info</label>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[associated_authors]" value="1" id="req_associated_authors" @if($requiredFields['associated_authors'] ?? true) checked @endif>
+                                    <label class="form-check-label" for="req_associated_authors">Associated Authors</label>
                                 </div>
-
-                                <div class="form-group mb-0">
-                                    <label>Version Submission Settings</label>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="enable_version_submission" name="enable_version_submission" value="1" @if(!isset($settings->enable_version_submission) || $settings->enable_version_submission) checked @endif>
-                                        <label class="form-check-label" for="enable_version_submission">
-                                            <i class="fa fa-plus-circle me-2"></i>Enable Version Submission
-                                        </label>
-                                    </div>
-                                    <small class="info-text">When enabled, users can submit new versions of publications. Only parent publications (non-versions) can have versions submitted. Versions themselves cannot have versions submitted.</small>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[tags]" value="1" id="req_tags" @if($requiredFields['tags'] ?? true) checked @endif>
+                                    <label class="form-check-label" for="req_tags">Tags/Health Topics</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[theme]" value="1" id="req_theme" @if($requiredFields['theme'] ?? true) checked @endif>
+                                    <label class="form-check-label" for="req_theme">Theme</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[sub_theme]" value="1" id="req_sub_theme" @if($requiredFields['sub_theme'] ?? true) checked @endif>
+                                    <label class="form-check-label" for="req_sub_theme">Sub Theme</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[data_category_id]" value="1" id="req_data_category_id" @if($requiredFields['data_category_id'] ?? true) checked @endif>
+                                    <label class="form-check-label" for="req_data_category_id">Category</label>
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[year_published]" value="1" id="req_year_published" @if($requiredFields['year_published'] ?? false) checked @endif>
+                                    <label class="form-check-label" for="req_year_published">Year Published</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[author]" value="1" id="req_author" @if($requiredFields['author'] ?? false) checked @endif>
+                                    <label class="form-check-label" for="req_author">Source/Author</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[doi]" value="1" id="req_doi" @if($requiredFields['doi'] ?? false) checked @endif>
+                                    <label class="form-check-label" for="req_doi">DOI</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[issn]" value="1" id="req_issn" @if($requiredFields['issn'] ?? false) checked @endif>
+                                    <label class="form-check-label" for="req_issn">ISSN</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[isbn]" value="1" id="req_isbn" @if($requiredFields['isbn'] ?? false) checked @endif>
+                                    <label class="form-check-label" for="req_isbn">ISBN</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[license_id]" value="1" id="req_license_id" @if($requiredFields['license_id'] ?? false) checked @endif>
+                                    <label class="form-check-label" for="req_license_id">License</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[copyright_info]" value="1" id="req_copyright_info" @if($requiredFields['copyright_info'] ?? false) checked @endif>
+                                    <label class="form-check-label" for="req_copyright_info">Copyright Info</label>
+                                </div>
+                            </div>
+            </div>
+        </div>
+
+                                <div class="form-group mb-0">
+                        <label>Version Submission Settings</label>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="enable_version_submission" name="enable_version_submission" value="1" @if(!isset($settings->enable_version_submission) || $settings->enable_version_submission) checked @endif>
+                            <label class="form-check-label" for="enable_version_submission">
+                                <i class="fa fa-plus-circle me-2"></i>Enable Version Submission
+                            </label>
                         </div>
+                        <small class="info-text">When enabled, users can submit new versions of publications. Only parent publications (non-versions) can have versions submitted. Versions themselves cannot have versions submitted.</small>
+                    </div>
+                </div>
+                </div>
                     </div>
                 </div>
                 </form>
@@ -1827,7 +1827,7 @@
                             </a>
 
                             <form action="{{ route('admin.config.import') }}" method="post" enctype="multipart/form-data" class="settings-import-group" id="import-config-form">
-                                @csrf
+                            @csrf
                                 <input type="file" name="config_file" id="import-config-file" accept=".xml,application/xml,text/xml" required>
                                 <button type="button" class="btn-tool" id="import-config-choose" title="Select a config XML file">
                                     <i class="fa fa-folder-open"></i>Choose XML
@@ -1835,19 +1835,19 @@
                                 <span class="settings-import-filename" id="import-config-filename">No file selected</span>
                                 <button type="submit" class="btn-tool btn-tool--accent" id="import-config-submit" disabled title="Import configuration from XML (overwrites current theme settings; images are not imported)">
                                     <i class="fa fa-upload"></i>Import Config
-                                </button>
-                            </form>
-
-                            <button type="button"
-                                    class="btn-tool"
-                                    onclick="clearCache()"
-                                    id="clear-cache-btn"
-                                    title="Clear all cached data including settings">
-                                <i class="fa fa-broom"></i>Clear Cache
                             </button>
-                        </div>
+    </form>
+
+                        <button type="button" 
+                                    class="btn-tool"
+                           onclick="clearCache()"
+                           id="clear-cache-btn"
+                           title="Clear all cached data including settings">
+                                <i class="fa fa-broom"></i>Clear Cache
+                        </button>
                     </div>
                 </div>
+            </div>
 
                 <p class="settings-action-footnote mb-0">
                     <i class="fa fa-info-circle"></i>
@@ -1855,7 +1855,7 @@
                     <strong>Export</strong> saves the active theme as XML (images excluded).
                     <strong>Import</strong> overwrites the active theme from XML (images are not changed).
                 </p>
-            </div>
+        </div>
         </div>
 
     <!-- Cache Clear Output Modal -->
@@ -2178,10 +2178,10 @@
                 }
                 if ($preview.length) {
                     $preview.css('background-color', hex);
-                }
-                if ($picker.attr('id') === 'gradientStartPicker' || $picker.attr('id') === 'gradientEndPicker') {
-                    updateGradientPreview();
-                }
+                        }
+                        if ($picker.attr('id') === 'gradientStartPicker' || $picker.attr('id') === 'gradientEndPicker') {
+                            updateGradientPreview();
+                        }
             }
 
             $('.colorPicker').each(function() {
@@ -2244,7 +2244,7 @@
             $('.branding-asset-card input[type="file"]').on('change', function (e) {
                 var file = e.target.files[0];
                 if (!file) return;
-                var $input = $(this);
+                    var $input = $(this);
                 var existingId = $input.attr('id') + '_existing';
                 if (document.getElementById(existingId)) {
                     document.getElementById(existingId).value = '';
@@ -2252,8 +2252,8 @@
                 var reader = new FileReader();
                 reader.onload = function (event) {
                     updateBrandingAssetPreview($input, event.target.result, file.name);
-                };
-                reader.readAsDataURL(file);
+                    };
+                    reader.readAsDataURL(file);
             });
 
             $('.js-branding-gallery-select').on('change', function () {
