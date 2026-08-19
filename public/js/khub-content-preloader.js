@@ -9,6 +9,7 @@
 
     var shownAt = Date.now();
     var hideTimer = null;
+    var hardHideTimer = null;
     var topLocked = false;
 
     function chromeBottomPx() {
@@ -84,6 +85,21 @@
         hideTimer = window.setTimeout(hidePreloader, wait);
     }
 
+    function scheduleHardFallbackHide() {
+        var minMs = parseInt(config.minMs, 10);
+        if (isNaN(minMs) || minMs < 0) {
+            minMs = 3000;
+        }
+
+        // Absolute safety net: never leave the preloader stuck forever.
+        // Wait at least minMs, then force-hide after an additional buffer.
+        var maxVisibleMs = minMs + 12000;
+        if (hardHideTimer) {
+            clearTimeout(hardHideTimer);
+        }
+        hardHideTimer = window.setTimeout(hidePreloader, maxVisibleMs);
+    }
+
     function initPreloader() {
         document.body.classList.add('khub-preloader-active');
 
@@ -113,4 +129,17 @@
             scheduleHide();
         });
     }
+
+    // BFCache restore and tab visibility transitions can skip/delay load in some browsers.
+    window.addEventListener('pageshow', function () {
+        lockPreloaderTopOnce();
+        scheduleHide();
+    });
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible') {
+            scheduleHide();
+        }
+    });
+
+    scheduleHardFallbackHide();
 })();
