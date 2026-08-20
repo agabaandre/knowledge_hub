@@ -360,6 +360,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web', 'admin.access
     Route::post('/federated-hubs/sync-central', [FederatedHubsController::class, 'syncFromCentral'])->name('admin.federation.sync-central');
     Route::post('/federated-hubs/refresh-central-token', [FederatedHubsController::class, 'refreshCentralToken'])->name('admin.federation.refresh-central');
     Route::post('/federated-hubs/test-central', [FederatedHubsController::class, 'testCentral'])->name('admin.federation.test-central');
+    Route::post('/federated-hubs/provision', [FederatedHubsController::class, 'storeProvision'])->name('admin.federation.provision');
+    Route::get('/federated-hubs/provision/{provision}', [FederatedHubsController::class, 'provisionStatus'])->name('admin.federation.provision-status');
     Route::get('/federated-content/pending', [\App\Http\Controllers\Admin\FederatedContentAdminController::class, 'pending'])->name('admin.federation.pending-content');
     Route::post('/federated-content/review', [\App\Http\Controllers\Admin\FederatedContentAdminController::class, 'bulkReview'])->name('admin.federation.content-review');
 

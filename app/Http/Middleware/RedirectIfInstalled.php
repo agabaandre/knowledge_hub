@@ -25,8 +25,14 @@ class RedirectIfInstalled
             return redirect('/');
         }
 
-        if ($installer->isExistingDeployment() && $request->routeIs('install.*')) {
-            abort(403, 'This application appears to be already deployed: Composer dependencies are present and the database contains data. Run `php artisan khub:mark-installed` on the server, or set APP_INSTALLED=true in .env, then visit the site home page.');
+        // Allow the web installer even when vendor/DB already exist (common after
+        // bare-metal file copy or a partial provision). Operators can finish setup
+        // or run `php artisan khub:mark-installed` when the app is fully ready.
+        if ($installer->isExistingDeployment() && $request->routeIs('install.index')) {
+            $request->session()->now(
+                'install_existing_deployment_notice',
+                'Composer dependencies and database tables were detected. Continue only if you intend to finish setup on this instance. If the site is already live, run `php artisan khub:mark-installed` instead.'
+            );
         }
 
         return $next($request);

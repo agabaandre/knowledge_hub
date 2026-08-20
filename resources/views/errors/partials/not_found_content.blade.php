@@ -1,5 +1,8 @@
-@include('errors.partials.resolve_error_message')
 @php
+    $resolvedErrorMessage = $message ?? null;
+    if (isset($exception) && $exception instanceof \Throwable) {
+        $resolvedErrorMessage = $exception->getMessage() ?: $resolvedErrorMessage;
+    }
     $notFoundMessage = $resolvedErrorMessage;
     if ($notFoundMessage === '' || $notFoundMessage === 'Not Found' || $notFoundMessage === null) {
         $notFoundMessage = 'The page you are looking for could not be found.';

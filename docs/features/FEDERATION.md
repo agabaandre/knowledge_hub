@@ -83,6 +83,9 @@ Tabs:
 1. **Provider API** — endpoint reference and local manifest preview
 2. **Central hub connection** (country hubs only) — test connection and sync branding/metadata from continental hub
 3. **Remote hubs** — register peer instances; connect and sync public publications/forums
+4. **Provision country hub** (continental only, when `FEDERATION_PROVISION_ENABLED=true`) — auto-create a bare-metal path-alias country instance (`https://khub.africacdc.org/{slug}`), dedicated MySQL DB, Apache Alias, verified admin, branding/metadata copy, and remote hub registration
+
+See `docs/superpowers/specs/2026-08-20-federated-hub-provision-design.md` for the full provision design.
 
 ---
 

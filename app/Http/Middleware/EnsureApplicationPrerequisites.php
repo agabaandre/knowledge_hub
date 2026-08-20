@@ -11,7 +11,7 @@ class EnsureApplicationPrerequisites
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->is('install', 'install/*')) {
+        if ($this->isInstallRequest($request)) {
             return $next($request);
         }
 
@@ -28,5 +28,19 @@ class EnsureApplicationPrerequisites
         return response()->view('errors.prerequisites', [
             'checks' => $result['checks'],
         ], 503);
+    }
+
+    protected function isInstallRequest(Request $request): bool
+    {
+        if ($request->routeIs('install.*')) {
+            return true;
+        }
+
+        $path = trim($request->path(), '/');
+
+        return $path === 'install'
+            || str_starts_with($path, 'install/')
+            || str_ends_with($path, '/install')
+            || str_contains($path, '/install/');
     }
 }

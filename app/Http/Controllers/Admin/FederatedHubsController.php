@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ProvisionFederatedHubJob;
 use App\Models\Country;
+use App\Models\FederatedHubProvision;
 use App\Models\FederatedKnowledgeHub;
 use App\Services\FederatedContentStagingService;
 use App\Services\FederatedHubLookupService;
 use App\Services\FederatedHubService;
 use App\Services\FederationHubAuthService;
+use App\Services\FederationProvision\FederatedHubProvisionService;
+use App\Services\FederationProvision\ProvisionSlug;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -21,6 +25,15 @@ class FederatedHubsController extends Controller
             : collect();
 
         $settings = function_exists('settings') ? settings() : null;
+        $isCountryHub = hub_admin_units_enabled();
+        $provisionEnabled = ! $isCountryHub && (bool) config('federation_provision.enabled');
+        $provisions = collect();
+        if ($provisionEnabled && Schema::hasTable('federated_hub_provisions')) {
+            $provisions = FederatedHubProvision::with('country')
+                ->orderByDesc('id')
+                ->limit(20)
+                ->get();
+        }
 
         return view('admin.federation.index', [
             'hubs' => $hubs,
@@ -36,7 +49,69 @@ class FederatedHubsController extends Controller
             'centralHubTokenExpiresAt' => $settings->central_hub_token_expires_at ?? null,
             'centralHubHasRefreshToken' => ! empty($settings->central_hub_refresh_token ?? null),
             'pendingFederatedContentCount' => app(FederatedContentStagingService::class)->pendingCount(),
-            'isCountryHub' => hub_admin_units_enabled(),
+            'isCountryHub' => $isCountryHub,
+            'provisionEnabled' => $provisionEnabled,
+            'provisions' => $provisions,
+            'provisionPublicBaseUrl' => rtrim((string) config('federation_provision.public_base_url'), '/'),
+        ]);
+    }
+
+    public function storeProvision(Request $request, FederatedHubProvisionService $provisioner)
+    {
+        if (hub_admin_units_enabled()) {
+            abort(403, 'Only the continental hub can provision country sites.');
+        }
+
+        $data = $request->validate([
+            'country_id' => 'required|integer|exists:country,id',
+            'slug' => 'required|string|max:64|regex:/^[a-z0-9\-]+$/',
+            'site_name' => 'nullable|string|max:255',
+            'admin_first_name' => 'required|string|max:50',
+            'admin_last_name' => 'required|string|max:255',
+            'admin_email' => 'required|email|max:255',
+            'admin_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        try {
+            $provision = $provisioner->createProvisionRecord([
+                'country_id' => (int) $data['country_id'],
+                'slug' => ProvisionSlug::normalize($data['slug']),
+                'site_name' => $data['site_name'] ?? null,
+                'admin_first_name' => $data['admin_first_name'],
+                'admin_last_name' => $data['admin_last_name'],
+                'admin_email' => $data['admin_email'],
+                'admin_password' => $data['admin_password'],
+                'requested_by' => $request->user()?->id,
+            ]);
+
+            ProvisionFederatedHubJob::dispatchFor($provision, $data['admin_password']);
+
+            return redirect()->route('admin.federation.index', ['fed_tab' => 'provision'])
+                ->with('alert-success', 'Provisioning started for /'.$provision->slug.'. Progress appears on the Provision tab.');
+        } catch (\Throwable $e) {
+            return redirect()->route('admin.federation.index', ['fed_tab' => 'provision'])
+                ->withInput()
+                ->with('alert-danger', 'Could not start provisioning: '.$e->getMessage());
+        }
+    }
+
+    public function provisionStatus(FederatedHubProvision $provision)
+    {
+        if (hub_admin_units_enabled()) {
+            abort(403);
+        }
+
+        return response()->json([
+            'id' => $provision->id,
+            'slug' => $provision->slug,
+            'status' => $provision->status,
+            'current_step' => $provision->current_step,
+            'progress_percent' => $provision->progress_percent,
+            'message' => $provision->message,
+            'error_message' => $provision->error_message,
+            'base_url' => $provision->base_url,
+            'federated_hub_id' => $provision->federated_hub_id,
+            'finished_at' => optional($provision->finished_at)->toIso8601String(),
         ]);
     }
 

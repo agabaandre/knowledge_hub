@@ -9,8 +9,11 @@
 @section('content')
     <div class="front-error-page">
         <div class="container">
-            @include('errors.partials.resolve_error_message')
             @php
+                $resolvedErrorMessage = $message ?? null;
+                if (isset($exception) && $exception instanceof \Throwable) {
+                    $resolvedErrorMessage = $exception->getMessage() ?: $resolvedErrorMessage;
+                }
                 $deniedMessage = $resolvedErrorMessage;
                 if ($deniedMessage === '' || $deniedMessage === 'Forbidden' || $deniedMessage === null) {
                     $deniedMessage = 'You do not have permission to access this area.';

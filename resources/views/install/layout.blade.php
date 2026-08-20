@@ -24,6 +24,9 @@
     @if (session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
+    @if (session('install_existing_deployment_notice'))
+        <div class="alert alert-warning">{{ session('install_existing_deployment_notice') }}</div>
+    @endif
 
     <div class="card shadow-sm">
         <div class="card-body p-4">

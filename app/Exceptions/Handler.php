@@ -56,9 +56,12 @@ class Handler extends ExceptionHandler
             $view = "errors.{$status}{$suffix}";
 
             if (view()->exists($view)) {
+                $msg = $e->getMessage();
+
                 return response()->view($view, [
                     'exception' => $e,
-                    'message' => $e->getMessage(),
+                    'message' => $msg,
+                    'resolvedErrorMessage' => $msg !== '' ? $msg : null,
                 ], $status);
             }
         }

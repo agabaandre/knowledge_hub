@@ -317,7 +317,9 @@ class BotProtection
 
         // Return a 403 Forbidden response
         return response()->view('errors.403', [
-            'message' => 'Access denied'
+            'message' => 'Access denied',
+            'resolvedErrorMessage' => 'Access denied',
+            'exception' => null,
         ], 403);
     }
 }

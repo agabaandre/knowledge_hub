@@ -53,6 +53,9 @@
             <button type="button" class="fed-tab" data-fed-tab="central">Central hub connection</button>
         @endif
         <button type="button" class="fed-tab" data-fed-tab="remote">Remote hubs</button>
+        @if(!empty($provisionEnabled))
+            <button type="button" class="fed-tab" data-fed-tab="provision">Provision country hub</button>
+        @endif
         @if(function_exists('federation_consumer_enabled') && federation_consumer_enabled())
             <a href="{{ route('admin.federation.pending-content') }}" class="fed-tab text-decoration-none {{ request()->routeIs('admin.federation.pending-content') ? 'active' : '' }}">
                 Content review
@@ -201,6 +204,142 @@
     </section>
     @endif
 
+    @if(!empty($provisionEnabled))
+    <section class="fed-section" id="fed-section-provision">
+        <div class="alert alert-info">
+            Creates a country Knowledge Hub on this server at
+            <code>{{ $provisionPublicBaseUrl }}/{slug}</code>
+            (file copy, dedicated MySQL database, Apache Alias, verified admin account).
+            Users and publications are <strong>not</strong> copied from continental.
+            Defaults: <code>STATES_ENABLED=false</code>, <code>ADMIN_UNITS_ENABLED=true</code>,
+            default owner country = selected country.
+        </div>
+
+        <div class="row">
+            <div class="col-lg-5">
+                <div class="card mb-4">
+                    <div class="card-header"><h3 class="card-title mb-0">Provision country hub</h3></div>
+                    <div class="card-body">
+                        <form method="post" action="{{ route('admin.federation.provision') }}" id="fedProvisionForm">
+                            @csrf
+                            <div class="mb-3">
+                                <label class="form-label">Country</label>
+                                <select name="country_id" id="fedProvisionCountry" class="form-control select2" required>
+                                    <option value="">— Select country —</option>
+                                    @foreach($countries as $country)
+                                        <option value="{{ $country->id }}"
+                                            data-slug="{{ $country->slug ?: \Illuminate\Support\Str::slug($country->name) }}"
+                                            data-name="{{ $country->name }}"
+                                            @selected(old('country_id') == $country->id)>
+                                            {{ $country->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">URL slug</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">{{ $provisionPublicBaseUrl }}/</span>
+                                    <input type="text" name="slug" id="fedProvisionSlug" class="form-control" required
+                                           pattern="[a-z0-9\-]+" maxlength="64"
+                                           value="{{ old('slug') }}" placeholder="uganda">
+                                </div>
+                                <div class="form-text">Lowercase letters, numbers, hyphens only.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Site name (optional)</label>
+                                <input type="text" name="site_name" id="fedProvisionSiteName" class="form-control"
+                                       value="{{ old('site_name') }}" placeholder="Uganda Knowledge Hub">
+                            </div>
+                            <hr>
+                            <p class="small text-muted mb-2">Country admin account (not copied from continental)</p>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">First name</label>
+                                    <input type="text" name="admin_first_name" class="form-control" required value="{{ old('admin_first_name') }}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Last name</label>
+                                    <input type="text" name="admin_last_name" class="form-control" required value="{{ old('admin_last_name') }}">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Admin email</label>
+                                <input type="email" name="admin_email" class="form-control" required value="{{ old('admin_email') }}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Admin password</label>
+                                <input type="password" name="admin_password" class="form-control" required minlength="8" autocomplete="new-password">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Confirm password</label>
+                                <input type="password" name="admin_password_confirmation" class="form-control" required minlength="8" autocomplete="new-password">
+                            </div>
+                            <ul class="small text-muted mb-3">
+                                <li>Copies branding + lookup metadata from continental</li>
+                                <li>Sets administrative units (country hub mode) and default owner country</li>
+                                <li>Requires queue worker and provision credentials in continental <code>.env</code></li>
+                            </ul>
+                            <button type="submit" class="btn btn-primary">Start provisioning</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="card mb-4">
+                    <div class="card-header"><h3 class="card-title mb-0">Recent provisions</h3></div>
+                    <div class="card-body p-0">
+                        @if(($provisions ?? collect())->isEmpty())
+                            <p class="p-3 mb-0 text-muted">No provision jobs yet.</p>
+                        @else
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0" id="fedProvisionTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Slug</th>
+                                            <th>Country</th>
+                                            <th>Status</th>
+                                            <th>Progress</th>
+                                            <th>Message</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($provisions as $p)
+                                            <tr data-provision-id="{{ $p->id }}" data-terminal="{{ $p->isTerminal() ? '1' : '0' }}">
+                                                <td>
+                                                    <code>{{ $p->slug }}</code>
+                                                    @if($p->status === 'completed')
+                                                        <br><a href="{{ $p->base_url }}" target="_blank" rel="noopener" class="small">Open</a>
+                                                    @endif
+                                                </td>
+                                                <td>{{ $p->country->name ?? '—' }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ $p->status === 'completed' ? 'success' : ($p->status === 'failed' ? 'danger' : 'secondary') }}">
+                                                        {{ $p->status }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="progress" style="height:8px;min-width:80px;">
+                                                        <div class="progress-bar" style="width:{{ $p->progress_percent }}%"></div>
+                                                    </div>
+                                                    <small class="text-muted">{{ $p->progress_percent }}% · {{ $p->current_step }}</small>
+                                                </td>
+                                                <td class="small">
+                                                    {{ $p->error_message ?: $p->message }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    @endif
+
     <section class="fed-section" id="fed-section-remote">
         @if(! $isCountryHub)
             <p class="text-muted small mb-3">As a continental hub, register country instances here to browse and sync their public publications and forums.</p>
@@ -330,15 +469,28 @@
 @section('scripts')
 <script>
 (function () {
+    function activateFedTab(tab) {
+        if (!tab) return;
+        document.querySelectorAll('.fed-tab').forEach(function (b) {
+            b.classList.toggle('active', b.getAttribute('data-fed-tab') === tab);
+        });
+        document.querySelectorAll('.fed-section').forEach(function (s) {
+            s.classList.toggle('active', s.id === 'fed-section-' + tab);
+        });
+    }
+
     document.querySelectorAll('.fed-tab').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var tab = btn.getAttribute('data-fed-tab');
-            document.querySelectorAll('.fed-tab').forEach(function (b) { b.classList.toggle('active', b === btn); });
-            document.querySelectorAll('.fed-section').forEach(function (s) {
-                s.classList.toggle('active', s.id === 'fed-section-' + tab);
-            });
+            if (!tab) return;
+            activateFedTab(tab);
         });
     });
+
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('fed_tab')) {
+        activateFedTab(params.get('fed_tab'));
+    }
 
     var testBtn = document.getElementById('adminTestCentralBtn');
     if (testBtn) {
@@ -361,6 +513,67 @@
                     }
                 });
         });
+    }
+
+    var countrySelect = document.getElementById('fedProvisionCountry');
+    var slugInput = document.getElementById('fedProvisionSlug');
+    var siteNameInput = document.getElementById('fedProvisionSiteName');
+    if (countrySelect && slugInput) {
+        countrySelect.addEventListener('change', function () {
+            var opt = countrySelect.options[countrySelect.selectedIndex];
+            if (!opt || !opt.value) return;
+            var slug = opt.getAttribute('data-slug') || '';
+            var name = opt.getAttribute('data-name') || '';
+            if (slug && (!slugInput.value || slugInput.dataset.autofilled === '1')) {
+                slugInput.value = slug;
+                slugInput.dataset.autofilled = '1';
+            }
+            if (siteNameInput && name && (!siteNameInput.value || siteNameInput.dataset.autofilled === '1')) {
+                siteNameInput.value = name + ' Knowledge Hub';
+                siteNameInput.dataset.autofilled = '1';
+            }
+        });
+        slugInput.addEventListener('input', function () {
+            slugInput.dataset.autofilled = '0';
+        });
+        if (siteNameInput) {
+            siteNameInput.addEventListener('input', function () {
+                siteNameInput.dataset.autofilled = '0';
+            });
+        }
+    }
+
+    function pollProvisions() {
+        var rows = document.querySelectorAll('#fedProvisionTable tr[data-provision-id][data-terminal="0"]');
+        if (!rows.length) return;
+        rows.forEach(function (row) {
+            var id = row.getAttribute('data-provision-id');
+            fetch('{{ url('/admin/federated-hubs/provision') }}/' + id, {
+                headers: { 'Accept': 'application/json' }
+            }).then(function (r) { return r.json(); }).then(function (data) {
+                if (!data || !data.id) return;
+                var badge = row.querySelector('.badge');
+                if (badge) {
+                    badge.textContent = data.status;
+                    badge.className = 'badge bg-' + (data.status === 'completed' ? 'success' : (data.status === 'failed' ? 'danger' : 'secondary'));
+                }
+                var bar = row.querySelector('.progress-bar');
+                if (bar) bar.style.width = (data.progress_percent || 0) + '%';
+                var small = row.querySelector('small.text-muted');
+                if (small) small.textContent = (data.progress_percent || 0) + '% · ' + (data.current_step || '');
+                var msg = row.querySelector('td.small');
+                if (msg) msg.textContent = data.error_message || data.message || '';
+                if (data.status === 'completed' || data.status === 'failed') {
+                    row.setAttribute('data-terminal', '1');
+                    if (data.status === 'completed') {
+                        setTimeout(function () { window.location.reload(); }, 1200);
+                    }
+                }
+            }).catch(function () {});
+        });
+    }
+    if (document.getElementById('fedProvisionTable')) {
+        setInterval(pollProvisions, 4000);
     }
 })();
 </script>
