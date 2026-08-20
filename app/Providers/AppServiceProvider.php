@@ -70,9 +70,6 @@ class AppServiceProvider extends ServiceProvider
             URL::forceRootUrl(rtrim($appUrl, '/'));
         }
 
-        if (! defined('PHPGRID_LIBPATH')) {
-            define('PHPGRID_LIBPATH', 'libs/phpgrid/');
-        }
         Paginator::useBootstrap();
         Schema::defaultStringLength(191);
 

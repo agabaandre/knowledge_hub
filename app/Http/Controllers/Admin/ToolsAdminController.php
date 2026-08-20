@@ -8,16 +8,14 @@ use App\Http\Controllers\Controller;
 use App\Models\ToolCategory;
 use App\Models\Tool;
 use App\Models\User;
-use App\Services\UITableService;
 
 class ToolsAdminController extends Controller
 {
-    private $toolRepository,$uiTableService;
+    private $toolRepository;
 
-    public function __construct(ToolsRepository $toolRepository, UITableService $uiTableService)
+    public function __construct(ToolsRepository $toolRepository)
     {
         $this->toolRepository = $toolRepository;
-        $this->uiTableService  = $uiTableService;
     }
 
     public function index(Request $request){

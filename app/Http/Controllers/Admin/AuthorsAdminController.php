@@ -5,19 +5,17 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\AuthorsRepository;
-use App\Services\UITableService;
 use App\Models\Author;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Rule;
 
 class AuthorsAdminController extends Controller
 {
-    private $authorsRepo, $uiTableService;
+    private $authorsRepo;
 
-    public function __construct(AuthorsRepository $authorsRepo, UITableService $uiTableServie)
+    public function __construct(AuthorsRepository $authorsRepo)
     {
-        $this->authorsRepo    = $authorsRepo;
-        $this->uiTableService = $uiTableServie;
+        $this->authorsRepo = $authorsRepo;
     }
 
     public function store(Request $request){

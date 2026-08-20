@@ -1,29 +1,5 @@
 @include('admin/layouts/partials/header')
 
-@php
- $table_assets = config('uitable.js_asset_path');
- $theme = "material";//"pepper-grinder";
-@endphp
-
-
-<link rel="stylesheet" type="text/css" media="screen" href="{{asset($table_assets)}}/themes/{{$theme}}/jquery-ui.custom.css"></link>
-<link rel="stylesheet" type="text/css" media="screen" href="{{asset($table_assets)}}/jqgrid/css/ui.jqgrid.css"></link>
-<style>
- #d_tg,.loading,.bottominfo{display: none!important;}
- #div_no_record_list1{
-    display: none!important;
- }
-
- #div_no_record_list1::after{
-    display: block;
-    content: "No records"!important;
- }
-</style>
-<!-- <script src="{{asset($table_assets)}}jquery.min.js" type="text/javascript"></script> -->
-<script src="{{asset($table_assets)}}/jqgrid/js/i18n/grid.locale-en.js" type="text/javascript"></script>
-<script src="{{asset($table_assets)}}/jqgrid/js/jquery.jqGrid.min.js" type="text/javascript"></script>
-<script src="{{asset($table_assets)}}/themes/jquery-ui.custom.min.js" type="text/javascript"></script>
-
 @yield('styles')
 @include('admin/layouts/partials/preloader')
 

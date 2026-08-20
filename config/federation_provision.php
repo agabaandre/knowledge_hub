@@ -45,6 +45,8 @@ return [
         '.git',
         '.idea',
         '.vscode',
+        'libs/phpgrid',
+        'public/assets/phpgrid',
     ],
 
 ];

@@ -11,18 +11,16 @@ use App\Models\CommunityOfPractice;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\UserBadge;
 use App\Models\User;
-use App\Services\UITableService;
 use App\Support\ContentModeration;
 use Illuminate\Support\Facades\DB;
 
 class CommsOfPracticeController extends Controller
 {
-    private $commsOfPracticeRepository,$uiTableService,$areasRepo;
+    private $commsOfPracticeRepository,$areasRepo;
 
-    public function __construct(CommsOfPracticeRepository $commsOfPracticeRepository, UITableService $uiTableService, AreasRepository $areasRepo)
+    public function __construct(CommsOfPracticeRepository $commsOfPracticeRepository, AreasRepository $areasRepo)
     {
         $this->commsOfPracticeRepository = $commsOfPracticeRepository;
-        $this->uiTableService  = $uiTableService;
         $this->areasRepo = $areasRepo;
     }
 
@@ -32,40 +30,6 @@ class CommsOfPracticeController extends Controller
             return response()->json($this->commsOfPracticeRepository->adminCommunitiesDatatable($request));
         }
 
-        $col = array();
-        $col["title"]    = "Id"; 
-        $col["name"]     = "id"; 
-        $col["width"]    = "30"; 
-        $col["editable"] = false;
-        $col["hidden"]   = true;
-        $cols[] = $col;
-
-        $col = array();
-        $col["title"]    = "Community"; 
-        $col["name"]     = "community_name"; 
-        $col["width"]    = "30"; 
-        $col["editable"] = true;
-        $cols[] = $col;
-
-        $col = array();
-        $col["title"]    = "Is Active"; 
-        $col["name"]     = "is_active"; 
-        $col["width"]    = "10"; 
-        $col["editable"] = true;
-        $col["edittype"] = "select";
-        $col["editoptions"] = array("value"=>"1:Yes;0:No");
-        $cols[] = $col;
-
-        $col = array();
-        $col["title"]    = "Created By"; 
-        $col["name"]     = "created_by"; 
-        $col["width"]    = "10"; 
-        $col["editable"] = true;
-        //$col["hidden"]   = true;
-        $col["edittype"] = "select";
-        $col["editoptions"] = array("value"=>current_user()->id.":".current_user()->name);
-        $cols[] = $col;
-
         // Get communities with pending member counts (admin can see all, including non-public)
         $request->merge(['admin' => true]);
         
@@ -73,8 +37,6 @@ class CommsOfPracticeController extends Controller
         $data['regions'] = $this->areasRepo->regions()->load('countries');
         
         $data['search']    = (Object) $request->all();
-        $sql = "SELECT c.id,community_name,description,is_active,u.name as created_by FROM community_of_practices c left join users u on u.id=c.created_by";
-        $data['uitable'] = $this->uiTableService->get_ui_table("community_of_practices",$cols,$sql);
         
         // Count pending member approvals for notification bell
         $data['pending_member_approvals_count'] = \App\Models\CommunityOfPracticeMembers::where('is_approved', 0)
