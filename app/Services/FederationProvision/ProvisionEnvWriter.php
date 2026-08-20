@@ -3,6 +3,7 @@
 namespace App\Services\FederationProvision;
 
 use Illuminate\Support\Str;
+use App\Support\HubSiteIdentifier;
 
 class ProvisionEnvWriter
 {
@@ -13,8 +14,9 @@ class ProvisionEnvWriter
     /**
      * @param  array{database: string, username: string, password: string, host: string, port: int}  $db
      * @param  array<string, string>  $extra
+     * @return array{site_id: string, files_root: string, sql_backup_root: string, base_url: string}
      */
-    public function writeCountryEnv(string $targetPath, string $slug, int $countryId, array $db, array $extra = []): void
+    public function writeCountryEnv(string $targetPath, string $slug, int $countryId, array $db, array $extra = []): array
     {
         $baseUrl = rtrim((string) config('federation_provision.public_base_url'), '/').'/'.$slug;
         $continentalUrl = rtrim((string) config('app.url'), '/');
@@ -30,6 +32,8 @@ class ProvisionEnvWriter
         }
 
         $appKey = 'base64:'.base64_encode(random_bytes(32));
+        $siteId = HubSiteIdentifier::fromAppUrl($baseUrl);
+        $paths = HubSiteIdentifier::defaultPaths($siteId);
 
         $values = array_merge([
             'APP_NAME' => $extra['APP_NAME'] ?? (ucfirst($slug).' Knowledge Hub'),
@@ -49,7 +53,9 @@ class ProvisionEnvWriter
             'STATES_ENABLED' => 'false',
             'ADMIN_UNITS_ENABLED' => 'true',
             'HUB_OWNER_COUNTRY_ID' => (string) $countryId,
-            'HUB_SITE_ID' => $slug,
+            'HUB_SITE_ID' => $siteId,
+            'HUB_FILES_ROOT' => $paths['files'],
+            'HUB_SQL_BACKUP_ROOT' => $paths['sql_backups'],
             'CENTRAL_HUB_URL' => $centralUrl,
             'CENTRAL_HUB_API_TOKEN' => $federationToken,
             'FEDERATION_API_TOKEN' => Str::random(40),
@@ -91,6 +97,13 @@ class ProvisionEnvWriter
 
         $envPath = rtrim($targetPath, '/').'/.env';
         $this->filesystem->writeFileAsRoot($envPath, $contents);
+
+        return [
+            'site_id' => $siteId,
+            'files_root' => $paths['files'],
+            'sql_backup_root' => $paths['sql_backups'],
+            'base_url' => $baseUrl,
+        ];
     }
 
     /**

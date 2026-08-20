@@ -87,6 +87,8 @@ Tabs:
 
 See `docs/superpowers/specs/2026-08-20-federated-hub-provision-design.md` for the full provision design.
 
+During provision, each country hub gets a dedicated MySQL database and a **site-scoped host data tree** under `/var/khubdata/{site-id}/` (derived from `APP_URL`, e.g. `https://khub.africacdc.org/ghana` → `khub-africacdc-org-ghana`), with `HUB_SITE_ID`, `HUB_FILES_ROOT`, and `HUB_SQL_BACKUP_ROOT` written into the country `.env`. Application runtime dirs (`storage`, `bootstrap/cache`, `public/uploads`) are also created and owned by the web user.
+
 ---
 
 ## Installation (country hubs)

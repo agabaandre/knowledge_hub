@@ -91,6 +91,60 @@ class ProvisionFilesystem
         return $target;
     }
 
+    /**
+     * Create persistent per-hub storage under /var/khubdata/{site-id}/ (outside the app tree).
+     *
+     * @return array{site_root: string, files: string, sql_backups: string}
+     */
+    public function ensureHubDataDirectories(string $siteId): array
+    {
+        $siteId = \App\Support\HubSiteIdentifier::sanitize($siteId);
+        $paths = \App\Support\HubSiteIdentifier::defaultPaths($siteId);
+        $user = (string) config('federation_provision.web_user', 'www-data');
+        $group = (string) config('federation_provision.web_group', 'www-data');
+
+        foreach ([$paths['site_root'], $paths['files'], $paths['sql_backups']] as $dir) {
+            $this->sudo->run(['mkdir', '-p', $dir]);
+        }
+
+        // Content prefixes used by HubStorageService (under files root).
+        foreach (config('hub_storage.content_prefixes', []) as $prefix) {
+            $this->sudo->run(['mkdir', '-p', $paths['files'].'/'.ltrim((string) $prefix, '/')]);
+        }
+
+        $this->sudo->run(['chown', '-R', $user.':'.$group, $paths['site_root']]);
+        $this->sudo->run(['chmod', '-R', 'ug+rwx', $paths['site_root']]);
+
+        return $paths;
+    }
+
+    /**
+     * Ensure app-tree writable dirs exist (storage, bootstrap/cache, public/uploads).
+     */
+    public function ensureAppWritableDirectories(string $targetPath): void
+    {
+        $user = (string) config('federation_provision.web_user', 'www-data');
+        $group = (string) config('federation_provision.web_group', 'www-data');
+        $target = rtrim($targetPath, '/');
+
+        foreach ([
+            'storage',
+            'storage/app',
+            'storage/logs',
+            'storage/framework',
+            'storage/framework/cache',
+            'storage/framework/sessions',
+            'storage/framework/views',
+            'bootstrap/cache',
+            'public/uploads',
+        ] as $dir) {
+            $this->sudo->run(['mkdir', '-p', $target.'/'.$dir]);
+        }
+
+        $this->sudo->run(['chown', '-R', $user.':'.$group, $target.'/storage', $target.'/bootstrap/cache', $target.'/public/uploads']);
+        $this->sudo->run(['chmod', '-R', 'ug+rwx', $target.'/storage', $target.'/bootstrap/cache', $target.'/public/uploads']);
+    }
+
     public function removeTarget(string $slug): void
     {
         $target = $this->targetPath($slug);

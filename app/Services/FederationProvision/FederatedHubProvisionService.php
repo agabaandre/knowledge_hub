@@ -148,13 +148,20 @@ class FederatedHubProvisionService
             $provision->markStep('database', 'Database created.', 45);
 
             $provision->markStep('env', 'Writing country environment…', 50);
-            $this->envWriter->writeCountryEnv(
+            $envMeta = $this->envWriter->writeCountryEnv(
                 $target,
                 $slug,
                 (int) $provision->country_id,
                 $dbCreds,
                 ['APP_NAME' => (string) $provision->site_name]
             );
+            $this->filesystem->ensureAppWritableDirectories($target);
+            $hubPaths = $this->filesystem->ensureHubDataDirectories($envMeta['site_id']);
+            $provision->markStep('env', 'Environment and site storage prepared.', 52, [
+                'hub_site_id' => $envMeta['site_id'],
+                'hub_files_root' => $hubPaths['files'],
+                'hub_sql_backup_root' => $hubPaths['sql_backups'],
+            ]);
 
             $provision->markStep('apache', 'Adding Apache Alias…', 55);
             $this->apache->addAlias($slug);

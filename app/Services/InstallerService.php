@@ -226,6 +226,9 @@ class InstallerService
             }
             $writable = is_dir($path) && is_writable($path);
             $relative = str_replace(base_path().'/', '', $path);
+            $fixHint = 'sudo mkdir -p storage/app storage/logs storage/framework/{cache,sessions,views} bootstrap/cache public/uploads'
+                .' && sudo chown -R www-data:www-data storage bootstrap/cache public/uploads'
+                .' && sudo chmod -R ug+rwx storage bootstrap/cache public/uploads';
             $checks[] = [
                 'label' => 'Writable: '.$relative,
                 'ok' => $writable,
@@ -233,30 +236,41 @@ class InstallerService
                     ? 'OK'
                     : ('Not writable'
                         .($createError ? ' — '.$createError : '')
-                        .'. Fix with: sudo chown -R www-data:www-data storage bootstrap/cache && sudo chmod -R ug+rwx storage bootstrap/cache'),
+                        .'. Fix with: '.$fixHint),
                 'required' => true,
             ];
         }
 
+        $hubStorage = app(HubStorageService::class);
+        $recommended = $hubStorage->recommendedPaths();
         $storageDefaults = $this->storageDefaults();
         foreach ([
-            'files' => $storageDefaults['files_root'],
-            'sql_backups' => $storageDefaults['sql_backup_root'],
+            'site_root' => $recommended['site_root'],
+            'files' => $storageDefaults['files_root'] ?: $recommended['files'],
+            'sql_backups' => $storageDefaults['sql_backup_root'] ?: $recommended['sql_backups'],
         ] as $label => $path) {
+            $createError = null;
             if (! File::isDirectory($path)) {
-                @File::ensureDirectoryExists($path, 0775, true);
+                try {
+                    File::ensureDirectoryExists($path, 0775, true);
+                } catch (\Throwable $e) {
+                    $createError = $e->getMessage();
+                }
             }
             $writable = is_dir($path) && is_writable($path);
             $checks[] = [
                 'label' => "Host data path ({$label}): {$path}",
                 'ok' => $writable,
                 'message' => $writable
-                    ? 'Writable'
+                    ? 'Writable (site id: '.$recommended['site_id'].')'
                     : ($runtime === 'docker'
                         ? 'Create and mount a host volume at /var/khubdata (see docker-compose)'
                         : ($runtime === 'windows'
                             ? 'Create the folder and grant the web server write access: '.$path
-                            : 'Run: sudo mkdir -p '.$path.' && sudo chown www-data '.$path)),
+                            : 'Run: sudo mkdir -p '.$path
+                                .' && sudo chown -R www-data:www-data '.dirname($recommended['site_root']).'/'.$recommended['site_id']
+                                .' && sudo chmod -R ug+rwx '.dirname($recommended['site_root']).'/'.$recommended['site_id']
+                                .($createError ? ' — '.$createError : ''))),
                 'required' => $runtime !== 'docker',
             ];
         }

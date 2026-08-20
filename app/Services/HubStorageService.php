@@ -741,7 +741,16 @@ class HubStorageService
         }
 
         foreach ([$hostRoot, $paths['site_root'], $paths['files'], $paths['sql_backups']] as $directory) {
-            File::ensureDirectoryExists($directory, 0775, true);
+            try {
+                File::ensureDirectoryExists($directory, 0775, true);
+            } catch (\Throwable $e) {
+                throw new \RuntimeException(
+                    'Could not create hub data directory "'.$directory.'": '.$e->getMessage()
+                    .'. Create it with: sudo mkdir -p '.$paths['site_root'].'/files '.$paths['sql_backups']
+                    .' && sudo chown -R www-data:www-data '.$paths['site_root']
+                    .' && sudo chmod -R ug+rwx '.$paths['site_root']
+                );
+            }
         }
     }
 
@@ -776,6 +785,14 @@ class HubStorageService
         }
 
         File::ensureDirectoryExists($this->sqlBackupRoot(), 0775, true);
+
+        // Legacy / installer-checked upload path inside the app tree.
+        try {
+            File::ensureDirectoryExists(public_path('uploads'), 0775, true);
+        } catch (\Throwable) {
+            // Reported by installer requirements when not writable.
+        }
+
         $this->ensurePublicStorageSymlink();
     }
 
