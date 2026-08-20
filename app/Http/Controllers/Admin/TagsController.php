@@ -21,7 +21,8 @@ class TagsController extends Controller
 
     public function index(Request $request){
 
-        $data['all_tags'] = $this->tagsRepo->get($request,false);
+        $request->merge(['datatable' => true]);
+        $data['all_tags'] = $this->tagsRepo->get($request, true);
         $data['allTagsForMapping'] = $this->tagsRepo->allTagsForMapping();
         $data['search']    = (Object) $request->all();
         $data['healthTopicSources'] = HealthTopicSourceCatalog::sources();

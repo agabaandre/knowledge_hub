@@ -2,6 +2,7 @@
 
 @section('styles')
     @include('common.table')
+    <link href="{{ asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
 @endsection
 
 @section('content')
@@ -22,7 +23,7 @@
             </div>
             <!-- Card Header With Form Filters -->
             <div class="card-header">
-                <form class="container-fluid">
+                <form class="container-fluid" method="get" action="{{ url('admin/subthemes') }}" id="subthemesFilterForm">
                     <div class="row">
 
                         <div class="col-md-12 text-right">
@@ -33,7 +34,7 @@
 
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label for="title">Search</label>
+                                <label for="filterTitle">Search</label>
                                 <input type="text" name="term" id="filterTitle" class="form-control"
                                     placeholder="Filter by name" value="{{ @$search->term ?? '' }}">
                             </div>
@@ -57,7 +58,6 @@
 
                     <div class="row">
                         <div class="col-md-12 text-right">
-                            <!-- Export Button -->
                             <button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
                             <button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
                             <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
@@ -69,8 +69,7 @@
                 </form>
             </div>
             <div class="card-body text-left">
-                <!-- Datatable -->
-                <table id="publicationTable" class="table table-striped table-bordered">
+                <table id="subthemesTable" class="table table-striped table-bordered" data-kh-datatable="client">
                     <thead>
                         <tr>
                             <th style="width:3px;">#</th>
@@ -81,34 +80,27 @@
                         </tr>
                     </thead>
                     <tbody>
-
-                        @php
-                            $i = 1;
-                        @endphp
-
                         @foreach ($subthemes as $row)
                             <tr>
-                                <td>{{ $i++ }}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $row->description }}</td>
                                 <td>{{ $row->icon }}</td>
                                 <td>{{ $row->theme->description ?? '' }}</td>
                                 <td>
-                                    <a href="#edit-subtheme-modal " data-toggle="modal" data-id="{{ $row->id }}"
+                                    <a href="#edit-subtheme-modal" data-toggle="modal" data-id="{{ $row->id }}"
                                         data-description="{{ e((string) $row->description) }}" data-icon="{{ e((string) $row->icon) }}"
                                         data-detailed_description="{{ e((string) ($row->detailed_description ?? '')) }}"
                                         data-thematic_area_id="{{ $row->thematic_area_id }}"
                                         class="btn btn-sm btn-primary ml-1">Edit</a>
                                     @can('delete_publication_metadata')
                                     <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);"
-                                        onclick='openDeleteModal({{ (int) $row->id }}, @json((string) $row->description))' class="text-danger"> Delete</a>
+                                        onclick='openDeleteModal({{ (int) $row->id }}, @json((string) $row->description))'>Delete</a>
                                     @endcan
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
-
-                <div class="py-2"> {{ $subthemes->links() }}</div>
 
             </div>
 
@@ -118,10 +110,36 @@
             'themes' => $themes,
             'selectedThemeId' => $selectedThemeId ?? 0,
         ])
-        <!-- Include edit-modal.php -->
         @include('admin.subthemes.partials.edit-modal', [
             'themes' => $themes,
         ])
-        <!-- Include delete-modal.php -->
         @include('admin.subthemes.partials.delete-modal')
-    @endsection
+@endsection
+
+@section('scripts')
+    @include('admin.partials.metadata_datatable')
+    <script>
+        $(function () {
+            // Theme filter is server-side (narrows the dataset); search/sort are client-side.
+            window.khInitMetadataTable('#subthemesTable', {
+                order: [[1, 'asc']]
+            });
+
+            $('#filterButton').off('click.khMetaDt').on('click.khMetaDt', function (e) {
+                // Allow full form submit when a thematic area is selected so the list reloads filtered.
+                var themeId = $('#theme_id').val();
+                if (themeId) {
+                    return true;
+                }
+                e.preventDefault();
+                var table = $('#subthemesTable').DataTable();
+                table.search(String($('#filterTitle').val() || '')).draw();
+            });
+
+            $('#reset').off('click.khMetaDt').on('click.khMetaDt', function (e) {
+                e.preventDefault();
+                window.location.href = @json(url('admin/subthemes'));
+            });
+        });
+    </script>
+@endsection

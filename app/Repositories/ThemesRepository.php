@@ -34,7 +34,14 @@ class ThemesRepository
 
         if ($request->term)
             $themes->where('description', 'like', '%' . $request->term . '%');
-        $result = $themes->paginate($rows_count);
+
+        // Admin DataTables: return the full filtered set (client-side sort/search/page).
+        if ($request->boolean('datatable') || $rows_count === 'all' || (int) $rows_count <= 0) {
+            return $themes->get();
+        }
+
+        $result = $themes->paginate((int) $rows_count);
+        $result->appends($request->only(['term', 'rows']));
 
         return $result;
     }
@@ -68,8 +75,13 @@ class ThemesRepository
         }
         if ($request->term)
             $themes->where('description', 'like', '%' . $request->term . '%');
-        $result = $themes->paginate($rows_count);
-        $result->appends($request->only(['term', 'theme_id', 'thematic_area_id']));
+
+        if ($request->boolean('datatable') || $rows_count === 'all' || (int) $rows_count <= 0) {
+            return $themes->get();
+        }
+
+        $result = $themes->paginate((int) $rows_count);
+        $result->appends($request->only(['term', 'theme_id', 'thematic_area_id', 'rows']));
 
         return $result;
     }

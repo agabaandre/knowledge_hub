@@ -323,7 +323,7 @@
 
 <script>
     window.__adminInitialKpiMap = @json($initialKpiMap);
-    window.__adminMapDataUrl = @json($map_data_url ?? route('countries.map-data'));
+    window.__adminMapDataUrl = @json($map_data_url ?? (\Illuminate\Support\Facades\Route::has('countries.map-data') ? route('countries.map-data') : url('/countries/map-data')));
     window.__adminMapRegions = @json($mapRegions->map(fn ($r) => ['id' => (int) $r->id, 'name' => $r->region_name])->values());
     window.__metricsMapModuleUrl = @json(asset('assets/plugins/highcharts/modules/map.js'));
     window.__metricsLiveUrl = @json(url('admin/metrics/live'));

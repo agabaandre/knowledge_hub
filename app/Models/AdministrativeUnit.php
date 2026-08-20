@@ -14,6 +14,13 @@ class AdministrativeUnit extends Model
        return $this->belongsTo(AdministrativeUnit::class,"parent_id","id");
     }
 
+    public function children()
+    {
+        return $this->hasMany(AdministrativeUnit::class, 'parent_id', 'id')
+            ->orderBy('name')
+            ->orderBy('id');
+    }
+
     public function country()
     {
         return $this->belongsTo(Country::class, 'country_id', 'id');

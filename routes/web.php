@@ -169,6 +169,11 @@ if(states_enabled()):
             Route::get('/details', [CountriesController::class, 'country']);
     });
 else:
+    // Country hubs hide the public countries UI, but admin metrics still needs
+    // member-state map/indicator endpoints (route('countries.map-data')).
+    Route::get('/countries/map-data', [CountriesController::class, 'mapData'])->name('countries.map-data');
+    Route::get('/countries/indicator-summaries', [CountriesController::class, 'indicatorSummaries'])->name('countries.indicator-summaries');
+
     Route::group(["prefix" => "adminunits"], function () {
         Route::get('/', [AdminUnitFrontEndController::class, 'index'])->name('adminunits');
         Route::get('/map-data', [AdminUnitFrontEndController::class, 'mapData'])->name('adminunits.map-data');
@@ -472,7 +477,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web', 'admin.access
 
         Route::get("/", [HealthThemesController::class, 'index']);
         Route::post("/save", [HealthThemesController::class, 'store']);
-        Route::get("/delete", [HealthThemesController::class, 'destroy']);
+        Route::match(['get', 'post'], "/delete", [HealthThemesController::class, 'destroy']);
     });
 
     //subthemes
@@ -481,7 +486,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web', 'admin.access
         Route::get("/", [SubHealthThemesController::class, 'index']);
         Route::post("/save", [SubHealthThemesController::class, 'store']);
         Route::post("/edit", [SubHealthThemesController::class, 'edit']);
-        Route::get("/delete", [SubHealthThemesController::class, 'destroy']);
+        Route::match(['get', 'post'], "/delete", [SubHealthThemesController::class, 'destroy']);
     });
 
     // Sub Categories (publication form - after Categories in dropdown lists)
@@ -498,7 +503,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web', 'admin.access
         Route::get("/", [TagsController::class, 'index']);
         Route::post("/save", [TagsController::class, 'store']);
         Route::put('/update', [TagsController::class, 'update'])->name('update');
-        Route::get("/delete", [TagsController::class, 'destroy']);
+        Route::match(['get', 'post'], "/delete", [TagsController::class, 'destroy']);
         Route::post('/ai-generate', [TagsController::class, 'aiGenerate'])->name('ai-generate');
         Route::post('/ai-import', [TagsController::class, 'aiImport'])->name('ai-import');
         Route::post('/ai-describe', [TagsController::class, 'aiDescribe'])->name('ai-describe');

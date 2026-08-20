@@ -11,7 +11,7 @@
         'map_regions' => $map_regions ?? collect(),
         'initial_kpi_map' => $initial_kpi_map ?? null,
         'continental_indicators' => $continental_indicators ?? [],
-        'map_data_url' => $map_data_url ?? route('countries.map-data'),
+        'map_data_url' => $map_data_url ?? (\Illuminate\Support\Facades\Route::has('countries.map-data') ? route('countries.map-data') : url('/countries/map-data')),
     ]))
 </div>
 @endsection

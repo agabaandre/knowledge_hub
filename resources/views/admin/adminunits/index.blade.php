@@ -2,6 +2,7 @@
 
 @section('styles')
  @include('common.table')
+ <link href="{{ asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
 @endsection
 
 @section('content')
@@ -13,7 +14,7 @@
 		</div>
 		<!-- Card Header With Form Filters -->
 		<div class="card-header">
-			<form  class="container-fluid">
+			<form  class="container-fluid" method="get" action="{{ url('admin/adminunits') }}" id="adminUnitsFilterForm">
 				  <div class="row">
 				   
 				    <div class="col-md-12 text-right">
@@ -22,9 +23,9 @@
 
 					<div class="col-md-12">
 						<div class="form-group">
-							<label for="title">Search</label>
+							<label for="filterTitle">Search</label>
 							<input type="text" name="term" id="filterTitle" class="form-control"
-								placeholder="Filter by name"
+								placeholder="Filter by name, code, or description"
                                 value="{{ @$search->term ?? ''}}"
 							>
 						</div>
@@ -35,7 +36,6 @@
 
 				<div class="row">
 					<div class="col-md-12 text-right">
-						<!-- Export Button -->
 						<button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
 						<button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
                         <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
@@ -49,12 +49,11 @@
             </form>
 		</div>
 		<div class="card-body text-left">
-			<!-- Datatable -->
-			<table id="publicationTable" class="table table-striped table-bordered">
+			@include('layouts.partials.alerts')
+			<table id="adminUnitsTable" class="table table-striped table-bordered" data-kh-datatable="client">
 				<thead>
 					<tr>
-						
-					    <th>Logo</th>
+					    <th style="width:70px;">Logo</th>
 						<th>Unit Name</th>
 						<th>Description</th>
 						<th>Parent</th>
@@ -62,43 +61,46 @@
 					</tr>
 				</thead>
 				<tbody>
-
-					@php 
-                    $i = 1;
-                    @endphp
-
 					@foreach($adminunits as $row)
 						<tr>
-						    <td><img src="{{ ($row->logo)?storage_link("uploads/adminunits/".$row->logo) : asset("assets/images/placeholder.pg") }}" width="50px" class="img img-thumbnail"/></td>
+						    <td data-order="{{ e((string) ($row->name ?? '')) }}">
+                                <img src="{{ ($row->logo)?storage_link("uploads/adminunits/".$row->logo) : asset("assets/images/placeholder.png") }}" width="50px" class="img img-thumbnail" alt=""/>
+                            </td>
 							<td>{{ $row->name }}</td>
 							<td>{{ $row->description }}</td>
 							<td>{{ ($row->parent)?$row->parent->name:"N/A" }}</td>
 							<td>
-								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
-								<a class="btn btn-sm btn-primary ml-1" href="#edit{{$row->id}}" data-toggle="modal"  class="text-danger"> Edit</a>
+								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')"> Delete</a>
+								<a class="btn btn-sm btn-primary ml-1" href="#edit{{$row->id}}" data-toggle="modal"> Edit</a>
 							</td>
 						</tr>
 						@include('admin.adminunits.partials.edit-modal',['row'=>$row])
 					@endforeach
 				</tbody>
 			</table>
-
-            <div class="py-2"> {{$adminunits->links() }}</div>
-
 		</div>
 
 	</div>
 
 	
-	<!-- Include delete-modal.php -->
 	@include('admin.adminunits.partials.delete-modal')
 
-    @endsection
+@endsection
 
-	@section('scripts')
+@section('scripts')
+    @include('admin.partials.metadata_datatable')
+    @include('common.attachment_js')
+    <script>
+    $(function () {
+        window.khInitMetadataTable('#adminUnitsTable', {
+            order: [[1, 'asc']],
+            columnDefs: [
+                { orderable: false, searchable: false, targets: [0, -1] }
+            ],
+            pageLength: 25
+        });
+    });
 
-   	 @include('common.attachment_js')
-     <script>
      document.addEventListener('change', function (e) {
          if (!e.target.matches('.js-admin-unit-country')) return;
          var opt = e.target.options[e.target.selectedIndex];
@@ -112,5 +114,4 @@
          if (iso3Input && iso3) iso3Input.value = iso3;
      });
      </script>
-
-	@endsection
+@endsection

@@ -23,6 +23,7 @@ class SubHealthThemesController extends Controller
             ->orderBy('description', 'asc')
             ->orderBy('id', 'asc')
             ->get();
+        $request->merge(['datatable' => true]);
         $data['subthemes'] = $this->themesRepo->get_all_subthemes($request);
         $data['allSubthemesForMapping'] = $this->themesRepo->allSubthemesForMapping();
         $data['faIconOptions'] = $this->themesRepo->fontAwesomeIconOptions();

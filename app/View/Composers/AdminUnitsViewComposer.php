@@ -9,10 +9,14 @@ class AdminUnitsViewComposer
 {
     public function compose(View $view)
     {
-        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
+        $minutes = (int) env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
 
-        $adminunits = cache()->remember('adminunits', $minutes, function () {
-            return AdministrativeUnit::all();
+        $allAdminUnits = cache()->remember('adminunits', $minutes, function () {
+            return AdministrativeUnit::query()
+                ->with('parent')
+                ->orderBy('name')
+                ->orderBy('id')
+                ->get();
         });
 
         $countries = cache()->remember('admin_unit_countries', $minutes, function () {
@@ -24,7 +28,13 @@ class AdminUnitsViewComposer
                 ->get(['id', 'name', 'iso_code', 'iso3_code']);
         });
 
-        $view->with('adminunits', $adminunits);
+        // Parent dropdowns need the full tree. Do NOT overwrite controller `$adminunits`
+        // (paginator / filtered list) on admin index pages.
+        $view->with('allAdminUnits', $allAdminUnits);
         $view->with('hubCountries', $countries);
+
+        if (! $view->offsetExists('adminunits')) {
+            $view->with('adminunits', $allAdminUnits);
+        }
     }
 }

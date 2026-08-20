@@ -64,13 +64,16 @@
           <div class="col-md-12">
             <div class="mb-3">
               <label class="form-label" for="parent_id">Parent Admin Unit</label>
-              <select class="form-control newform"  id="parent_id" name="parent_id" >
-                <option value="">None</option>
-                @foreach($adminunits as $unit)
-                <option {{ (($row && $row->parent_id == $unit->id) || (int) old('parent_id') === (int) $unit->id) ? 'selected' : '' }}
-                     value="{{ $unit->id }}">{{ $unit->name }}</option>
+              <select class="form-control newform no-select2"  id="parent_id" name="parent_id" >
+                <option value="">None (top level)</option>
+                @foreach(($allAdminUnits ?? $adminunits ?? collect()) as $unit)
+                @if(! $row || (int) $unit->id !== (int) $row->id)
+                <option {{ (($row && (int) $row->parent_id === (int) $unit->id) || (int) old('parent_id') === (int) $unit->id) ? 'selected' : '' }}
+                     value="{{ $unit->id }}">{{ $unit->name }}@if($unit->parent) — under {{ $unit->parent->name }}@endif</option>
+                @endif
                 @endforeach
               </select>
+              <small class="text-muted">A parent may have many children at the same level.</small>
             </div>
           </div>
 

@@ -81,6 +81,32 @@
             ?? (settings()->language ?? 'en')
     );
 
+    // Country hubs: default Member States / Region to Configure → Advanced owner country.
+    $isCountryHub = function_exists('hub_admin_units_enabled')
+        ? hub_admin_units_enabled()
+        : (function_exists('admin_units_enabled') && admin_units_enabled());
+    $defaultOwnerCountryId = function_exists('hub_owner_country_id') ? hub_owner_country_id() : null;
+    $defaultOwnerRegionId = function_exists('hub_owner_region_id') ? hub_owner_region_id() : null;
+
+    $selectedRegionIds = old('rccs');
+    if ($selectedRegionIds === null) {
+        $selectedRegionIds = optional($publication)->region_ids ?? null;
+        if ($selectedRegionIds === null && $publication && ! empty($publication->geographical_coverage_id)) {
+            $selectedRegionIds = [$publication->geographical_coverage_id];
+        }
+        if (empty($selectedRegionIds) && ! $publication && $defaultOwnerRegionId) {
+            $selectedRegionIds = [$defaultOwnerRegionId];
+        }
+    }
+
+    $selectedCountryIds = old('countries');
+    if ($selectedCountryIds === null) {
+        $selectedCountryIds = optional($publication)->country_ids ?? null;
+        if (empty($selectedCountryIds) && ! $publication && $isCountryHub && $defaultOwnerCountryId) {
+            $selectedCountryIds = [$defaultOwnerCountryId];
+        }
+    }
+
 @endphp
 
 <!-- SmartWizard html -->
@@ -405,7 +431,7 @@
                             'field' => 'rccs[]',
                             'required' => 'required',
                             'class' => 'rcc select2',
-                            'selected' => @$row->region_ids ?? (isset($row->geographical_coverage_id) ? [$row->geographical_coverage_id] : (hub_owner_region_id() ? [hub_owner_region_id()] : null)),
+                            'selected' => $selectedRegionIds,
                             'multiple' => 'multiple',
                             'allfield' => 'All',
                         ])
@@ -417,7 +443,7 @@
                             'field' => 'countries[]',
                             'required' => 'required',
                             'class' => 'country select2',
-                            'selected' => $row->country_ids ?? (hub_owner_country_id() ? [hub_owner_country_id()] : null),
+                            'selected' => $selectedCountryIds,
                             'multiple' => 'multiple',
                             'all_option' => true,
                             'allfield' => 'All',
@@ -824,6 +850,8 @@
         // Get regions data with countries (from ViewComposer)
         var regionsData = @json($regions ?? []);
         var allCountries = [];
+        var hubOwnerCountryId = @json($defaultOwnerCountryId ? (string) $defaultOwnerCountryId : null);
+        var hubAdminUnitsEnabled = @json((bool) $isCountryHub);
         
         // Build a map of all countries with their region_id for quick lookup
         if (regionsData && Array.isArray(regionsData)) {
@@ -897,6 +925,18 @@
             return specifics;
         }
 
+        function wizardDefaultCountrySelection(regionCountries) {
+            if (hubAdminUnitsEnabled && hubOwnerCountryId) {
+                var ownerInRegion = (regionCountries || []).some(function(c) {
+                    return String(c.id) === String(hubOwnerCountryId);
+                });
+                if (ownerInRegion) {
+                    return [String(hubOwnerCountryId)];
+                }
+            }
+            return ['all'];
+        }
+
         function wizardApplyRegionToCountries(selectedValues, options) {
             options = options || {};
             var preserveSelection = options.preserveSelection !== false;
@@ -911,10 +951,17 @@
                 selectedValues = selectedValues ? [selectedValues] : [];
             }
 
+            // Capture before rebuild — emptying options clears the current value.
+            var previousValues = wizardNormalizeCountrySelection(wizardGetSelectValue(countrySelect));
+
             if (wizardRegionSelectionIncludesAll(selectedValues)) {
                 userManuallyChangedCountries = false;
                 wizardRebuildCountryOptions(countrySelect, allCountries, true);
-                wizardSetCountrySelection(countrySelect, ['all']);
+                // Country hubs keep the configured owner country even when region is "All".
+                wizardSetCountrySelection(
+                    countrySelect,
+                    hubAdminUnitsEnabled && hubOwnerCountryId ? [String(hubOwnerCountryId)] : ['all']
+                );
                 return;
             }
 
@@ -926,11 +973,9 @@
             var regionCountries = wizardCountriesForRegionIds(regionIds);
             wizardRebuildCountryOptions(countrySelect, regionCountries, true);
 
-            var nextSelection = ['all'];
+            var nextSelection = wizardDefaultCountrySelection(regionCountries);
             if (preserveSelection) {
-                var currentVal = wizardGetSelectValue(countrySelect);
-                var currentValues = wizardNormalizeCountrySelection(currentVal);
-                var validSpecific = currentValues.filter(function(v) {
+                var validSpecific = previousValues.filter(function(v) {
                     if (String(v).toLowerCase() === 'all') {
                         return false;
                     }
@@ -941,11 +986,9 @@
                 if (validSpecific.length) {
                     nextSelection = validSpecific;
                     userManuallyChangedCountries = true;
-                } else if (currentValues.indexOf('all') !== -1 || String(currentVal).toLowerCase() === 'all') {
-                    nextSelection = ['all'];
-                    userManuallyChangedCountries = false;
-                } else if (!options.fromUserRegionChange) {
-                    nextSelection = ['all'];
+                } else if (previousValues.indexOf('all') !== -1) {
+                    // Explicit "All" only when not a country hub (or owner country not in filter).
+                    nextSelection = wizardDefaultCountrySelection(regionCountries);
                     userManuallyChangedCountries = false;
                 }
             }
@@ -1047,8 +1090,9 @@
                 return v && String(v).toLowerCase() !== 'all' && parseInt(v, 10) > 0;
             });
 
+            // Always preserve a concrete country selection (e.g. default owner country on country hubs).
             wizardApplyRegionToCountries(regionValues, {
-                preserveSelection: hasSavedCountries,
+                preserveSelection: true,
                 fromUserRegionChange: false
             });
         }, 600);

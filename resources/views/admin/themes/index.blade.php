@@ -2,6 +2,7 @@
 
 @section('styles')
     @include('common.table')
+    <link href="{{ asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
 @endsection
 
 @section('content')
@@ -19,7 +20,7 @@
            
             <!-- Card Header With Form Filters -->
             <div class="card-header">
-                <form class="container-fluid">
+                <form class="container-fluid" method="get" action="{{ url('admin/themes') }}" id="themesFilterForm">
                     <div class="row">
 
                         <div class="col-md-12 text-right">
@@ -29,7 +30,7 @@
 
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label for="description">Search</label>
+                                <label for="filterTitle">Search</label>
                                 <input type="text" name="term" id="filterTitle" class="form-control"
                                     placeholder="Filter by name" value="{{ @$search->term ?? '' }}">
                             </div>
@@ -40,7 +41,6 @@
 
                     <div class="row">
                         <div class="col-md-12 text-right">
-                            <!-- Export Button -->
                             <button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
                             <button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
                             <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
@@ -53,8 +53,7 @@
             </div>
             <div class="card-body text-left">
                 @include('layouts.partials.alerts')
-                <!-- Datatable -->
-                <table id="publicationTable" class="table table-striped table-bordered">
+                <table id="themesTable" class="table table-striped table-bordered" data-kh-datatable="client">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -65,14 +64,9 @@
                         </tr>
                     </thead>
                     <tbody>
-
-                        @php
-$i = 1;
-                        @endphp
-
                         @foreach ($themes as $row)
                             <tr>
-                                <td>{{ $i++ }}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $row->description }}</td>
                                 <td>{{ (int) ($row->display_order ?? 0) }}</td>
                                 <td>{{ $row->icon }}</td>
@@ -89,7 +83,7 @@ $i = 1;
 
                                     @can('delete_publication_metadata')
                                     <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);"
-                                        onclick='openDeleteModal({{ (int) $row->id }}, @json((string) $row->description))' class="text-danger"> Delete</a>
+                                        onclick='openDeleteModal({{ (int) $row->id }}, @json((string) $row->description))'>Delete</a>
                                     @endcan
                                 </td>
                             </tr>
@@ -97,15 +91,29 @@ $i = 1;
                     </tbody>
                 </table>
 
-                <div class="py-2"> {{ $themes->links() }}</div>
-
             </div>
 
         </div>
 
         @include('admin.themes.partials.create-modal')
-        <!-- Include edit-modal.php -->
         @include('admin.themes.partials.edit-modal')
-        <!-- Include delete-modal.php -->
         @include('admin.themes.partials.delete-modal')
-    @endsection
+@endsection
+
+@section('scripts')
+    @include('admin.partials.metadata_datatable')
+    <script>
+        $(function () {
+            var table = window.khInitMetadataTable('#themesTable', {
+                order: [[2, 'asc'], [1, 'asc']]
+            });
+            $('#exportButton').on('click', function () {
+                if (table) {
+                    // Fallback: copy visible rows as CSV-ish via browser print of table search filter
+                    table.search($('#filterTitle').val() || '').draw();
+                }
+                window.print();
+            });
+        });
+    </script>
+@endsection

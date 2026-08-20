@@ -3,40 +3,79 @@ namespace App\Repositories;
 
 use App\Models\AdministrativeUnit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class AdminUnitsRepository{
 
     public function get(Request $request){
 
-        $records = AdministrativeUnit::orderBy('created_at','desc');
+        $records = AdministrativeUnit::query()->with('parent');
 
-        if($request->term){
-            $records->where('name','like',$request->term.'%');
+        if ($request->filled('term')) {
+            $term = trim((string) $request->term);
+            $records->where(function ($q) use ($term) {
+                $q->where('name', 'like', '%'.$term.'%')
+                    ->orWhere('description', 'like', '%'.$term.'%')
+                    ->orWhere('code', 'like', '%'.$term.'%')
+                    ->orWhere('alternate_code', 'like', '%'.$term.'%');
+            });
         }
 
-        return $records->paginate(15);
+        if ($request->filled('parent_id')) {
+            $records->where('parent_id', (int) $request->parent_id);
+        }
+
+        $sort = (string) $request->input('sort', 'name');
+        $dir = strtolower((string) $request->input('dir', 'asc')) === 'desc' ? 'desc' : 'asc';
+        $allowed = ['name', 'description', 'code', 'created_at', 'id'];
+        if (! in_array($sort, $allowed, true)) {
+            $sort = 'name';
+        }
+
+        $records->orderBy($sort, $dir)->orderBy('id', 'asc');
+
+        // Admin DataTables: full filtered set for client-side sort/search/page.
+        if ($request->boolean('datatable') || $request->input('rows') === 'all') {
+            return $records->get();
+        }
+
+        $rows = (int) ($request->rows ?: 25);
+        if ($rows <= 0) {
+            $rows = 25;
+        }
+
+        return $records->paginate($rows)->appends($request->only(['term', 'parent_id', 'sort', 'dir', 'rows']));
     }
     
     public function save(Request $request){
 
         $record = ($request->id)?AdministrativeUnit::find($request->id) : new AdministrativeUnit();
+        if (! $record) {
+            return false;
+        }
+
+        $parentId = $request->filled('parent_id') ? (int) $request->parent_id : null;
+        // A unit cannot be its own parent; siblings under the same parent are allowed.
+        if ($parentId && (int) $record->id === $parentId) {
+            $parentId = null;
+        }
 
         $record->name            = $request->unit_name;
         $record->description     = $request->description;
-        $record->parent_id       = ($request->parent_id)?$request->parent_id:null;
+        $record->parent_id       = $parentId;
         $record->code            = $request->code;
         $record->alternate_code  = $request->alt_code;
         $record->icon            = $request->icon;
 
-        if (\Illuminate\Support\Facades\Schema::hasColumn('administrative_units', 'country_id')) {
+        if (Schema::hasColumn('administrative_units', 'country_id')) {
             $countryId = $request->input('country_id');
             $record->country_id = ($countryId !== null && $countryId !== '') ? (int) $countryId : null;
         }
-        if (\Illuminate\Support\Facades\Schema::hasColumn('administrative_units', 'iso_code')) {
+        if (Schema::hasColumn('administrative_units', 'iso_code')) {
             $iso2 = strtoupper(trim((string) $request->input('iso_code', '')));
             $record->iso_code = $iso2 !== '' ? $iso2 : null;
         }
-        if (\Illuminate\Support\Facades\Schema::hasColumn('administrative_units', 'iso3_code')) {
+        if (Schema::hasColumn('administrative_units', 'iso3_code')) {
             $iso3 = strtoupper(trim((string) $request->input('iso3_code', '')));
             $record->iso3_code = $iso3 !== '' ? $iso3 : null;
         }
@@ -88,7 +127,8 @@ class AdminUnitsRepository{
 
     public function child_units($id){
 
-        return AdministrativeUnit::where('parent_id',$id)->get();
+        // Multiple children at the same level under one parent are supported.
+        return AdministrativeUnit::where('parent_id',$id)->orderBy('name')->orderBy('id')->get();
     }
 
     /**
@@ -160,7 +200,17 @@ class AdminUnitsRepository{
 
     public function delete($id){
 
-        return AdministrativeUnit::find($id)->delete();
+        $unit = AdministrativeUnit::find($id);
+        if (! $unit) {
+            return false;
+        }
+
+        $deleted = $unit->delete();
+        if ($deleted) {
+            cache()->forget('adminunits');
+        }
+
+        return $deleted;
     }
 
 }

@@ -2,6 +2,7 @@
 
 @section('styles')
     @include('common.table')
+    <link href="{{ asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
 @endsection
 
 @section('content')
@@ -16,7 +17,7 @@
 
             <!-- Card Header With Form Filters -->
             <div class="card-header">
-                <form class="container-fluid">
+                <form class="container-fluid" method="get" action="{{ url('admin/tags') }}" id="tagsFilterForm">
                     <div class="row">
 
                         <div class="col-md-12 text-right">
@@ -25,9 +26,9 @@
 
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label for="title">Search</label>
+                                <label for="filterTitle">Search</label>
                                 <input type="text" name="term" id="filterTitle" class="form-control"
-                                       placeholder="Filter by name"
+                                       placeholder="Search tag name or description"
                                        value="{{ @$search->term ?? '' }}"
                                 >
                             </div>
@@ -38,7 +39,6 @@
 
                     <div class="row">
                         <div class="col-md-12 text-right">
-                            <!-- Export Button -->
                             <button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
                             <button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
                             <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
@@ -51,8 +51,7 @@
             </div>
             <div class="card-body text-left">
                 @include('layouts.partials.alerts')
-                <!-- Datatable -->
-                <table id="publicationTable" class="table table-striped table-bordered">
+                <table id="tagsTable" class="table table-striped table-bordered" data-kh-datatable="client">
                     <thead>
                     <tr>
                         <th style="width:60px;">#</th>
@@ -65,14 +64,9 @@
                     </tr>
                     </thead>
                     <tbody>
-
-                    @php
-                        $i = 1;
-                    @endphp
-
                     @foreach($all_tags as $row)
                         <tr>
-                            <td>{{ $all_tags->firstItem() + $loop->index }}</td>
+                            <td>{{ $loop->iteration }}</td>
                             <td>{{ $row->tag_text }}</td>
                             <td>{{ ($row->is_health_topic ?? 1) ? 'Yes':'No' }}</td>
                             <td>{{ ($row->is_health_emergency ?? 0) ? 'Yes':'No' }}</td>
@@ -81,7 +75,7 @@
                                 $overviewLen = mb_strlen($overviewPlain);
                                 $needsOverview = $overviewLen < 120;
                             @endphp
-                            <td style="max-width:420px;">
+                            <td style="max-width:420px;" data-order="{{ $overviewLen }}">
                                 @if($overviewLen > 0)
                                     <div class="small text-muted mb-1">{{ number_format($overviewLen) }} chars (plain text)</div>
                                     <div class="tag-desc-preview">{!! Str::limit(strip_tags($row->overview ?? ''), 160) !!}</div>
@@ -89,7 +83,7 @@
                                     <span class="text-muted">—</span>
                                 @endif
                             </td>
-                            <td>
+                            <td data-order="{{ $needsOverview ? 0 : ($overviewLen < 400 ? 1 : 2) }}">
                                 @if($needsOverview)
                                     <span class="badge badge-warning">Missing</span>
                                 @elseif($overviewLen < 400)
@@ -129,22 +123,28 @@
                     </tbody>
                 </table>
 
-                <div class="py-2"> {{ $all_tags->links() }}</div>
-
             </div>
 
         </div>
 
 
         @include('admin.tags.partials.create-modal')
-        <!-- Include edit-modal.php -->
         @include('admin.tags.partials.edit-modal')
-        <!-- Include delete-modal.php -->
         @include('admin.tags.partials.delete-modal')
-
-        
         @include('partials.general.summernote')
 
 
     </div>
+@endsection
+
+@section('scripts')
+    @include('admin.partials.metadata_datatable')
+    <script>
+        $(function () {
+            window.khInitMetadataTable('#tagsTable', {
+                order: [[1, 'asc']],
+                pageLength: 50
+            });
+        });
+    </script>
 @endsection

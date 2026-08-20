@@ -19,10 +19,24 @@ class TagsRepository{
         $rows_count = ($request->rows)?$request->rows:20;
         $tags       = Tag::query()->orderBy('tag_text', 'asc')->orderBy('id', 'asc');
 
-        if($request->term)
-        $tags->where('tag_text','like','%'.$request->term.'%');
+        if ($request->filled('term')) {
+            $term = trim((string) $request->term);
+            $tags->where(function ($q) use ($term) {
+                $q->where('tag_text', 'like', '%'.$term.'%');
+                if (Schema::hasColumn('tags', 'overview')) {
+                    $q->orWhere('overview', 'like', '%'.$term.'%');
+                }
+            });
+        }
 
-        return ($return_array)?$tags->get():$tags->paginate($rows_count);
+        if ($return_array || $request->boolean('datatable') || $rows_count === 'all' || (int) $rows_count <= 0) {
+            return $tags->get();
+        }
+
+        $paginator = $tags->paginate((int) $rows_count);
+        $paginator->appends($request->only(['term', 'rows']));
+
+        return $paginator;
     }
 
     /**

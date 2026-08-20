@@ -19,6 +19,7 @@ class HealthThemesController extends Controller
 
     public function index(Request $request){
 
+        $request->merge(['datatable' => true]);
         $data['themes'] = $this->themesRepo->get($request);
         $data['allThemesForMapping'] = $this->themesRepo->allForMapping();
         $data['faIconOptions'] = $this->themesRepo->fontAwesomeIconOptions();

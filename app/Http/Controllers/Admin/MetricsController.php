@@ -44,6 +44,7 @@ class MetricsController extends Controller
             'map_regions' => Region::query()->orderBy('region_name')->get(['id', 'region_name']),
             'initial_kpi_map' => $initialKpiMap,
             'continental_indicators' => $continentalIndicators,
+            // Available on continental hubs and country hubs (STATES_ENABLED=false still registers this name).
             'map_data_url' => route('countries.map-data'),
         ];
     }

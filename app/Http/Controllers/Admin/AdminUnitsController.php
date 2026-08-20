@@ -17,6 +17,7 @@ class AdminUnitsController extends Controller
 
     public function index(Request $request){
 
+        $request->merge(['datatable' => true]);
         $data['adminunits'] = $this->adminUnitsRepository->get($request);
         $data['search']    = (Object) $request->all();
         return view('admin.adminunits.index',$data);

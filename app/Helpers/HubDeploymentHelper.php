@@ -26,18 +26,24 @@ if (! function_exists('hub_admin_units_enabled')) {
 if (! function_exists('hub_owner_country_id')) {
     function hub_owner_country_id(): ?int
     {
-        $fromEnv = env('HUB_OWNER_COUNTRY_ID');
-        if ($fromEnv !== null && $fromEnv !== '') {
-            return (int) $fromEnv;
-        }
-
+        // Prefer Configure → Advanced (settings) so admin UI changes take effect.
         try {
             $settings = function_exists('settings') ? settings() : null;
             if ($settings && Schema::hasColumn('setting', 'default_owner_country_id') && $settings->default_owner_country_id) {
                 return (int) $settings->default_owner_country_id;
             }
         } catch (\Throwable $e) {
-            return null;
+            // fall through to env/config
+        }
+
+        $fromConfig = config('deployment.hub_owner_country_id');
+        if ($fromConfig !== null && $fromConfig !== '') {
+            return (int) $fromConfig;
+        }
+
+        $fromEnv = env('HUB_OWNER_COUNTRY_ID');
+        if ($fromEnv !== null && $fromEnv !== '') {
+            return (int) $fromEnv;
         }
 
         return null;
@@ -47,18 +53,23 @@ if (! function_exists('hub_owner_country_id')) {
 if (! function_exists('hub_owner_region_id')) {
     function hub_owner_region_id(): ?int
     {
-        $fromEnv = env('HUB_OWNER_REGION_ID');
-        if ($fromEnv !== null && $fromEnv !== '') {
-            return (int) $fromEnv;
-        }
-
         try {
             $settings = function_exists('settings') ? settings() : null;
             if ($settings && Schema::hasColumn('setting', 'default_owner_region_id') && $settings->default_owner_region_id) {
                 return (int) $settings->default_owner_region_id;
             }
         } catch (\Throwable $e) {
-            return null;
+            // fall through
+        }
+
+        $fromConfig = config('deployment.hub_owner_region_id');
+        if ($fromConfig !== null && $fromConfig !== '') {
+            return (int) $fromConfig;
+        }
+
+        $fromEnv = env('HUB_OWNER_REGION_ID');
+        if ($fromEnv !== null && $fromEnv !== '') {
+            return (int) $fromEnv;
         }
 
         $countryId = hub_owner_country_id();
