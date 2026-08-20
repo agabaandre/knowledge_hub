@@ -19,7 +19,7 @@ class PublicationSubCategoryRepository
     {
         $query = PublicationCategory::parentOnly()
             ->withCount('sub_categories')
-            ->with('linkedDataCategories:id')
+            ->with('linkedDataCategories:id,category_name')
             ->orderBy('category_name');
 
         if ($request->filled('term')) {

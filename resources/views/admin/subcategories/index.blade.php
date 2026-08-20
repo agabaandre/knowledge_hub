@@ -19,7 +19,7 @@
         <div class="card col-lg-12">
             <div class="card-header text-left d-flex justify-content-between align-items-center flex-wrap">
                 <h3 class="card-title mb-0">Manage Categories</h3>
-                <a href="#add-subcategory-modal" data-toggle="modal" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Add Sub Category</a>
+                <a href="#add-subcategory-modal" data-toggle="modal" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Add Category</a>
             </div>
             <div class="card-header">
                 <form method="GET" action="{{ route('admin.subcategories.index') }}" class="container-fluid">
@@ -51,23 +51,44 @@
                                 <th>#</th>
                                 <th>Category</th>
                                 <th>Description</th>
-                                    <th>Linked Sub Categories</th>
+                                <th>Categories</th>
                                 <th width="140">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($subcategories as $idx => $row)
+                                @php
+                                    $linkedPayload = $row->linkedDataCategories->map(function ($dc) {
+                                        return [
+                                            'id' => (int) $dc->id,
+                                            'name' => (string) $dc->category_name,
+                                        ];
+                                    })->values()->all();
+                                    $linkedIds = $row->linkedDataCategories->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
+                                    $linkedCount = count($linkedPayload);
+                                @endphp
                                 <tr>
                                     <td>{{ $subcategories->firstItem() + $idx }}</td>
                                     <td>{{ $row->category_name }}</td>
                                     <td>{{ \Illuminate\Support\Str::limit($row->category_desc, 60) }}</td>
-                                    <td>{{ $row->linkedDataCategories->count() }}</td>
+                                    <td>
+                                        @if($linkedCount > 0)
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-info js-view-linked-categories"
+                                                    data-parent-name="{{ e($row->category_name) }}"
+                                                    data-linked='{{ e(json_encode($linkedPayload)) }}'>
+                                                {{ $linkedCount }} linked
+                                            </button>
+                                        @else
+                                            <span class="text-muted">None</span>
+                                        @endif
+                                    </td>
                                     <td>
                                         <a href="#edit-subcategory-modal" data-toggle="modal"
                                            data-id="{{ $row->id }}"
                                            data-category_name="{{ e($row->category_name) }}"
                                            data-category_desc="{{ e($row->category_desc ?? '') }}"
-                                           data-linked_categories='@json($row->linkedDataCategories->pluck("id")->values())'
+                                           data-linked_categories="{{ e(json_encode($linkedIds)) }}"
                                            class="btn btn-sm btn-outline-primary">Edit</a>
                                         @can('delete_publication_metadata')
                                             <a href="javascript:void(0);" class="btn btn-sm btn-outline-danger" onclick='openDeleteModal({{ (int) $row->id }}, @json((string) $row->category_name))'>Delete</a>
@@ -76,7 +97,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted">No categories yet. <a href="#add-subcategory-modal" data-toggle="modal">Add one</a>.</td>
+                                    <td colspan="5" class="text-center text-muted">No categories yet. <a href="#add-subcategory-modal" data-toggle="modal">Add one</a>.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -90,6 +111,7 @@
     @include('admin.subcategories.partials.add-modal')
     @include('admin.subcategories.partials.edit-modal')
     @include('admin.subcategories.partials.delete-modal')
+    @include('admin.subcategories.partials.linked-categories-modal')
 @endsection
 
 @section('scripts')
@@ -157,5 +179,30 @@
             })
             .catch(function () { showDeleteNotice('Failed to delete category.', 'error'); });
     }
+
+    $(document).on('click', '.js-view-linked-categories', function () {
+        var parentName = $(this).data('parent-name') || 'Category';
+        var linked = $(this).attr('data-linked');
+        var items = [];
+        try {
+            items = typeof linked === 'string' ? JSON.parse(linked) : (linked || []);
+        } catch (e) {
+            items = [];
+        }
+        $('#linkedCategoriesParentName').text(parentName);
+        var $list = $('#linkedCategoriesList').empty();
+        if (!items.length) {
+            $list.append('<li class="list-group-item text-muted">No linked categories.</li>');
+        } else {
+            items.forEach(function (item) {
+                $list.append(
+                    $('<li class="list-group-item d-flex justify-content-between align-items-center"></li>')
+                        .append($('<span></span>').text(item.name || ('#' + item.id)))
+                        .append($('<span class="badge badge-light"></span>').text('ID ' + item.id))
+                );
+            });
+        }
+        $('#linked-categories-modal').modal('show');
+    });
 </script>
 @endsection
