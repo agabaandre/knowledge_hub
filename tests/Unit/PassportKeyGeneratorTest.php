@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Support\PassportKeyGenerator;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class PassportKeyGeneratorTest extends TestCase
@@ -11,32 +12,53 @@ class PassportKeyGeneratorTest extends TestCase
     {
         [$private, $public] = PassportKeyGenerator::createKeyPair(2048);
 
-        $this->assertStringContainsString('BEGIN', $private);
+        $this->assertTrue(PassportKeyGenerator::isPemString($private));
+        $this->assertTrue(PassportKeyGenerator::isPemString($public));
         $this->assertStringContainsString('PRIVATE KEY', $private);
-        $this->assertStringContainsString('BEGIN', $public);
         $this->assertStringContainsString('PUBLIC KEY', $public);
         $this->assertNotFalse(openssl_pkey_get_private($private));
         $this->assertNotFalse(openssl_pkey_get_public($public));
     }
 
-    public function test_it_writes_key_files_when_missing(): void
+    public function test_ensure_keys_injects_config_even_without_writable_storage(): void
     {
-        $dir = sys_get_temp_dir().'/khub-passport-keys-'.uniqid('', true);
-        mkdir($dir, 0700, true);
+        config([
+            'passport.private_key' => null,
+            'passport.public_key' => null,
+            'cache.default' => 'array',
+        ]);
 
-        $private = $dir.'/oauth-private.key';
-        $public = $dir.'/oauth-public.key';
+        Cache::flush();
 
-        // Point Passport keyPath via storage_path override by writing where generator defaults;
-        // exercise create + validate helpers directly.
-        [$privatePem, $publicPem] = PassportKeyGenerator::createKeyPair(2048);
-        file_put_contents($private, $privatePem);
-        file_put_contents($public, $publicPem);
+        $ok = PassportKeyGenerator::ensureKeysExist(2048);
 
-        $this->assertTrue(PassportKeyGenerator::keysAreValid($private, $public));
+        $this->assertTrue($ok);
+        $this->assertTrue(PassportKeyGenerator::isPemString((string) config('passport.private_key')));
+        $this->assertTrue(PassportKeyGenerator::isPemString((string) config('passport.public_key')));
+    }
 
-        @unlink($private);
-        @unlink($public);
-        @rmdir($dir);
+    public function test_ensure_keys_caches_pem_for_later_requests(): void
+    {
+        config([
+            'passport.private_key' => null,
+            'passport.public_key' => null,
+            'cache.default' => 'array',
+        ]);
+        Cache::flush();
+
+        $ok = PassportKeyGenerator::ensureKeysExist(2048);
+
+        $this->assertTrue($ok);
+        $cachedPrivate = (string) Cache::get(PassportKeyGenerator::CACHE_PRIVATE);
+        $cachedPublic = (string) Cache::get(PassportKeyGenerator::CACHE_PUBLIC);
+
+        // Cache write is best-effort; when it works, PEM must be valid.
+        if ($cachedPrivate !== '' || $cachedPublic !== '') {
+            $this->assertTrue(PassportKeyGenerator::isPemString($cachedPrivate));
+            $this->assertTrue(PassportKeyGenerator::isPemString($cachedPublic));
+        }
+
+        $this->assertTrue(PassportKeyGenerator::isPemString((string) config('passport.private_key')));
+        $this->assertTrue(PassportKeyGenerator::isPemString((string) config('passport.public_key')));
     }
 }

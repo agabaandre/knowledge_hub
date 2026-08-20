@@ -65,6 +65,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Country hubs often lack writable storage/oauth-*.key; inject PEM into config early
+        // so Passport CryptKey never depends on a missing file path during the request.
+        try {
+            \App\Support\PassportKeyGenerator::ensureKeysExist();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Early Passport key ensure failed: '.$e->getMessage());
+        }
+
         $appUrl = config('app.url');
         if (is_string($appUrl) && $appUrl !== '') {
             URL::forceRootUrl(rtrim($appUrl, '/'));

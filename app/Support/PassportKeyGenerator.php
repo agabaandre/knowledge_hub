@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Laravel\Passport\Passport;
 use phpseclib\Crypt\RSA as LegacyRSA;
@@ -10,12 +11,19 @@ use phpseclib3\Crypt\RSA;
 use Throwable;
 
 /**
- * Create storage/oauth-*.key without relying on `php artisan passport:keys`.
- * Artisan::call() during AuthServiceProvider::boot() often fails with
- * "The command passport:keys does not exist" on country hubs.
+ * Ensure Passport has usable RSA material even when:
+ * - `php artisan passport:keys` is unavailable during provider boot
+ * - storage/oauth-*.key cannot be written (common on country hubs)
+ *
+ * Prefer files, then cache, then in-process config PEM (Passport accepts
+ * passport.private_key / passport.public_key as raw PEM).
  */
 class PassportKeyGenerator
 {
+    public const CACHE_PRIVATE = 'passport.oauth_private_key_pem';
+
+    public const CACHE_PUBLIC = 'passport.oauth_public_key_pem';
+
     public static function privateKeyPath(): string
     {
         return class_exists(Passport::class)
@@ -35,39 +43,67 @@ class PassportKeyGenerator
         $private = $private ?? self::privateKeyPath();
         $public = $public ?? self::publicKeyPath();
 
-        return self::isReadablePem($private) && self::isReadablePem($public);
+        return self::isReadablePemFile($private) && self::isReadablePemFile($public);
     }
 
     public static function ensureKeysExist(int $bits = 4096): bool
     {
-        $private = self::privateKeyPath();
-        $public = self::publicKeyPath();
-
-        if (self::keysAreValid($private, $public)) {
-            self::securePermissions($private, $public);
-
-            return true;
-        }
-
         try {
-            [$privatePem, $publicPem] = self::createKeyPair($bits);
+            // 1) Already configured as PEM (env / previous apply)
+            $cfgPrivate = (string) (config('passport.private_key') ?? '');
+            $cfgPublic = (string) (config('passport.public_key') ?? '');
+            if (self::isPemString($cfgPrivate) && self::isPemString($cfgPublic)) {
+                return true;
+            }
 
-            if ($privatePem === '' || $publicPem === '') {
+            // 2) Existing key files
+            $privatePath = self::privateKeyPath();
+            $publicPath = self::publicKeyPath();
+            if (self::keysAreValid($privatePath, $publicPath)) {
+                self::securePermissions($privatePath, $publicPath);
+                self::applyToConfig(
+                    (string) file_get_contents($privatePath),
+                    (string) file_get_contents($publicPath)
+                );
+
+                return true;
+            }
+
+            // 3) Cached PEM (Redis/file) when storage root is not writable
+            $cachedPrivate = self::cacheGet(self::CACHE_PRIVATE);
+            $cachedPublic = self::cacheGet(self::CACHE_PUBLIC);
+            if (self::isPemString($cachedPrivate) && self::isPemString($cachedPublic)) {
+                self::applyToConfig($cachedPrivate, $cachedPublic);
+                self::persistKeysBestEffort($cachedPrivate, $cachedPublic);
+
+                return true;
+            }
+
+            // 4) Generate fresh material
+            [$privatePem, $publicPem] = self::createKeyPair($bits);
+            if (! self::isPemString($privatePem) || ! self::isPemString($publicPem)) {
                 throw new \RuntimeException('Generated empty OAuth key material.');
             }
 
-            if (! is_dir(dirname($private))) {
-                @mkdir(dirname($private), 0755, true);
+            self::applyToConfig($privatePem, $publicPem);
+
+            $persisted = self::persistKeysBestEffort($privatePem, $publicPem);
+            $cached = self::cachePut($privatePem, $publicPem);
+
+            if (! $persisted && ! $cached) {
+                Log::warning(
+                    'Passport OAuth keys are active for this process only; '
+                    .'could not write storage/oauth-*.key or cache. '
+                    .'Fix ownership: chown -R www-data:www-data storage bootstrap/cache'
+                );
+            } elseif (! $persisted) {
+                Log::warning(
+                    'Passport OAuth keys stored in cache only; storage/oauth-*.key is not writable. '
+                    .'Run: chown -R www-data:www-data /var/www/ghana/storage && chmod 775 storage'
+                );
             }
 
-            if (file_put_contents($private, $privatePem) === false
-                || file_put_contents($public, $publicPem) === false) {
-                throw new \RuntimeException('Unable to write OAuth key files to storage.');
-            }
-
-            self::securePermissions($private, $public);
-
-            return self::keysAreValid($private, $public);
+            return true;
         } catch (Throwable $e) {
             Log::error('Failed to generate Passport OAuth keys: '.$e->getMessage());
 
@@ -122,15 +158,71 @@ class PassportKeyGenerator
         return [$privatePem, $publicPem];
     }
 
-    protected static function isReadablePem(string $path): bool
+    public static function applyToConfig(string $privatePem, string $publicPem): void
+    {
+        config([
+            'passport.private_key' => $privatePem,
+            'passport.public_key' => $publicPem,
+        ]);
+    }
+
+    /**
+     * Try several writable directories so hubs with root-owned storage/ still work.
+     */
+    public static function persistKeysBestEffort(string $privatePem, string $publicPem): bool
+    {
+        $dirs = array_values(array_unique([
+            storage_path(),
+            storage_path('app'),
+            storage_path('framework'),
+            storage_path('framework/cache'),
+        ]));
+
+        foreach ($dirs as $dir) {
+            if (! is_dir($dir) && ! @mkdir($dir, 0775, true) && ! is_dir($dir)) {
+                continue;
+            }
+            if (! is_writable($dir)) {
+                continue;
+            }
+
+            $private = rtrim($dir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'oauth-private.key';
+            $public = rtrim($dir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'oauth-public.key';
+
+            $wrotePrivate = @file_put_contents($private, $privatePem);
+            $wrotePublic = @file_put_contents($public, $publicPem);
+            if ($wrotePrivate === false || $wrotePublic === false) {
+                continue;
+            }
+
+            self::securePermissions($private, $public);
+
+            if ($dir !== storage_path() && class_exists(Passport::class)) {
+                Passport::loadKeysFrom($dir);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public static function isPemString(string $contents): bool
+    {
+        $contents = trim($contents);
+
+        return $contents !== ''
+            && str_contains($contents, 'BEGIN')
+            && str_contains($contents, 'KEY');
+    }
+
+    protected static function isReadablePemFile(string $path): bool
     {
         if (! is_file($path) || ! is_readable($path) || filesize($path) <= 0) {
             return false;
         }
 
-        $contents = (string) @file_get_contents($path);
-
-        return str_contains($contents, 'BEGIN') && str_contains($contents, 'KEY');
+        return self::isPemString((string) @file_get_contents($path));
     }
 
     protected static function securePermissions(string $private, string $public): void
@@ -140,6 +232,30 @@ class PassportKeyGenerator
         }
         if (is_file($public)) {
             @chmod($public, 0600);
+        }
+    }
+
+    protected static function cacheGet(string $key): string
+    {
+        try {
+            return (string) (Cache::get($key) ?? '');
+        } catch (Throwable) {
+            return '';
+        }
+    }
+
+    protected static function cachePut(string $privatePem, string $publicPem): bool
+    {
+        try {
+            Cache::forever(self::CACHE_PRIVATE, $privatePem);
+            Cache::forever(self::CACHE_PUBLIC, $publicPem);
+
+            return self::isPemString(self::cacheGet(self::CACHE_PRIVATE))
+                && self::isPemString(self::cacheGet(self::CACHE_PUBLIC));
+        } catch (Throwable $e) {
+            Log::warning('Could not cache Passport OAuth keys: '.$e->getMessage());
+
+            return false;
         }
     }
 }

@@ -27,9 +27,8 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        // Passport::routes() resolves CryptKey immediately; missing keys crash every request
-        // (including publication submit) on hubs where oauth_clients exist but key files do not.
-        // Do not use Artisan::call('passport:keys') here — the command is often not registered yet.
+        // Inject PEM into config before ResourceServer/CryptKey resolve. File writes may fail
+        // on country hubs (storage owned by root); config PEM still lets Passport work.
         if (! PassportKeyGenerator::ensureKeysExist()) {
             Log::error('Passport OAuth keys are missing; skipping Passport::routes() to avoid crashing the app.');
 
