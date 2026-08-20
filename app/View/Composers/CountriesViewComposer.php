@@ -18,7 +18,9 @@ class CountriesViewComposer{
 
         $minutes = (int) env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
 
-        $isCountryHub = function_exists('hub_admin_units_enabled') && hub_admin_units_enabled();
+        $isCountryHub = (function_exists('hub_is_country_portal') && hub_is_country_portal())
+            || (function_exists('hub_admin_units_enabled') && hub_admin_units_enabled())
+            || (function_exists('states_enabled') && ! states_enabled());
         $ownerCountryId = function_exists('hub_owner_country_id') ? hub_owner_country_id() : null;
 
         // Member-state hubs only expose the configured owner country in country pickers.

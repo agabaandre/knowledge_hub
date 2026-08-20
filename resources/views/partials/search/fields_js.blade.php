@@ -1,5 +1,11 @@
 <script>
-    if (!$('#publication_form').length && !$('#smartwizard').length) {
+    // Skip continental region→country rebuild on publication wizard / country hubs.
+    var khIsCountryPortal = @json(
+        (function_exists('hub_is_country_portal') && hub_is_country_portal())
+        || (function_exists('hub_admin_units_enabled') && hub_admin_units_enabled())
+        || (function_exists('states_enabled') && ! states_enabled())
+    );
+    if (!$('#publication_form').length && !$('#smartwizard').length && !khIsCountryPortal) {
     $('.rcc').on('change', function(e) {
 
         if (typeof $(this).val() == 'object' && $(this).val().length > 1) {

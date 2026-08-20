@@ -82,9 +82,10 @@
     );
 
     // Country hubs: default Member States / Region to Configure → Advanced owner country.
-    $isCountryHub = function_exists('hub_admin_units_enabled')
-        ? hub_admin_units_enabled()
-        : (function_exists('admin_units_enabled') && admin_units_enabled());
+    $isCountryHub = function_exists('hub_is_country_portal')
+        ? hub_is_country_portal()
+        : ((function_exists('hub_admin_units_enabled') && hub_admin_units_enabled())
+            || (function_exists('states_enabled') && ! states_enabled()));
     $defaultOwnerCountryId = function_exists('hub_owner_country_id') ? hub_owner_country_id() : null;
     $defaultOwnerRegionId = function_exists('hub_owner_region_id') ? hub_owner_region_id() : null;
 
@@ -1863,6 +1864,16 @@
             }
             $countries.prop('disabled', false);
             $('#wizard-countries-all-hidden, #wizard-rccs-all-hidden').remove();
+
+            // Country hubs always submit the configured owner member state — never "all".
+            if (hubAdminUnitsEnabled && hubOwnerCountryId) {
+                if ($countries.find('option[value="all"]').length) {
+                    $countries.find('option[value="all"]').remove();
+                }
+                wizardRebuildCountryOptions($countries, allCountries, false);
+                wizardSetCountrySelection($countries, [String(hubOwnerCountryId)]);
+                return;
+            }
 
             var regionVal = wizardGetSelectValue($region);
             var regionValues = Array.isArray(regionVal) ? regionVal : (regionVal ? [regionVal] : []);

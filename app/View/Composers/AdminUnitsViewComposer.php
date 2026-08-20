@@ -26,16 +26,16 @@ class AdminUnitsViewComposer
                 ->where('iso_code', '!=', '')
                 ->orderBy('name');
 
-            // Country hubs still list AU states for optional mapping, but default selection is the owner.
             return $query->get(['id', 'name', 'iso_code', 'iso3_code']);
         });
 
-        if (function_exists('hub_admin_units_enabled') && hub_admin_units_enabled()
-            && function_exists('hub_owner_country_id') && hub_owner_country_id()) {
-            $ownerId = (int) hub_owner_country_id();
-            $countries = $countries->sortBy(function ($c) use ($ownerId) {
-                return (int) $c->id === $ownerId ? 0 : 1;
-            })->values();
+        if ((function_exists('hub_is_country_portal') && hub_is_country_portal())
+            || (function_exists('hub_admin_units_enabled') && hub_admin_units_enabled())
+            || (function_exists('states_enabled') && ! states_enabled())) {
+            $ownerId = function_exists('hub_owner_country_id') ? hub_owner_country_id() : null;
+            if ($ownerId) {
+                $countries = $countries->where('id', (int) $ownerId)->values();
+            }
         }
 
         // Parent dropdowns need the full tree. Do NOT overwrite controller `$adminunits`

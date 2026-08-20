@@ -2,6 +2,10 @@
 @php
     $selected = $selected ?? null;
     $isMultiple = !empty($multiple);
+    // Country hubs: never offer "All" even if a caller passes all_option.
+    if (!empty($hubCountriesScoped)) {
+        $all_option = false;
+    }
     $noCountryChosen = $isMultiple
         ? (empty($selected) || (is_array($selected) && count($selected) === 0))
         : ($selected === null || $selected === '' || ! is_numeric($selected));
@@ -13,7 +17,7 @@
         || $selected === 'all'
     );
 @endphp
-<select class="form-control {{ $class ?? 'select2' }} text-left form-select" name="{{ $field ?? 'country_id' }}" id="{{ $id ?? ($field ?? 'country_id') }}" {{ $required ?? '' }} {{ $multiple ?? '' }} {{ $onclick ?? '' }} data-placeholder="{{ $allfield ?? 'Select Country' }}">
+<select class="form-control {{ $class ?? 'select2' }} text-left form-select" name="{{ $field ?? 'country_id' }}" id="{{ $id ?? ($field ?? 'country_id') }}" {{ $required ?? '' }} {{ $multiple ?? '' }} {{ $onclick ?? '' }} data-placeholder="{{ $allfield ?? 'Select Country' }}" @if(!empty($hubCountriesScoped)) data-kh-country-hub="1" @endif>
     @if (!empty($all_option))
         <option value="all" {{ $hasAllSelected ? 'selected' : '' }}>{{ $allfield ?? 'All' }}</option>
     @else

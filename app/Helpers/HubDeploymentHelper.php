@@ -6,20 +6,42 @@ use Illuminate\Support\Facades\Schema;
 if (! function_exists('hub_admin_units_enabled')) {
     /**
      * Whether this hub uses administrative units (country portal) vs continental portal.
-     * Setting row overrides .env when the column exists and is non-null.
+     *
+     * Country hubs are detected from (in order):
+     * - ADMIN_UNITS_ENABLED / config
+     * - STATES_ENABLED=false (federated country-hub pattern)
+     * - setting.admin_units_enabled (only when env/config do not already imply country mode)
      */
     function hub_admin_units_enabled(): bool
     {
+        $envOrConfig = filter_var(env('ADMIN_UNITS_ENABLED', false), FILTER_VALIDATE_BOOLEAN)
+            || (bool) config('deployment.admin_units_enabled', false);
+
+        $statesOff = ! (bool) config('deployment.states_enabled', true);
+
+        // Federated country portals: STATES_ENABLED=false and/or ADMIN_UNITS_ENABLED=true.
+        if ($envOrConfig || $statesOff) {
+            return true;
+        }
+
         try {
             $settings = function_exists('settings') ? settings() : null;
             if ($settings && Schema::hasColumn('setting', 'admin_units_enabled') && $settings->admin_units_enabled !== null) {
                 return (bool) $settings->admin_units_enabled;
             }
         } catch (\Throwable $e) {
-            // fall through to env
+            // fall through
         }
 
-        return (bool) config('deployment.admin_units_enabled', false);
+        return false;
+    }
+}
+
+if (! function_exists('hub_is_country_portal')) {
+    /** Alias for country-hub detection used by publish wizard / country pickers. */
+    function hub_is_country_portal(): bool
+    {
+        return hub_admin_units_enabled();
     }
 }
 
