@@ -216,14 +216,24 @@ class InstallerService
         ];
 
         foreach (config('install.writable_paths') as $path) {
+            $createError = null;
             if (! File::isDirectory($path)) {
-                File::ensureDirectoryExists($path, 0775, true);
+                try {
+                    File::ensureDirectoryExists($path, 0775, true);
+                } catch (\Throwable $e) {
+                    $createError = $e->getMessage();
+                }
             }
-            $writable = is_writable($path);
+            $writable = is_dir($path) && is_writable($path);
+            $relative = str_replace(base_path().'/', '', $path);
             $checks[] = [
-                'label' => 'Writable: '.str_replace(base_path().'/', '', $path),
+                'label' => 'Writable: '.$relative,
                 'ok' => $writable,
-                'message' => $writable ? 'OK' : 'Not writable',
+                'message' => $writable
+                    ? 'OK'
+                    : ('Not writable'
+                        .($createError ? ' — '.$createError : '')
+                        .'. Fix with: sudo chown -R www-data:www-data storage bootstrap/cache && sudo chmod -R ug+rwx storage bootstrap/cache'),
                 'required' => true,
             ];
         }

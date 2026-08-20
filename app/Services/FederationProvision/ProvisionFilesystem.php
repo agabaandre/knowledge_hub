@@ -60,15 +60,33 @@ class ProvisionFilesystem
         $this->sudo->run(['chown', '-R', $user.':'.$group, $target]);
 
         // Ensure writable runtime dirs exist even if excluded from rsync content.
-        foreach (['storage/logs', 'storage/framework/cache', 'storage/framework/sessions', 'storage/framework/views', 'bootstrap/cache'] as $dir) {
+        foreach ([
+            'storage',
+            'storage/app',
+            'storage/logs',
+            'storage/framework',
+            'storage/framework/cache',
+            'storage/framework/sessions',
+            'storage/framework/views',
+            'bootstrap/cache',
+            'public/uploads',
+        ] as $dir) {
             $this->sudo->run(['mkdir', '-p', $target.'/'.$dir]);
-            $this->sudo->run(['chown', '-R', $user.':'.$group, $target.'/'.$dir]);
-            $this->sudo->run(['chmod', '-R', 'ug+rwx', $target.'/'.$dir]);
         }
+        $this->sudo->run(['chown', '-R', $user.':'.$group, $target.'/storage', $target.'/bootstrap/cache', $target.'/public/uploads']);
+        $this->sudo->run(['chmod', '-R', 'ug+rwx', $target.'/storage', $target.'/bootstrap/cache', $target.'/public/uploads']);
 
         // Drop continental install lock if somehow copied.
         $lock = $target.'/storage/app/installed.lock';
         $this->sudo->runShell('rm -f '.escapeshellarg($lock));
+
+        // Ensure .env can be written by the web installer / artisan.
+        $envPath = $target.'/.env';
+        $this->sudo->runShell(
+            'touch '.escapeshellarg($envPath)
+            .' && chown '.$user.':'.$group.' '.escapeshellarg($envPath)
+            .' && chmod ug+rw '.escapeshellarg($envPath)
+        );
 
         return $target;
     }
