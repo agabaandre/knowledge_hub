@@ -412,6 +412,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web', 'admin.access
         Route::post("/save", [ResourcesController::class, 'store']);
         Route::post("/approval", [ResourcesController::class, 'approval']);
         Route::post("/bulk-approval", [ResourcesController::class, 'bulkApproval'])->name('admin.publications.bulk-approval');
+        Route::post("/wipe-content", [ResourcesController::class, 'wipeContent'])->name('admin.publications.wipe-content');
         Route::get("/moderate", [ResourcesController::class, 'moderate']);
         Route::get("/delete", [ResourcesController::class, 'destroy']);
         Route::get("/approve_comment", [ResourcesController::class, 'approve_comment']);

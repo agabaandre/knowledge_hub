@@ -638,8 +638,44 @@ class InstallerService
             Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\AccessLevelsSeeder', '--force' => true]);
         }
 
+        $this->ensurePassportKeys();
+
         if (Schema::hasTable('oauth_clients') && DB::table('oauth_clients')->count() === 0) {
             Artisan::call('passport:install', ['--force' => true]);
+            $this->securePassportKeyPermissions();
+        }
+    }
+
+    /**
+     * Provisioned country hubs often copy oauth_clients but exclude key files.
+     * Always ensure storage/oauth-*.key exist before Passport boots.
+     */
+    public function ensurePassportKeys(): void
+    {
+        $private = storage_path('oauth-private.key');
+        $public = storage_path('oauth-public.key');
+
+        $missing = ! is_file($private) || ! is_file($public)
+            || filesize($private) === 0 || filesize($public) === 0;
+
+        if ($missing) {
+            try {
+                Artisan::call('passport:keys', ['--force' => true]);
+            } catch (\Throwable) {
+                // passport:install below may still create keys when clients are empty.
+            }
+        }
+
+        $this->securePassportKeyPermissions();
+    }
+
+    protected function securePassportKeyPermissions(): void
+    {
+        foreach (['oauth-private.key', 'oauth-public.key'] as $name) {
+            $path = storage_path($name);
+            if (is_file($path)) {
+                @chmod($path, 0600);
+            }
         }
     }
 
@@ -874,7 +910,8 @@ class InstallerService
             'INSTALLER_DISABLED' => 'true',
         ];
         if ($appUrl !== '') {
-            $values['APP_URL'] = rtrim($appUrl, '/').'/';
+            // Keep APP_URL without trailing slash; trailing slash + route:cache breaks subdirectory hubs.
+            $values['APP_URL'] = rtrim($appUrl, '/');
         }
         $this->writeEnvValues($values);
 
@@ -898,8 +935,24 @@ class InstallerService
         Artisan::call('config:clear');
         if (! config('app.debug')) {
             Artisan::call('config:cache');
-            Artisan::call('route:cache');
+            // Subdirectory installs (e.g. /ghana) often break with route:cache (405s).
+            if (! $this->appUrlHasPath(env('APP_URL', $appUrl))) {
+                try {
+                    Artisan::call('route:cache');
+                } catch (\Throwable) {
+                    Artisan::call('route:clear');
+                }
+            } else {
+                Artisan::call('route:clear');
+            }
         }
+    }
+
+    protected function appUrlHasPath(string $appUrl): bool
+    {
+        $path = parse_url(rtrim($appUrl, '/'), PHP_URL_PATH);
+
+        return is_string($path) && trim($path, '/') !== '';
     }
 
     public function lockInstallerInSettings(): void

@@ -44,6 +44,9 @@ class ResourcesController extends Controller
         }
 
         $data['search'] = (object) $request->all();
+        $data['allowContentWipe'] = (bool) config('hub_content.allow_content_wipe');
+        $data['wipeConfirmationPhrase'] = (string) config('hub_content.wipe_confirmation_phrase', 'WIPE');
+
         return view('admin.publications.pending', $data);
     }
 
@@ -305,6 +308,36 @@ class ResourcesController extends Controller
             'message' => $isActive ? 'Publication published.' : 'Publication unpublished.',
             'is_active' => $isActive ? 1 : 0,
         ]);
+    }
+
+    public function wipeContent(Request $request)
+    {
+        if (! config('hub_content.allow_content_wipe')) {
+            abort(403, 'Content wipe is disabled on this hub.');
+        }
+
+        if (! current_user() || ! current_user()->hasRole('Admin')) {
+            abort(403, 'Only Administrators can wipe hub content.');
+        }
+
+        $data = $request->validate([
+            'confirmation' => 'required|string',
+            'include_communities' => 'nullable|boolean',
+        ]);
+
+        $expected = (string) config('hub_content.wipe_confirmation_phrase', 'WIPE');
+        if (trim($data['confirmation']) !== $expected) {
+            return back()->with('error', 'Confirmation phrase did not match. Type '.$expected.' exactly.');
+        }
+
+        try {
+            $result = app(\App\Services\ContentWipeService::class)->wipe($request->boolean('include_communities', true));
+            $total = array_sum($result['tables']);
+
+            return back()->with('success', 'Wiped hub content ('.$total.' rows across '.count($result['tables']).' tables). Auto-increment reset.');
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Wipe failed: '.$e->getMessage());
+        }
     }
 
 }

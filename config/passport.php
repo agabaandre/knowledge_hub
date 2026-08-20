@@ -13,9 +13,10 @@ return [
     |
     */
 
-    'private_key' => env('PASSPORT_PRIVATE_KEY'),
+    // Empty env values must be null so Passport falls back to storage/oauth-*.key files.
+    'private_key' => env('PASSPORT_PRIVATE_KEY') ?: null,
 
-    'public_key' => env('PASSPORT_PUBLIC_KEY'),
+    'public_key' => env('PASSPORT_PUBLIC_KEY') ?: null,
 
     /*
     |--------------------------------------------------------------------------

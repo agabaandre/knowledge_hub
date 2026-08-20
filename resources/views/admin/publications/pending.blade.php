@@ -58,6 +58,32 @@
                     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
                     @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
 
+                    @if(!empty($allowContentWipe))
+                        <div class="alert alert-danger border">
+                            <strong>Danger zone — wipe hub content</strong>
+                            <p class="mb-2 small">
+                                Permanently deletes all publications, forums, comments, access/search logs,
+                                authors, and related pivot data (and communities if selected),
+                                then resets table auto-increment. Taxonomy/users/settings are kept.
+                                Enable only via <code>HUB_ALLOW_CONTENT_WIPE=true</code>.
+                            </p>
+                            <form method="post" action="{{ route('admin.publications.wipe-content') }}" class="form-inline flex-wrap"
+                                  onsubmit="return confirm('This cannot be undone. Wipe all content on this hub?');">
+                                @csrf
+                                <div class="form-group mr-2 mb-2">
+                                    <label class="sr-only" for="wipeConfirmation">Type {{ $wipeConfirmationPhrase ?? 'WIPE' }}</label>
+                                    <input type="text" name="confirmation" id="wipeConfirmation" class="form-control form-control-sm"
+                                           placeholder="Type {{ $wipeConfirmationPhrase ?? 'WIPE' }}" required autocomplete="off">
+                                </div>
+                                <div class="form-check mr-2 mb-2">
+                                    <input class="form-check-input" type="checkbox" name="include_communities" value="1" id="wipeCommunities" checked>
+                                    <label class="form-check-label" for="wipeCommunities">Also wipe communities</label>
+                                </div>
+                                <button type="submit" class="btn btn-danger btn-sm mb-2">Wipe content</button>
+                            </form>
+                        </div>
+                    @endif
+
                     <form id="bulk-approval-form" method="POST" action="{{ route('admin.publications.bulk-approval') }}">
                         @csrf
                         <input type="hidden" name="action" id="bulk-approval-action" value="">

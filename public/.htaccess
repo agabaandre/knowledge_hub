@@ -13,8 +13,10 @@
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
     # Redirect Trailing Slashes If Not A Folder...
+    # Skip when URI is only the app subdirectory root (e.g. /ghana/) to avoid 405s after route:cache.
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteCond %{REQUEST_URI} !^/[^/]+/$
     RewriteRule ^ %1 [L,R=301]
 
     # Send Requests To Front Controller...
