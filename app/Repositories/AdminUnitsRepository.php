@@ -65,10 +65,19 @@ class AdminUnitsRepository{
         $record->parent_id       = $parentId;
         $record->code            = $request->code;
         $record->alternate_code  = $request->alt_code;
-        $record->icon            = $request->icon;
+        $icon = trim((string) $request->input('icon', ''));
+        $record->icon            = $icon !== '' ? $icon : 'fa-building';
 
         if (Schema::hasColumn('administrative_units', 'country_id')) {
             $countryId = $request->input('country_id');
+            if (($countryId === null || $countryId === '')
+                && ! $request->id
+                && function_exists('hub_admin_units_enabled')
+                && hub_admin_units_enabled()
+                && function_exists('hub_owner_country_id')
+                && hub_owner_country_id()) {
+                $countryId = hub_owner_country_id();
+            }
             $record->country_id = ($countryId !== null && $countryId !== '') ? (int) $countryId : null;
         }
         if (Schema::hasColumn('administrative_units', 'iso_code')) {

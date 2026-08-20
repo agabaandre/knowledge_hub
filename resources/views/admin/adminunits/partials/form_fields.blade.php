@@ -1,5 +1,18 @@
 @csrf
         <input type="hidden" name="id" id="id" class="newform" value="{{$row->id ?? '' }}">
+        @php
+            $defaultOwnerCountryId = $defaultOwnerCountryId
+                ?? (function_exists('hub_owner_country_id') ? hub_owner_country_id() : null);
+            $defaultUnitIcon = $defaultUnitIcon ?? 'fa-building';
+            $selectedCountryId = old(
+                'country_id',
+                $row->country_id
+                    ?? ((! $row && function_exists('hub_admin_units_enabled') && hub_admin_units_enabled())
+                        ? $defaultOwnerCountryId
+                        : null)
+            );
+            $selectedIcon = old('icon', $row->icon ?? $defaultUnitIcon);
+        @endphp
         <div class="row">
           <div class="col-md-12">
             <div class="mb-3">
@@ -31,19 +44,41 @@
 
           <div class="col-md-12">
             <div class="mb-3">
+              <label class="form-label" for="icon">Icon</label>
+              <select class="form-control newform select2-fa-icons no-select2" id="icon" name="icon" required>
+                <option value="">Select icon class</option>
+                @foreach(($faIconOptions ?? ['fa-building']) as $iconClass)
+                  <option value="{{ $iconClass }}" {{ (string) $selectedIcon === (string) $iconClass ? 'selected' : '' }}>{{ $iconClass }}</option>
+                @endforeach
+              </select>
+              <small class="text-muted d-block mt-1">
+                Using Font Awesome {{ $faVersion ?? '5.3.1' }}. Default is <code>fa-building</code>.
+                <a href="{{ $faCheatsheetUrl ?? 'https://fontawesome.com/v5.3.1/icons?d=gallery&m=free' }}" target="_blank" rel="noopener noreferrer">Open cheatsheet</a>
+              </small>
+            </div>
+          </div>
+
+          <div class="col-md-12">
+            <div class="mb-3">
               <label class="form-label" for="country_id">Member state mapping <span class="text-muted">(optional)</span></label>
-              <select class="form-control newform js-admin-unit-country" id="country_id" name="country_id">
+              <select class="form-control newform js-admin-unit-country no-select2" id="country_id" name="country_id">
                 <option value="">— None —</option>
                 @foreach(($hubCountries ?? $countries ?? collect()) as $country)
                 <option value="{{ $country->id }}"
                     data-iso2="{{ strtoupper($country->iso_code ?? '') }}"
                     data-iso3="{{ strtoupper($country->iso3_code ?? '') }}"
-                    {{ (int) old('country_id', $row->country_id ?? 0) === (int) $country->id ? 'selected' : '' }}>
+                    {{ (int) ($selectedCountryId ?? 0) === (int) $country->id ? 'selected' : '' }}>
                     {{ $country->name }}
                 </option>
                 @endforeach
               </select>
-              <small class="text-muted">Link this unit to an AU member state for country-level KPI and map data joins.</small>
+              <small class="text-muted">
+                @if(function_exists('hub_admin_units_enabled') && hub_admin_units_enabled() && $defaultOwnerCountryId)
+                  Defaults to the Configure → Advanced owner country on new units.
+                @else
+                  Link this unit to an AU member state for country-level KPI and map data joins.
+                @endif
+              </small>
             </div>
           </div>
 
@@ -78,12 +113,13 @@
           </div>
 
           <div class="col-md-12 mt-3">
-                <label> Logo</label>
+                <label> Logo <span class="text-muted">(optional image override)</span></label>
                 <div class="form-group">
-                    <input type="file" name="logo" id="attachments">
+                    <input type="file" name="logo" id="attachments" class="newform">
                     <div class="preview" style="max-width: 150px;">
-                        <img src="{{ ($row && $row->logo)?storage_link("uploads/adminunits/".$row->logo) : asset("assets/images/placeholder.pg") }}" width="50px" class="img img-thumbnail"/>
+                        <img src="{{ ($row && $row->logo)?storage_link("uploads/adminunits/".$row->logo) : asset("assets/images/placeholder.png") }}" width="50px" class="img img-thumbnail" alt=""/>
                     </div>
+                    <small class="text-muted">Prefer the Font Awesome icon above; upload only if you need a custom image.</small>
                 </div>
             </div>
         </div>

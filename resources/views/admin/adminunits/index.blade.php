@@ -53,7 +53,7 @@
 			<table id="adminUnitsTable" class="table table-striped table-bordered" data-kh-datatable="client">
 				<thead>
 					<tr>
-					    <th style="width:70px;">Logo</th>
+					    <th style="width:70px;">Icon</th>
 						<th>Unit Name</th>
 						<th>Description</th>
 						<th>Parent</th>
@@ -63,8 +63,14 @@
 				<tbody>
 					@foreach($adminunits as $row)
 						<tr>
-						    <td data-order="{{ e((string) ($row->name ?? '')) }}">
-                                <img src="{{ ($row->logo)?storage_link("uploads/adminunits/".$row->logo) : asset("assets/images/placeholder.png") }}" width="50px" class="img img-thumbnail" alt=""/>
+						    <td data-order="{{ e((string) ($row->icon ?: 'fa-building')) }}">
+                                @if($row->logo)
+                                    <img src="{{ storage_link("uploads/adminunits/".$row->logo) }}" width="50px" class="img img-thumbnail" alt=""/>
+                                @else
+                                    <span class="d-inline-flex align-items-center justify-content-center border rounded bg-light" style="width:50px;height:50px;">
+                                        <i class="fa {{ $row->icon ?: 'fa-building' }} fa-lg text-secondary" aria-hidden="true"></i>
+                                    </span>
+                                @endif
                             </td>
 							<td>{{ $row->name }}</td>
 							<td>{{ $row->description }}</td>
@@ -98,6 +104,40 @@
                 { orderable: false, searchable: false, targets: [0, -1] }
             ],
             pageLength: 25
+        });
+
+        function initFaIconSelect($root) {
+            var $select = $root.find('.select2-fa-icons');
+            if (!$select.length || typeof $.fn.select2 !== 'function') {
+                return;
+            }
+            if ($select.hasClass('select2-hidden-accessible')) {
+                $select.select2('destroy');
+            }
+            $select.select2({
+                placeholder: 'Select icon class',
+                width: '100%',
+                dir: 'ltr',
+                dropdownParent: $root
+            });
+        }
+
+        $('#create-modal').on('show.bs.modal', function () {
+            var $modal = $(this);
+            initFaIconSelect($modal);
+            var $icon = $modal.find('select[name="icon"]');
+            if ($icon.length && !$icon.val()) {
+                $icon.val(@json($defaultUnitIcon ?? 'fa-building')).trigger('change');
+            }
+            var defaultCountry = @json($defaultOwnerCountryId ? (string) $defaultOwnerCountryId : null);
+            var $country = $modal.find('select[name="country_id"]');
+            if (defaultCountry && $country.length && !$country.val()) {
+                $country.val(defaultCountry).trigger('change');
+            }
+        });
+
+        $(document).on('show.bs.modal', '[id^="edit"]', function () {
+            initFaIconSelect($(this));
         });
     });
 

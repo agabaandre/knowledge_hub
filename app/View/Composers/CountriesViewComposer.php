@@ -16,20 +16,36 @@ class CountriesViewComposer{
 
     public function compose(View $view){
 
-        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+        $minutes = (int) env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
 
-        $countries  = cache()->remember('countries',$minutes, function () {
-            $query =   Country::where('national','national');
-            $this->sharedRepo->access_filter($query,true);
-            $countries = $query->orderBy('name', 'asc')->get();
-            
-            return $countries;
+        $isCountryHub = function_exists('hub_admin_units_enabled') && hub_admin_units_enabled();
+        $ownerCountryId = function_exists('hub_owner_country_id') ? hub_owner_country_id() : null;
+
+        // Member-state hubs only expose the configured owner country in country pickers.
+        if ($isCountryHub && $ownerCountryId) {
+            $cacheKey = 'countries_hub_owner_'.$ownerCountryId;
+            $countries = cache()->remember($cacheKey, $minutes, function () use ($ownerCountryId) {
+                return Country::query()
+                    ->where('id', (int) $ownerCountryId)
+                    ->orderBy('name', 'asc')
+                    ->get();
+            });
+
+            $view->with('countries', $countries);
+            $view->with('hubCountriesScoped', true);
+
+            return;
+        }
+
+        $countries = cache()->remember('countries', $minutes, function () {
+            $query = Country::where('national', 'national');
+            $this->sharedRepo->access_filter($query, true);
+            return $query->orderBy('name', 'asc')->get();
         });
 
-        $view->with('countries',$countries);
+        $view->with('countries', $countries);
+        $view->with('hubCountriesScoped', false);
     }
 
 
 }
-
-?>

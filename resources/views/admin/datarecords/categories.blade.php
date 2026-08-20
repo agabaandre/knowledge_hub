@@ -33,21 +33,24 @@
                     @endphp
 
 					@foreach($categories as $record)
+						@php
+							$categoryPayload = [
+								'id' => (int) $record->id,
+								'name' => (string) $record->category_name,
+								'url_path' => (string) ($record->url_path ?? ''),
+								'show_on_menu' => (bool) ($record->show_on_menu ?? false),
+							];
+						@endphp
 						<tr>
 							<td>
-								{!!truncate(strip_tags($record->category_name), 100) !!}
+								{!! truncate(strip_tags($record->category_name), 100) !!}
 							</td>
 							<td>
 								<a class="btn btn-primary btn-sm" href="#edit_category" data-toggle="modal"
-									data-category='@json([
-										'id' => (int) $record->id,
-										'name' => (string) $record->category_name,
-										'url_path' => (string) ($record->url_path ?? ''),
-										'show_on_menu' => (bool) ($record->show_on_menu ?? false),
-									])'>Edit</a>
+									data-category="{{ e(json_encode($categoryPayload)) }}">Edit</a>
 								<!-- Delete Modal Action -->
                                 @can('delete_publication_metadata')
-                                <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick='openDeleteModal({{ (int) $record->id }}, @json((string) $record->category_name))' class="text-danger"> Delete</a>
+                                <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick='openDeleteModal({{ (int) $record->id }}, @json((string) $record->category_name))'> Delete</a>
                                 @endcan
 							</td>
 						</tr>

@@ -445,10 +445,16 @@
                             'class' => 'country select2',
                             'selected' => $selectedCountryIds,
                             'multiple' => 'multiple',
-                            'all_option' => true,
-                            'allfield' => 'All',
+                            'all_option' => ! $isCountryHub,
+                            'allfield' => $isCountryHub ? 'Select member state' : 'All',
                         ])
-                        <small class="text-muted d-block mt-1">After choosing region(s), pick <strong>All</strong> or select specific member states from those regions only.</small>
+                        <small class="text-muted d-block mt-1">
+                            @if($isCountryHub)
+                                This country hub defaults to the configured owner member state.
+                            @else
+                                After choosing region(s), pick <strong>All</strong> or select specific member states from those regions only.
+                            @endif
+                        </small>
             </div>
 
             @include('partials.publications.public_availability_toggle', ['row' => $row ?? null])
@@ -852,6 +858,12 @@
         var allCountries = [];
         var hubOwnerCountryId = @json($defaultOwnerCountryId ? (string) $defaultOwnerCountryId : null);
         var hubAdminUnitsEnabled = @json((bool) $isCountryHub);
+        var hubOwnerCountryName = @json(
+            ($isCountryHub && $defaultOwnerCountryId && function_exists('hub_owner_country') && hub_owner_country())
+                ? hub_owner_country()->name
+                : null
+        );
+        var hubOwnerRegionId = @json($defaultOwnerRegionId ? (string) $defaultOwnerRegionId : null);
         
         // Build a map of all countries with their region_id for quick lookup
         if (regionsData && Array.isArray(regionsData)) {
@@ -866,6 +878,20 @@
                     });
                 }
             });
+        }
+
+        // Country hubs: only the configured owner member state is selectable.
+        if (hubAdminUnitsEnabled && hubOwnerCountryId) {
+            allCountries = allCountries.filter(function(c) {
+                return String(c.id) === String(hubOwnerCountryId);
+            });
+            if (!allCountries.length) {
+                allCountries.push({
+                    id: parseInt(hubOwnerCountryId, 10),
+                    name: hubOwnerCountryName || ('Country #' + hubOwnerCountryId),
+                    region_id: hubOwnerRegionId ? parseInt(hubOwnerRegionId, 10) : 0
+                });
+            }
         }
 
         function wizardBootstrapAllCountriesFromDom() {
@@ -956,8 +982,7 @@
 
             if (wizardRegionSelectionIncludesAll(selectedValues)) {
                 userManuallyChangedCountries = false;
-                wizardRebuildCountryOptions(countrySelect, allCountries, true);
-                // Country hubs keep the configured owner country even when region is "All".
+                wizardRebuildCountryOptions(countrySelect, allCountries, !hubAdminUnitsEnabled);
                 wizardSetCountrySelection(
                     countrySelect,
                     hubAdminUnitsEnabled && hubOwnerCountryId ? [String(hubOwnerCountryId)] : ['all']
@@ -970,8 +995,10 @@
                 return;
             }
 
-            var regionCountries = wizardCountriesForRegionIds(regionIds);
-            wizardRebuildCountryOptions(countrySelect, regionCountries, true);
+            var regionCountries = hubAdminUnitsEnabled
+                ? allCountries.slice()
+                : wizardCountriesForRegionIds(regionIds);
+            wizardRebuildCountryOptions(countrySelect, regionCountries, !hubAdminUnitsEnabled);
 
             var nextSelection = wizardDefaultCountrySelection(regionCountries);
             if (preserveSelection) {
@@ -1004,6 +1031,11 @@
             if (!$select.length) {
                 return;
             }
+            // Country hubs never offer "All" — only the owner member state.
+            if (hubAdminUnitsEnabled) {
+                includeAllOption = false;
+                countryList = allCountries.slice();
+            }
             $select.prop('disabled', false);
             var hadSelect2 = typeof $.fn.select2 !== 'undefined' && $select.hasClass('select2-hidden-accessible');
             if (hadSelect2) {
@@ -1020,14 +1052,14 @@
                 $select.select2({
                     width: '100%',
                     dir: 'ltr',
-                    minimumResultsForSearch: 0,
+                    minimumResultsForSearch: hubAdminUnitsEnabled ? Infinity : 0,
                     placeholder: $select.data('placeholder') || 'Select Country'
                 });
             }
         }
 
         function wizardEnsureCountriesAllOption($select) {
-            if (!$select || !$select.length) {
+            if (!$select || !$select.length || hubAdminUnitsEnabled) {
                 return;
             }
             $select.prop('disabled', false);
@@ -1066,12 +1098,29 @@
 
         setTimeout(function() {
             wizardBootstrapAllCountriesFromDom();
+            if (hubAdminUnitsEnabled && hubOwnerCountryId) {
+                allCountries = allCountries.filter(function(c) {
+                    return String(c.id) === String(hubOwnerCountryId);
+                });
+                if (!allCountries.length) {
+                    allCountries.push({
+                        id: parseInt(hubOwnerCountryId, 10),
+                        name: hubOwnerCountryName || ('Country #' + hubOwnerCountryId),
+                        region_id: hubOwnerRegionId ? parseInt(hubOwnerRegionId, 10) : 0
+                    });
+                }
+            }
             $('#step-1 select.select2').each(function() {
                 wizardSyncSelect2FromDom($(this));
             });
             var $region = wizardStep1Field('select[name="rccs[]"]');
             var $countries = wizardStep1Field('select[name="countries[]"]');
             wizardEnsureCountriesAllOption($countries);
+
+            if (hubAdminUnitsEnabled && hubOwnerCountryId) {
+                wizardRebuildCountryOptions($countries, allCountries, false);
+                wizardSetCountrySelection($countries, [String(hubOwnerCountryId)]);
+            }
 
             if (!$region.length) {
                 return;
@@ -1083,12 +1132,6 @@
             if (!regionValues.length) {
                 return;
             }
-
-            var countryVal = wizardGetSelectValue($countries);
-            var countryValues = wizardNormalizeCountrySelection(countryVal);
-            var hasSavedCountries = countryValues.some(function(v) {
-                return v && String(v).toLowerCase() !== 'all' && parseInt(v, 10) > 0;
-            });
 
             // Always preserve a concrete country selection (e.g. default owner country on country hubs).
             wizardApplyRegionToCountries(regionValues, {

@@ -20,6 +20,14 @@ class AdminUnitsController extends Controller
         $request->merge(['datatable' => true]);
         $data['adminunits'] = $this->adminUnitsRepository->get($request);
         $data['search']    = (Object) $request->all();
+
+        $themesRepo = app(\App\Repositories\ThemesRepository::class);
+        $data['faIconOptions'] = $themesRepo->fontAwesomeIconOptions();
+        $data['faVersion'] = $themesRepo->fontAwesomeVersion();
+        $data['faCheatsheetUrl'] = $themesRepo->fontAwesomeCheatsheetUrl();
+        $data['defaultUnitIcon'] = 'fa-building';
+        $data['defaultOwnerCountryId'] = function_exists('hub_owner_country_id') ? hub_owner_country_id() : null;
+
         return view('admin.adminunits.index',$data);
     }
 
