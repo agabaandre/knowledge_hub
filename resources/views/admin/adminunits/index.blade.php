@@ -39,12 +39,7 @@
 						<button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
 						<button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
                         <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
-						
 					</div>
-
-					@include('admin.adminunits.partials.create-modal',['row'=>null])
-	
-					
 				</div>
             </form>
 		</div>
@@ -89,6 +84,7 @@
 	</div>
 
 	
+	@include('admin.adminunits.partials.create-modal', ['row' => null])
 	@include('admin.adminunits.partials.delete-modal')
 
 @endsection

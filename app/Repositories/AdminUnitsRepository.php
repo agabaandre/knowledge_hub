@@ -47,31 +47,37 @@ class AdminUnitsRepository{
         return $records->paginate($rows)->appends($request->only(['term', 'parent_id', 'sort', 'dir', 'rows']));
     }
     
-    public function save(Request $request){
+    public function save(Request $request)
+    {
+        $isUpdate = $request->filled('id');
+        $record = $isUpdate
+            ? AdministrativeUnit::find((int) $request->input('id'))
+            : new AdministrativeUnit();
 
-        $record = ($request->id)?AdministrativeUnit::find($request->id) : new AdministrativeUnit();
         if (! $record) {
             return false;
         }
 
         $parentId = $request->filled('parent_id') ? (int) $request->parent_id : null;
         // A unit cannot be its own parent; siblings under the same parent are allowed.
-        if ($parentId && (int) $record->id === $parentId) {
+        if ($parentId && $isUpdate && (int) $record->id === $parentId) {
             $parentId = null;
         }
 
-        $record->name            = $request->unit_name;
-        $record->description     = $request->description;
-        $record->parent_id       = $parentId;
-        $record->code            = $request->code;
-        $record->alternate_code  = $request->alt_code;
+        $record->name = trim((string) $request->unit_name);
+        $record->description = $request->filled('description')
+            ? trim((string) $request->description)
+            : null;
+        $record->parent_id = $parentId;
+        $record->code = $request->filled('code') ? trim((string) $request->code) : null;
+        $record->alternate_code = $request->filled('alt_code') ? trim((string) $request->alt_code) : null;
         $icon = trim((string) $request->input('icon', ''));
-        $record->icon            = $icon !== '' ? $icon : 'fa-building';
+        $record->icon = $icon !== '' ? $icon : 'fa-building';
 
         if (Schema::hasColumn('administrative_units', 'country_id')) {
             $countryId = $request->input('country_id');
             if (($countryId === null || $countryId === '')
-                && ! $request->id
+                && ! $isUpdate
                 && function_exists('hub_admin_units_enabled')
                 && hub_admin_units_enabled()
                 && function_exists('hub_owner_country_id')
@@ -89,24 +95,17 @@ class AdminUnitsRepository{
             $record->iso3_code = $iso3 !== '' ? $iso3 : null;
         }
 
-        //save cover
-        if($request->hasFile('logo')):
+        if ($request->hasFile('logo')) {
+            $record->logo = $this->save_attachments($request->file('logo'));
+        }
 
-            if($request->hasFile('logo')):
-                $logo_file           = $request->file('logo');
-                $logo_filepath       = $this->save_attachments($logo_file);
-                $record->logo     = $logo_filepath;
-            endif;
-
-        endif;
-
-        $saved = ($request->id)?$record->update():$record->save();
+        $saved = $record->save();
 
         if ($saved) {
             cache()->forget('adminunits');
         }
 
-        return $saved;
+        return $saved ? $record : false;
     }
 
     private function save_attachments($files){

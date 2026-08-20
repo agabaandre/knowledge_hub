@@ -652,20 +652,7 @@ class InstallerService
      */
     public function ensurePassportKeys(): void
     {
-        $private = storage_path('oauth-private.key');
-        $public = storage_path('oauth-public.key');
-
-        $missing = ! is_file($private) || ! is_file($public)
-            || filesize($private) === 0 || filesize($public) === 0;
-
-        if ($missing) {
-            try {
-                Artisan::call('passport:keys', ['--force' => true]);
-            } catch (\Throwable) {
-                // passport:install below may still create keys when clients are empty.
-            }
-        }
-
+        \App\Support\PassportKeyGenerator::ensureKeysExist();
         $this->securePassportKeyPermissions();
     }
 

@@ -9,6 +9,19 @@ class AdministrativeUnit extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'description',
+        'parent_id',
+        'code',
+        'alternate_code',
+        'logo',
+        'icon',
+        'country_id',
+        'iso_code',
+        'iso3_code',
+    ];
+
     public function parent(){
 
        return $this->belongsTo(AdministrativeUnit::class,"parent_id","id");
