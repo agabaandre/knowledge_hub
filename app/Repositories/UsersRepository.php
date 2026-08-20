@@ -200,20 +200,23 @@ class UsersRepository {
         $user_saved = ($user->id)?$user->update():$user->save();
         $user = User::find($user->id);
 
-       try{
-
-           if(!$user->author_id && !$request->author_id){
-
-                $author = Author::firstOrCreate(['name'=>$user->name,"is_organsiation"=>false]);
-                \Log::info("Error creating author::",['user'=>$user->name,'author'=>$author->name]);
-                $user->author_id=$author->id;
-
-                $user->update(); 
+        if ($user) {
+            try {
+                if ((! $user->author_id || ! Author::find((int) $user->author_id)) && ! $request->filled('author_id')) {
+                    app(\App\Repositories\AuthorsRepository::class)->ensureAuthorForUser($user);
+                    $user->refresh();
+                }
+            } catch (\Throwable $ex) {
+                \Log::error('Error creating author for user', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'error' => $ex->getMessage(),
+                ]);
+                // Fail registration loudly; don't break profile/OAuth updates.
+                if (! $request->filled('id') && ! $is_social) {
+                    throw $ex;
+                }
             }
-        }
-        catch(\Exception $ex){
-            \Log::info("Error creating author::");
-            \Log::info($ex->getMessage());
         }
 
         // Email verification is no longer needed since we auto-verify

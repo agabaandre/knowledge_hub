@@ -798,6 +798,7 @@ Route::group(['prefix' => 'permissions', 'middleware' => ['auth', 'web', 'admin.
     Route::get('/users',  [PermissionController::class, 'users'])->name('permissions.users');
     Route::get('/user',  [PermissionController::class, 'users'])->name('permissions.filerusers');
     Route::post('/saveuser',  [PermissionController::class, 'saveUser'])->name('permissions.saveuser');
+    Route::post('/ensure-authors',  [PermissionController::class, 'ensureAuthorAccounts'])->name('permissions.ensureauthors');
     Route::post('/userrole',  [PermissionController::class, 'roleToUser'])->name('permissions.userrole');
 
     Route::get('/changepass',  [PermissionController::class, 'changePassword'])->name('permissions.changepass');

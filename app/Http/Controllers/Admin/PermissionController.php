@@ -67,6 +67,7 @@ class PermissionController extends Controller
         $usersQuery = DB::table('users')
             ->leftJoin('country', 'users.country_id', '=', 'country.id')
             ->leftJoin('access_levels', 'users.access_level_id', '=', 'access_levels.id')
+            ->leftJoin('author', 'users.author_id', '=', 'author.id')
             ->leftJoin(DB::raw($accessLogSub), function ($join) {
                 $join->whereRaw('CAST(al.user_id AS UNSIGNED) = users.id');
             })
@@ -79,6 +80,7 @@ class PermissionController extends Controller
                 'country.name as country_name',
                 'access_levels.level_name as access_level_name',
                 'al.access_last_at',
+                'author.name as author_name',
                 DB::raw("(SELECT r.id FROM model_has_roles mhr INNER JOIN roles r ON r.id = mhr.role_id WHERE mhr.model_id = users.id AND mhr.model_type = '".$spatieUserSql."' ORDER BY r.id ASC LIMIT 1) AS role_id"),
                 DB::raw("(SELECT r.name FROM model_has_roles mhr INNER JOIN roles r ON r.id = mhr.role_id WHERE mhr.model_id = users.id AND mhr.model_type = '".$spatieUserSql."' ORDER BY r.id ASC LIMIT 1) AS role_name")
             )
@@ -107,6 +109,13 @@ class PermissionController extends Controller
             ->when($verifiedFilter === '0' || $verifiedFilter === 0, function ($query) {
                 return $query->whereNull('users.email_verified_at');
             })
+            ->when($request->input('missing_author') === '1', function ($query) {
+                return $query->where(function ($q) {
+                    $q->whereNull('users.author_id')
+                        ->orWhere('users.author_id', 0)
+                        ->orWhereNull('author.id');
+                });
+            })
             ->when(true, function ($query) {
                 return $this->sharedRepo->access_filter($query, true, true);
             })
@@ -125,10 +134,63 @@ class PermissionController extends Controller
             'phone' => $phone,
             'is_staff' => $request->input('is_staff'),
             'verified' => $verifiedFilter,
+            'missing_author' => $request->input('missing_author'),
         ];
 
+        $data['usersMissingAuthorCount'] = User::query()
+            ->leftJoin('author', 'users.author_id', '=', 'author.id')
+            ->where(function ($q) {
+                $q->whereNull('users.author_id')
+                    ->orWhere('users.author_id', 0)
+                    ->orWhereNull('author.id');
+            })
+            ->count('users.id');
 
         return view('admin.permissions.users')->with($data);
+    }
+
+    /**
+     * Create/link author accounts for users that registered without one.
+     */
+    public function ensureAuthorAccounts(Request $request)
+    {
+        $request->validate([
+            'user_id' => ['nullable', 'integer', 'exists:users,id'],
+        ]);
+
+        $authorsRepo = app(\App\Repositories\AuthorsRepository::class);
+
+        try {
+            if ($request->filled('user_id')) {
+                $user = User::findOrFail((int) $request->user_id);
+                $authorsRepo->ensureAuthorForUser($user);
+                $message = 'Author account assigned for '.$user->name.'.';
+                $alertClass = 'success';
+            } else {
+                $result = $authorsRepo->assignMissingAuthorAccounts();
+                $message = 'Assigned author accounts to '.$result['assigned'].' user(s).'
+                    .($result['failed'] ? ' Failed: '.$result['failed'].'.' : '');
+                $alertClass = $result['failed'] ? 'warning' : 'success';
+            }
+        } catch (\Throwable $e) {
+            report($e);
+            $message = 'Could not assign author account(s): '.$e->getMessage();
+            $alertClass = 'danger';
+        }
+
+        if ($request->ajax()) {
+            return response()->json([
+                'status' => $alertClass === 'danger' ? 'error' : 'success',
+                'message' => $message,
+                'alert_class' => $alertClass,
+            ], $alertClass === 'danger' ? 500 : 200);
+        }
+
+        return back()->with([
+            'message' => $message,
+            'alert' => $message,
+            'alert_class' => $alertClass,
+        ]);
     }
 
     public function sendVerification(Request $request)
@@ -237,6 +299,17 @@ class PermissionController extends Controller
         $saved = ($request->id)? $user->update():$user->save();
 
         if ($saved) {
+            try {
+                if (! $user->author_id || ! \App\Models\Author::find((int) $user->author_id)) {
+                    app(\App\Repositories\AuthorsRepository::class)->ensureAuthorForUser($user->fresh());
+                }
+            } catch (\Throwable $e) {
+                \Log::error('Admin saveUser author ensure failed', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
             $isViewer = $this->isViewerAccessLevel($request->level_id ?? null);
             if ($isViewer) {
                 $user->syncRoles([]);

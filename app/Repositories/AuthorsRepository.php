@@ -100,10 +100,124 @@ class AuthorsRepository extends SharedRepo{
         
         $author = new Author();
         $author->name = $name;
+        $author->icon = 'fa fa-archive';
+        $author->is_organsiation = 'No';
+        $author->address = '';
+        $author->telephone = '';
+        $author->email = '';
+        $author->logo = 'author.png';
         $author->save();
         $this->ensureSlug($author);
 
         return $author;
+    }
+
+    /**
+     * Ensure a portal user has a linked author row (creates one when missing).
+     */
+    public function ensureAuthorForUser(User $user): Author
+    {
+        if ($user->author_id) {
+            $existing = Author::find((int) $user->author_id);
+            if ($existing && (int) $existing->id > 0) {
+                return $existing;
+            }
+        }
+
+        $name = trim((string) ($user->name ?: trim(($user->first_name ?? '').' '.($user->last_name ?? ''))));
+        if ($name === '') {
+            $name = trim((string) ($user->email ?: ('User '.$user->id)));
+        }
+
+        $email = trim((string) ($user->email ?? ''));
+        // Legacy author.email was VARCHAR(20); keep inserts safe until migration expands it.
+        $emailForAuthor = $email !== '' ? mb_substr($email, 0, 255) : '';
+
+        $author = null;
+        if ($emailForAuthor !== '' && Schema::hasColumn('author', 'email')) {
+            $author = Author::query()
+                ->where('email', $emailForAuthor)
+                ->where(function ($q) {
+                    $q->where('is_organsiation', 'No')
+                        ->orWhere('is_organsiation', 'no')
+                        ->orWhere('is_organsiation', 0)
+                        ->orWhere('is_organsiation', 'false')
+                        ->orWhereNull('is_organsiation');
+                })
+                ->first();
+        }
+
+        if (! $author) {
+            $author = new Author();
+            $author->name = mb_substr($name, 0, 100);
+            $author->icon = 'fa fa-archive';
+            $author->is_organsiation = 'No';
+            $author->address = '';
+            $author->telephone = '';
+            $author->email = $emailForAuthor;
+            $author->logo = 'author.png';
+            $author->save();
+        }
+
+        if (! $author || (int) $author->id <= 0) {
+            throw new \RuntimeException('Failed to create author account for user #'.$user->id);
+        }
+
+        $this->ensureSlug($author);
+
+        if ((int) $user->author_id !== (int) $author->id) {
+            $user->author_id = (int) $author->id;
+            $user->save();
+        }
+
+        return $author;
+    }
+
+    /**
+     * Backfill author accounts for users missing a valid author_id.
+     *
+     * @return array{assigned:int, skipped:int, failed:int, errors:list<string>}
+     */
+    public function assignMissingAuthorAccounts(?int $limit = null): array
+    {
+        $query = User::query()
+            ->leftJoin('author', 'users.author_id', '=', 'author.id')
+            ->where(function ($q) {
+                $q->whereNull('users.author_id')
+                    ->orWhere('users.author_id', 0)
+                    ->orWhereNull('author.id');
+            })
+            ->select('users.*')
+            ->orderBy('users.id');
+
+        if ($limit !== null && $limit > 0) {
+            $query->limit($limit);
+        }
+
+        $assigned = 0;
+        $skipped = 0;
+        $failed = 0;
+        $errors = [];
+
+        foreach ($query->cursor() as $user) {
+            try {
+                if ($user->author_id && Author::find((int) $user->author_id)) {
+                    $skipped++;
+                    continue;
+                }
+                $this->ensureAuthorForUser($user);
+                $assigned++;
+            } catch (\Throwable $e) {
+                $failed++;
+                $errors[] = 'User #'.$user->id.': '.$e->getMessage();
+                \Log::error('assignMissingAuthorAccounts failed', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return compact('assigned', 'skipped', 'failed', 'errors');
     }
 
     public function find($id){

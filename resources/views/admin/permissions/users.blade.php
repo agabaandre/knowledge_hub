@@ -121,14 +121,32 @@
 @include('admin.permissions.partials.add_user_modal')
 
 <div class="col-md-12 bg-white py-4 rounded">
-    <div class="row">
-        <div class="col-md-9">
+    <div class="row align-items-center">
+        <div class="col-md-6">
             <h3 class="card-title mb-0">{{ __('auth.users') }}</h3>
+            @if(($usersMissingAuthorCount ?? 0) > 0)
+                <div class="alert alert-warning mt-2 mb-0 py-2">
+                    <strong>{{ (int) $usersMissingAuthorCount }}</strong> user(s) have no author account.
+                    Publishing will fail until they are assigned.
+                </div>
+            @endif
         </div>
-        <div class="col-md-3">
-            <a class="modal-effect btn btn-outline-primary d-block d-grid mb-3 float-right" data-effect="effect-rotate-bottom" data-toggle="modal" href="#addUser"><i class="fa fa-plus-circle"></i> {{ __('general.add') }} {{ __('auth.user') }}</a>
+        <div class="col-md-6 text-md-right">
+            @if(($usersMissingAuthorCount ?? 0) > 0)
+                <form method="POST" action="{{ route('permissions.ensureauthors') }}" class="d-inline" onsubmit="return confirm('Create author accounts for all users missing one?');">
+                    @csrf
+                    <button type="submit" class="btn btn-warning mb-3">
+                        <i class="fa fa-user-plus"></i> Assign missing author accounts ({{ (int) $usersMissingAuthorCount }})
+                    </button>
+                </form>
+            @endif
+            <a class="modal-effect btn btn-outline-primary mb-3" data-effect="effect-rotate-bottom" data-toggle="modal" href="#addUser"><i class="fa fa-plus-circle"></i> {{ __('general.add') }} {{ __('auth.user') }}</a>
         </div>
     </div>
+
+    @if(session('alert') || session('message'))
+        <div class="alert alert-{{ session('alert_class', 'info') }}">{{ session('alert') ?? session('message') }}</div>
+    @endif
 
     <form id="user-filters" action="{{ route('permissions.users') }}" method="GET">
         <div class="row bg-white pb-3">
@@ -150,6 +168,13 @@
                     <option value="" {{ ($search->verified ?? '') === '' || $search->verified === null ? 'selected' : '' }}>All</option>
                     <option value="1" {{ ($search->verified ?? '') === '1' ? 'selected' : '' }}>Yes</option>
                     <option value="0" {{ ($search->verified ?? '') === '0' ? 'selected' : '' }}>No</option>
+                </select>
+            </div>
+            <div class="form-group col-md-3">
+                <label>Author account</label>
+                <select name="missing_author" class="form-control">
+                    <option value="" {{ ($search->missing_author ?? '') === '' || ($search->missing_author ?? null) === null ? 'selected' : '' }}>All</option>
+                    <option value="1" {{ ($search->missing_author ?? '') === '1' ? 'selected' : '' }}>Missing author</option>
                 </select>
             </div>
             <div class="form-group col-md-2">
@@ -209,6 +234,18 @@
                             <p><strong>Job</strong><br>{{ $u->job_title ?: '—' }}</p>
                             <p><strong>Country</strong><br>{{ $u->country_name ?: '—' }}</p>
                             <p><strong>Access level</strong><br>{{ $u->access_level_name ?: '—' }}</p>
+                            <p><strong>Author</strong><br>
+                                @if(!empty($u->author_id) && !empty($u->author_name))
+                                    #{{ $u->author_id }} — {{ $u->author_name }}
+                                @else
+                                    <span class="text-danger">Missing</span>
+                                    <form action="{{ route('permissions.ensureauthors') }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <input type="hidden" name="user_id" value="{{ $u->id }}">
+                                        <button type="submit" class="btn btn-link btn-sm p-0 align-baseline">Assign now</button>
+                                    </form>
+                                @endif
+                            </p>
                         </div>
                         <div class="user-card-section">
                             <div class="user-card-section-title">Contact</div>
