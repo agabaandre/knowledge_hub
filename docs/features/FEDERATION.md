@@ -148,6 +148,18 @@ Runs **hourly** on country hubs to refresh the parent connection before the acce
 
 ---
 
+## Public browse (`/federated`)
+
+On a continental hub, `/federated` lists approved partner publications and forums.
+
+- Linked partner hubs render in a **right-to-left carousel above** the listings. Cards use the mapped country flag as a background and filter the page when clicked.
+- Publication cards use a **compact cover** (about 320px min-height) so the image lines up with the text, and excerpts of about **140 words**.
+- Synced items sit in `federated_content_items` until a central administrator approves them (**Approvals** inbox or **Settings → Federated Knowledge Hubs → Review pending content**).
+
+See the [user guide](../user-guide.md#8-partner-country-hubs-federation) and [approvals](APPROVALS.md).
+
+---
+
 ## Key files
 
 | Path | Purpose |

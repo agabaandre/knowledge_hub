@@ -195,6 +195,7 @@ class SitemapService
             ['path' => 'authors', 'changefreq' => 'weekly', 'priority' => '0.6'],
             ['path' => 'faqs', 'changefreq' => 'monthly', 'priority' => '0.5'],
             ['path' => 'privacy', 'changefreq' => 'yearly', 'priority' => '0.3'],
+            ['path' => 'user_manual', 'changefreq' => 'monthly', 'priority' => '0.4'],
             ['path' => 'federated', 'changefreq' => 'weekly', 'priority' => '0.5'],
             ['path' => 'browse/themes', 'changefreq' => 'weekly', 'priority' => '0.6'],
             ['path' => 'browse/subthemes', 'changefreq' => 'weekly', 'priority' => '0.6'],

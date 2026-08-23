@@ -113,7 +113,7 @@ flowchart TB
 
 | Process | System implementation |
 |---------|----------------------|
-| **Review** | Admin review workflows, bulk approval, CoP participant approval, forum moderation, configurable auto-approve |
+| **Review** | Central approvals inbox (`/admin/approvals`), bulk approve/reject, CoP participant approval, forum moderation, configurable auto-approve, daily digest email |
 | **Admin portal** | Institution dashboards, KPI/performance views, metrics & audience analytics (visits, signups, geography), content publishing tools — helps institutions curate and target knowledge products to the right audience |
 
 **Flow:** Institutions use the admin portal to understand their audience, publish and manage content, and govern quality before full release.

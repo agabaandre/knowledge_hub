@@ -71,4 +71,81 @@ class CommonController extends Controller
         return redirect()->away(site_favicon_url(), 301);
     }
 
+    public function userManual()
+    {
+        $hide_search = true;
+        $bodyHtml = $this->renderMarkdownGuide(base_path('docs/user-guide.md'));
+
+        return view('user_manual.index', compact('hide_search', 'bodyHtml'));
+    }
+
+    public function administratorGuide()
+    {
+        $hide_search = true;
+        $bodyHtml = $this->renderMarkdownGuide(base_path('docs/administrator-guide.md'));
+
+        return view('user_manual.administrator', compact('hide_search', 'bodyHtml'));
+    }
+
+    private function renderMarkdownGuide(string $path): string
+    {
+        if (! is_file($path)) {
+            return '<p>This guide is not available on the server.</p>';
+        }
+
+        $markdown = (string) file_get_contents($path);
+        $converter = new \League\CommonMark\GithubFlavoredMarkdownConverter([
+            'html_input' => 'strip',
+            'allow_unsafe_links' => false,
+        ]);
+
+        return $this->rewriteGuideLinkUrls(
+            $this->rewriteGuideImageUrls($converter->convert($markdown)->getContent())
+        );
+    }
+
+    /**
+     * Point manual screenshots at the public /manual files under the app URL.
+     */
+    private function rewriteGuideImageUrls(string $html): string
+    {
+        return (string) preg_replace_callback(
+            '#src="(?:\.\./public)?/manual/([^"]+)"#',
+            function (array $matches): string {
+                return 'src="'.e(asset('manual/'.$matches[1])).'"';
+            },
+            $html
+        );
+    }
+
+    /**
+     * Root-relative markdown links such as /administrator-guide must include the
+     * subdirectory app URL (e.g. /knowledge_hub/administrator-guide).
+     */
+    private function rewriteGuideLinkUrls(string $html): string
+    {
+        return (string) preg_replace_callback(
+            '#href="(/[^"]*)"#',
+            function (array $matches): string {
+                $path = $matches[1];
+                if (str_starts_with($path, '//')) {
+                    return $matches[0];
+                }
+
+                $parts = parse_url($path) ?: [];
+                $pathOnly = ltrim((string) ($parts['path'] ?? ''), '/');
+                $href = url($pathOnly);
+                if (! empty($parts['query'])) {
+                    $href .= '?'.$parts['query'];
+                }
+                if (! empty($parts['fragment'])) {
+                    $href .= '#'.$parts['fragment'];
+                }
+
+                return 'href="'.e($href).'"';
+            },
+            $html
+        );
+    }
+
 }

@@ -140,8 +140,8 @@ flowchart TB
 | Area | Functions |
 |------|-----------|
 | **Configure** | Branding, colors, typography, social login, AI settings, search options, auto-approve toggles |
-| **Dashboards & insights** | Hub dashboard stats, RCC/KPI dashboards, metrics (visits, signups, country maps), AI insights, target-audience analytics |
-| **Moderation** | Approve/reject publications, forums, CoP participants (permission-gated) |
+| **Dashboards & insights** | Hub dashboard stats at `/admin/dashboard`; dashboard publications list at `/admin/dashboard/list`; RCC/KPI dashboards, metrics, AI insights, target-audience analytics |
+| **Moderation** | Approve/reject publications, forums, CoP participants, and federated partner content from `/admin/approvals` (permission-gated) |
 | **Users & roles** | User management, Spatie role/permission assignment |
 | **Federation** | Register remote hubs, connect, sync public content |
 | **System** | Hub deployment type (continental/country), installation wizard |
@@ -357,6 +357,10 @@ flowchart LR
 | Document | Path |
 |----------|------|
 | Federation | `docs/features/FEDERATION.md` |
+| Approvals inbox | `docs/features/APPROVALS.md` |
+| SEO slugs | `docs/features/SEO_SLUGS.md` |
+| User guide | `docs/user-guide.md` |
+| Administrator guide | `docs/administrator-guide.md` |
 | AI configuration | `config/ai.php` |
 | Database config | `config/database.php` |
 | API routes | `routes/api.php` |

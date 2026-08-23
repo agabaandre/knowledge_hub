@@ -53,7 +53,7 @@
                 </a></li>
                 <li><a href="https://africacdc.org" target="_blank" class="text-decoration-none">{{ __('ui_body.footer_africa_cdc_website') }}</a></li>
                 <li><a href="{{ url('privacy') }}" class="text-decoration-none">{{ __('ui_body.footer_privacy_policy') }}</a></li>
-                <li><a href="https://github.com/Africa-cdc-Khub/knowledge_hub/wiki#user-guide" class="text-decoration-none">{{ __('ui_body.footer_user_guide') }}</a></li>
+                <li><a href="{{ url('user_manual') }}" class="text-decoration-none">{{ __('ui_body.footer_user_guide') }}</a></li>
             </ul>
         </div>
     </div>

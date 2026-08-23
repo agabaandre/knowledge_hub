@@ -1,6 +1,15 @@
 # Knowledge Hub — documentation
 
-Central index for operators, administrators, and developers. Start with [installation](installation/README.md) for new deployments, or [deployment](deployment/README.md) for production operations.
+Central index for operators, administrators, contributors, and developers. **End users:** start with the [user guide](user-guide.md) (also at `/user_manual` on the portal). **Hub staff:** see the [administrator guide](administrator-guide.md). For new servers start with [installation](installation/README.md); for production operations see [deployment](deployment/README.md).
+
+---
+
+## User and administrator guides
+
+| Document | Audience | Description |
+|----------|----------|-------------|
+| [user-guide.md](user-guide.md) | Visitors, contributors, reviewers | Search, publish, forums, communities, federation browse, approvals inbox (in-app: `/user_manual`) |
+| [administrator-guide.md](administrator-guide.md) | Admins, operators | Dashboards, approvals, slugs, admin units, federation, Artisan (in-app: `/administrator-guide`) |
 
 ---
 
@@ -52,6 +61,8 @@ Central index for operators, administrators, and developers. Start with [install
 | Document | Audience | Description |
 |----------|----------|-------------|
 | [features/FEATURE_ENHANCEMENTS.md](features/FEATURE_ENHANCEMENTS.md) | Admin, dev | Tags AI, email config, forum sharing, CoP admin & detail |
+| [features/APPROVALS.md](features/APPROVALS.md) | Admin, reviewers | Central approvals inbox, notification links, daily digest |
+| [features/SEO_SLUGS.md](features/SEO_SLUGS.md) | Admin, ops | Slug catalogue, rename sync, `php artisan slugs:regenerate` |
 | [features/KPI_INDICATORS_OWID.md](features/KPI_INDICATORS_OWID.md) | Admin, dev | Country indicators, OWID import, KPI queues |
 | [features/CONTENT_REQUEST_REFERRALS.md](features/CONTENT_REQUEST_REFERRALS.md) | Admin, dev | Content request referrals |
 | [features/FORUM_ATTACHMENTS_PDF.md](features/FORUM_ATTACHMENTS_PDF.md) | Dev / ops | Forum Office → PDF conversion |

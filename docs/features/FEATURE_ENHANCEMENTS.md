@@ -234,6 +234,18 @@ Config is injected as `window.communityDetailReactConfig` from the Blade view.
 
 ---
 
+## Approvals, federation browse, admin units, and slugs (August 2026)
+
+- **Approvals inbox** (`/admin/approvals`) — one queue for publications, forums, CoP participants, and federated items. Notification emails link here. Daily digest: `php artisan approvals:daily-summary` at 08:00. See [APPROVALS.md](APPROVALS.md).
+- **Admin dashboard** — `/admin/dashboard` is the stats overview; `/admin/dashboard/list` lists dashboard publications (works on empty country hubs).
+- **Federation browse** (`/federated`) — partner-hub carousel above listings, compact covers (~320px), longer excerpts (~140 words). See [FEDERATION.md](FEDERATION.md).
+- **Admin unit detail** — publication feed cards match records search (preview, download, AI).
+- **Nifty sidebar icons** — Font Awesome 6 solid at weight 900; admin layout always enables menu icons.
+- **SEO slugs** — regenerated when titles/names change; `php artisan slugs:regenerate` (`--only-empty`, `--dry-run`). See [SEO_SLUGS.md](SEO_SLUGS.md).
+- **User guide** — in-app at `/user_manual` (source: `docs/user-guide.md`). Administrator guide at `/administrator-guide`.
+
+---
+
 ## Operations checklist (after pull)
 
 1. Run migrations:
@@ -271,6 +283,11 @@ Config is injected as `window.communityDetailReactConfig` from the Blade view.
 | [CONTENT_REQUEST_REFERRALS.md](CONTENT_REQUEST_REFERRALS.md) | Content request referrals |
 | [FORUM_ATTACHMENTS_PDF.md](FORUM_ATTACHMENTS_PDF.md) | Forum Office → PDF |
 | [KPI_INDICATORS_OWID.md](KPI_INDICATORS_OWID.md) | KPI / OWID indicators |
+| [APPROVALS.md](APPROVALS.md) | Approvals inbox |
+| [SEO_SLUGS.md](SEO_SLUGS.md) | SEO slug sync |
+| [FEDERATION.md](FEDERATION.md) | Federated hubs |
+| [../user-guide.md](../user-guide.md) | End-user guide |
+| [../administrator-guide.md](../administrator-guide.md) | Administrator guide |
 
 ---
 
@@ -286,3 +303,7 @@ Config is injected as `window.communityDetailReactConfig` from the Blade view.
 | Contributor org | `app/Helpers/UtilsHelper.php` → `contributor_profile_organization()` |
 | Forum sharing | `resources/views/forums/partials/share_buttons.blade.php`, `resources/views/forums/index.blade.php` |
 | Guest create nav | `resources/views/layouts/partials/create_menu.blade.php`, `app/Http/Controllers/Auth/LoginController.php` |
+| Approvals inbox | `app/Http/Controllers/Admin/ApprovalsController.php`, `app/Services/ApprovalInboxService.php` |
+| SEO slugs | `app/Support/SeoSlugSync.php`, `app/Console/Commands/RegenerateSeoSlugsCommand.php` |
+| Admin unit cards | `resources/views/adminunits/details.blade.php` |
+| Nifty sidebar icons | `resources/views/layouts/theme1/partials/theme1_colors.blade.php`, `resources/views/admin/layouts/main_nifty.blade.php` |

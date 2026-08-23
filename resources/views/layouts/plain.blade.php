@@ -13,7 +13,7 @@
 
 @yield('styles')
 
-@if (Session::has('alert') || Session::has('message') || $errors->any())
+@if (Session::has('alert') || Session::has('message') || (isset($errors) && $errors->any()))
     <div class="container">
         @include('layouts.' . $theme . 'partials.alerts')
     </div>

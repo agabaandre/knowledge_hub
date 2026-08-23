@@ -40,7 +40,7 @@ Ensure the system cron runs Laravel's scheduler:
 * * * * * cd /path/to/knowledge_hub && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-Includes daily SQL backup (`hub:backup-database`) when enabled in Storage Management, and nightly federated hub sync (`federation:sync`) on continental portals.
+Includes daily SQL backup (`hub:backup-database`) when enabled in Storage Management, nightly federated hub sync (`federation:sync`) on continental portals, daily approval summaries (`approvals:daily-summary` at 08:00), and sitemap generation.
 
 ---
 
@@ -57,6 +57,10 @@ Includes daily SQL backup (`hub:backup-database`) when enabled in Storage Manage
 | `php artisan hub:backup-database --full` | Run full SQL backup |
 | `php artisan federation:sync` | Sync public content from country hubs (`--all` for every active hub) |
 | `php artisan federation:sync --hub=1` | Sync a single federated hub by ID |
+| `php artisan slugs:regenerate` | Rebuild SEO slugs from current titles (`--only-empty`, `--dry-run`) |
+| `php artisan approvals:daily-summary` | Email pending-approval digest (also scheduled at 08:00) |
+
+Host `php artisan` (not inside Docker) remaps `DB_HOST=mysql` to `127.0.0.1`. If Compose publishes MySQL on another port, set `DB_PORT_FORWARD` (for this stack the default published port is `3307`). Prefer `docker compose exec app php artisan migrate` so you use the container network.
 
 Shell helpers: `./link-hub-storage.sh`, `./recover-hub-storage.sh`, `./fix-storage-permissions.sh` (Linux/macOS); `link-hub-storage.bat` / `link-hub-storage.ps1` (Windows).
 

@@ -3,7 +3,7 @@
 
 Web platform for health knowledge management: publications, forums, communities of practice, KPI indicators, federation, AI-assisted search, and institution admin tooling.
 
-**Full documentation:** [docs/README.md](docs/README.md)
+**Full documentation:** [docs/README.md](docs/README.md) · **User guide:** [docs/user-guide.md](docs/user-guide.md) (portal: `/user_manual`) · **Administrator guide:** [docs/administrator-guide.md](docs/administrator-guide.md)
 
 ---
 
@@ -29,7 +29,11 @@ Detailed specs: [docs/architecture/KH_Portal_Architecture.md](docs/architecture/
 | Area | Highlights |
 |------|------------|
 | **Khub AI** | Multi-PDF ChatPDF support; per-document Q&A; merged answers for selected sources |
-| **Moderation** | Permission-gated approve/reject for publications, forums, CoP participants; pending badge on Participants menu; optional auto-approve publications (Admin → Configure) |
+| **Moderation** | Permission-gated approve/reject for publications, forums, CoP participants, and federated partner content via a central **Approvals** inbox (`/admin/approvals`); pending badge; optional auto-approve publications (Admin → Configure) |
+| **Dashboards** | `/admin/dashboard` is the stats overview; `/admin/dashboard/list` lists admin-only dashboards (including empty country hubs) |
+| **Federation browse** | `/federated` shows a partner-hub carousel above listings, compact covers, and longer excerpts; partner items appear after central approval |
+| **Admin units** | Country-hub unit detail pages use the same publication cards as records search |
+| **SEO slugs** | Theme, publication, forum, tag, community, author, and related URLs regenerate when the name/title changes; `php artisan slugs:regenerate` |
 | **Publications** | Office→PDF on upload (admin toggle); file-type badges on search cards; publication card author/date layout |
 | **Admin configure** | Reorganized tabs, 3-column grids, color pickers, social login tab fix |
 | **Community detail** | Tabbed activity (Wall · Publications · Forums · Processed requests), React tab switching, collapsible attachments |
@@ -98,6 +102,8 @@ Details: [docs/installation/WEB_INSTALLER.md](docs/installation/WEB_INSTALLER.md
 | **Architecture** | [docs/architecture/](docs/architecture/KH_Portal_Architecture.md) |
 | Installation | [docs/installation/](docs/installation/README.md) |
 | Deployment & storage | [docs/deployment/](docs/deployment/README.md) |
+| User guide | [docs/user-guide.md](docs/user-guide.md) |
+| Administrator guide | [docs/administrator-guide.md](docs/administrator-guide.md) |
 | Features | [docs/features/](docs/features/FEATURE_ENHANCEMENTS.md) |
 
 | Topic | Document |
@@ -110,6 +116,8 @@ Details: [docs/installation/WEB_INSTALLER.md](docs/installation/WEB_INSTALLER.md
 | Permissions script | [docs/deployment/PERMISSIONS.md](docs/deployment/PERMISSIONS.md) |
 | KPI / OWID indicators | [docs/features/KPI_INDICATORS_OWID.md](docs/features/KPI_INDICATORS_OWID.md) |
 | Forum Office → PDF | [docs/features/FORUM_ATTACHMENTS_PDF.md](docs/features/FORUM_ATTACHMENTS_PDF.md) |
+| Approvals inbox | [docs/features/APPROVALS.md](docs/features/APPROVALS.md) |
+| SEO slugs | [docs/features/SEO_SLUGS.md](docs/features/SEO_SLUGS.md) |
 | Records search security testing | [docs/security/RECORDS_SEARCH_SECURITY_TESTING.md](docs/security/RECORDS_SEARCH_SECURITY_TESTING.md) |
 | Community detail (tabs, React, publications) | [docs/features/FEATURE_ENHANCEMENTS.md](docs/features/FEATURE_ENHANCEMENTS.md#frontend--communities-of-practice-detail) |
 
