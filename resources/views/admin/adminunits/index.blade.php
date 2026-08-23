@@ -3,6 +3,28 @@
 @section('styles')
  @include('common.table')
  <link href="{{ asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
+ <style>
+    .adminunits-modal .modal-content {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .adminunits-modal .modal-body {
+        max-height: calc(100vh - 220px);
+        overflow-y: auto;
+    }
+    .adminunits-modal .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: .5rem;
+        width: 100%;
+        margin: 0;
+        border-top: 1px solid #e9ecef;
+        background: #fff;
+        border-radius: 0 0 .3rem .3rem;
+    }
+ </style>
 @endsection
 
 @section('content')
@@ -75,16 +97,18 @@
 								<a class="btn btn-sm btn-primary ml-1" href="#edit{{$row->id}}" data-toggle="modal"> Edit</a>
 							</td>
 						</tr>
-						@include('admin.adminunits.partials.edit-modal',['row'=>$row])
 					@endforeach
 				</tbody>
 			</table>
 		</div>
 
 	</div>
+</div>
 
-	
 	@include('admin.adminunits.partials.create-modal', ['row' => null])
+	@foreach($adminunits as $row)
+		@include('admin.adminunits.partials.edit-modal', ['row' => $row])
+	@endforeach
 	@include('admin.adminunits.partials.delete-modal')
 
 @endsection

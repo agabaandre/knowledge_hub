@@ -209,7 +209,7 @@ class ContentRequestAdminController extends Controller
         $request->validate([
             'subject' => 'required|string|max:200',
             'description' => 'required|string',
-            'country_id' => 'required|exists:countries,id',
+            'country_id' => 'required|exists:country,id',
             'email' => 'nullable|email',
         ]);
 
@@ -231,7 +231,7 @@ class ContentRequestAdminController extends Controller
         $request->validate([
             'subject' => 'required|string|max:200',
             'description' => 'required|string',
-            'country_id' => 'required|exists:countries,id',
+            'country_id' => 'required|exists:country,id',
             'email' => 'nullable|email',
         ]);
 

@@ -52,7 +52,12 @@ class AdminUnitsController extends Controller
         ];
 
         if (Schema::hasColumn('administrative_units', 'country_id')) {
-            $rules['country_id'] = ['nullable', 'integer', 'exists:countries,id'];
+            $countryTable = Schema::hasTable('country') ? 'country' : (Schema::hasTable('countries') ? 'countries' : null);
+            if ($countryTable) {
+                $rules['country_id'] = ['nullable', 'integer', 'exists:'.$countryTable.',id'];
+            } else {
+                $rules['country_id'] = ['nullable', 'integer'];
+            }
         }
         if (Schema::hasColumn('administrative_units', 'iso_code')) {
             $rules['iso_code'] = ['nullable', 'string', 'size:2'];
