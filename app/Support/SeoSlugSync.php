@@ -163,7 +163,7 @@ class SeoSlugSync
             });
         }
 
-        $query->chunkById(200, function ($rows) use ($type, $onlyEmpty, $dryRun, &$scanned, &$updated, &$skipped) {
+        $query->chunkById(200, function ($rows) use ($type, $onlyEmpty, $dryRun, $column, &$scanned, &$updated, &$skipped) {
             foreach ($rows as $row) {
                 $scanned++;
                 $changed = self::apply($row, $type, ! $onlyEmpty);
@@ -173,11 +173,19 @@ class SeoSlugSync
                 }
                 $updated++;
                 if (! $dryRun) {
-                    $row->saveQuietly();
+                    self::persistSlug($row, $column);
                 }
             }
         });
 
         return compact('scanned', 'updated', 'skipped');
+    }
+
+    private static function persistSlug(Model $row, string $column): void
+    {
+        $row->newQueryWithoutScopes()
+            ->toBase()
+            ->where($row->getKeyName(), $row->getKey())
+            ->update([$column => $row->getAttribute($column)]);
     }
 }

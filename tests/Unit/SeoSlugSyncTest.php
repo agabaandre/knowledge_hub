@@ -35,6 +35,7 @@ class SeoSlugSyncTest extends TestCase
         Schema::dropIfExists('publication');
         Schema::dropIfExists('sub_thematic_area');
         Schema::dropIfExists('thematic_area');
+        Schema::dropIfExists('country');
 
         Schema::create('thematic_area', function (Blueprint $table) {
             $table->id();
@@ -62,6 +63,12 @@ class SeoSlugSyncTest extends TestCase
             $table->string('slug')->nullable();
             $table->integer('is_version')->default(0);
             $table->timestamps();
+        });
+
+        Schema::create('country', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->nullable();
+            $table->string('slug')->nullable();
         });
     }
 
@@ -152,5 +159,18 @@ class SeoSlugSyncTest extends TestCase
 
         $this->assertTrue(SeoSlugSync::apply($pub, 'publications'));
         $this->assertSame('new-publication-title', $pub->slug);
+    }
+
+    public function test_regenerate_updates_country_slugs_without_timestamp_columns(): void
+    {
+        $country = new \App\Models\Country();
+        $country->timestamps = false;
+        $country->forceFill(['name' => 'Western Sahara', 'slug' => 'stale-country'])->save();
+
+        $result = SeoSlugSync::regenerate('countries');
+
+        $this->assertSame(1, $result['updated']);
+        $this->assertSame('western-sahara', $country->fresh()->slug);
+        $this->assertFalse(Schema::hasColumn('country', 'updated_at'));
     }
 }

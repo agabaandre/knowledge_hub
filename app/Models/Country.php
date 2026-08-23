@@ -13,6 +13,8 @@ class Country extends Model
 
     protected $table ="country";
 
+    public $timestamps = false;
+
     protected static function boot()
     {
         parent::boot();
