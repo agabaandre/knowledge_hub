@@ -10,7 +10,10 @@ final class SpotlightBackground
      *     banner_url: ?string,
      *     gradient_start: string,
      *     gradient_end: string,
-     *     inline_style: string
+     *     inline_style: string,
+     *     animation: string,
+     *     animation_speed: string,
+     *     animation_class: string
      * }
      */
     public static function resolve(?object $settings = null): array
@@ -39,12 +42,36 @@ final class SpotlightBackground
             );
         }
 
+        $animation = self::animationType($settings);
+        $speed = self::animationSpeed($settings);
+
         return [
             'has_banner' => $bannerUrl !== null,
             'banner_url' => $bannerUrl,
             'gradient_start' => $gradientStart,
             'gradient_end' => $gradientEnd,
             'inline_style' => $inlineStyle,
+            'animation' => $animation,
+            'animation_speed' => $speed,
+            'animation_class' => $animation === 'none'
+                ? ''
+                : 'home-spotlight--anim-'.$animation.' home-spotlight--speed-'.$speed,
+        ];
+    }
+
+    /**
+     * @return list<array{value: string, label: string, hint: string}>
+     */
+    public static function animationOptions(): array
+    {
+        return [
+            ['value' => 'none', 'label' => 'None (static)', 'hint' => 'No motion. Best for accessibility and low-power devices.'],
+            ['value' => 'kenburns', 'label' => 'Ken Burns zoom', 'hint' => 'Slow cinematic zoom and pan, like documentary stills.'],
+            ['value' => 'pan', 'label' => 'Gentle pan', 'hint' => 'Background drifts slowly across the frame.'],
+            ['value' => 'gradient', 'label' => 'Living gradient', 'hint' => 'Brand colors shift and flow — works with or without a photo.'],
+            ['value' => 'aurora', 'label' => 'Aurora glow', 'hint' => 'Soft moving color blobs, common on modern SaaS heroes.'],
+            ['value' => 'shimmer', 'label' => 'Light shimmer', 'hint' => 'A diagonal highlight sweeps across the banner.'],
+            ['value' => 'pulse', 'label' => 'Breathing overlay', 'hint' => 'Overlay opacity gently pulses for a live feel.'],
         ];
     }
 
@@ -116,5 +143,22 @@ final class SpotlightBackground
     private static function cssUrl(string $escapedUrl): string
     {
         return "'".$escapedUrl."'";
+    }
+
+    public static function animationType(?object $settings = null): string
+    {
+        $settings = $settings ?? settings();
+        $value = strtolower(trim((string) ($settings->spotlight_animation ?? 'none')));
+        $allowed = array_column(self::animationOptions(), 'value');
+
+        return in_array($value, $allowed, true) ? $value : 'none';
+    }
+
+    public static function animationSpeed(?object $settings = null): string
+    {
+        $settings = $settings ?? settings();
+        $value = strtolower(trim((string) ($settings->spotlight_animation_speed ?? 'medium')));
+
+        return in_array($value, ['slow', 'medium', 'fast'], true) ? $value : 'medium';
     }
 }

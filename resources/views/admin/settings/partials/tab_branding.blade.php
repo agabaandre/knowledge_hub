@@ -169,4 +169,50 @@
             </div>
         </div>
     </div>
+
+    <div class="branding-options-panel mt-4">
+        <h4 class="branding-options-panel__title">
+            <i class="fa fa-magic"></i> Spotlight motion
+        </h4>
+        <p class="info-text mb-3">Give the homepage hero a live feel used on modern marketing sites. Motion pauses automatically when the visitor prefers reduced motion.</p>
+        <div class="row settings-grid-row">
+            <div class="col-md-6">
+                <div class="form-group settings-field--compact mb-0">
+                    <label for="spotlight_animation">Animation type</label>
+                    <select class="form-control" name="spotlight_animation" id="spotlight_animation">
+                        @foreach(\App\Support\SpotlightBackground::animationOptions() as $option)
+                            <option value="{{ $option['value'] }}"
+                                    data-hint="{{ $option['hint'] }}"
+                                    @if(($settings->spotlight_animation ?? 'none') === $option['value']) selected @endif>{{ $option['label'] }}</option>
+                        @endforeach
+                    </select>
+                    <small class="info-text d-block mt-2" id="spotlight_animation_hint">
+                        {{ collect(\App\Support\SpotlightBackground::animationOptions())->firstWhere('value', $settings->spotlight_animation ?? 'none')['hint'] ?? 'No motion. Best for accessibility and low-power devices.' }}
+                    </small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group settings-field--compact mb-0">
+                    <label for="spotlight_animation_speed">Motion speed</label>
+                    <select class="form-control" name="spotlight_animation_speed" id="spotlight_animation_speed">
+                        <option value="slow" @if(($settings->spotlight_animation_speed ?? 'medium') === 'slow') selected @endif>Slow</option>
+                        <option value="medium" @if(($settings->spotlight_animation_speed ?? 'medium') === 'medium') selected @endif>Medium</option>
+                        <option value="fast" @if(($settings->spotlight_animation_speed ?? 'medium') === 'fast') selected @endif>Fast</option>
+                    </select>
+                    <small class="info-text d-block mt-2">How quickly the chosen effect plays.</small>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<script>
+    (function () {
+        var select = document.getElementById('spotlight_animation');
+        var hint = document.getElementById('spotlight_animation_hint');
+        if (!select || !hint) return;
+        select.addEventListener('change', function () {
+            var option = select.options[select.selectedIndex];
+            hint.textContent = option && option.getAttribute('data-hint') ? option.getAttribute('data-hint') : '';
+        });
+    })();
+</script>

@@ -33,10 +33,10 @@
 .theme1-spotlight.theme1-spotlight--has-banner {
     background-color: transparent !important;
 }
-.theme1-spotlight.theme1-spotlight--has-banner::before {
+.theme1-spotlight.theme1-spotlight--has-banner:not(.home-spotlight--anim-aurora):not(.home-spotlight--anim-gradient)::before {
     display: none;
 }
-.theme1-spotlight .theme1-spotlight-inner { position: relative; z-index: 1; }
+.theme1-spotlight .theme1-spotlight-inner { position: relative; z-index: 2; }
 .theme1-spotlight .banner-headline { color: #1e293b !important; font-size: 1.05rem; line-height: 1.5; }
 .theme1-spotlight .banner-headline p { color: #334155 !important; margin: 0; }
 .theme1-spotlight-search {
@@ -208,7 +208,9 @@
     }
 }
 </style>
-<div class="theme1-spotlight{{ $spotlightBg['has_banner'] ? ' theme1-spotlight--has-banner' : '' }}" style="{!! $spotlightBg['inline_style'] !!}">
+@include('home.partials.spotlight_motion')
+<div class="theme1-spotlight home-spotlight{{ $spotlightBg['has_banner'] ? ' theme1-spotlight--has-banner home-spotlight--has-banner' : '' }} {{ $spotlightBg['animation_class'] ?? '' }}">
+    <div class="home-spotlight__stage" style="{!! $spotlightBg['inline_style'] !!}" aria-hidden="true"></div>
     <h1 class="visually-hidden notranslate">
         <span data-khub-i18n="ui_body.site_title">{{ \App\Support\UiLocaleLabels::siteTitle() }}</span>@if(\App\Support\UiLocaleLabels::siteTagline() !== '') — <span data-khub-i18n="ui_body.site_tagline">{{ \App\Support\UiLocaleLabels::siteTagline() }}</span>@endif
     </h1>

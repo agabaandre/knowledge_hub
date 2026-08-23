@@ -9,7 +9,7 @@ class AdminUnitsRepository{
 
     public function get(Request $request){
 
-        $records = AdministrativeUnit::query()->with('parent');
+        $records = AdministrativeUnit::query()->with('parent')->withCount('children');
 
         if ($request->filled('term')) {
             $term = trim((string) $request->term);
@@ -136,7 +136,11 @@ class AdminUnitsRepository{
     public function child_units($id){
 
         // Multiple children at the same level under one parent are supported.
-        return AdministrativeUnit::where('parent_id',$id)->orderBy('name')->orderBy('id')->get();
+        return AdministrativeUnit::where('parent_id',$id)
+            ->withCount('children')
+            ->orderBy('name')
+            ->orderBy('id')
+            ->get();
     }
 
     /**

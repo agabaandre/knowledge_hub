@@ -19,6 +19,7 @@ class SettingsRepository
         'header_logo_inverse', 'footer_logo_inverse', 'logo_scale',
         'au_red', 'au_gold', 'au_corporate_green', 'au_green', 'au_plum', 'au_grey_text', 'au_white',
         'logo', 'favicon', 'spotlight_banner', 'spotlight_overlay_color', 'spotlight_overlay_opacity',
+        'spotlight_animation', 'spotlight_animation_speed',
     ];
 
     public function get(Request $request){
@@ -266,6 +267,15 @@ class SettingsRepository
         if (Schema::hasColumn('setting', 'spotlight_overlay_opacity')) {
             $overlayOpacity = (int) $request->input('spotlight_overlay_opacity', 35);
             $settings->spotlight_overlay_opacity = max(0, min(100, $overlayOpacity));
+        }
+        if (Schema::hasColumn('setting', 'spotlight_animation')) {
+            $anim = strtolower((string) $request->input('spotlight_animation', 'none'));
+            $allowedAnim = array_column(\App\Support\SpotlightBackground::animationOptions(), 'value');
+            $settings->spotlight_animation = in_array($anim, $allowedAnim, true) ? $anim : 'none';
+        }
+        if (Schema::hasColumn('setting', 'spotlight_animation_speed')) {
+            $speed = strtolower((string) $request->input('spotlight_animation_speed', 'medium'));
+            $settings->spotlight_animation_speed = in_array($speed, ['slow', 'medium', 'fast'], true) ? $speed : 'medium';
         }
         if (Schema::hasColumn('setting', 'theme_cards_per_row')) {
             $cards = (int) $request->input('theme_cards_per_row', 4);
@@ -902,6 +912,12 @@ class SettingsRepository
             'theme_cards_per_row' => (string) max(2, min(8, (int) $request->input('theme_cards_per_row', 4))),
             'spotlight_overlay_color' => $request->input('spotlight_overlay_color') ?: '#000000',
             'spotlight_overlay_opacity' => (string) max(0, min(100, (int) $request->input('spotlight_overlay_opacity', 35))),
+            'spotlight_animation' => in_array(strtolower((string) $request->input('spotlight_animation', 'none')), array_column(\App\Support\SpotlightBackground::animationOptions(), 'value'), true)
+                ? strtolower((string) $request->input('spotlight_animation', 'none'))
+                : 'none',
+            'spotlight_animation_speed' => in_array(strtolower((string) $request->input('spotlight_animation_speed', 'medium')), ['slow', 'medium', 'fast'], true)
+                ? strtolower((string) $request->input('spotlight_animation_speed', 'medium'))
+                : 'medium',
         ];
         foreach ($map as $key => $value) {
             if ($value !== null) {

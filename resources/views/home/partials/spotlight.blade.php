@@ -4,26 +4,22 @@
     $spotlightBg = SpotlightBackground::resolve();
     $primaryColor = settings()->primary_color ?? '#119A48';
 @endphp
+@include('home.partials.spotlight_motion')
 <style>
     .home-spotlight {
         position: relative;
-        background-size: cover !important;
-        background-position: center !important;
-        background-repeat: no-repeat !important;
+        overflow: hidden;
     }
     .home-spotlight.home-spotlight--has-banner {
         background-color: transparent !important;
-    }
-    .home-spotlight > * {
-        position: relative;
-        z-index: 1;
     }
     .home-spotlight .search-btn-unified:hover {
         opacity: 0.92;
         filter: brightness(0.96);
     }
 </style>
-<div class="spotlight home-spotlight{{ $spotlightBg['has_banner'] ? ' home-spotlight--has-banner' : '' }} px-3 py-3" style="{!! $spotlightBg['inline_style'] !!}">
+<div class="spotlight home-spotlight{{ $spotlightBg['has_banner'] ? ' home-spotlight--has-banner' : '' }} {{ $spotlightBg['animation_class'] ?? '' }} px-3 py-3">
+    <div class="home-spotlight__stage" style="{!! $spotlightBg['inline_style'] !!}" aria-hidden="true"></div>
     <h1 class="sr-only notranslate">
         <span data-khub-i18n="ui_body.site_title">{{ \App\Support\UiLocaleLabels::siteTitle() }}</span>@if(\App\Support\UiLocaleLabels::siteTagline() !== '') — <span data-khub-i18n="ui_body.site_tagline">{{ \App\Support\UiLocaleLabels::siteTagline() }}</span>@endif
     </h1>
