@@ -188,6 +188,50 @@
     color: #64748b;
 }
 .fed-page .form-label { font-size: 0.82rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem; }
+.fed-page .federation-publication-card .publication-card-row {
+    align-items: flex-start !important;
+}
+.fed-page .federation-publication-card .publication-image-col,
+.fed-page .federation-publication-card .publication-image-link,
+.fed-page .federation-publication-card .publication-image {
+    min-height: 90px !important;
+    max-height: 90px !important;
+    height: 90px !important;
+}
+.fed-page .federation-publication-card .publication-image {
+    object-fit: cover !important;
+}
+.fed-hubs-carousel {
+    margin: 0 0 1.25rem;
+}
+.fed-hubs-viewport {
+    overflow: hidden;
+}
+.fed-hubs-track {
+    display: flex;
+    gap: 1rem;
+    width: max-content;
+}
+.fed-hub-slide {
+    flex: 0 0 min(340px, 82vw);
+    width: min(340px, 82vw);
+}
+.fed-hubs-carousel.is-animated .fed-hubs-track {
+    animation: fed-rtl-scroll 36s linear infinite;
+}
+.fed-hubs-carousel.is-animated:hover .fed-hubs-track,
+.fed-hubs-carousel.is-animated:focus-within .fed-hubs-track {
+    animation-play-state: paused;
+}
+@keyframes fed-rtl-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fed-hubs-carousel.is-animated .fed-hubs-track {
+        animation: none;
+    }
+}
 </style>
 @endsection
 
@@ -214,6 +258,55 @@
                     Partner hubs are linked. Approved publications and discussions will appear here after sync and review.
                 </div>
             @endif
+            @php
+                $partnerHubs = ($linkedHubs ?? $hubs);
+                $copies = max(2, (int) ceil(4 / max(1, $partnerHubs->count())));
+                $hubHalf = collect();
+                for ($i = 0; $i < $copies; $i++) {
+                    $hubHalf = $hubHalf->concat($partnerHubs);
+                }
+                $hubCarouselSlides = $hubHalf->concat($hubHalf);
+            @endphp
+            <div class="mb-2">
+                <h2 class="h5 fw-semibold text-body mb-3">Linked partner hubs</h2>
+            </div>
+            <div class="fed-hubs-carousel is-animated" aria-label="Linked partner hubs">
+                <div class="fed-hubs-viewport">
+                    <div class="fed-hubs-track">
+                        @foreach($hubCarouselSlides as $hub)
+                            @php
+                                $browseUrl = route('federation.browse', ['hub' => $hub->id]);
+                                $flagUrl = $hub->countryFlagUrl();
+                                $iso2 = $hub->countryIso2();
+                            @endphp
+                            <div class="fed-hub-slide">
+                                <article class="fed-hub-card">
+                                    @if($flagUrl)
+                                        <div class="fed-hub-card__bg" style="background-image: url('{{ $flagUrl }}');"></div>
+                                    @elseif($iso2)
+                                        <span class="flag-icon flag-icon-{{ $iso2 }} fed-hub-card__bg" aria-hidden="true"></span>
+                                    @endif
+                                    <div class="fed-hub-card__veil"></div>
+                                    <a class="fed-hub-card__hit" href="{{ $browseUrl }}" aria-label="Browse {{ $hub->name }}"></a>
+                                    <div class="fed-hub-card__body">
+                                        <h3 class="fed-hub-card__title">{{ $hub->name }}</h3>
+                                        @if($hub->mappedCountry)
+                                            <div class="fed-hub-card__meta">{{ $hub->mappedCountry->name }}</div>
+                                        @endif
+                                        <div class="fed-hub-card__sync">
+                                            Last sync: {{ $hub->last_synced_at ? $hub->last_synced_at->diffForHumans() : 'Never' }}
+                                        </div>
+                                        <div class="fed-hub-card__actions">
+                                            <span class="fed-hub-card__browse">Browse</span>
+                                            <a href="{{ $hub->base_url }}" target="_blank" rel="noopener noreferrer" class="fed-hub-card__visit">Visit hub</a>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
             <div class="fed-panel">
                 <div class="fed-panel__body">
                     <form method="get" action="{{ route('federation.browse') }}" class="row g-3 align-items-end">
@@ -265,7 +358,7 @@
                 <div class="fed-panel__body">
                     @if(($type ?? 'publications') === 'publications')
                         @forelse($publications as $row)
-                            @include('partials.federation.publication_card', ['row' => $row])
+                            @include('partials.federation.publication_card', ['row' => $row, 'excerptWords' => 140])
                         @empty
                             <div class="fed-empty mb-0">No approved partner publications match this filter.</div>
                         @endforelse
@@ -279,43 +372,6 @@
                         <div class="py-3">{{ $forums->links() }}</div>
                     @endif
                 </div>
-            </div>
-
-            <div class="mt-4 mb-2">
-                <h2 class="h5 fw-semibold text-body mb-3">Linked partner hubs</h2>
-            </div>
-            <div class="row fed-hubs">
-                @foreach(($linkedHubs ?? $hubs) as $hub)
-                    @php
-                        $browseUrl = route('federation.browse', ['hub' => $hub->id]);
-                        $flagUrl = $hub->countryFlagUrl();
-                        $iso2 = $hub->countryIso2();
-                    @endphp
-                    <div class="col-sm-6 col-xl-4 mb-3">
-                        <article class="fed-hub-card">
-                            @if($flagUrl)
-                                <div class="fed-hub-card__bg" style="background-image: url('{{ $flagUrl }}');"></div>
-                            @elseif($iso2)
-                                <span class="flag-icon flag-icon-{{ $iso2 }} fed-hub-card__bg" aria-hidden="true"></span>
-                            @endif
-                            <div class="fed-hub-card__veil"></div>
-                            <a class="fed-hub-card__hit" href="{{ $browseUrl }}" aria-label="Browse {{ $hub->name }}"></a>
-                            <div class="fed-hub-card__body">
-                                <h3 class="fed-hub-card__title">{{ $hub->name }}</h3>
-                                @if($hub->mappedCountry)
-                                    <div class="fed-hub-card__meta">{{ $hub->mappedCountry->name }}</div>
-                                @endif
-                                <div class="fed-hub-card__sync">
-                                    Last sync: {{ $hub->last_synced_at ? $hub->last_synced_at->diffForHumans() : 'Never' }}
-                                </div>
-                                <div class="fed-hub-card__actions">
-                                    <span class="fed-hub-card__browse">Browse</span>
-                                    <a href="{{ $hub->base_url }}" target="_blank" rel="noopener noreferrer" class="fed-hub-card__visit">Visit hub</a>
-                                </div>
-                            </div>
-                        </article>
-                    </div>
-                @endforeach
             </div>
         @endif
     </div>

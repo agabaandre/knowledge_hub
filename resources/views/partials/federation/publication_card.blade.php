@@ -1,6 +1,7 @@
 @php
     $defaultImage = asset('assets/images/cover.png');
     $image = $row->image_url ?? $defaultImage;
+    $excerptWords = (int) ($excerptWords ?? 40);
 @endphp
 <div class="card col-lg-12 single-border mb-2 publication-list-card federation-publication-card">
     <div class="card-body text-left">
@@ -22,7 +23,7 @@
                     </a>
                 </h5>
                 <p class="text-muted" style="text-align:justify;">
-                    {!! Str::words(strip_tags(clean_unicode($row->description ?? '')), 40, '...') !!}
+                    {!! Str::words(strip_tags(clean_unicode($row->description ?? '')), $excerptWords, '...') !!}
                 </p>
                 @if(!empty($row->federation_country))
                     <span class="muted medium d-block"><i class="fa fa-map-marker me-1" aria-hidden="true"></i>{{ $row->federation_country }}</span>
