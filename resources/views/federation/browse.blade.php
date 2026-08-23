@@ -189,23 +189,16 @@
 }
 .fed-page .form-label { font-size: 0.82rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem; }
 .fed-page .federation-publication-card .publication-card-row {
-    align-items: stretch !important;
+    align-items: flex-start !important;
 }
-.fed-page .federation-publication-card .publication-image-col {
-    min-height: 311px !important;
-    max-height: none !important;
-    height: auto !important;
-    align-self: stretch;
-}
-.fed-page .federation-publication-card .publication-image-link {
-    min-height: 311px !important;
-    height: 100% !important;
-    max-height: none !important;
+.fed-page .federation-publication-card .publication-image-col,
+.fed-page .federation-publication-card .publication-image-link,
+.fed-page .federation-publication-card .publication-image {
+    min-height: 270px !important;
+    max-height: 270px !important;
+    height: 270px !important;
 }
 .fed-page .federation-publication-card .publication-image {
-    min-height: 311px !important;
-    height: 100% !important;
-    max-height: none !important;
     object-fit: cover !important;
     object-position: center;
 }
