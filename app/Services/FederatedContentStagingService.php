@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Jobs\NotifyApprovers;
 use App\Models\FederatedContentItem;
 use App\Models\FederatedKnowledgeHub;
+use App\Support\ApprovalNotifications;
 use Illuminate\Support\Facades\Schema;
 
 class FederatedContentStagingService
@@ -69,6 +71,18 @@ class FederatedContentStagingService
                 ])->save();
                 $stats['deactivated']++;
             }
+        }
+
+        if (($stats['new'] + $stats['updated']) > 0) {
+            $pending = $stats['new'] + $stats['updated'];
+            NotifyApprovers::dispatch(
+                'federated',
+                (int) $hub->id,
+                $pending.' item(s) from '.($hub->name ?? 'a partner hub'),
+                'New or updated partner hub content is waiting for central approval.',
+                (string) ($hub->name ?? ''),
+                ApprovalNotifications::inboxUrl('federated')
+            )->onQueue('default');
         }
 
         return $stats;

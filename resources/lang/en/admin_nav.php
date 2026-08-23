@@ -4,6 +4,7 @@ return [
 
     'menu_caption' => 'Menu',
     'dashboard' => 'Dashboard',
+    'overview' => 'Overview',
     'view_all_dashboards' => 'View All Dashboards',
     'kpis' => 'KPIs',
     'rcc_dashboard' => 'RCC Dashboard',
@@ -16,6 +17,8 @@ return [
     'publish_a_resource' => 'Publish a Resource',
     'manage_resources' => 'Manage Resources',
     'pending_approval' => 'Pending Approval',
+    'approvals' => 'Approvals',
+    'pending_approvals' => 'Pending Approvals',
     'rejected_resources' => 'Rejected Resources',
     'summaries_abstracts' => 'Summaries & Abstracts',
     'moderate_comments' => 'Moderate Comments',

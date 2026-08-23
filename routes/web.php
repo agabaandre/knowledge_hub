@@ -42,6 +42,7 @@ use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\ParticipantBadgeManagementController;
 use App\Http\Controllers\Admin\StorageManagementController;
 use App\Http\Controllers\Admin\FederatedHubsController;
+use App\Http\Controllers\Admin\ApprovalsController;
 use App\Http\Controllers\HubMediaController;
 use App\Http\Controllers\Admin\PublicationSubCategoryController;
 use App\Http\Controllers\Admin\TagsController;
@@ -318,7 +319,10 @@ Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function 
 Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web', 'admin.access']], function () {
 
     Route::get("/", [AdminController::class, 'index'])->name('admin.index');
-    Route::get("/dashboard", [AdminController::class, 'dashboards'])->name('admin.dashboard');
+    Route::get("/dashboard", [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get("/dashboard/list", [AdminController::class, 'dashboards'])->name('admin.dashboard.list');
+    Route::get('/approvals', [ApprovalsController::class, 'index'])->name('admin.approvals.index');
+    Route::post('/approvals/review', [ApprovalsController::class, 'review'])->name('admin.approvals.review');
     if(states_enabled())
     Route::get("/rccdashboards", [GraphController::class, 'rcc_admin'])->name('admin.rccdashboards');
     Route::get("/rccdashboards/data", [GraphController::class, 'rcc_data'])->name('admin.rccdashboards.data');

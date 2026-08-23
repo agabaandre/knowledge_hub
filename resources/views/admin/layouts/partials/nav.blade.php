@@ -7,6 +7,9 @@
                             <i class=""></i> Dashboard <i class="fe fe-chevron-down horizontal-icon"></i>
                         </a>
                         <ul class="sub-menu">
+                            <li aria-haspopup="true">
+                                <a href="{{ url('admin/dashboard') }}" class="slide-item">{{ __('admin_nav.overview') }}</a>
+                            </li>
                             @if(isset($dashboards) && $dashboards->count() > 0)
                                 @foreach ($dashboards as $dashboard)
                                     @php
@@ -29,12 +32,21 @@
                                            class="slide-item">{{ $dashboard->title }}</a>
                                     </li>
                                 @endforeach
-                            @else
-                                <li aria-haspopup="true">
-                                    <a href="{{ url('admin/dashboard') }}" class="slide-item">View All Dashboards</a>
-                                </li>
                             @endif
+                            <li aria-haspopup="true">
+                                <a href="{{ url('admin/dashboard/list') }}" class="slide-item">{{ __('admin_nav.view_all_dashboards') }}</a>
+                            </li>
                         </ul>
+                    </li>
+
+                    <li aria-haspopup="true">
+                        <a href="{{ route('admin.approvals.index') }}" class="sub-icon" style="position: relative;">
+                            Approvals
+                            @php $approvalsBadgeNav = (int)($pending_publications_count ?? 0) + (int)($pending_forums_count ?? 0) + (int)($pending_cop_approvals_count ?? 0) + (int)($pending_federated_content_count ?? 0); @endphp
+                            @if($approvalsBadgeNav > 0)
+                                <span class="badge badge-danger badge-pill" style="position: absolute; top: 0px; right: -8px; min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $approvalsBadgeNav > 99 ? '99+' : $approvalsBadgeNav }}</span>
+                            @endif
+                        </a>
                     </li>
 
                 @can('view_rcc_dashboard')

@@ -14,6 +14,12 @@
 @if(session('alert-success'))
     <div class="alert alert-success">{{ session('alert-success') }}</div>
 @endif
+@if(session('alert-danger'))
+    <div class="alert alert-danger">{{ session('alert-danger') }}</div>
+@endif
+@if($errors->any())
+    <div class="alert alert-danger">{{ $errors->first() }}</div>
+@endif
 
 <div class="card mb-3">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -51,10 +57,9 @@
         @else
             <form method="post" action="{{ route('admin.federation.content-review') }}" id="fedReviewForm">
                 @csrf
-                <input type="hidden" name="action" id="fedReviewAction" value="">
                 <div class="d-flex gap-2 mb-3">
-                    <button type="button" class="btn btn-success btn-sm" id="fedApproveBtn">Approve selected</button>
-                    <button type="button" class="btn btn-outline-danger btn-sm" id="fedRejectBtn">Reject selected</button>
+                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm" id="fedApproveBtn">Approve selected</button>
+                    <button type="submit" name="action" value="reject" class="btn btn-outline-danger btn-sm" id="fedRejectBtn">Reject selected</button>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-sm align-middle">
@@ -72,9 +77,10 @@
                             @foreach($items as $item)
                                 @php
                                     $payload = $item->payload ?? [];
+                                    $hubBase = optional($item->hub)->normalizedBaseUrl() ?: '';
                                     $url = $item->content_type === 'forum'
-                                        ? federated_forum_url($item->hub->normalizedBaseUrl(), $payload)
-                                        : federated_publication_url($item->hub->normalizedBaseUrl(), $payload);
+                                        ? federated_forum_url($hubBase, $payload)
+                                        : federated_publication_url($hubBase, $payload);
                                 @endphp
                                 <tr>
                                     <td><input type="checkbox" name="item_ids[]" value="{{ $item->id }}" class="fed-item-cb"></td>
@@ -85,19 +91,38 @@
                                     <td><span class="badge bg-light text-dark">{{ ucfirst($item->content_type) }}</span></td>
                                     <td>{{ $item->hub->name ?? '—' }}</td>
                                     <td class="small text-muted">{{ optional($item->remote_updated_at)->diffForHumans() ?? '—' }}</td>
-                                    <td><a href="{{ $url }}" target="_blank" rel="noopener" class="btn btn-link btn-sm p-0">Preview on hub</a></td>
+                                    <td>
+                                        <a href="{{ $url }}" target="_blank" rel="noopener" class="btn btn-link btn-sm p-0">Preview on hub</a>
+                                        <div class="mt-1 d-flex gap-2">
+                                            <button type="submit" class="btn btn-success btn-sm py-0 px-2" form="fed-approve-{{ $item->id }}">Approve</button>
+                                            <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" form="fed-reject-{{ $item->id }}" onclick="return confirm('Reject this item?');">Reject</button>
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
-                {{ $items->links() }}
             </form>
+            @foreach($items as $item)
+                <form method="post" action="{{ route('admin.federation.content-review') }}" id="fed-approve-{{ $item->id }}" class="d-none">
+                    @csrf
+                    <input type="hidden" name="action" value="approve">
+                    <input type="hidden" name="item_ids[]" value="{{ $item->id }}">
+                </form>
+                <form method="post" action="{{ route('admin.federation.content-review') }}" id="fed-reject-{{ $item->id }}" class="d-none">
+                    @csrf
+                    <input type="hidden" name="action" value="reject">
+                    <input type="hidden" name="item_ids[]" value="{{ $item->id }}">
+                </form>
+            @endforeach
+            {{ $items->links() }}
         @endif
     </div>
 </div>
+@endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 (function () {
     var all = document.getElementById('fedSelectAll');
@@ -106,23 +131,21 @@
             document.querySelectorAll('.fed-item-cb').forEach(function (cb) { cb.checked = all.checked; });
         });
     }
-    function submitAction(action) {
-        var checked = document.querySelectorAll('.fed-item-cb:checked');
-        if (!checked.length) {
-            alert('Select at least one item.');
-            return;
-        }
-        if (action === 'reject' && !confirm('Reject selected items?')) {
-            return;
-        }
-        document.getElementById('fedReviewAction').value = action;
-        document.getElementById('fedReviewForm').submit();
+    var form = document.getElementById('fedReviewForm');
+    if (!form) {
+        return;
     }
-    var approve = document.getElementById('fedApproveBtn');
-    var reject = document.getElementById('fedRejectBtn');
-    if (approve) approve.addEventListener('click', function () { submitAction('approve'); });
-    if (reject) reject.addEventListener('click', function () { submitAction('reject'); });
+    form.addEventListener('submit', function (e) {
+        if (document.querySelectorAll('.fed-item-cb:checked').length) {
+            var submitter = e.submitter || document.activeElement;
+            if (submitter && submitter.value === 'reject' && !confirm('Reject selected items?')) {
+                e.preventDefault();
+            }
+            return;
+        }
+        e.preventDefault();
+        alert('Select at least one item.');
+    });
 })();
 </script>
-@endpush
 @endsection

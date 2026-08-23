@@ -41,6 +41,12 @@
                 <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; text-align: right;"><strong>{{ $totalCopApprovals }}</strong></td>
             </tr>
             @endif
+            @if(($totalFederated ?? 0) > 0)
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0;"><strong>Federated Content:</strong></td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; text-align: right;"><strong>{{ $totalFederated }}</strong></td>
+            </tr>
+            @endif
             <tr>
                 <td style="padding: 12px 0 8px 0; font-size: 1.1em;"><strong>Total Pending:</strong></td>
                 <td style="padding: 12px 0 8px 0; text-align: right; font-size: 1.1em;"><strong style="color: #119A48;">{{ $totalPending }}</strong></td>
@@ -59,7 +65,7 @@
             <p style="margin: 8px 0 0 0; color: #666;">{!! \Illuminate\Support\Str::words(strip_tags($forum->forum_description), 30, '...') !!}</p>
             @endif
             <p style="margin: 10px 0 0 0;">
-                <a href="{{ url('admin/forums/moderate') }}?id={{ $forum->id }}" 
+                <a href="{{ url('/admin/approvals') }}?type=forum&q={{ urlencode($forum->forum_title ?? '') }}" 
                    style="background: #119A48; color: #ffffff; padding: 8px 20px; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 0.9em;">
                     Review Forum
                 </a>
@@ -68,7 +74,7 @@
         @endforeach
         @if($totalForums > $pendingForums->count())
         <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
-            <a href="{{ url('admin/forums/moderate') }}" style="color: #119A48;">View all {{ $totalForums }} pending forums →</a>
+            <a href="{{ url('/admin/approvals') }}?type=forum" style="color: #119A48;">View all {{ $totalForums }} pending forums →</a>
         </p>
         @endif
     </div>
@@ -85,7 +91,7 @@
             <p style="margin: 8px 0 0 0; color: #666;">{!! \Illuminate\Support\Str::words(strip_tags($publication->description), 30, '...') !!}</p>
             @endif
             <p style="margin: 10px 0 0 0;">
-                <a href="{{ url('admin/publications/details') }}?id={{ $publication->id }}" 
+                <a href="{{ url('/admin/approvals') }}?type=publication&q={{ urlencode($publication->title ?? '') }}" 
                    style="background: #119A48; color: #ffffff; padding: 8px 20px; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 0.9em;">
                     Review Publication
                 </a>
@@ -94,7 +100,7 @@
         @endforeach
         @if($totalPublications > $pendingPublications->count())
         <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
-            <a href="{{ url('admin/publications/pending') }}" style="color: #119A48;">View all {{ $totalPublications }} pending publications →</a>
+            <a href="{{ url('/admin/approvals') }}?type=publication" style="color: #119A48;">View all {{ $totalPublications }} pending publications →</a>
         </p>
         @endif
     </div>
@@ -108,7 +114,7 @@
             <p style="margin: 5px 0; color: #666; font-size: 0.9em;"><strong>By:</strong> {{ $comment->user->name ?? 'Anonymous' }}</p>
             <p style="margin: 8px 0 0 0; color: #666;">{!! \Illuminate\Support\Str::words(strip_tags($comment->comment ?? ''), 30, '...') !!}</p>
             <p style="margin: 10px 0 0 0;">
-                <a href="{{ url('admin/forums/moderate') }}" 
+                <a href="{{ url('/admin/approvals') }}?type=forum" 
                    style="background: #119A48; color: #ffffff; padding: 8px 20px; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 0.9em;">
                     Review Comments
                 </a>
@@ -126,7 +132,7 @@
             <p style="margin: 5px 0; color: #666; font-size: 0.9em;"><strong>By:</strong> {{ $comment->user->name ?? 'Anonymous' }}</p>
             <p style="margin: 8px 0 0 0; color: #666;">{!! \Illuminate\Support\Str::words(strip_tags($comment->comment ?? ''), 30, '...') !!}</p>
             <p style="margin: 10px 0 0 0;">
-                <a href="{{ url('admin/publications/moderate') }}" 
+                <a href="{{ url('/admin/approvals') }}?type=publication" 
                    style="background: #119A48; color: #ffffff; padding: 8px 20px; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 0.9em;">
                     Review Comments
                 </a>
@@ -145,7 +151,7 @@
             <p style="margin: 5px 0; color: #666; font-size: 0.9em;"><strong>User:</strong> {{ $approval->user->name ?? 'Unknown' }}</p>
             <p style="margin: 5px 0; color: #666; font-size: 0.9em;"><strong>Email:</strong> {{ $approval->user->email ?? 'N/A' }}</p>
             <p style="margin: 10px 0 0 0;">
-                <a href="{{ route('admin.commsofpractice.details', $approval->community_of_practice_id) }}" 
+                <a href="{{ url('/admin/approvals') }}?type=cop_participant" 
                    style="background: #119A48; color: #ffffff; padding: 8px 20px; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 0.9em;">
                     Review Community
                 </a>
@@ -154,16 +160,39 @@
         @endforeach
         @if($totalCopApprovals > $pendingCopApprovals->count())
         <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
-            <a href="{{ url('admin/commsofpractice') }}" style="color: #119A48;">View all {{ $totalCopApprovals }} pending approvals →</a>
+            <a href="{{ url('/admin/approvals') }}?type=cop_participant" style="color: #119A48;">View all {{ $totalCopApprovals }} pending approvals →</a>
+        </p>
+        @endif
+    </div>
+    @endif
+
+    @if(($pendingFederated ?? collect())->count() > 0)
+    <div style="margin: 30px 0;">
+        <h3 style="color: #119A48; margin-bottom: 15px;">Pending Federated Content ({{ $totalFederated }})</h3>
+        @foreach($pendingFederated as $item)
+        <div style="background: #fff; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 10px; border-radius: 4px;">
+            <h4 style="margin: 0 0 8px 0; color: #2d3748;">{{ $item->title ?? 'Untitled federated item' }}</h4>
+            <p style="margin: 5px 0; color: #666; font-size: 0.9em;"><strong>Hub:</strong> {{ $item->hub->name ?? 'Partner hub' }}</p>
+            <p style="margin: 10px 0 0 0;">
+                <a href="{{ url('/admin/approvals') }}?type=federated"
+                   style="background: #119A48; color: #ffffff; padding: 8px 20px; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 0.9em;">
+                    Review Federated Content
+                </a>
+            </p>
+        </div>
+        @endforeach
+        @if($totalFederated > $pendingFederated->count())
+        <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
+            <a href="{{ url('/admin/approvals') }}?type=federated" style="color: #119A48;">View all {{ $totalFederated }} pending federated items →</a>
         </p>
         @endif
     </div>
     @endif
 
     <div style="margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 4px; text-align: center;">
-        <a href="{{ url('admin') }}" 
+        <a href="{{ url('/admin/approvals') }}"
            style="background: #119A48; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
-            Go to Admin Dashboard
+            Review & Approve in Approvals
         </a>
     </div>
     

@@ -44,6 +44,11 @@ class AdminStatsViewComposer{
         $pending_cop_approvals_count = CommunityOfPracticeMembers::where('is_approved', 0)
             ->count();
 
+        $pending_federated_content_count = 0;
+        if (\Illuminate\Support\Facades\Schema::hasTable('federated_content_items')) {
+            $pending_federated_content_count = \App\Models\FederatedContentItem::query()->pendingReview()->count();
+        }
+
         // Content requests: unprocessed and processed counters for admin navigation
         $pending_content_requests_count = 0;
         $processed_content_requests_count = 0;
@@ -184,9 +189,10 @@ class AdminStatsViewComposer{
         $sortedNotifications = $allNotifications->sortByDesc('created_at')->take(10)->values();
 
         // Calculate total pending count
-        $total_pending_count = $pending_forums_count + $pending_publications_count + 
+        $total_pending_count = $pending_forums_count + $pending_publications_count +
                               $pending_forum_comments_count + $pending_publication_comments_count +
-                              $pending_cop_approvals_count + $pending_content_requests_count;
+                              $pending_cop_approvals_count + $pending_content_requests_count +
+                              $pending_federated_content_count;
 
         $data = [
             // Old variables for backward compatibility (can be removed later)
@@ -200,6 +206,7 @@ class AdminStatsViewComposer{
             'pending_publications_count' => $pending_publications_count,
             'rejected_publications_count' => $rejected_publications_count,
             'pending_cop_approvals_count' => $pending_cop_approvals_count,
+            'pending_federated_content_count' => $pending_federated_content_count,
             'pending_content_requests_count' => $pending_content_requests_count,
             'processed_content_requests_count' => $processed_content_requests_count,
             'total_pending_count' => $total_pending_count,

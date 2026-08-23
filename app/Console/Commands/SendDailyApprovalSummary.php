@@ -10,7 +10,10 @@ use App\Models\ForumComment;
 use App\Models\PublicationComment;
 use App\Models\CommunityOfPracticeMembers;
 use App\Jobs\SendMailJob;
+use App\Models\FederatedContentItem;
+use App\Support\ApprovalNotifications;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class SendDailyApprovalSummary extends Command
 {
@@ -90,7 +93,14 @@ class SendDailyApprovalSummary extends Command
             ->count();
         $totalCopApprovals = CommunityOfPracticeMembers::where('is_approved', 0)->count();
 
-        $totalPending = $totalForums + $totalPublications + $totalForumComments + $totalPublicationComments + $totalCopApprovals;
+        $pendingFederated = collect();
+        $totalFederated = 0;
+        if (Schema::hasTable('federated_content_items')) {
+            $pendingFederated = FederatedContentItem::query()->pendingReview()->with('hub')->orderByDesc('id')->limit(10)->get();
+            $totalFederated = FederatedContentItem::query()->pendingReview()->count();
+        }
+
+        $totalPending = $totalForums + $totalPublications + $totalForumComments + $totalPublicationComments + $totalCopApprovals + $totalFederated;
 
         // If nothing pending, skip sending emails
         if ($totalPending === 0) {
@@ -98,18 +108,12 @@ class SendDailyApprovalSummary extends Command
             return 0;
         }
 
-        // Get all users with moderation permissions
-        $forumModerators = User::permission('moderate_forum')->get();
-        $publicationModerators = User::permission('moderate_publication')->get();
-        
-        // For COP approvals, we'll send to all admins or users with any moderation permission
-        $copModerators = User::role(['admin', 'Administrator'])->get()
-            ->merge($forumModerators)
-            ->merge($publicationModerators)
+        $allApprovers = collect()
+            ->merge(ApprovalNotifications::recipientsFor('publication'))
+            ->merge(ApprovalNotifications::recipientsFor('forum'))
+            ->merge(ApprovalNotifications::recipientsFor('cop_participant'))
+            ->merge(ApprovalNotifications::recipientsFor('federated'))
             ->unique('id');
-
-        // Combine all approvers (unique users)
-        $allApprovers = $forumModerators->merge($publicationModerators)->merge($copModerators)->unique('id');
 
         if ($allApprovers->isEmpty()) {
             $this->warn('No approvers found with moderation permissions.');
@@ -123,30 +127,39 @@ class SendDailyApprovalSummary extends Command
                 continue;
             }
 
-            // Determine what this approver can moderate
-            $canModerateForums = $approver->hasPermissionTo('moderate_forum');
-            $canModeratePublications = $approver->hasPermissionTo('moderate_publication');
-            $isAdmin = $approver->hasRole(['admin', 'Administrator']);
+            $canModerateForums = ApprovalNotifications::canApprove($approver, 'forum');
+            $canModeratePublications = ApprovalNotifications::canApprove($approver, 'publication');
+            $canModerateCop = ApprovalNotifications::canApprove($approver, 'cop_participant');
+            $canModerateFederated = ApprovalNotifications::canApprove($approver, 'federated');
 
-            // Build email content
+            $userPending = ($canModerateForums ? $totalForums + $totalForumComments : 0)
+                + ($canModeratePublications ? $totalPublications + $totalPublicationComments : 0)
+                + ($canModerateCop ? $totalCopApprovals : 0)
+                + ($canModerateFederated ? $totalFederated : 0);
+            if ($userPending === 0) {
+                continue;
+            }
+
             $body = view('emails.daily_approval_summary', [
                 'approverName' => $approver->name,
                 'pendingForums' => $canModerateForums ? $pendingForums : collect(),
                 'pendingPublications' => $canModeratePublications ? $pendingPublications : collect(),
                 'pendingForumComments' => $canModerateForums ? $pendingForumComments : collect(),
                 'pendingPublicationComments' => $canModeratePublications ? $pendingPublicationComments : collect(),
-                'pendingCopApprovals' => $isAdmin ? $pendingCopApprovals : collect(),
+                'pendingCopApprovals' => $canModerateCop ? $pendingCopApprovals : collect(),
+                'pendingFederated' => $canModerateFederated ? $pendingFederated : collect(),
                 'totalForums' => $canModerateForums ? $totalForums : 0,
                 'totalPublications' => $canModeratePublications ? $totalPublications : 0,
                 'totalForumComments' => $canModerateForums ? $totalForumComments : 0,
                 'totalPublicationComments' => $canModeratePublications ? $totalPublicationComments : 0,
-                'totalCopApprovals' => $isAdmin ? $totalCopApprovals : 0,
-                'totalPending' => $totalPending,
+                'totalCopApprovals' => $canModerateCop ? $totalCopApprovals : 0,
+                'totalFederated' => $canModerateFederated ? $totalFederated : 0,
+                'totalPending' => $userPending,
             ])->render();
 
             $emailData = (object) [
                 'email' => $approver->email,
-                'subject' => 'Daily Approval Summary - ' . $totalPending . ' Item(s) Pending',
+                'subject' => 'Daily Approval Summary - ' . $userPending . ' Item(s) Pending',
                 'body' => $body,
                 'title' => 'Daily Approval Summary'
             ];

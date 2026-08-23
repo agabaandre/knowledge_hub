@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\ExpertsRepository;
 use App\Repositories\ForumsRepository;
+use Illuminate\Support\Facades\Schema;
 
 class AdminController extends Controller
 {
@@ -50,12 +51,17 @@ class AdminController extends Controller
         $data['states_count'] = Country::count();
         // $data['visits_count'] = AccessLog::whereDate('created_at', now())->count();
 
-        $total_visits = DB::table('access_logs')->count();
-        $earliest_date = DB::table('access_logs')->min('created_at');
-        $days_diff = Carbon::parse($earliest_date)->diffInDays(Carbon::now()) + 1;
-        $data['visits_count'] = round($total_visits / $days_diff);
+        $total_visits = Schema::hasTable('access_logs') ? (int) DB::table('access_logs')->count() : 0;
+        $earliest_date = $total_visits > 0 ? DB::table('access_logs')->min('created_at') : null;
+        $data['visits_count'] = self::averageDailyVisits($total_visits, $earliest_date);
 
-        $data['admin_units_count'] = AdministrativeUnit::count();
+        try {
+            $data['admin_units_count'] = Schema::hasTable((new AdministrativeUnit)->getTable())
+                ? AdministrativeUnit::count()
+                : 0;
+        } catch (\Throwable $e) {
+            $data['admin_units_count'] = 0;
+        }
         // Show total registered users for clarity on the dashboard
         $data['users_count'] = User::count();
 
@@ -94,7 +100,22 @@ class AdminController extends Controller
                 ->paginate($request->input('rows', 20));
         }catch(\Throwable $e){ $dashboards = collect(); }
 
-        return view('admin.dashboard.list', ['dashboards' => $dashboards]);
+        return view('admin.dashboard.list', ['adminOnlyDashboards' => $dashboards]);
+    }
+
+    public static function averageDailyVisits(int $totalVisits, $earliestDate): int
+    {
+        if ($totalVisits < 1 || $earliestDate === null || $earliestDate === '') {
+            return 0;
+        }
+
+        try {
+            $days = Carbon::parse($earliestDate)->diffInDays(Carbon::now()) + 1;
+        } catch (\Throwable $e) {
+            return 0;
+        }
+
+        return (int) round($totalVisits / max(1, $days));
     }
 
 }

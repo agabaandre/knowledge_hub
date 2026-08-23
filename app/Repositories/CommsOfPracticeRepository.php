@@ -880,13 +880,27 @@ class CommsOfPracticeRepository{
             return $existing;
         }
 
-        CommunityOfPracticeMembers::create([
+        $member = CommunityOfPracticeMembers::create([
             'community_of_practice_id' => $communityId,
             'user_id' => $userId,
             'is_approved' => 0,
             'is_active' => 1,
             'is_admin' => 0,
         ]);
+
+        if (! isset($joinUser) || ! $joinUser) {
+            $joinUser = \Illuminate\Support\Facades\Schema::hasTable('users') ? User::find($userId) : null;
+        }
+        $communityName = optional($community)->community_name ?? 'a community';
+        $memberName = optional($joinUser)->name ?: 'A member';
+        \App\Jobs\NotifyApprovers::dispatch(
+            'cop_participant',
+            (int) $member->id,
+            $memberName.' requested to join '.$communityName,
+            $communityName,
+            $memberName,
+            \App\Support\ApprovalNotifications::inboxUrl('cop_participant', $memberName)
+        )->onQueue('default');
 
         return true; // or any relevant response
     }

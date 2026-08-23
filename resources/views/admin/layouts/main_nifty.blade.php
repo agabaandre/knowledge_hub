@@ -133,13 +133,22 @@
                               </div>
                            </a>
                         @endif
+                        @if(isset($pending_federated_content_count) && $pending_federated_content_count > 0)
+                           <a href="{{ route('admin.federation.pending-content') }}" class="list-group-item list-group-item-action d-flex align-items-center mb-2">
+                              <div class="flex-shrink-0 me-3"><i class="pli-globe text-primary fs-2"></i></div>
+                              <div class="flex-grow-1">
+                                 <span class="h6 fw-normal d-block mb-0">Federated content</span>
+                                 <small class="text-body-secondary">{{ $pending_federated_content_count }} pending</small>
+                              </div>
+                           </a>
+                        @endif
                         @if(empty($total_pending_count) || $total_pending_count == 0)
                            <div class="list-group-item text-body-secondary text-center py-4">No pending notifications</div>
                         @endif
                      </div>
                      @if(isset($total_pending_count) && $total_pending_count > 0)
                         <div class="text-center p-2 border-top">
-                           <a href="{{ url('admin/publications/pending') }}" class="btn-link text-primary icon-link icon-link-hover small">View all</a>
+                           <a href="{{ route('admin.approvals.index') }}" class="btn-link text-primary icon-link icon-link-hover small">View all</a>
                         </div>
                      @endif
                   </div>

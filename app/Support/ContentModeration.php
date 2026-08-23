@@ -28,6 +28,11 @@ final class ContentModeration
         return $user !== null && $user->can('moderate_cop_participants');
     }
 
+    public static function canModerateFederated(?User $user = null): bool
+    {
+        return self::canModeratePublications($user) || self::canModerateForums($user);
+    }
+
     public static function ensureCanModeratePublications(): void
     {
         if (! self::canModeratePublications()) {

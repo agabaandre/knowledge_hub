@@ -11,7 +11,7 @@ class AdminUnitsViewComposer
     {
         $minutes = (int) env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
 
-        $allAdminUnits = cache()->remember('adminunits', $minutes, function () {
+        $allAdminUnits = cache()->remember('administrative_units.all', $minutes, function () {
             return AdministrativeUnit::query()
                 ->with('parent')
                 ->orderBy('name')

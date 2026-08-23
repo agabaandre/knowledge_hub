@@ -124,7 +124,7 @@ class LocaleSwitchController extends Controller
     {
         $minutes = (int) env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
 
-        return cache()->remember('adminunits', $minutes, static function () {
+        return cache()->remember('static_links.ordered', $minutes, static function () {
             return StaticLink::orderBy('order')->get();
         });
     }

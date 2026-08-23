@@ -7,8 +7,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Models\User;
 use App\Jobs\SendMailJob;
+use App\Support\ApprovalNotifications;
 
 class NotifyApprovers implements ShouldQueue
 {
@@ -34,10 +34,9 @@ class NotifyApprovers implements ShouldQueue
         $this->contentTitle = $contentTitle;
         $this->contentDescription = $contentDescription;
         $this->authorName = $authorName;
-        $this->approveUrl = $approveUrl;
-        
-        // Determine permission based on content type
-        $this->permissionType = $contentType === 'publication' ? 'moderate_publication' : 'moderate_forum';
+        $this->approveUrl = ApprovalNotifications::inboxUrl($contentType, $contentTitle);
+        $permissions = ApprovalNotifications::permissionsFor($contentType);
+        $this->permissionType = $permissions[0] ?? 'moderate_forum';
         
         // Set queue to 'default'
         $this->onQueue('default');
@@ -50,30 +49,30 @@ class NotifyApprovers implements ShouldQueue
      */
     public function handle()
     {
-        // Get all users with the permission to approve this content type
-        $approvers = User::permission($this->permissionType)->get();
-        
+        $approvers = ApprovalNotifications::recipientsFor($this->contentType);
+
         if ($approvers->isEmpty()) {
-            \Log::warning("No approvers found with permission: {$this->permissionType}");
+            \Log::warning('No approvers found for pending '.$this->contentType.' approval.');
             return;
         }
+
+        $typeLabel = ApprovalNotifications::typeLabel($this->contentType);
 
         foreach ($approvers as $approver) {
             if (!$approver->email) {
                 continue;
             }
 
-            // Build email subject and body
-            $subject = 'New ' . ucfirst($this->contentType) . ' Awaiting Approval';
-            
+            $subject = 'New '.$typeLabel.' awaiting approval';
+
             $body = view('emails.approval_notification', [
-                'contentType' => $this->contentType,
+                'contentType' => $typeLabel,
                 'contentTitle' => $this->contentTitle,
                 'contentDescription' => $this->contentDescription,
                 'approveUrl' => $this->approveUrl,
                 'authorName' => $this->authorName,
                 'approverName' => $approver->name,
-                'contentId' => $this->contentId
+                'contentId' => $this->contentId,
             ])->render();
 
             // Send email using the existing email helper

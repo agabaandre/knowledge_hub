@@ -78,7 +78,7 @@ class ViewComposerServiceProvider extends ServiceProvider
         View::composer('layouts.*', function ($view) {
 
             $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
-            $static_links = cache()->remember('adminunits',$minutes, function () {
+            $static_links = cache()->remember('static_links.ordered',$minutes, function () {
                 return  StaticLink::orderBy('order')->get();
               });
             

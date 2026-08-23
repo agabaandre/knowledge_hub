@@ -4,6 +4,7 @@
         <li class="nav-item has-sub">
             <a href="#" class="mininav-toggle nav-link {{ request()->is('admin/dashboard*') && !request()->is('admin/dashboards') ? 'active' : '' }} collapsed" data-bs-toggle="collapse" data-bs-target="#nav-dashboard"><i class="fa fa-th-large fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.dashboard') }}</span></a>
             <ul class="mininav-content nav collapse {{ request()->is('admin/dashboard*') ? 'show' : '' }}" id="nav-dashboard">
+                <li class="nav-item"><a href="{{ url('admin/dashboard') }}" class="nav-link {{ request()->is('admin/dashboard') && ! request()->is('admin/dashboard/*') ? 'active' : '' }}">{{ __('admin_nav.overview') }}</a></li>
                 @if(isset($dashboards) && $dashboards->count() > 0)
                     @foreach ($dashboards as $dashboard)
                         @php
@@ -15,10 +16,19 @@
                         @endphp
                         <li class="nav-item"><a href="{{ $dashboard_url }}" target="{{ $is_external_link ? '_blank' : '_self' }}" class="nav-link">{{ $dashboard->title }}</a></li>
                     @endforeach
-                @else
-                    <li class="nav-item"><a href="{{ url('admin/dashboard') }}" class="nav-link">{{ __('admin_nav.view_all_dashboards') }}</a></li>
                 @endif
+                <li class="nav-item"><a href="{{ url('admin/dashboard/list') }}" class="nav-link {{ request()->is('admin/dashboard/list') ? 'active' : '' }}">{{ __('admin_nav.view_all_dashboards') }}</a></li>
             </ul>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('admin.approvals.index') }}" class="nav-link {{ request()->is('admin/approvals*') ? 'active' : '' }}">
+                <i class="fa fa-check-square fs-5 me-2"></i>
+                <span class="nav-label ms-1">{{ __('admin_nav.approvals') }}</span>
+                @php $approvalsBadge = (int)($pending_publications_count ?? 0) + (int)($pending_forums_count ?? 0) + (int)($pending_cop_approvals_count ?? 0) + (int)($pending_federated_content_count ?? 0); @endphp
+                @if($approvalsBadge > 0)
+                    <span class="badge bg-danger rounded-pill ms-1">{{ $approvalsBadge > 99 ? '99+' : $approvalsBadge }}</span>
+                @endif
+            </a>
         </li>
         @can('view_rcc_dashboard')
             @if (states_enabled())

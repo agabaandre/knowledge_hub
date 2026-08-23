@@ -21,7 +21,7 @@
     </div>
     <div class="af-card-body">
       <div class="row" style="row-gap:16px;">
-        @forelse($dashboards as $idx => $db)
+        @forelse($adminOnlyDashboards as $idx => $db)
           @php
             // Get image with proper fallback logic like frontend
             $raw_cover = $db->getRawOriginal('cover');
@@ -94,8 +94,8 @@
           <div class="col-12 text-center text-muted">No dashboards or admin-only content found.</div>
         @endforelse
       </div>
-      @if(method_exists($dashboards, 'links'))
-      <div class="py-2">{{ $dashboards->links() }}</div>
+      @if(method_exists($adminOnlyDashboards, 'links'))
+      <div class="py-2">{{ $adminOnlyDashboards->links() }}</div>
       @endif
     </div>
   </div>
