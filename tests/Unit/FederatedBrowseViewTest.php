@@ -31,7 +31,7 @@ class FederatedBrowseViewTest extends TestCase
         $this->assertStringContainsString("'excerptWords' => 140", $browse);
         $this->assertStringContainsString('excerptWords', $card);
         $this->assertMatchesRegularExpression('/Str::words\([^,]+,\s*\$excerptWords/', $card);
-        $this->assertStringContainsString('min-height: 310px', $browse);
+        $this->assertStringContainsString('min-height: 320px', $browse);
         $this->assertStringContainsString('.federation-publication-card', $browse);
     }
 }
