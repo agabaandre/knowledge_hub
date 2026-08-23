@@ -2,9 +2,11 @@
 namespace App\Repositories;
 
 use App\Models\Setting;
+use App\Models\User;
 use App\Services\InstallerService;
 use App\Support\DisposableEmailChecker;
 use App\Support\EmailConfig;
+use App\Support\FederationApiToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -436,7 +438,8 @@ class SettingsRepository
             $settings->default_owner_region_id = $regionId !== null && $regionId !== '' ? (int) $regionId : null;
         }
         if (Schema::hasColumn('setting', 'federation_api_token') && $request->filled('federation_api_token')) {
-            $settings->federation_api_token = $request->input('federation_api_token');
+            $token = trim((string) $request->input('federation_api_token'));
+            $settings->federation_api_token = $token !== '' ? $token : $settings->federation_api_token;
         }
 
         if (Schema::hasColumn('setting', 'email_driver')) {
@@ -523,6 +526,39 @@ class SettingsRepository
         clear_cache();
 
         return $settings;
+    }
+
+    /**
+     * Create and persist a federation Bearer token as the signed-in admin.
+     *
+     * @return array{token: string, generated_by: string}
+     */
+    public function generateFederationApiToken(?User $user = null): array
+    {
+        if (! Schema::hasColumn('setting', 'federation_api_token')) {
+            throw new \RuntimeException('The federation_api_token column is missing. Run database migrations.');
+        }
+
+        $settings = Setting::where('status', 'active')->first() ?: Setting::query()->first();
+        if (! $settings) {
+            throw new \RuntimeException('No settings record exists to store the federation token.');
+        }
+
+        $token = FederationApiToken::forAdmin($user);
+        $settings->federation_api_token = $token;
+        $settings->save();
+
+        clear_settings_cache();
+        if (function_exists('clear_cache')) {
+            clear_cache();
+        }
+
+        $generatedBy = trim((string) ($user?->names ?? $user?->name ?? $user?->email ?? 'admin'));
+
+        return [
+            'token' => $token,
+            'generated_by' => $generatedBy !== '' ? $generatedBy : 'admin',
+        ];
     }
 
     public function saveSsoIntegrations(Request $request): ?Setting

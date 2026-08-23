@@ -1565,13 +1565,32 @@
                                 @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'federation_api_token'))
                                 <div class="form-group mb-0">
                                     <label for="federation_api_token">Federation API token</label>
-                                    <input type="text"
-                                           name="federation_api_token"
-                                           id="federation_api_token"
-                                           class="form-control"
-                                           value="{{ old('federation_api_token', $settings->federation_api_token ?? '') }}"
-                                           placeholder="Optional — leave blank for open federation endpoints">
-                                    <small class="info-text">Remote hubs use this as <code>Authorization: Bearer …</code> when calling <code>/api/federation/*</code>.</small>
+                                    <div class="d-flex flex-wrap align-items-stretch" style="gap:.35rem;">
+                                        <input type="text"
+                                               name="federation_api_token"
+                                               id="federation_api_token"
+                                               class="form-control font-monospace"
+                                               style="min-width:12rem;flex:1 1 16rem;"
+                                               value="{{ old('federation_api_token', $settings->federation_api_token ?? '') }}"
+                                               autocomplete="off"
+                                               spellcheck="false"
+                                               placeholder="Generate a token, then copy it for other hubs">
+                                        <button type="button" class="btn btn-outline-secondary" id="copy-federation-token" title="Copy token">
+                                            <i class="fa fa-copy"></i> Copy
+                                        </button>
+                                        <button type="button" class="btn btn-primary" id="generate-federation-token" title="Generate a new token as the signed-in admin">
+                                            <i class="fa fa-key"></i> Generate
+                                        </button>
+                                    </div>
+                                    <small class="info-text d-block mt-2" id="federation-token-status">
+                                        Generate a token using your signed-in admin account, then copy it into other hubs as
+                                        <code>Authorization: Bearer …</code> when they call <code>/api/federation/*</code> on this site.
+                                        @if(!empty($settings->federation_api_token))
+                                            A token is currently saved for this hub.
+                                        @else
+                                            No token is set — federation endpoints are currently open.
+                                        @endif
+                                    </small>
                                 </div>
                                 @endif
                             </div>
@@ -1978,6 +1997,85 @@
                 btn.innerHTML = original;
             });
         }
+
+        (function bindFederationTokenActions() {
+            const input = document.getElementById('federation_api_token');
+            const copyBtn = document.getElementById('copy-federation-token');
+            const generateBtn = document.getElementById('generate-federation-token');
+            const status = document.getElementById('federation-token-status');
+            if (!input || !copyBtn || !generateBtn) {
+                return;
+            }
+
+            const setStatus = function (message) {
+                if (status) {
+                    status.textContent = message;
+                }
+            };
+
+            const copyToken = function () {
+                const token = (input.value || '').trim();
+                if (!token) {
+                    setStatus('Generate a token first, then copy it for other hubs.');
+                    return;
+                }
+                const onCopied = function () {
+                    const previous = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<i class="fa fa-check"></i> Copied';
+                    setStatus('Token copied. Paste it on other hubs as Authorization: Bearer ' + token.substring(0, 8) + '…');
+                    setTimeout(function () { copyBtn.innerHTML = previous; }, 1600);
+                };
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(token).then(onCopied).catch(function () {
+                        input.select();
+                        document.execCommand('copy');
+                        onCopied();
+                    });
+                    return;
+                }
+                input.select();
+                document.execCommand('copy');
+                onCopied();
+            };
+
+            copyBtn.addEventListener('click', copyToken);
+
+            generateBtn.addEventListener('click', function () {
+                if (input.value && !confirm('Replace the current federation token? Other hubs using the old token will stop working until you update them.')) {
+                    return;
+                }
+                const previous = generateBtn.innerHTML;
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Generating';
+
+                fetch('{{ route("admin.config.federation-token") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(function (response) { return response.json().then(function (data) { return { ok: response.ok, data: data }; }); })
+                .then(function (result) {
+                    if (!result.ok || !result.data.token) {
+                        throw new Error(result.data['alert-danger'] || 'Could not generate the federation token.');
+                    }
+                    input.value = result.data.token;
+                    setStatus(result.data['alert-success'] || ('Token generated as ' + (result.data.generated_by || 'admin') + '. Click Copy to use it on other hubs.'));
+                    copyToken();
+                })
+                .catch(function (error) {
+                    setStatus(error.message || 'Could not generate the federation token.');
+                    alert(error.message || 'Could not generate the federation token.');
+                })
+                .finally(function () {
+                    generateBtn.disabled = false;
+                    generateBtn.innerHTML = previous;
+                });
+            });
+        })();
 
         function clearCache() {
             const btn = document.getElementById('clear-cache-btn');

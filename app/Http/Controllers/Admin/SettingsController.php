@@ -116,6 +116,40 @@ class SettingsController extends Controller
         return back()->with($data);
     }
 
+    public function generateFederationToken(Request $request)
+    {
+        $user = $request->user();
+        if (! $user) {
+            abort(403, 'Sign in as an administrator to generate a federation token.');
+        }
+
+        try {
+            $result = $this->settingsRepo->generateFederationApiToken($user);
+        } catch (\Throwable $e) {
+            $payload = [
+                'status' => 'failure',
+                'alert-danger' => $e->getMessage(),
+            ];
+
+            return $request->expectsJson()
+                ? response()->json($payload, 422)
+                : back()->with($payload);
+        }
+
+        $payload = [
+            'status' => 'success',
+            'token' => $result['token'],
+            'generated_by' => $result['generated_by'],
+            'alert-success' => 'Federation API token generated as '.$result['generated_by'].'. Copy it for other hubs. Remote requests must send Authorization: Bearer <token>.',
+        ];
+
+        if ($request->expectsJson()) {
+            return response()->json($payload);
+        }
+
+        return back()->with($payload);
+    }
+
     public function storeSso(Request $request)
     {
         $saved = $this->settingsRepo->saveSsoIntegrations($request);

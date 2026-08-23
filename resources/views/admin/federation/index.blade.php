@@ -79,7 +79,10 @@
                 <div class="fed-kpi">
                     <div class="fed-kpi-label">API security</div>
                     <div class="fw-semibold">{{ $federationToken ? 'Token required' : 'Open (no token)' }}</div>
-                    <div class="small text-muted mt-1">Configure under System Configurations → Hub deployment</div>
+                    <div class="small text-muted mt-1">
+                        Generate and copy the token under
+                        <a href="{{ route('admin.configure') }}#advanced" class="text-decoration-underline">System Configurations → Advanced</a>
+                    </div>
                 </div>
             </div>
             <div class="col-md-4">
