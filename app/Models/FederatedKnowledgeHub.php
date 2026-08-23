@@ -49,4 +49,44 @@ class FederatedKnowledgeHub extends Model
     {
         return rtrim((string) $this->base_url, '/');
     }
+
+    public function countryIso2(): ?string
+    {
+        $code = strtolower(trim((string) ($this->mappedCountry?->iso_code ?? '')));
+
+        return preg_match('/^[a-z]{2}$/', $code) ? $code : null;
+    }
+
+    public function countryFlagUrl(): ?string
+    {
+        $country = $this->mappedCountry;
+        if (! $country) {
+            return null;
+        }
+
+        $candidates = [];
+        $flag = trim((string) ($country->flag ?? ''));
+        if ($flag !== '' && ! str_contains($flag, '..')) {
+            $candidates[] = ltrim($flag, '/');
+        }
+
+        $iso2 = $this->countryIso2();
+        if ($iso2) {
+            $candidates[] = $iso2.'.svg';
+            $candidates[] = $iso2.'.png';
+        }
+
+        foreach (array_unique($candidates) as $file) {
+            $relative = 'assets/img/flags/'.$file;
+            if (is_file(public_path($relative))) {
+                return asset($relative);
+            }
+        }
+
+        if ($iso2) {
+            return asset('assets/img/flags/'.$iso2.'.svg');
+        }
+
+        return null;
+    }
 }

@@ -85,17 +85,100 @@
     color: var(--theme-color-primary, #119A48);
     border-color: var(--theme-color-primary, #119A48);
 }
+.fed-hubs {
+    align-items: stretch;
+}
 .fed-hub-card {
+    position: relative;
+    overflow: hidden;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    border-radius: 14px;
+    min-height: 118px;
+    height: auto;
+    background: #fff;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.fed-hub-card:hover,
+.fed-hub-card:focus-within {
+    border-color: color-mix(in srgb, var(--theme-color-primary, #119A48) 40%, #e2e8f0);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.1);
+    transform: translateY(-2px);
+}
+.fed-hub-card__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
     height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(1.06);
+    filter: saturate(1.05);
 }
-.fed-hub-card:hover {
-    border-color: color-mix(in srgb, var(--theme-color-primary, #119A48) 35%, #e2e8f0);
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
+.fed-hub-card__veil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.88) 42%, rgba(255,255,255,0.35) 100%);
 }
-.fed-hub-card .card-title { font-size: 0.95rem; font-weight: 600; color: #0f172a; }
+.fed-hub-card__hit {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+}
+.fed-hub-card__hit:focus {
+    outline: 2px solid var(--theme-color-primary, #119A48);
+    outline-offset: 2px;
+}
+.fed-hub-card__body {
+    position: relative;
+    z-index: 1;
+    padding: 0.9rem 1rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-height: 118px;
+}
+.fed-hub-card__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    line-height: 1.3;
+    padding-right: 1.5rem;
+}
+.fed-hub-card__meta {
+    color: #475569;
+    font-size: 0.82rem;
+}
+.fed-hub-card__sync {
+    color: #64748b;
+    font-size: 0.75rem;
+}
+.fed-hub-card__actions {
+    margin-top: auto;
+    padding-top: 0.55rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+.fed-hub-card__browse {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--theme-color-primary, #119A48);
+}
+.fed-hub-card__visit {
+    position: relative;
+    z-index: 2;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #334155;
+    text-decoration: none;
+}
+.fed-hub-card__visit:hover {
+    color: var(--theme-color-primary, #119A48);
+    text-decoration: underline;
+}
 .fed-empty {
     background: #f8fafc;
     border: 1px dashed #cbd5e1;
@@ -201,24 +284,36 @@
             <div class="mt-4 mb-2">
                 <h2 class="h5 fw-semibold text-body mb-3">Linked partner hubs</h2>
             </div>
-            <div class="row">
+            <div class="row fed-hubs">
                 @foreach(($linkedHubs ?? $hubs) as $hub)
-                    <div class="col-md-6 col-lg-4 mb-3">
-                        <div class="card fed-hub-card h-100">
-                            <div class="card-body d-flex flex-column">
-                                <h6 class="card-title mb-1">{{ $hub->name }}</h6>
+                    @php
+                        $browseUrl = route('federation.browse', ['hub' => $hub->id]);
+                        $flagUrl = $hub->countryFlagUrl();
+                        $iso2 = $hub->countryIso2();
+                    @endphp
+                    <div class="col-sm-6 col-xl-4 mb-3">
+                        <article class="fed-hub-card">
+                            @if($flagUrl)
+                                <div class="fed-hub-card__bg" style="background-image: url('{{ $flagUrl }}');"></div>
+                            @elseif($iso2)
+                                <span class="flag-icon flag-icon-{{ $iso2 }} fed-hub-card__bg" aria-hidden="true"></span>
+                            @endif
+                            <div class="fed-hub-card__veil"></div>
+                            <a class="fed-hub-card__hit" href="{{ $browseUrl }}" aria-label="Browse {{ $hub->name }}"></a>
+                            <div class="fed-hub-card__body">
+                                <h3 class="fed-hub-card__title">{{ $hub->name }}</h3>
                                 @if($hub->mappedCountry)
-                                    <small class="text-muted d-block mb-2">{{ $hub->mappedCountry->name }}</small>
+                                    <div class="fed-hub-card__meta">{{ $hub->mappedCountry->name }}</div>
                                 @endif
-                                <small class="text-muted d-block mb-3">
+                                <div class="fed-hub-card__sync">
                                     Last sync: {{ $hub->last_synced_at ? $hub->last_synced_at->diffForHumans() : 'Never' }}
-                                </small>
-                                <div class="mt-auto d-flex flex-wrap gap-2">
-                                    <a href="{{ route('federation.browse', ['hub' => $hub->id]) }}" class="btn btn-sm fed-btn-outline">Browse</a>
-                                    <a href="{{ $hub->base_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-link px-0" style="color:var(--theme-color-primary,#119A48);">Visit hub</a>
+                                </div>
+                                <div class="fed-hub-card__actions">
+                                    <span class="fed-hub-card__browse">Browse</span>
+                                    <a href="{{ $hub->base_url }}" target="_blank" rel="noopener noreferrer" class="fed-hub-card__visit">Visit hub</a>
                                 </div>
                             </div>
-                        </div>
+                        </article>
                     </div>
                 @endforeach
             </div>
