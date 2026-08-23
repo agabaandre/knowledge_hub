@@ -1,6 +1,6 @@
 @php
     $counts = get_menu_counts(auth()->id());
-    $filteredTags = isset($tags) ? $tags->filter(fn ($tag) => $tag->is_health_emergency ?? false)->values() : collect();
+    $filteredTags = \App\Support\HealthEmergencyTags::from($tags ?? []);
     $federationEnabled = function_exists('federation_consumer_enabled') && federation_consumer_enabled();
     $menuIconsEnabled = (bool) (settings()->menu_icons_enabled ?? 0);
     $browseActive = (request()->is('records*') && ! request()->has('tag')) || request()->is('health-topics*') || request()->is('countries*') || request()->is('adminunits*') || request()->is('categories/*');

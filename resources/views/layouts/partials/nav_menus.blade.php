@@ -60,10 +60,11 @@
         </li>
 
 
-            @php
-            $filteredTags = $tags->filter(fn($tag) => $tag->is_health_emergency)->values();
-            @endphp
+        @php
+            $filteredTags = \App\Support\HealthEmergencyTags::from($tags ?? []);
+        @endphp
 
+        @if($filteredTags->isNotEmpty())
         <li class="categories has-mega-menu {{ request()->has('tag') ? 'active' : '' }}">
             <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-briefcase-medical mr-1"></i> @endif {{ __('frontend_nav.health_emergencies') }} <span class="submenu-indicator"></span></a>
 
@@ -88,6 +89,7 @@
            </ul>
 
         </li>
+        @endif
         <li class="categories {{ (request()->is('tools')|| (isset($staticLinks) && collect($staticLinks)->pluck('link')->contains(url()->current()))) ? 'active' : '' }}">
             <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-book mr-1"></i>@endif {{ __('frontend_nav.key_links') }} @if($menuIconsEnabled)<i class="fa fa-angle-right ml-1"></i>@endif<span class="submenu-indicator"></span></a>
             <ul class="nav-dropdown nav-submenu">

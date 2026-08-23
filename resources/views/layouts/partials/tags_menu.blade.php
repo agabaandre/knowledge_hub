@@ -1,9 +1,7 @@
-@if(count($health_emergencies) == 0)
+@if(count($health_emergencies ?? []) == 0)
     <ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
-        @foreach($tags as $tag)
-            @if($tag->is_health_emergency)
-                <li><a href="{{ tag_records_url($tag) }}">{{ $tag->tag_text }}</a></li>
-            @endif
+        @foreach($filteredTags as $tag)
+            <li><a href="{{ tag_records_url($tag) }}">{{ $tag->tag_text }}</a></li>
         @endforeach
     </ul>
 @else

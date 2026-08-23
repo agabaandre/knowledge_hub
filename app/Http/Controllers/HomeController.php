@@ -71,9 +71,7 @@ class HomeController extends Controller
             $data['events'] = (clone $eventsQuery)->take(12)->get();
         }
         $data['is_home']      = true;
-        $data['healthEmergencies'] = collect($data['tags'] ?? [])
-            ->filter(fn ($tag) => ! empty($tag->is_health_emergency))
-            ->values();
+        $data['healthEmergencies'] = \App\Support\HealthEmergencyTags::from($data['tags'] ?? []);
 
         return view('home.index',$data);
     }
