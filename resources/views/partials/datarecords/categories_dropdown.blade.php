@@ -22,6 +22,9 @@
         <option disabled {{ $__catSelected === '' ? 'selected' : '' }} value="">Select Category</option>
     @endif
     @foreach ($data_categories as $category)
+        @if (! \App\Support\DataCategoryAccess::userCanView($category) && ! ($__catSelected !== '' && (string) $category->id === $__catSelected))
+            @continue
+        @endif
         @if (!empty($exclude_special))
             @if (empty($category->is_special) || ($__catSelected !== '' && (string) $category->id === $__catSelected))
                 <option {{ $__catSelected !== '' && $category->id == $__catSelected ? 'selected' : '' }} value="{{ $category->id }}">

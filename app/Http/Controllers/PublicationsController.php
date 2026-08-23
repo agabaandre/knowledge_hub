@@ -14,6 +14,7 @@ use App\Support\PublicationSeo;
 use App\Support\RecordsSearchSeo;
 use App\Support\RecordsSearchFragmentCache;
 use App\Support\PublicationSearchQuery;
+use App\Support\DataCategoryAccess;
 use App\Services\ContributorBadgeAwardService;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
@@ -445,6 +446,8 @@ class PublicationsController extends Controller
                 ? \App\Support\PublicationSearchQuery::normalizeTerm($request->term)
                 : null,
         ]);
+
+        DataCategoryAccess::assertRequestAllowed($request);
     }
 
     protected function validateRecordsSearchRequest(Request $request): void

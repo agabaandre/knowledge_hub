@@ -30,7 +30,7 @@ final class RecordsSearchFilterSchema
         });
 
         $facetCategories = $dataCategories->filter(function ($c) {
-            return empty($c->is_special);
+            return empty($c->is_special) && \App\Support\DataCategoryAccess::userCanView($c);
         });
 
         $fileTypes = cache()->remember('file_types', $minutes, function () {

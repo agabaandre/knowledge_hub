@@ -16,6 +16,11 @@ class DataRecordsController extends Controller
 
     public function index(Request $request){
 
+        if ($request->slug) {
+            $category = \App\Models\DataCategory::where('slug', $request->slug)->first();
+            \App\Support\DataCategoryAccess::assertCanView($category);
+        }
+
         $data['records'] = $this->dataRecordsRepo->get($request);
         return view('datarecords.index',$data);
     }

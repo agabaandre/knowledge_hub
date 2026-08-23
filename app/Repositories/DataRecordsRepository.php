@@ -8,9 +8,11 @@ use App\Models\DataRecord;
 use App\Models\DataSubCategory;
 use App\Models\PublicationCategory;
 use Illuminate\Http\Request;
+use App\Support\DataCategoryAccess;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DataRecordsRepository extends SharedRepo{
 
@@ -217,11 +219,7 @@ class DataRecordsRepository extends SharedRepo{
 
     public function save_category(Request $request){
         $record = new DataCategory();
-
-        $record->category_name    = $request->name;
-        $record->url_path         = $request->url;
-        $record->slug             = Str::slug($request->name ?? '');
-        $record->show_on_menu     = $request->boolean('show_menu');
+        $this->fillCategoryFromRequest($record, $request);
 
         $saved = $record->save();
         if ($saved) {
@@ -258,10 +256,7 @@ class DataRecordsRepository extends SharedRepo{
         ]);
 
         $record = DataCategory::findOrFail((int) $request->id);
-        $record->category_name = $request->name;
-        $record->url_path = $request->url;
-        $record->slug = Str::slug($request->name ?? '');
-        $record->show_on_menu = $request->boolean('show_menu');
+        $this->fillCategoryFromRequest($record, $request);
 
         $ok = $record->save();
         if ($ok) {
@@ -284,6 +279,45 @@ class DataRecordsRepository extends SharedRepo{
         }
 
         return $saved;
+    }
+
+    private function fillCategoryFromRequest(DataCategory $record, Request $request): void
+    {
+        $record->category_name = $request->input('name');
+
+        $this->setFirstExistingColumn($record, ['url_path', 'url_path'], $request->input('url'));
+        $this->setFirstExistingColumn($record, ['slug', 'slug'], Str::slug((string) $request->input('name', '')));
+
+        $showOnMenu = $request->boolean('show_menu') || $request->boolean('show_menu');
+        $this->setFirstExistingColumn($record, ['show_on_menu', 'show_on_menu'], $showOnMenu ? 1 : 0);
+
+        if (Schema::hasColumn('data_categories', 'is_special')) {
+            $record->is_special = $request->boolean('is_special') ? 1 : 0;
+        }
+
+        $restricted = $request->boolean('is_restricted');
+        if (Schema::hasColumn('data_categories', 'is_restricted')) {
+            $record->is_restricted = $restricted ? 1 : 0;
+        }
+
+        $permission = trim((string) $request->input('required_permission', ''));
+        if ($restricted && $permission === '') {
+            $permission = DataCategoryAccess::DEFAULT_PERMISSION;
+        }
+        if (Schema::hasColumn('data_categories', 'required_permission')) {
+            $record->required_permission = $permission !== '' ? $permission : null;
+        }
+    }
+
+    private function setFirstExistingColumn(DataCategory $record, array $columns, $value): void
+    {
+        foreach ($columns as $column) {
+            if (Schema::hasColumn('data_categories', $column)) {
+                $record->{$column} = $value;
+
+                return;
+            }
+        }
     }
 
 }

@@ -9,6 +9,23 @@ class DataCategory extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'show_on_menu' => 'boolean',
+        'is_special' => 'boolean',
+        'is_dashboard' => 'boolean',
+        'is_restricted' => 'boolean',
+    ];
+
+    public function menuUrlPath(): string
+    {
+        return (string) ($this->url_path ?? $this->url_path ?? '');
+    }
+
+    public function showsOnMenu(): bool
+    {
+        return (bool) ($this->show_on_menu ?? $this->show_on_menu ?? false);
+    }
+
     public function sub_categories(){
 
         return $this->hasMany(DataSubCategory::class);

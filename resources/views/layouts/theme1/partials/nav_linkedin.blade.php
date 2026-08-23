@@ -37,25 +37,13 @@
                     $categoryI18nKey = 'frontend_nav.' . \App\Support\UiLocaleLabels::navCategoryTranslationKey((string) ($category->slug ?? ''));
                     $categoryLabel = \App\Support\UiLocaleLabels::navCategoryLabel($category);
                 @endphp
-                @if($category->is_special ?? false)
-                    @auth
+                @if(\App\Support\DataCategoryAccess::userCanView($category))
+                    @if($category->is_special ?? false)
                         <li>
                             <a class="dropdown-item" href="{{ url($category->url_path ?? '') }}?slug={{ $category->slug }}">
                                 <span class="khub-i18n-text" data-khub-i18n="{{ $categoryI18nKey }}">{{ $categoryLabel }}</span>
                             </a>
                         </li>
-                    @endauth
-                @else
-                    @if(strlen($category->required_permission ?? '') > 0)
-                        @auth
-                            @can($category->required_permission)
-                                <li>
-                                    <a class="dropdown-item" href="{{ url('/records') }}?category={{ $category->id }}">
-                                        <span class="khub-i18n-text" data-khub-i18n="{{ $categoryI18nKey }}">{{ $categoryLabel }}</span>
-                                    </a>
-                                </li>
-                            @endcan
-                        @endauth
                     @else
                         <li>
                             <a class="dropdown-item" href="{{ url('/records') }}?category={{ $category->id }}">

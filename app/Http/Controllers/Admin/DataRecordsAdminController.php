@@ -6,6 +6,8 @@ use App\Models\DataSubCategory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\DataRecordsRepository;
+use Illuminate\Support\Facades\Schema;
+use Spatie\Permission\Models\Permission;
 
 class DataRecordsAdminController extends Controller
 {
@@ -71,6 +73,7 @@ class DataRecordsAdminController extends Controller
         $data['categories'] = $this->dataRecordsRepo->get_categories($request);
         $data['allCategoriesForMapping'] = $this->dataRecordsRepo->allCategoriesForMapping();
         $data['search']       = (Object) $request->all();
+        $data['categoryPermissions'] = $this->categoryPermissionNames();
         return view('admin.datarecords.categories',$data);
     }
 
@@ -161,6 +164,19 @@ class DataRecordsAdminController extends Controller
 
         // Return subcategories as JSON response
         return response()->json($subcategories);
+    }
+
+    private function categoryPermissionNames()
+    {
+        try {
+            if (! Schema::hasTable('permissions')) {
+                return collect();
+            }
+
+            return Permission::query()->orderBy('name')->pluck('name');
+        } catch (\Throwable $e) {
+            return collect();
+        }
     }
 
 

@@ -22,10 +22,7 @@
                         <input type="text" class="form-control" id="edit_category_url" name="url" maxlength="500" placeholder="URL path">
                     </div>
 
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" value="1" name="show_menu" id="edit_show_menu">
-                        <label class="form-check-label" for="edit_show_menu">Show on menu</label>
-                    </div>
+                    @include('admin.datarecords.partials.category-access-fields', ['prefix' => 'edit'])
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
@@ -36,28 +33,29 @@
     </div>
 </div>
 
+@push('modal-scripts')
 <script>
     (function () {
-        $('#edit_category').on('show.bs.modal', function (event) {
-            var btn = $(event.relatedTarget);
+        function fillCategoryEditForm(btn) {
             if (!btn || !btn.length) {
                 return;
             }
-            var payload = btn.data('category');
-            if (typeof payload === 'string') {
-                try {
-                    payload = JSON.parse(payload);
-                } catch (e) {
-                    payload = null;
-                }
-            }
-            if (!payload || !payload.id) {
-                return;
-            }
-            $('#edit_category_id').val(payload.id);
-            $('#edit_category_name').val(payload.name || '');
-            $('#edit_category_url').val(payload.url_path || '');
-            $('#edit_show_menu').prop('checked', !!payload.show_on_menu);
+            $('#edit_category_id').val(btn.attr('data-id') || '');
+            $('#edit_category_name').val(btn.attr('data-name') || '');
+            $('#edit_category_url').val(btn.attr('data-url') || '');
+            $('#edit_show_menu').prop('checked', btn.attr('data-show-menu') === '1');
+            $('#edit_is_special').prop('checked', btn.attr('data-special') === '1');
+            $('#edit_is_restricted').prop('checked', btn.attr('data-restricted') === '1');
+            $('#edit_required_permission').val(btn.attr('data-permission') || '');
+        }
+
+        $(document).on('click', '.js-edit-category', function () {
+            fillCategoryEditForm($(this));
+        });
+
+        $('#edit_category').on('show.bs.modal', function (event) {
+            fillCategoryEditForm($(event.relatedTarget));
         });
     })();
 </script>
+@endpush

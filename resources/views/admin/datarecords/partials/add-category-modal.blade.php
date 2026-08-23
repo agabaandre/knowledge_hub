@@ -29,12 +29,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-12">
-                        <div class="mb-3">
-                            <label class="form-label" for="description">Show on Menu ?</label>
-                            <input type="checkbox" value="1" name="show_menu"/>
-                        </div>
-                    </div>
+                    @include('admin.datarecords.partials.category-access-fields', ['prefix' => 'add'])
                 </div>
             </div>
             <div class="modal-footer">

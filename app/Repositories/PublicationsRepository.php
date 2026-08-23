@@ -26,6 +26,7 @@ use App\Support\CommunityTargeting;
 use App\Support\ContentModeration;
 use App\Support\ContributorProfileContext;
 use App\Support\SeoSlugger;
+use App\Support\DataCategoryAccess;
 use App\Services\OfficeDocumentToPdfService;
 use App\Models\ContentRequest;
 use Illuminate\Http\Request;
@@ -1974,6 +1975,14 @@ public function contributorProfileResourceStats(ContributorProfileContext $ctx, 
 
 // New method to apply filters
 private function applyFilters($query, $request) {
+
+    $blockedCategoryIds = DataCategoryAccess::inaccessibleIds(auth()->user());
+    if ($blockedCategoryIds !== []) {
+        $query->where(function ($q) use ($blockedCategoryIds) {
+            $q->whereNotIn('publication_catgory_id', $blockedCategoryIds)
+                ->orWhereNull('publication_catgory_id');
+        });
+    }
 
     if ($request->boolean('contributor_profile_scope')) {
         $authorId = (int) $request->input('contributor_profile_author_id');

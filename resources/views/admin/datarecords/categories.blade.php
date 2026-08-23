@@ -23,6 +23,7 @@
 				<thead>
 					<tr>
 						<th>Category</th>
+						<th>Access</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
@@ -33,21 +34,33 @@
                     @endphp
 
 					@foreach($categories as $record)
-						@php
-							$categoryPayload = [
-								'id' => (int) $record->id,
-								'name' => (string) $record->category_name,
-								'url_path' => (string) ($record->url_path ?? ''),
-								'show_on_menu' => (bool) ($record->show_on_menu ?? false),
-							];
-						@endphp
 						<tr>
 							<td>
 								{!! truncate(strip_tags($record->category_name), 100) !!}
 							</td>
 							<td>
-								<a class="btn btn-primary btn-sm" href="#edit_category" data-toggle="modal"
-									data-category="{{ e(json_encode($categoryPayload)) }}">Edit</a>
+								@if(!empty($record->is_restricted) || filled($record->required_permission))
+									<span class="badge badge-warning">Restricted</span>
+									@if(filled($record->required_permission))
+										<small class="d-block text-muted">{{ $record->required_permission }}</small>
+									@endif
+								@elseif(!empty($record->is_special))
+									<span class="badge badge-info">Login required</span>
+								@else
+									<span class="badge badge-light">Public</span>
+								@endif
+							</td>
+							<td>
+								<a class="btn btn-primary btn-sm js-edit-category" href="#edit_category"
+									data-toggle="modal"
+									data-target="#edit_category"
+									data-id="{{ (int) $record->id }}"
+									data-name="{{ $record->category_name }}"
+									data-url="{{ $record->menuUrlPath() }}"
+									data-show-menu="{{ $record->showsOnMenu() ? '1' : '0' }}"
+									data-special="{{ !empty($record->is_special) ? '1' : '0' }}"
+									data-restricted="{{ !empty($record->is_restricted) ? '1' : '0' }}"
+									data-permission="{{ $record->required_permission }}">Edit</a>
 								<!-- Delete Modal Action -->
                                 @can('delete_publication_metadata')
                                 <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick='openDeleteModal({{ (int) $record->id }}, @json((string) $record->category_name))'> Delete</a>
