@@ -52,6 +52,15 @@ class UserManualViewTest extends TestCase
         $this->assertStringContainsString("asset('manual/'", $controller);
         $this->assertStringContainsString('rewriteGuideLinkUrls', $controller);
         $this->assertStringContainsString("href=\"(/", $controller);
+        $nav = file_get_contents(resource_path('views/partials/secondary_navigation.blade.php'));
+        $this->assertStringContainsString('$isUserManualPage', $nav);
+        $this->assertStringContainsString("request()->is('user_manual')", $nav);
+        $this->assertStringContainsString("request()->is('administrator-guide')", $nav);
+        $index = file_get_contents(resource_path('views/user_manual/index.blade.php'));
+        $admin = file_get_contents(resource_path('views/user_manual/administrator.blade.php'));
+        $this->assertStringContainsString("partials.secondary_navigation", $index);
+        $this->assertStringContainsString("'forceShow' => true", $index);
+        $this->assertStringContainsString("partials.secondary_navigation", $admin);
     }
 
     public function test_guide_root_relative_links_include_the_app_subdirectory(): void

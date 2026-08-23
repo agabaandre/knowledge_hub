@@ -9,10 +9,11 @@
     $isMyForumsPage = request()->routeIs('account.my-forums');
     $isPublicationsAccountPage = request()->routeIs('account.publications') || request()->routeIs('account.publications.edit');
     $isFederatedBrowsePage = request()->is('federated*');
+    $isUserManualPage = request()->is('user_manual') || request()->is('user-guide') || request()->is('administrator-guide') || request()->routeIs('user_manual') || request()->routeIs('administrator_guide');
     $isAuthenticated = auth()->check();
     // If $forceShow is set to true, bypass the page check (used when explicitly included in content)
     $forceShow = $forceShow ?? false;
-    $excludedPages = $isContentRequestPage || $isFaqsPage || $isForumsPage || $isCommunitiesDetailPage || $isPublishPage || $isMyForumsPage || $isFederatedBrowsePage;
+    $excludedPages = $isContentRequestPage || $isFaqsPage || $isForumsPage || $isCommunitiesDetailPage || $isPublishPage || $isMyForumsPage || $isFederatedBrowsePage || $isUserManualPage;
     // Only show from layout if NOT on excluded pages AND not force-showing
     $shouldShow = !$isHomePage && $isAuthenticated && (!$excludedPages || $forceShow);
 @endphp
