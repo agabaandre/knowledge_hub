@@ -194,9 +194,9 @@
 .fed-page .federation-publication-card .publication-image-col,
 .fed-page .federation-publication-card .publication-image-link,
 .fed-page .federation-publication-card .publication-image {
-    min-height: 285px !important;
-    max-height: 285px !important;
-    height: 285px !important;
+    min-height: 300px !important;
+    max-height: 300px !important;
+    height: 300px !important;
 }
 .fed-page .federation-publication-card .publication-image {
     object-fit: cover !important;
