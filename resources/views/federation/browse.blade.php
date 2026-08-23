@@ -192,18 +192,18 @@
     align-items: stretch !important;
 }
 .fed-page .federation-publication-card .publication-image-col {
-    min-height: 362px !important;
+    min-height: 311px !important;
     max-height: none !important;
     height: auto !important;
     align-self: stretch;
 }
 .fed-page .federation-publication-card .publication-image-link {
-    min-height: 362px !important;
+    min-height: 311px !important;
     height: 100% !important;
     max-height: none !important;
 }
 .fed-page .federation-publication-card .publication-image {
-    min-height: 362px !important;
+    min-height: 311px !important;
     height: 100% !important;
     max-height: none !important;
     object-fit: cover !important;
