@@ -39,13 +39,22 @@ class AdminUnitFrontEndController extends Controller
 
 	public function show(Request $request){
 
-        $data['unit']          = $this->adminUnitsRepository->find($request->id);
+        $unit = $this->adminUnitsRepository->find($request->id);
+        if (! $unit) {
+            abort(404);
+        }
+
+        $data['unit']          = $unit;
         $data['child_units']   = $this->adminUnitsRepository->child_units($request->id);
-       
-        $request['admin_unit'] = $request->id;
-        $request['rows']       = 10;
+
+        $request->merge([
+            'admin_unit' => $request->id,
+            'rows' => 10,
+            'search_listing' => true,
+            'skip_random_order' => true,
+        ]);
 		$data['publications']  = $this->publicationsRepository->get($request);
-       
+
         return view('adminunits.details',$data);
     }
 

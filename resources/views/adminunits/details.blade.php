@@ -2,8 +2,10 @@
 @extends('layouts.plain')
 
 @section('styles')
-
-
+<style>
+@include('partials.publications.publication_feed_card_styles')
+@include('publications.partials.preview_modal_styles')
+</style>
 @endsection
 @section('content')      	
 <!-- ======================= Countries ======================== -->
@@ -68,9 +70,7 @@
                     </div>
                 </div>
             
-                <div class="container">
-                    @include('publications.partials.publications')
-                </div>
+                @include('publications.partials.publications')
 
             @else
                 <div class="row justify-content-center mb-2">
@@ -87,7 +87,16 @@
         
     </div>
 </section>
+@auth
+    @include('common.pdf-chat-modal')
+@endauth
 <!-- ======================= Countries ======================== -->
 @endsection
 @section('scripts')
+@auth
+    @include('common.pdf-chat-js')
+@endauth
+@include('common.attachment_js')
+@include('publications.partials.preview_modal')
+@include('partials.publications.publication_feed_card_scripts')
 @endsection

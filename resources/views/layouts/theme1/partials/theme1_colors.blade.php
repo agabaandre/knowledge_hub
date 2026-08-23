@@ -115,7 +115,23 @@
     #mainnav-container .mininav-content .nav-link:hover { color: #fff !important; }
     #mainnav-container .badge { color: #fff !important; background-color: #dc3545 !important; }
     #mainnav-container .mainnav__menu i[class*="pli-"],
-    #mainnav-container .mainnav__menu .fs-5 { color: rgba(255,255,255,0.92) !important; font-size: var(--nav-icon-size, 16px) !important; font-weight: 400 !important; }
+    #mainnav-container .mainnav__menu i[class*="psi-"] {
+        color: rgba(255,255,255,0.92) !important;
+        font-size: var(--nav-icon-size, 16px) !important;
+        font-weight: 400 !important;
+    }
+    #mainnav-container .mainnav__menu .fs-5 {
+        color: rgba(255,255,255,0.92) !important;
+        font-size: var(--nav-icon-size, 16px) !important;
+    }
+    /* FA6 solid icons need weight 900; 400 makes most glyphs render as missing boxes. */
+    #mainnav-container .mainnav__menu .nav-link > i.fa,
+    #mainnav-container .mainnav__menu .mininav-toggle > i.fa {
+        color: rgba(255,255,255,0.92) !important;
+        font-size: var(--nav-icon-size, 16px) !important;
+        font-family: "Font Awesome 6 Free" !important;
+        font-weight: 900 !important;
+    }
     html.menu-icons-disabled #mainnav-container .mainnav__menu .nav-link > i.fa,
     html.menu-icons-disabled #mainnav-container .mainnav__menu .mininav-toggle > i.fa { display: none !important; }
     #mainnav-container .mainnav__top-content { color: rgba(255,255,255,0.92); }
