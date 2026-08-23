@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use App\Services\OfficeDocumentToPdfService;
-use App\Support\SeoSlugger;
+use App\Support\SeoSlugSync;
 use App\Support\ContentModeration;
 
 class CommsOfPracticeRepository{
@@ -716,11 +716,8 @@ class CommsOfPracticeRepository{
         $access_grp->department = $request->department ?: null;
         $access_grp->is_public = $request->has('is_public') ? (bool)$request->is_public : true;
 
-        if (Schema::hasColumn('community_of_practices', 'slug') && empty($access_grp->slug)) {
-            $access_grp->slug = SeoSlugger::forCommunity(
-                (string) ($access_grp->community_name ?? ''),
-                $access_grp->id ?: null
-            );
+        if (Schema::hasColumn('community_of_practices', 'slug')) {
+            SeoSlugSync::apply($access_grp, 'communities');
         }
         
         $access_grp->save();

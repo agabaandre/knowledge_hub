@@ -9,7 +9,7 @@ use App\Models\DataSubCategory;
 use App\Models\PublicationCategory;
 use Illuminate\Http\Request;
 use App\Support\DataCategoryAccess;
-use Illuminate\Support\Str;
+use App\Support\SeoSlugSync;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -286,7 +286,7 @@ class DataRecordsRepository extends SharedRepo{
         $record->category_name = $request->input('name');
 
         $this->setFirstExistingColumn($record, ['url_path', 'url_path'], $request->input('url'));
-        $this->setFirstExistingColumn($record, ['slug', 'slug'], Str::slug((string) $request->input('name', '')));
+        SeoSlugSync::apply($record, 'data-categories');
 
         $showOnMenu = $request->boolean('show_menu') || $request->boolean('show_menu');
         $this->setFirstExistingColumn($record, ['show_on_menu', 'show_on_menu'], $showOnMenu ? 1 : 0);

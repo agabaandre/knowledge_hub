@@ -27,7 +27,7 @@ use App\Services\ContentRequestReferralNotifier;
 use App\Services\ForumThreadActivityNotifier;
 use App\Services\OfficeDocumentToPdfService;
 use App\Support\CommunityTargeting;
-use App\Support\SeoSlugger;
+use App\Support\SeoSlugSync;
 
 class ForumsRepository extends SharedRepo{
 
@@ -1619,14 +1619,11 @@ class ForumsRepository extends SharedRepo{
 
     private function assignForumSlug(Forum $forum): void
     {
-        if (! DBSchema::hasColumn('forums', 'slug') || ! empty($forum->slug)) {
+        if (! DBSchema::hasColumn('forums', 'slug')) {
             return;
         }
 
-        $forum->slug = SeoSlugger::forForum(
-            (string) ($forum->forum_title ?? ''),
-            $forum->id ?: null
-        );
+        SeoSlugSync::apply($forum, 'forums');
     }
 
     public function forumEngagementScore(object $forum): int

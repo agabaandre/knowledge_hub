@@ -4,7 +4,7 @@ namespace App\Repositories;
 use App\Models\Author;
 use App\Models\Publication;
 use App\Models\User;
-use App\Support\SeoSlugger;
+use App\Support\SeoSlugSync;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -244,12 +244,14 @@ class AuthorsRepository extends SharedRepo{
 
     public function ensureSlug(Author $author): void
     {
-        if (! Schema::hasColumn('author', 'slug') || ! empty($author->slug)) {
+        if (! Schema::hasColumn('author', 'slug')) {
             return;
         }
 
-        $author->slug = SeoSlugger::forAuthor((string) ($author->name ?? ''), $author->id ?: null);
-        $author->saveQuietly();
+        $force = $author->wasChanged('name');
+        if (SeoSlugSync::apply($author, 'authors', $force) && $author->isDirty('slug')) {
+            $author->saveQuietly();
+        }
     }
 
     public function delete($id): bool

@@ -47,6 +47,18 @@ class SeoSlugger
         return self::uniqueSlug('sub_thematic_area', self::baseSlug($name, 'sub-theme'), $excludeId);
     }
 
+    public static function forDataCategory(string $name, ?int $excludeId = null): string
+    {
+        $table = (new \App\Models\DataCategory())->getTable();
+
+        return self::uniqueSlug($table, self::baseSlug($name, 'category'), $excludeId);
+    }
+
+    public static function forSubjectArea(string $name, ?int $excludeId = null): string
+    {
+        return self::uniqueSlug('subject_areas', self::baseSlug($name, 'subject-area'), $excludeId);
+    }
+
     public static function baseSlug(string $title, string $fallback): string
     {
         $slug = Str::slug(Str::limit(trim($title), 120, ''));

@@ -25,7 +25,7 @@ use App\Models\User;
 use App\Support\CommunityTargeting;
 use App\Support\ContentModeration;
 use App\Support\ContributorProfileContext;
-use App\Support\SeoSlugger;
+use App\Support\SeoSlugSync;
 use App\Support\DataCategoryAccess;
 use App\Services\OfficeDocumentToPdfService;
 use App\Models\ContentRequest;
@@ -694,8 +694,8 @@ public function getPublicationIds(Request $request, int $limit = 80): array
             endif;
         endif;
 
-        if ((int) ($pub->is_version ?? 0) === 0 && Schema::hasColumn('publication', 'slug') && empty($pub->slug)) {
-            $pub->slug = SeoSlugger::forPublication((string) ($pub->title ?? ''), $pub->id ?: null);
+        if ((int) ($pub->is_version ?? 0) === 0 && Schema::hasColumn('publication', 'slug')) {
+            SeoSlugSync::apply($pub, 'publications');
         }
 
         if (Schema::hasColumn('publication', 'content_updated_at')) {

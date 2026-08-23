@@ -7,7 +7,7 @@ use App\Models\PublicationTag;
 use App\Models\Tag;
 use App\View\Composers\TagsViewComposer;
 use App\Support\HealthTopicSourceCatalog;
-use App\Support\SeoSlugger;
+use App\Support\SeoSlugSync;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -66,8 +66,8 @@ class TagsRepository{
         if ($request->has('overview')) {
             $tag->overview = $request->overview;
         }
-        if (Schema::hasColumn('tags', 'slug') && empty($tag->slug)) {
-            $tag->slug = SeoSlugger::forTag((string) ($tag->tag_text ?? ''), null);
+        if (Schema::hasColumn('tags', 'slug')) {
+            SeoSlugSync::apply($tag, 'tags');
         }
         $tag->save();
         TagsViewComposer::forgetTagListCache();
@@ -98,8 +98,8 @@ class TagsRepository{
         if ($request->has('overview')) {
             $tag->overview = $request->overview;
         }
-        if (Schema::hasColumn('tags', 'slug') && empty($tag->slug)) {
-            $tag->slug = SeoSlugger::forTag((string) ($tag->tag_text ?? ''), (int) $tag->id);
+        if (Schema::hasColumn('tags', 'slug')) {
+            SeoSlugSync::apply($tag, 'tags');
         }
         $tag->save();
         TagsViewComposer::forgetTagListCache();
@@ -277,7 +277,7 @@ class TagsRepository{
             $tag->is_health_topic = (int) ($row['is_health_topic'] ?? 1);
             $tag->is_health_emergency = (int) ($row['is_health_emergency'] ?? 0);
             if (Schema::hasColumn('tags', 'slug')) {
-                $tag->slug = SeoSlugger::forTag($tagText, null);
+                SeoSlugSync::apply($tag, 'tags');
             }
             $tag->save();
 
