@@ -189,17 +189,25 @@
 }
 .fed-page .form-label { font-size: 0.82rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem; }
 .fed-page .federation-publication-card .publication-card-row {
-    align-items: flex-start !important;
+    align-items: stretch !important;
 }
-.fed-page .federation-publication-card .publication-image-col,
-.fed-page .federation-publication-card .publication-image-link,
-.fed-page .federation-publication-card .publication-image {
-    min-height: 117px !important;
-    max-height: 117px !important;
-    height: 117px !important;
+.fed-page .federation-publication-card .publication-image-col {
+    min-height: 372px !important;
+    max-height: none !important;
+    height: auto !important;
+    align-self: stretch;
+}
+.fed-page .federation-publication-card .publication-image-link {
+    min-height: 372px !important;
+    height: 100% !important;
+    max-height: none !important;
 }
 .fed-page .federation-publication-card .publication-image {
+    min-height: 372px !important;
+    height: 100% !important;
+    max-height: none !important;
     object-fit: cover !important;
+    object-position: center;
 }
 .fed-hubs-carousel {
     margin: 0 0 1.25rem;
