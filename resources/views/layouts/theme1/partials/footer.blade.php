@@ -48,11 +48,12 @@
                     @if(settings()->twitter ?? null)<a href="{{ settings()->twitter }}" target="_blank" class="btn btn-icon btn-sm btn-light" title="Twitter"><i class="fa-brands fa-x-twitter"></i></a>@endif
                     @if(settings()->linkedin ?? null)<a href="{{ settings()->linkedin }}" target="_blank" class="btn btn-icon btn-sm btn-light" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>@endif
                 </div>
-                @if((settings()->show_tags ?? false) && isset($tags) && count($tags) > 0)
+                @php $footerPopularTags = $popular_tags ?? collect(); @endphp
+                @if((settings()->show_tags ?? false) && $footerPopularTags->count() > 0)
                     <div class="mt-3">
                         <h6 class="h6 fw-bold mb-2">Tags</h6>
                         <div class="d-flex flex-wrap gap-1">
-                            @foreach($tags->take(8) as $tag)
+                            @foreach($footerPopularTags->take(8) as $tag)
                                 <a href="{{ tag_records_url($tag) }}" class="badge bg-primary text-decoration-none">{{ truncate($tag->tag_text, 12) }}</a>
                             @endforeach
                         </div>
@@ -60,6 +61,7 @@
                 @endif
             </div>
         </div>
+        @include('layouts.partials.footer_partners')
         <hr class="my-4">
         <div class="row">
             <div class="col-md-6 text-center text-md-start">

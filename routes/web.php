@@ -189,6 +189,9 @@ Route::get('/privacy', [CommonController::class, 'privacy'])->name('privacy');
 Route::get('/user_manual', [CommonController::class, 'userManual'])->name('user_manual');
 Route::get('/user-guide', [CommonController::class, 'userManual']);
 Route::get('/administrator-guide', [CommonController::class, 'administratorGuide'])->name('administrator_guide');
+Route::get('/docs/{path}', [CommonController::class, 'documentation'])
+    ->where('path', '.*')
+    ->name('docs.show');
 Route::group(["prefix" => "browse"], function () {
 
     Route::get("themes", [ThemesController::class, 'index']);

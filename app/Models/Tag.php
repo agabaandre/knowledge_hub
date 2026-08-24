@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class Tag extends Model
 {
@@ -29,16 +30,28 @@ class Tag extends Model
             ->groupBy('publication_id');
 
         $tagIdsOrdered = DB::table('publication_tags')
-            ->select('publication_tags.tag_id', DB::raw('COALESCE(SUM(pv.total_views), 0) + COALESCE(SUM(fl.total_likes), 0) as engagement'))
+            ->select(
+                'publication_tags.tag_id',
+                DB::raw('COALESCE(SUM(pv.total_views), 0) + COALESCE(SUM(fl.total_likes), 0) as engagement'),
+                DB::raw('COUNT(DISTINCT publication.id) as publication_count')
+            )
             ->join('publication', function ($j) {
                 $j->on('publication.id', '=', 'publication_tags.publication_id')
                     ->where('publication.is_active', '=', 'Active')
                     ->where('publication.is_approved', '=', 1);
+
+                if (Schema::hasColumn('publication', 'is_version')) {
+                    $j->where('publication.is_version', '=', 0);
+                }
+                if (Schema::hasColumn('publication', 'is_admin_only_access')) {
+                    $j->where('publication.is_admin_only_access', '=', 0);
+                }
             })
             ->leftJoinSub($viewsSub, 'pv', 'pv.publication_id', '=', 'publication.id')
             ->leftJoinSub($likesSub, 'fl', 'fl.publication_id', '=', 'publication.id')
             ->groupBy('publication_tags.tag_id')
             ->orderByDesc('engagement')
+            ->orderByDesc('publication_count')
             ->limit($limit)
             ->pluck('tag_id');
 

@@ -78,6 +78,40 @@ Track status under **My publications**. Pending and rejected items can be edited
 
 You will receive email when a reviewer decides. Reviewers work from a single **Approvals** inbox (`/admin/approvals`), so links in those emails open that inbox rather than older specialist queues.
 
+### Videos
+
+Use this when the resource is a recording (webinar, training clip, announcement) rather than a PDF.
+
+1. In the publish wizard, choose **External Link** if the video is already on YouTube, Vimeo, or a similar host. Do **not** upload a copy as an attachment unless you only have a local file.
+2. Paste the **full watch URL** from the browser address bar (for example `https://www.youtube.com/watch?v=…` or a `youtu.be/…` short link).
+3. Turn on **Embedded On Page** so visitors can play the video on the resource page instead of leaving the Hub.
+4. Complete title, description, theme, and tags as for any other resource, then submit.
+
+If you only have a file on your computer, choose **Attachment** and upload a common format such as MP4 or WebM. Scripts and executables are not allowed. The Hub flags video resources automatically and can generate a cover image from the platform thumbnail or the first seconds of a file.
+
+### Embedded dashboards
+
+Use this for Power BI, Tableau, DHIS2, Excel Online, or other live views that should appear inside the Hub.
+
+1. Choose **External Link** and paste the dashboard’s **embed or share URL** (the address that loads in a browser, not a file download).
+2. Turn on **Embedded On Page**. The resource page shows the dashboard in an in-page frame so people can explore it without opening a new tab.
+3. Pick the dashboard / data-visualisation **category** your hub uses, plus theme and tags, so the item is findable in search.
+4. Administrators can also tick **Admin Only Access** to keep a sensitive dashboard off the public catalogue (it then appears under **Admin → Dashboards**). **Default in Category** features it as the primary item in that category.
+
+If embedding is blocked by the dashboard host (X-Frame-Options / CSP), leave **Embedded On Page** off so the Hub opens the external URL instead.
+
+### New versions of a document
+
+Do **not** publish a second, unrelated record when a report is updated. After the original resource is approved, open it and choose **Submit Version** (shown when versioning is enabled for the hub). That form is at `/account/newversion`.
+
+- Enter a **version number or name** (the Hub suggests the next number).
+- Upload the new file and/or paste a new link. Title, authors, theme, and tags are copied from the original — change only what is different.
+- Submit. The new version goes through the same **Approvals** inbox as a first publication unless auto-approve is on.
+- The original record stays the public canonical page. Approved versions are listed on that page so readers can open earlier or later editions.
+- You can version a parent resource only, not another version.
+
+Until a version is approved it stays under **My publications** as pending, like any other submission.
+
 ![Publish a resource](/manual/user-guide/20-publish.png)
 *Publish wizard — title, description, authors, theme, files, and submit.*
 

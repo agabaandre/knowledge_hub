@@ -506,6 +506,14 @@ class SettingsRepository
             }
         }
 
+        if (Schema::hasColumn('setting', 'partner_logos')) {
+            $settings->partner_logos = json_encode(
+                \App\Support\FooterPartners::fromRequest($request, function ($file) {
+                    return $this->save_attachments($file);
+                })
+            );
+        }
+
         $settings->save();
 
         DisposableEmailChecker::forgetCache();

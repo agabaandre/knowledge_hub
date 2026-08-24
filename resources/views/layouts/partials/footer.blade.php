@@ -38,6 +38,9 @@
 		</div>
 	</div>
 
+	<div class="container">
+		@include('layouts.partials.footer_partners')
+	</div>
 	@include('layouts.partials.footer_i18n_bottom')
 </footer>
 <!-- ============================ Footer End ================================== -->

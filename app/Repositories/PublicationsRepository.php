@@ -26,6 +26,7 @@ use App\Support\CommunityTargeting;
 use App\Support\ContentModeration;
 use App\Support\ContributorProfileContext;
 use App\Support\SeoSlugSync;
+use App\View\Composers\TagsViewComposer;
 use App\Support\DataCategoryAccess;
 use App\Services\OfficeDocumentToPdfService;
 use App\Models\ContentRequest;
@@ -948,6 +949,7 @@ public function getPublicationIds(Request $request, int $limit = 80): array
             try {
                 // Delete existing tags for this publication
                 PublicationTag::where('publication_id', $id)->delete();
+                TagsViewComposer::forgetTagListCache();
                 
                 // Ensure tags is an array
                 $tags = is_array($tagsToSave) ? $tagsToSave : (is_string($tagsToSave) ? json_decode($tagsToSave, true) : []);
@@ -1306,6 +1308,7 @@ public function getPublicationIds(Request $request, int $limit = 80): array
         if (!empty($tagData)) {
             try {
             PublicationTag::insert($tagData);
+            TagsViewComposer::forgetTagListCache();
                 \Log::info('Tags inserted into database', [
                     'publication_id' => $publication_id,
                     'tags_count' => count($tagData),

@@ -17,6 +17,11 @@ class UserManualViewTest extends TestCase
         $this->assertStringContainsString('/adminunits/details', $guide);
         $this->assertStringContainsString('/account/publish', $guide);
         $this->assertStringContainsString('moderate_publication', $guide);
+        $this->assertStringContainsString('### Videos', $guide);
+        $this->assertStringContainsString('Embedded On Page', $guide);
+        $this->assertStringContainsString('### Embedded dashboards', $guide);
+        $this->assertStringContainsString('### New versions of a document', $guide);
+        $this->assertStringContainsString('Submit Version', $guide);
     }
 
     public function test_administrator_guide_documents_slug_and_approval_commands(): void
@@ -51,7 +56,9 @@ class UserManualViewTest extends TestCase
         $this->assertStringContainsString('rewriteGuideImageUrls', $controller);
         $this->assertStringContainsString("asset('manual/'", $controller);
         $this->assertStringContainsString('rewriteGuideLinkUrls', $controller);
-        $this->assertStringContainsString("href=\"(/", $controller);
+        $this->assertStringContainsString('rewriteGuideDisplayedPaths', $controller);
+        $this->assertStringContainsString('rewriteGuideHref', $controller);
+        $this->assertStringContainsString("get('/docs/{path}'", $routes);
         $nav = file_get_contents(resource_path('views/partials/secondary_navigation.blade.php'));
         $this->assertStringContainsString('$isUserManualPage', $nav);
         $this->assertStringContainsString("request()->is('user_manual')", $nav);
@@ -76,6 +83,87 @@ class UserManualViewTest extends TestCase
 
         $this->assertStringContainsString(url('administrator-guide'), $html);
         $this->assertStringNotContainsString('href="/administrator-guide"', $html);
+    }
+
+    public function test_guide_relative_markdown_links_map_to_in_app_pages(): void
+    {
+        $controller = app(\App\Http\Controllers\CommonController::class);
+        $method = new \ReflectionMethod($controller, 'rewriteGuideLinkUrls');
+        $method->setAccessible(true);
+
+        $html = $method->invoke(
+            $controller,
+            '<p><a href="user-guide.md">user-guide.md</a> <a href="features/APPROVALS.md">approvals</a> <a href="README.md">index</a></p>'
+        );
+
+        $this->assertStringContainsString(url('user_manual'), $html);
+        $this->assertStringContainsString(url('docs/features/APPROVALS.md'), $html);
+        $this->assertStringContainsString(url('docs/README.md'), $html);
+        $this->assertStringNotContainsString('href="user-guide.md"', $html);
+        $this->assertStringNotContainsString('href="features/APPROVALS.md"', $html);
+    }
+
+    public function test_rendered_administrator_guide_related_docs_do_not_point_at_raw_markdown_files(): void
+    {
+        $controller = app(\App\Http\Controllers\CommonController::class);
+        $method = new \ReflectionMethod($controller, 'renderMarkdownGuide');
+        $method->setAccessible(true);
+
+        $html = $method->invoke($controller, base_path('docs/administrator-guide.md'));
+
+        $this->assertStringContainsString(url('user_manual'), $html);
+        $this->assertStringContainsString(url('docs/README.md'), $html);
+        $this->assertStringContainsString(url('docs/features/APPROVALS.md'), $html);
+        $this->assertStringContainsString(url('docs/features/SEO_SLUGS.md'), $html);
+        $this->assertStringContainsString(url('docs/features/FEDERATION.md'), $html);
+        $this->assertStringContainsString(url('docs/deployment/STORAGE.md'), $html);
+        $this->assertStringNotContainsString('href="user-guide.md"', $html);
+        $this->assertStringNotContainsString('href="features/APPROVALS.md"', $html);
+    }
+
+    public function test_docs_viewer_rejects_path_traversal_and_serves_allowlisted_markdown(): void
+    {
+        $controller = app(\App\Http\Controllers\CommonController::class);
+        $method = new \ReflectionMethod($controller, 'safeDocsRelativePath');
+        $method->setAccessible(true);
+
+        $this->assertNull($method->invoke($controller, '../.env'));
+        $this->assertNull($method->invoke($controller, 'features/APPROVALS.txt'));
+        $this->assertSame('features/APPROVALS.md', $method->invoke($controller, 'features/APPROVALS.md'));
+    }
+
+    public function test_guide_displayed_paths_use_the_full_app_url_from_env(): void
+    {
+        config(['app.url' => 'http://khub.example.test/portal']);
+        url()->forceRootUrl('http://khub.example.test/portal');
+
+        $controller = app(\App\Http\Controllers\CommonController::class);
+        $method = new \ReflectionMethod($controller, 'rewriteGuideDisplayedPaths');
+        $method->setAccessible(true);
+
+        $html = $method->invoke(
+            $controller,
+            '<p>Browse <code>/countries</code> or open <code>/user_manual</code>.</p>'
+        );
+
+        $this->assertStringContainsString('http://khub.example.test/portal/countries', $html);
+        $this->assertStringContainsString('http://khub.example.test/portal/user_manual', $html);
+        $this->assertStringNotContainsString('<code>/countries</code>', $html);
+        $this->assertStringNotContainsString('<code>/user_manual</code>', $html);
+    }
+
+    public function test_rendered_user_guide_replaces_root_paths_with_app_url(): void
+    {
+        $controller = app(\App\Http\Controllers\CommonController::class);
+        $method = new \ReflectionMethod($controller, 'renderMarkdownGuide');
+        $method->setAccessible(true);
+
+        $html = $method->invoke($controller, base_path('docs/user-guide.md'));
+
+        $this->assertStringContainsString(url('countries'), $html);
+        $this->assertStringContainsString(url('user_manual'), $html);
+        $this->assertStringNotContainsString('<code>/countries</code>', $html);
+        $this->assertStringNotContainsString('<code>/user_manual</code>', $html);
     }
 
     public function test_guide_markdown_embeds_every_manual_screenshot(): void

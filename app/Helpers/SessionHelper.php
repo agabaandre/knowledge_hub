@@ -73,6 +73,15 @@ if (! function_exists('branding_image_url')) {
 	}
 }
 
+if (! function_exists('footer_partner_logos')) {
+	function footer_partner_logos(): array
+	{
+		$settings = function_exists('settings') ? settings() : null;
+
+		return \App\Support\FooterPartners::items($settings->partner_logos ?? null);
+	}
+}
+
 if (! function_exists('site_favicon_url')) {
 	function site_favicon_url(): string
 	{
@@ -140,6 +149,9 @@ if(!function_exists('settings')){
 				$settings->logo = branding_image_url($settings->logo ?? '');
 				$settings->favicon = branding_image_url($settings->favicon ?? '');
 				$settings->spotlight_banner = branding_image_url($settings->spotlight_banner ?? '');
+				if (property_exists($settings, 'partner_logos')) {
+					$settings->partner_logos = \App\Support\FooterPartners::decode($settings->partner_logos ?? null);
+				}
 				foreach (['enable_microsoft_login', 'enable_google_login', 'enable_linkedin_login'] as $toggle) {
 					if (! property_exists($settings, $toggle)) {
 						continue;

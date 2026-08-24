@@ -84,6 +84,29 @@
     </div>
 
     <div class="form-section-title mt-4">
+        <i class="fa fa-handshake"></i>
+        Partner logos
+    </div>
+    <p class="info-text mb-3">Shown as a small centered row in the public footer, above the copyright line. Upload square or landscape logos (PNG or SVG with a transparent background works best).</p>
+
+    @php
+        $partnerLogos = \App\Support\FooterPartners::items(settings()->partner_logos ?? []);
+    @endphp
+    <div id="partner-logos-list">
+        @forelse($partnerLogos as $index => $partner)
+            @include('admin.settings.partials.partner_logo_row', ['index' => $index, 'partner' => $partner])
+        @empty
+            @include('admin.settings.partials.partner_logo_row', ['index' => 0, 'partner' => ['file' => '', 'name' => '', 'url' => '', 'image' => '']])
+        @endforelse
+    </div>
+    <button type="button" class="btn btn-outline-secondary btn-sm" id="js-add-partner-logo">
+        <i class="fa fa-plus mr-1"></i>Add partner logo
+    </button>
+    <template id="partner-logo-row-template">
+        @include('admin.settings.partials.partner_logo_row', ['index' => '__INDEX__', 'partner' => ['file' => '', 'name' => '', 'url' => '', 'image' => '']])
+    </template>
+
+    <div class="form-section-title mt-4">
         <i class="fa fa-image"></i>
         Homepage Spotlight
     </div>
@@ -213,6 +236,66 @@
         select.addEventListener('change', function () {
             var option = select.options[select.selectedIndex];
             hint.textContent = option && option.getAttribute('data-hint') ? option.getAttribute('data-hint') : '';
+        });
+    })();
+</script>
+<script>
+    (function () {
+        var list = document.getElementById('partner-logos-list');
+        var addBtn = document.getElementById('js-add-partner-logo');
+        var template = document.getElementById('partner-logo-row-template');
+        if (!list || !addBtn || !template) return;
+
+        function nextIndex() {
+            return Date.now();
+        }
+
+        function bindRow(row) {
+            var file = row.querySelector('.js-partner-file');
+            if (file && !file.dataset.bound) {
+                file.dataset.bound = '1';
+                file.addEventListener('change', function () {
+                    var preview = row.querySelector('.js-partner-preview');
+                    if (!file.files || !file.files[0] || !preview) return;
+                    var reader = new FileReader();
+                    reader.onload = function (event) {
+                        preview.innerHTML = '<img src="' + event.target.result + '" alt="">';
+                    };
+                    reader.readAsDataURL(file.files[0]);
+                });
+            }
+            var remove = row.querySelector('.js-remove-partner-logo');
+            if (remove && !remove.dataset.bound) {
+                remove.dataset.bound = '1';
+                remove.addEventListener('click', function () {
+                    if (list.querySelectorAll('[data-partner-row]').length < 2) {
+                        row.querySelectorAll('input').forEach(function (input) {
+                            if (input.type === 'file') {
+                                input.value = '';
+                            } else {
+                                input.value = '';
+                            }
+                        });
+                        var preview = row.querySelector('.js-partner-preview');
+                        if (preview) {
+                            preview.innerHTML = '<span class="branding-asset-preview__placeholder">Logo</span>';
+                        }
+                        return;
+                    }
+                    row.remove();
+                });
+            }
+        }
+
+        list.querySelectorAll('[data-partner-row]').forEach(bindRow);
+
+        addBtn.addEventListener('click', function () {
+            var html = template.innerHTML.replace(/__INDEX__/g, String(nextIndex()));
+            var wrap = document.createElement('div');
+            wrap.innerHTML = html.trim();
+            var row = wrap.firstElementChild;
+            list.appendChild(row);
+            bindRow(row);
         });
     })();
 </script>

@@ -9,7 +9,7 @@
     $isMyForumsPage = request()->routeIs('account.my-forums');
     $isPublicationsAccountPage = request()->routeIs('account.publications') || request()->routeIs('account.publications.edit');
     $isFederatedBrowsePage = request()->is('federated*');
-    $isUserManualPage = request()->is('user_manual') || request()->is('user-guide') || request()->is('administrator-guide') || request()->routeIs('user_manual') || request()->routeIs('administrator_guide');
+    $isUserManualPage = request()->is('user_manual') || request()->is('user-guide') || request()->is('administrator-guide') || request()->is('docs*') || request()->routeIs('user_manual') || request()->routeIs('administrator_guide') || request()->routeIs('docs.show');
     $isAuthenticated = auth()->check();
     // If $forceShow is set to true, bypass the page check (used when explicitly included in content)
     $forceShow = $forceShow ?? false;

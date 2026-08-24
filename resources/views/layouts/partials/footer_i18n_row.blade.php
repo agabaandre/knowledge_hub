@@ -101,14 +101,15 @@
             </ul>
             <p class="text-white small mb-3">{{ __('ui_body.footer_download_app') }}</p>
 
-            @if((settings()->show_tags ?? false) && isset($tags) && count($tags) > 0)
+            @php $footerPopularTags = $popular_tags ?? collect(); @endphp
+            @if((settings()->show_tags ?? false) && $footerPopularTags->count() > 0)
             <div class="mt-3">
                 <h5 class="widget_title mb-2" style="font-size:0.95rem;">{{ __('ui_body.footer_popular_tags') }}</h5>
                 <div class="footer-tags">
                     @php
                         $colors = [settings()->primary_color,settings()->primary_text_color,settings()->icon_font_color];
                     @endphp
-                    @foreach($tags->take(5) as $tag)
+                    @foreach($footerPopularTags->take(5) as $tag)
                     <a href="{{ tag_records_url($tag) }}"
                        class="tag-pill"
                        title="{{$tag->tag_text}}">

@@ -35,6 +35,7 @@ return [
     'footer_find_us' => 'Find us On',
     'footer_download_app' => 'Download our mobile app for a better experience',
     'footer_popular_tags' => 'Popular Tags',
+    'footer_partners' => 'Partners',
     'footer_copyright' => '© :year Africa CDC. All rights reserved.',
 
     'login_modal_title' => 'Login',
