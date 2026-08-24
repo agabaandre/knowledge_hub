@@ -1,6 +1,7 @@
 @php
     $footerPartners = footer_partner_logos();
     $showPartnerNames = \App\Support\FooterPartners::showNames(function_exists('settings') ? settings() : null);
+    $partnerLogoMaxHeight = \App\Support\FooterPartners::logoMaxHeight(function_exists('settings') ? settings() : null);
 @endphp
 @if(count($footerPartners) > 0)
 <style>
@@ -32,13 +33,12 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 51px;
+    min-height: {{ $partnerLogoMaxHeight }}px;
     padding: .2rem .35rem;
     text-decoration: none;
 }
 .footer-partners-item img {
-    max-height: 37px;
-    max-width: 127px;
+    max-height: {{ $partnerLogoMaxHeight }}px;
     width: auto;
     height: auto;
     object-fit: contain;
@@ -51,7 +51,7 @@
     line-height: 1.25;
     color: #475569;
     text-align: center;
-    max-width: 127px;
+    max-width: {{ max(127, $partnerLogoMaxHeight * 2) }}px;
 }
 </style>
 <div class="footer-partners" id="khub-footer-partners">

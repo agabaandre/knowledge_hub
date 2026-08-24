@@ -88,12 +88,30 @@
         Partner logos
     </div>
     <p class="info-text mb-3">Shown as a centered row on a white bar above the public footer. Upload square or landscape logos (PNG or SVG with a transparent background works best).</p>
-    <div class="branding-toggle-card mb-3">
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="show_partner_names" name="show_partner_names" value="1" @if(settings()->show_partner_names ?? false) checked @endif>
-            <label class="form-check-label" for="show_partner_names">Show partner names below logos</label>
+    <div class="row settings-grid-row mb-3">
+        <div class="col-md-6">
+            <div class="branding-toggle-card h-100">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="show_partner_names" name="show_partner_names" value="1" @if(settings()->show_partner_names ?? false) checked @endif>
+                    <label class="form-check-label" for="show_partner_names">Show partner names below logos</label>
+                </div>
+                <small class="info-text">Off by default. When enabled, the organisation name is shown under each logo.</small>
+            </div>
         </div>
-        <small class="info-text">Off by default. When enabled, the organisation name is shown under each logo.</small>
+        <div class="col-md-6">
+            <div class="branding-toggle-card h-100">
+                <label class="branding-field-label" for="partner_logo_max_height">Partner logo max height</label>
+                <input type="number"
+                       class="form-control"
+                       id="partner_logo_max_height"
+                       name="partner_logo_max_height"
+                       min="50"
+                       max="200"
+                       step="1"
+                       value="{{ \App\Support\FooterPartners::logoMaxHeight(settings()) }}">
+                <small class="info-text d-block mt-2">50–200px. Default 100px.</small>
+            </div>
+        </div>
     </div>
 
     @php

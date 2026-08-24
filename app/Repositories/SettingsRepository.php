@@ -516,6 +516,11 @@ class SettingsRepository
         if (Schema::hasColumn('setting', 'show_partner_names')) {
             $settings->show_partner_names = (bool) $request->boolean('show_partner_names', false);
         }
+        if (Schema::hasColumn('setting', 'partner_logo_max_height')) {
+            $settings->partner_logo_max_height = \App\Support\FooterPartners::logoMaxHeight((object) [
+                'partner_logo_max_height' => $request->input('partner_logo_max_height', \App\Support\FooterPartners::LOGO_MAX_HEIGHT_DEFAULT),
+            ]);
+        }
 
         $settings->save();
 

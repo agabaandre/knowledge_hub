@@ -21,6 +21,23 @@ class FooterPartners
         return filter_var($settings->show_partner_names, FILTER_VALIDATE_BOOLEAN);
     }
 
+    public const LOGO_MAX_HEIGHT_DEFAULT = 100;
+    public const LOGO_MAX_HEIGHT_MIN = 50;
+    public const LOGO_MAX_HEIGHT_MAX = 200;
+
+    /**
+     * @param  mixed  $settings
+     */
+    public static function logoMaxHeight($settings): int
+    {
+        $value = self::LOGO_MAX_HEIGHT_DEFAULT;
+        if (is_object($settings) && isset($settings->partner_logo_max_height) && $settings->partner_logo_max_height !== '') {
+            $value = (int) $settings->partner_logo_max_height;
+        }
+
+        return max(self::LOGO_MAX_HEIGHT_MIN, min(self::LOGO_MAX_HEIGHT_MAX, $value));
+    }
+
     /**
      * @param  mixed  $raw
      * @return list<array{file: string, name: string, url: string, image: string}>

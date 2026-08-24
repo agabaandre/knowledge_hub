@@ -68,6 +68,16 @@ class FooterPartnersTest extends TestCase
         $this->assertTrue(FooterPartners::showNames((object) ['show_partner_names' => '1']));
     }
 
+    public function test_logo_max_height_defaults_to_100_and_clamps_between_50_and_200(): void
+    {
+        $this->assertSame(100, FooterPartners::logoMaxHeight(null));
+        $this->assertSame(100, FooterPartners::logoMaxHeight((object) []));
+        $this->assertSame(100, FooterPartners::logoMaxHeight((object) ['partner_logo_max_height' => 100]));
+        $this->assertSame(80, FooterPartners::logoMaxHeight((object) ['partner_logo_max_height' => '80']));
+        $this->assertSame(50, FooterPartners::logoMaxHeight((object) ['partner_logo_max_height' => 10]));
+        $this->assertSame(200, FooterPartners::logoMaxHeight((object) ['partner_logo_max_height' => 500]));
+    }
+
     public function test_branding_and_footers_include_the_partners_row(): void
     {
         $branding = file_get_contents(resource_path('views/admin/settings/partials/tab_branding.blade.php'));
@@ -80,16 +90,22 @@ class FooterPartnersTest extends TestCase
         $this->assertStringContainsString('name="partner_logos[', file_get_contents(resource_path('views/admin/settings/partials/partner_logo_row.blade.php')));
         $this->assertStringContainsString('name="show_partner_names"', $branding);
         $this->assertStringContainsString('settings()->show_partner_names', $branding);
+        $this->assertStringContainsString('name="partner_logo_max_height"', $branding);
+        $this->assertStringContainsString('min="50"', $branding);
+        $this->assertStringContainsString('max="200"', $branding);
         $this->assertStringContainsString('layouts.partials.footer_partners', $footer);
         $this->assertStringContainsString('layouts.partials.footer_partners', $theme1);
         $this->assertLessThan(strpos($footer, '<footer'), strpos($footer, "layouts.partials.footer_partners"));
         $this->assertLessThan(strpos($theme1, '<footer'), strpos($theme1, "layouts.partials.footer_partners"));
         $this->assertStringContainsString('footer_partner_logos', $partial);
         $this->assertStringContainsString('FooterPartners::showNames', $partial);
+        $this->assertStringContainsString('FooterPartners::logoMaxHeight', $partial);
         $this->assertStringContainsString('footer-partners-name', $partial);
         $this->assertStringContainsString('khub-footer-partners', $partial);
         $this->assertStringContainsString('background: #ffffff', $partial);
-        $this->assertStringContainsString('max-height: 37px', $partial);
+        $this->assertStringContainsString('.footer-partners-item img', $partial);
+        $this->assertStringContainsString('max-height:', $partial);
         $this->assertStringContainsString("show_partner_names", $repository);
+        $this->assertStringContainsString('partner_logo_max_height', $repository);
     }
 }
