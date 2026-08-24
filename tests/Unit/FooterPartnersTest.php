@@ -58,18 +58,38 @@ class FooterPartnersTest extends TestCase
         $this->assertSame('old.png', $saved[1]['file']);
     }
 
+    public function test_show_names_is_disabled_by_default(): void
+    {
+        $this->assertFalse(FooterPartners::showNames(null));
+        $this->assertFalse(FooterPartners::showNames((object) []));
+        $this->assertFalse(FooterPartners::showNames((object) ['show_partner_names' => false]));
+        $this->assertFalse(FooterPartners::showNames((object) ['show_partner_names' => '0']));
+        $this->assertTrue(FooterPartners::showNames((object) ['show_partner_names' => true]));
+        $this->assertTrue(FooterPartners::showNames((object) ['show_partner_names' => '1']));
+    }
+
     public function test_branding_and_footers_include_the_partners_row(): void
     {
         $branding = file_get_contents(resource_path('views/admin/settings/partials/tab_branding.blade.php'));
         $footer = file_get_contents(resource_path('views/layouts/partials/footer.blade.php'));
         $theme1 = file_get_contents(resource_path('views/layouts/theme1/partials/footer.blade.php'));
         $partial = file_get_contents(resource_path('views/layouts/partials/footer_partners.blade.php'));
+        $repository = file_get_contents(app_path('Repositories/SettingsRepository.php'));
 
         $this->assertStringContainsString('Partner logos', $branding);
         $this->assertStringContainsString('name="partner_logos[', file_get_contents(resource_path('views/admin/settings/partials/partner_logo_row.blade.php')));
+        $this->assertStringContainsString('name="show_partner_names"', $branding);
+        $this->assertStringContainsString('settings()->show_partner_names', $branding);
         $this->assertStringContainsString('layouts.partials.footer_partners', $footer);
         $this->assertStringContainsString('layouts.partials.footer_partners', $theme1);
+        $this->assertLessThan(strpos($footer, '<footer'), strpos($footer, "layouts.partials.footer_partners"));
+        $this->assertLessThan(strpos($theme1, '<footer'), strpos($theme1, "layouts.partials.footer_partners"));
         $this->assertStringContainsString('footer_partner_logos', $partial);
+        $this->assertStringContainsString('FooterPartners::showNames', $partial);
+        $this->assertStringContainsString('footer-partners-name', $partial);
         $this->assertStringContainsString('khub-footer-partners', $partial);
+        $this->assertStringContainsString('background: #ffffff', $partial);
+        $this->assertStringContainsString('max-height: 37px', $partial);
+        $this->assertStringContainsString("show_partner_names", $repository);
     }
 }

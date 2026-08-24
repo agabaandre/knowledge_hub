@@ -31,6 +31,7 @@
 }
 </style>
 
+@include('layouts.partials.footer_partners')
 <footer class="{{ settings()->footer_style }} skin-dark-footer justify-content-center">
 	<div class="footer-middle py-0">
 		<div class="container">
@@ -38,9 +39,6 @@
 		</div>
 	</div>
 
-	<div class="container">
-		@include('layouts.partials.footer_partners')
-	</div>
 	@include('layouts.partials.footer_i18n_bottom')
 </footer>
 <!-- ============================ Footer End ================================== -->

@@ -10,6 +10,18 @@ class FooterPartners
     public const MAX_ITEMS = 12;
 
     /**
+     * @param  mixed  $settings
+     */
+    public static function showNames($settings): bool
+    {
+        if (! is_object($settings) || ! isset($settings->show_partner_names)) {
+            return false;
+        }
+
+        return filter_var($settings->show_partner_names, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
      * @param  mixed  $raw
      * @return list<array{file: string, name: string, url: string, image: string}>
      */

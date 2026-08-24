@@ -1,3 +1,4 @@
+@include('layouts.partials.footer_partners')
 <footer class="footer pt-5 pb-4 bg-body-secondary">
     <div class="container">
         <div class="row g-4">
@@ -61,7 +62,6 @@
                 @endif
             </div>
         </div>
-        @include('layouts.partials.footer_partners')
         <hr class="my-4">
         <div class="row">
             <div class="col-md-6 text-center text-md-start">

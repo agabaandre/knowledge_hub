@@ -87,7 +87,14 @@
         <i class="fa fa-handshake"></i>
         Partner logos
     </div>
-    <p class="info-text mb-3">Shown as a small centered row in the public footer, above the copyright line. Upload square or landscape logos (PNG or SVG with a transparent background works best).</p>
+    <p class="info-text mb-3">Shown as a centered row on a white bar above the public footer. Upload square or landscape logos (PNG or SVG with a transparent background works best).</p>
+    <div class="branding-toggle-card mb-3">
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="show_partner_names" name="show_partner_names" value="1" @if(settings()->show_partner_names ?? false) checked @endif>
+            <label class="form-check-label" for="show_partner_names">Show partner names below logos</label>
+        </div>
+        <small class="info-text">Off by default. When enabled, the organisation name is shown under each logo.</small>
+    </div>
 
     @php
         $partnerLogos = \App\Support\FooterPartners::items(settings()->partner_logos ?? []);
