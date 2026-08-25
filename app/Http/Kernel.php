@@ -21,6 +21,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \App\Http\Middleware\SetSecurityHeaders::class,
         \App\Http\Middleware\BotProtection::class, // Bot protection - allows SEO bots
         \App\Http\Middleware\AuthenticateWithPassportToken::class,
     ];

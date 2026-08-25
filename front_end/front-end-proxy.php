@@ -11,9 +11,24 @@ $nextOrigin = getenv('KHUB_FRONT_END_ORIGIN') ?: 'http://127.0.0.1:3001';
 $uri = $_SERVER['REQUEST_URI'] ?? '/knowledge_hub/front_end';
 $target = rtrim($nextOrigin, '/') . $uri;
 
+$autoload = dirname(__DIR__).'/vendor/autoload.php';
+if (is_file($autoload)) {
+    require_once $autoload;
+}
+
+$applySecurityHeaders = static function (): void {
+    if (! class_exists(\App\Support\SecurityHeaders::class)) {
+        return;
+    }
+    \App\Support\SecurityHeaders::apply(static function (string $name, string $value): void {
+        header($name.': '.$value, true);
+    });
+};
+
 if (! function_exists('curl_init')) {
     http_response_code(500);
     header('Content-Type: text/plain; charset=utf-8');
+    $applySecurityHeaders();
     echo "PHP curl is required to proxy the Knowledge Hub frontend.\n";
     exit;
 }
@@ -52,6 +67,7 @@ if ($response === false) {
     curl_close($ch);
     http_response_code(502);
     header('Content-Type: text/html; charset=utf-8');
+    $applySecurityHeaders();
     echo '<!DOCTYPE html><html><head><title>Frontend not running</title></head><body>';
     echo '<h1>Knowledge Hub frontend is not running</h1>';
     echo '<p>Start it with:</p><pre>cd front_end && npm install && npm run dev</pre>';
@@ -68,7 +84,17 @@ curl_close($ch);
 $rawHeaders = substr($response, 0, $headerSize);
 $body = substr($response, $headerSize);
 http_response_code((int) $status);
-$skip = ['transfer-encoding', 'connection', 'keep-alive'];
+$skip = [
+    'transfer-encoding',
+    'connection',
+    'keep-alive',
+    'x-content-type-options',
+    'x-frame-options',
+    'content-security-policy',
+    'referrer-policy',
+    'strict-transport-security',
+    'permissions-policy',
+];
 foreach (explode("\r\n", $rawHeaders) as $line) {
     if (! str_contains($line, ':')) {
         continue;
@@ -79,4 +105,5 @@ foreach (explode("\r\n", $rawHeaders) as $line) {
     }
     header(trim($name) . ': ' . trim($value), false);
 }
+$applySecurityHeaders();
 echo $body;
