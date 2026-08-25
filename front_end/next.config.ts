@@ -14,6 +14,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  output: 'export',
+  images: {
+    unoptimized: true,
+  },
   basePath,
   assetPrefix: basePath,
   trailingSlash: true,

@@ -1,7 +1,12 @@
 import ShopDetailsMain from "@/components/pages/page-layout-four/shop/shop-details/ShopDetailsMain";
 import Wrapper from "@/layout/DefaultWrapper";
+import { productStaticParams } from "@/lib/staticExportParams";
 import { Metadata } from "next";
 import React from "react";
+
+export function generateStaticParams() {
+  return productStaticParams();
+}
 
 export const metadata: Metadata = {
   title: "Shop Details - Education & Online Courses React NextJs Template",

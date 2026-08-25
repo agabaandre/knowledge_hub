@@ -1,7 +1,12 @@
 import ProgramDetailsMain from "@/components/courses-inner-pages/program-details/ProgramDetailsMain";
 import Wrapper from "@/layout/DefaultWrapper";
+import { programStaticParams } from "@/lib/staticExportParams";
 import { Metadata } from "next";
 import React from "react";
+
+export function generateStaticParams() {
+    return programStaticParams();
+}
 
 export const metadata: Metadata = {
     title: "Program Details - Education & Online Courses React NextJs Template",

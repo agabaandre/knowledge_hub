@@ -3,7 +3,7 @@
     RewriteBase /knowledge_hub/front_end/
 
     # Do not expose the Next source tree
-    RewriteRule ^(src|node_modules|\.next|apache-front-end\.conf)(/|$) - [F,L]
+    RewriteRule ^(src|node_modules|\.next|out|apache-front-end\.conf)(/|$) - [F,L]
 
     # Real files (proxy script, later static export)
     RewriteCond %{REQUEST_FILENAME} -f

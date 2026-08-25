@@ -1,7 +1,12 @@
 import BlogDetailsMain from '@/components/blog-inner-pages/blog/blog-details/BlogDetailsMain';
 import Wrapper from '@/layout/DefaultWrapper';
+import { blogStaticParams } from '@/lib/staticExportParams';
 import { Metadata } from 'next';
 import React from 'react';
+
+export function generateStaticParams() {
+    return blogStaticParams();
+}
 
 export const metadata: Metadata = {
     title: "Blog Details - Education & Online Courses React NextJs Template",

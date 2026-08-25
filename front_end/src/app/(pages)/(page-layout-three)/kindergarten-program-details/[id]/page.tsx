@@ -1,7 +1,12 @@
 import KindergartenProgramDetailsMain from '@/components/pages/page-layout-three/kindergartent-program-details/KindergartenProgramDetailsMain';
 import Wrapper from '@/layout/DefaultWrapper';
+import { kindergartenProgramStaticParams } from '@/lib/staticExportParams';
 import { Metadata } from 'next';
 import React from 'react';
+
+export function generateStaticParams() {
+    return kindergartenProgramStaticParams();
+}
 interface PageProps {
     params: Promise<{ id: number }>;
 }

@@ -1,7 +1,12 @@
 import EventDetailsMain from "@/components/pages/page-layout-three/event/event-details/EventDetailsMain";
 import Wrapper from "@/layout/DefaultWrapper";
+import { eventStaticParams } from "@/lib/staticExportParams";
 import { Metadata } from "next";
 import React from "react";
+
+export function generateStaticParams() {
+    return eventStaticParams();
+}
 
 export const metadata: Metadata = {
     title: "Event Details - Education & Online Courses React NextJs Template",

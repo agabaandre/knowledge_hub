@@ -16,6 +16,8 @@
 # next.js
 /.next/
 /out/
+/public-spa
+/.npm-cache
 
 # production
 /build

@@ -3,13 +3,11 @@
 declare(strict_types=1);
 
 /**
- * Reverse-proxy this subdirectory to the Next.js dev/prod server.
+ * Serve published static files (./setup-production.sh) or reverse-proxy to Next.js.
  * Same role as staff-portal/spa-static.php: Apache keeps the public URL
- * (http://localhost/knowledge_hub/front_end) while Node serves the app.
+ * (http://localhost/knowledge_hub/front_end) while production files live in public-spa/.
  */
-$nextOrigin = getenv('KHUB_FRONT_END_ORIGIN') ?: 'http://127.0.0.1:3001';
-$uri = $_SERVER['REQUEST_URI'] ?? '/knowledge_hub/front_end';
-$target = rtrim($nextOrigin, '/') . $uri;
+require __DIR__.'/front-end-static.php';
 
 $autoload = dirname(__DIR__).'/vendor/autoload.php';
 if (is_file($autoload)) {
@@ -24,6 +22,12 @@ $applySecurityHeaders = static function (): void {
         header($name.': '.$value, true);
     });
 };
+
+khub_front_end_try_send_published($_SERVER['REQUEST_URI'] ?? '/knowledge_hub/front_end');
+
+$nextOrigin = getenv('KHUB_FRONT_END_ORIGIN') ?: 'http://127.0.0.1:3001';
+$uri = $_SERVER['REQUEST_URI'] ?? '/knowledge_hub/front_end';
+$target = rtrim($nextOrigin, '/').$uri;
 
 if (! function_exists('curl_init')) {
     http_response_code(500);
@@ -43,10 +47,10 @@ foreach ($_SERVER as $key => $value) {
     if (in_array(strtolower($name), ['host', 'connection', 'content-length'], true)) {
         continue;
     }
-    $headers[] = $name . ': ' . $value;
+    $headers[] = $name.': '.$value;
 }
 if (! empty($_SERVER['CONTENT_TYPE'])) {
-    $headers[] = 'Content-Type: ' . $_SERVER['CONTENT_TYPE'];
+    $headers[] = 'Content-Type: '.$_SERVER['CONTENT_TYPE'];
 }
 
 $ch = curl_init($target);
@@ -70,9 +74,12 @@ if ($response === false) {
     $applySecurityHeaders();
     echo '<!DOCTYPE html><html><head><title>Frontend not running</title></head><body>';
     echo '<h1>Knowledge Hub frontend is not running</h1>';
-    echo '<p>Start it with:</p><pre>cd front_end && npm install && npm run dev</pre>';
+    echo '<p>Publish a production build (no Node required afterwards):</p>';
+    echo '<pre>cd front_end && ./setup-production.sh</pre>';
+    echo '<p>Or start the Next.js dev server:</p>';
+    echo '<pre>cd front_end && npm install --legacy-peer-deps && npm run dev</pre>';
     echo '<p>Then open <a href="/knowledge_hub/front_end">/knowledge_hub/front_end</a>.</p>';
-    echo '<p style="color:#666">(' . htmlspecialchars($err, ENT_QUOTES) . ')</p>';
+    echo '<p style="color:#666">('.htmlspecialchars($err, ENT_QUOTES).')</p>';
     echo '</body></html>';
     exit;
 }
@@ -103,7 +110,7 @@ foreach (explode("\r\n", $rawHeaders) as $line) {
     if (in_array(strtolower(trim($name)), $skip, true)) {
         continue;
     }
-    header(trim($name) . ': ' . trim($value), false);
+    header(trim($name).': '.trim($value), false);
 }
 $applySecurityHeaders();
 echo $body;
