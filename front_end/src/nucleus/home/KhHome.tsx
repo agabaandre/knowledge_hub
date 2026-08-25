@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { khGet, type KhListItem } from "@/nucleus/api/client";
+import { useKhI18n } from "@/nucleus/i18n/KhI18nProvider";
 import KhRecordCard from "@/nucleus/molecules/KhRecordCard";
 import KhSection from "@/nucleus/molecules/KhSection";
 import type { KhSettings } from "@/nucleus/theme/types";
@@ -14,6 +15,7 @@ type HomeSection = {
 };
 
 export default function KhHome() {
+  const { t, locale } = useKhI18n();
   const [settings, setSettings] = useState<KhSettings | null>(null);
   const [sections, setSections] = useState<HomeSection[]>([]);
   const [error, setError] = useState("");
@@ -28,9 +30,11 @@ export default function KhHome() {
         setSections(homeRes.data?.sections ?? []);
       })
       .catch((err: Error) => setError(err.message));
-  }, []);
+  }, [locale]);
 
   const visible = sections.filter((section) => section.visible !== false && (section.items ?? []).length > 0);
+  const title = settings?.site_name || t("ui_body.site_title", "Knowledge Hub");
+  const tagline = settings?.slogan || settings?.title || t("ui_body.site_tagline", "");
 
   return (
     <>
@@ -38,8 +42,8 @@ export default function KhHome() {
         <div className="container">
           <div className="row">
             <div className="col-xl-8">
-              <h1 className="bd-section-title white-text mb-20">{settings?.site_name || "Knowledge Hub"}</h1>
-              <p className="white-text">{settings?.slogan || settings?.title || "Public health knowledge for Africa."}</p>
+              <h1 className="bd-section-title white-text mb-20">{title}</h1>
+              {tagline ? <p className="white-text">{tagline}</p> : null}
             </div>
           </div>
         </div>
@@ -50,7 +54,7 @@ export default function KhHome() {
         </div>
       ) : null}
       {visible.map((section) => (
-        <KhSection key={section.key} title={section.title}>
+        <KhSection key={section.key} title={t(`home_sections.${section.key}`, section.title)}>
           {(section.items ?? []).slice(0, 6).map((item, index) => (
             <div className="col-xl-4 col-md-6" key={String(item.id ?? index)}>
               <KhRecordCard item={item} hrefBase="/records/show/" />

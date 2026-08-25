@@ -152,6 +152,42 @@ class LanguageManagementController extends Controller
         ]);
     }
 
+    /**
+     * Fill the editor from English (empty keys only, unless overwrite=1). Review then Save.
+     */
+    public function copyEnglish(Request $request)
+    {
+        $groups = array_keys($this->uiTranslations->groups());
+        $locales = $this->uiTranslations->supportedLocales();
+
+        $validated = $request->validate([
+            'locale' => ['required', 'string', Rule::in($locales)],
+            'group' => ['required', 'string', Rule::in($groups)],
+            'overwrite' => ['sometimes', 'boolean'],
+        ]);
+
+        if ($validated['locale'] === 'en') {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Select a locale other than English to copy into.',
+            ], 422);
+        }
+
+        $onlyEmpty = ! $request->boolean('overwrite');
+        $existing = $this->uiTranslations->loadRawLocaleGroup($validated['locale'], $validated['group']);
+        $translations = $this->uiTranslations->copyEnglishPayload(
+            $validated['locale'],
+            $validated['group'],
+            $existing,
+            $onlyEmpty
+        );
+
+        return response()->json([
+            'ok' => true,
+            'translations' => $translations,
+        ]);
+    }
+
     private function localeDisplayName(string $locale): string
     {
         $map = SiteLanguage::selectorMap();

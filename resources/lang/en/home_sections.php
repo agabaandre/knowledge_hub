@@ -37,5 +37,11 @@ return [
     'file_type' => 'File Type',
     'author' => 'Author',
     'all' => 'All',
+    'records_intro' => 'Search and browse publications from the Knowledge Hub.',
+    'health_topics_intro' => 'Browse health topics from the Knowledge Hub.',
+    'forums_intro' => 'Discussions from the Knowledge Hub community.',
+    'communities_intro' => 'Communities of practice on the Knowledge Hub.',
+    'faqs_intro' => 'Frequently asked questions.',
+    'footer_explore' => 'Explore',
 
 ];

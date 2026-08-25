@@ -1,22 +1,16 @@
-import OnlineCourseMain from '@/components/online-course/OnlineCourseMain';
-import Wrapper from '@/layout/DefaultWrapper';
-import { Metadata } from 'next';
-import React from 'react';
+import ThemeShell from "@/nucleus/theme/ThemeShell";
+import KhHome from "@/nucleus/home/KhHome";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Online Courses - Education & Online Courses React NextJs Template",
+  title: "Knowledge Hub — Online Course theme",
+  description: "Africa CDC Knowledge Hub public frontend",
 };
 
-const OnlineCourse = () => {
-    return (
-        <>
-            <Wrapper>
-                <main className="main-area">
-                    <OnlineCourseMain />
-                </main>
-            </Wrapper>
-        </>
-    );
-};
-
-export default OnlineCourse;
+export default function OnlineCourse() {
+  return (
+    <ThemeShell forceTheme="online-course">
+      <KhHome />
+    </ThemeShell>
+  );
+}

@@ -197,4 +197,75 @@ class UiTranslationService
             throw new \RuntimeException('Could not write translation file: '.$path);
         }
     }
+
+    /**
+     * Raw locale values from storage or committed resource files (no English fill).
+     *
+     * @return array<string, string>
+     */
+    public function loadRawLocaleGroup(string $locale, string $group): array
+    {
+        $storagePath = $this->storageLocalePath($locale, $group);
+        if (File::exists($storagePath)) {
+            $loaded = require $storagePath;
+
+            return is_array($loaded) ? $loaded : [];
+        }
+
+        if ($locale === 'en') {
+            return $this->loadEnglishGroup($group);
+        }
+
+        $legacy = $this->resourceLocalePath($locale, $group);
+        if (File::exists($legacy)) {
+            $loaded = require $legacy;
+
+            return is_array($loaded) ? $loaded : [];
+        }
+
+        return [];
+    }
+
+    /**
+     * Copy English source strings into a locale payload.
+     *
+     * @param  array<string, string>  $existing
+     * @return array<string, string>
+     */
+    public function copyEnglishPayload(string $locale, string $group, array $existing, bool $onlyEmpty = true): array
+    {
+        $english = $this->loadEnglishGroup($group);
+        $out = [];
+
+        foreach ($english as $key => $value) {
+            $current = $existing[$key] ?? '';
+            if ($onlyEmpty && is_string($current) && trim($current) !== '') {
+                $out[$key] = $current;
+            } else {
+                $out[$key] = is_string($value) ? $value : (string) $value;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Persist English defaults into storage for one group or every editable group.
+     */
+    public function copyEnglishToLocale(string $locale, ?string $group = null, bool $onlyEmpty = true): int
+    {
+        $groups = $group === null || $group === ''
+            ? array_keys($this->groups())
+            : [$group];
+
+        $written = 0;
+        foreach ($groups as $name) {
+            $existing = $onlyEmpty ? $this->loadRawLocaleGroup($locale, $name) : [];
+            $payload = $this->copyEnglishPayload($locale, $name, $existing, $onlyEmpty);
+            $this->saveGroup($locale, $name, $payload);
+            $written += count($payload);
+        }
+
+        return $written;
+    }
 }

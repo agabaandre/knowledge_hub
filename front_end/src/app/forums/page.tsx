@@ -8,8 +8,8 @@ export default function ForumsPage() {
   return (
     <ThemeShell>
       <KhListingPage
-        title="Forums"
-        intro="Discussions from the Knowledge Hub community."
+        titleKey="frontend_nav.forums"
+        introKey="home_sections.forums_intro"
         endpoint="/forums?page_size=12"
         hrefBase="/forums/show/"
       />

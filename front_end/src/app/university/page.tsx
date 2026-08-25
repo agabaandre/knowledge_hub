@@ -1,22 +1,16 @@
-//@refresh
-import UniversityMain from "@/components/university/UniversityMain";
-import Wrapper from "@/layout/DefaultWrapper";
+import ThemeShell from "@/nucleus/theme/ThemeShell";
+import KhHome from "@/nucleus/home/KhHome";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "University - Education & Online Courses React NextJs Template",
+  title: "Knowledge Hub — University theme",
+  description: "Africa CDC Knowledge Hub public frontend",
 };
 
-const University = () => {
+export default function University() {
   return (
-    <>
-      <Wrapper>
-        <main className="main-area">
-          <UniversityMain />
-        </main>
-      </Wrapper>
-    </>
+    <ThemeShell forceTheme="university">
+      <KhHome />
+    </ThemeShell>
   );
 }
-
-export default University;

@@ -29,16 +29,16 @@ export type KhSettings = {
 
 export type KhNavLink = {
   href: string;
-  label: string;
+  labelKey: string;
 };
 
 export const KH_NAV: KhNavLink[] = [
-  { href: "/", label: "Home" },
-  { href: "/records/", label: "Records" },
-  { href: "/health-topics/", label: "Health topics" },
-  { href: "/forums/", label: "Forums" },
-  { href: "/communities/", label: "Communities" },
-  { href: "/faqs/", label: "FAQs" },
+  { href: "/", labelKey: "frontend_nav.home" },
+  { href: "/records/", labelKey: "frontend_nav.records" },
+  { href: "/health-topics/", labelKey: "frontend_nav.health_topics" },
+  { href: "/forums/", labelKey: "frontend_nav.forums" },
+  { href: "/communities/", labelKey: "frontend_nav.communities" },
+  { href: "/faqs/", labelKey: "frontend_nav.faqs" },
 ];
 
 export const KH_HUB_LOGIN = "/knowledge_hub/login";

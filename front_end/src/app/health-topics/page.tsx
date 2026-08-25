@@ -8,8 +8,8 @@ export default function HealthTopicsPage() {
   return (
     <ThemeShell>
       <KhListingPage
-        title="Health topics"
-        intro="Browse health topics from the Knowledge Hub."
+        titleKey="frontend_nav.health_topics"
+        introKey="home_sections.health_topics_intro"
         endpoint="/health-topics"
         hrefBase="/health-topics/show/"
       />

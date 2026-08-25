@@ -383,4 +383,76 @@ class LookupApiController extends ApiController
             ),
         ];
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/lookup/i18n",
+     *     operationId="FrontendI18n",
+     *     tags={"Lookup"},
+     *     summary="UI locale, flags, LTR/RTL, and translation labels",
+     *     description="Returns Africa CDC AU languages (with existing Knowledge Hub flags), document direction (including an explicit LTR option), and native UI labels such as frontend_nav.layout_ltr. Used by the Next.js frontend. See https://khub.africacdc.org/docs/#/.",
+     *     @OA\Parameter(name="locale", in="query", required=false, @OA\Schema(type="string", example="fr")),
+     *     @OA\Parameter(name="direction", in="query", required=false, description="auto, ltr, or rtl", @OA\Schema(type="string", example="ltr")),
+     *     @OA\Response(response=200, description="Successful", @OA\JsonContent())
+     * )
+     */
+    public function i18n(Request $request)
+    {
+        $supported = \App\Models\SiteLanguage::activeLocaleCodes();
+        $queryLocale = $request->query('locale');
+        $cookieName = (string) config('supported_locales.locale_cookie', 'khub_locale');
+        $cookieLocale = $request->cookie($cookieName);
+
+        if (is_string($queryLocale) && in_array($queryLocale, $supported, true)) {
+            $locale = $queryLocale;
+        } else {
+            $locale = \App\Models\SiteLanguage::resolveActiveLocale(
+                $request->user()?->langauge ?? null,
+                $request->cookie('googtrans'),
+                is_string($cookieLocale) ? $cookieLocale : null
+            );
+        }
+
+        if (! in_array($locale, $supported, true)) {
+            $locale = in_array('en', $supported, true) ? 'en' : ($supported[0] ?? 'en');
+        }
+
+        \Illuminate\Support\Facades\App::setLocale($locale);
+
+        $dirCookie = (string) config('supported_locales.direction_cookie', 'khub_dir');
+        $dirMode = strtolower((string) ($request->query('direction') ?? $request->cookie($dirCookie) ?? 'auto'));
+        if (! in_array($dirMode, ['auto', 'ltr', 'rtl'], true)) {
+            $dirMode = 'auto';
+        }
+
+        $direction = $dirMode === 'auto'
+            ? \App\Support\LocaleDirection::direction($locale)
+            : $dirMode;
+
+        $languages = [];
+        foreach (\App\Models\SiteLanguage::selectorMap() as $code => $meta) {
+            $languages[] = [
+                'code' => $code,
+                'name' => $meta['name'] ?? $code,
+                'flag' => $meta['flag'] ?? '',
+                'google_code' => $meta['google_code'] ?? $code,
+                'direction' => \App\Support\LocaleDirection::direction($code),
+            ];
+        }
+
+        return [
+            'status' => 200,
+            'data' => [
+                'locale' => $locale,
+                'direction' => $direction,
+                'direction_mode' => $dirMode,
+                'is_rtl' => $direction === 'rtl',
+                'rtl_locales' => \App\Support\LocaleDirection::rtlLocales(),
+                'ltr_available' => true,
+                'languages' => $languages,
+                'labels' => \App\Support\UiLocaleLabels::exportForCurrentLocale(),
+                'docs' => 'https://khub.africacdc.org/docs/#/',
+            ],
+        ];
+    }
 }

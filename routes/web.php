@@ -396,6 +396,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web', 'admin.access
     Route::get('/language-management', [LanguageManagementController::class, 'index'])->name('admin.language-management.index');
     Route::get('/language-management/grid', [LanguageManagementController::class, 'grid'])->name('admin.language-management.grid');
     Route::post('/language-management/ai-translate', [LanguageManagementController::class, 'aiTranslate'])->name('admin.language-management.ai-translate');
+    Route::post('/language-management/copy-english', [LanguageManagementController::class, 'copyEnglish'])->name('admin.language-management.copy-english');
     Route::post('/language-management', [LanguageManagementController::class, 'update'])->name('admin.language-management.update');
 
     Route::get('/site-languages', [SiteLanguageController::class, 'index'])->name('admin.site-languages.index');

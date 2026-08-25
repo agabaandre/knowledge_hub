@@ -8,8 +8,8 @@ export default function RecordsPage() {
   return (
     <ThemeShell>
       <KhListingPage
-        title="Records"
-        intro="Search and browse publications from the Knowledge Hub."
+        titleKey="frontend_nav.records"
+        introKey="home_sections.records_intro"
         endpoint="/publications?page_size=12"
         hrefBase="/records/show/"
       />

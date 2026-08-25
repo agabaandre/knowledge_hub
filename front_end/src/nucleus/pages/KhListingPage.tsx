@@ -2,20 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { khGet, type KhListItem } from "@/nucleus/api/client";
+import { useKhI18n } from "@/nucleus/i18n/KhI18nProvider";
 import KhPageHeader from "@/nucleus/molecules/KhPageHeader";
 import KhRecordCard from "@/nucleus/molecules/KhRecordCard";
 
 export default function KhListingPage({
-  title,
-  intro,
+  titleKey,
+  introKey,
   endpoint,
   hrefBase,
 }: {
-  title: string;
-  intro: string;
+  titleKey: string;
+  introKey: string;
   endpoint: string;
   hrefBase: string;
 }) {
+  const { t, locale } = useKhI18n();
   const [items, setItems] = useState<KhListItem[]>([]);
   const [error, setError] = useState("");
 
@@ -39,11 +41,11 @@ export default function KhListingPage({
         setItems(Array.isArray(rows) ? rows : []);
       })
       .catch((err: Error) => setError(err.message));
-  }, [endpoint]);
+  }, [endpoint, locale]);
 
   return (
     <>
-      <KhPageHeader title={title} intro={intro} />
+      <KhPageHeader title={t(titleKey)} intro={t(introKey)} />
       <section className="section-space">
         <div className="container">
           {error ? <p>{error}</p> : null}
@@ -53,7 +55,7 @@ export default function KhListingPage({
                 <KhRecordCard item={item} hrefBase={hrefBase} />
               </div>
             ))}
-            {!error && items.length === 0 ? <p>No items yet.</p> : null}
+            {!error && items.length === 0 ? <p>{t("frontend_nav.no_items")}</p> : null}
           </div>
         </div>
       </section>

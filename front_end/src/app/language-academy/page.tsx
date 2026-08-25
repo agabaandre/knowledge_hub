@@ -1,22 +1,16 @@
-import LanguageAcademyMain from '@/components/language-academy/LanguageAcademyMain';
-import Wrapper from '@/layout/DefaultWrapper';
-import { Metadata } from 'next';
-import React from 'react';
+import ThemeShell from "@/nucleus/theme/ThemeShell";
+import KhHome from "@/nucleus/home/KhHome";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Language Academy - Education & Online Courses React NextJs Template",
+  title: "Knowledge Hub — Language Academy theme",
+  description: "Africa CDC Knowledge Hub public frontend",
 };
 
-const LanguageAcademy = () => {
-    return (
-        <>
-            <Wrapper>
-                <main className="main-area">
-                    <LanguageAcademyMain />
-                </main>
-            </Wrapper>
-        </>
-    );
-};
-
-export default LanguageAcademy;
+export default function LanguageAcademy() {
+  return (
+    <ThemeShell forceTheme="language-academy">
+      <KhHome />
+    </ThemeShell>
+  );
+}

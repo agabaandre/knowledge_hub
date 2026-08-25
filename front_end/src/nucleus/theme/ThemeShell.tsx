@@ -1,6 +1,7 @@
 "use client";
 
 import BacktoTop from "@/utils/BacktoTop";
+import { KhI18nProvider } from "@/nucleus/i18n/KhI18nProvider";
 import { khGet } from "@/nucleus/api/client";
 import { applyThemeTokens, themeChrome } from "@/nucleus/theme/registry";
 import type { KhResolvedTheme, KhSettings, KhThemeId } from "@/nucleus/theme/types";
@@ -13,8 +14,16 @@ const FALLBACK: KhResolvedTheme = {
   source: "builtin",
 };
 
-export default function ThemeShell({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<KhResolvedTheme>(FALLBACK);
+function ThemeChrome({
+  children,
+  forceTheme,
+}: {
+  children: React.ReactNode;
+  forceTheme?: KhThemeId;
+}) {
+  const [theme, setTheme] = useState<KhResolvedTheme>(
+    forceTheme ? { ...FALLBACK, id: forceTheme, extends: forceTheme } : FALLBACK
+  );
   const [settings, setSettings] = useState<KhSettings | null>(null);
 
   useEffect(() => {
@@ -26,13 +35,18 @@ export default function ThemeShell({ children }: { children: React.ReactNode }) 
       if (cancelled) {
         return;
       }
-      setTheme(themeRes.data ?? FALLBACK);
+      const resolved = themeRes.data ?? FALLBACK;
+      setTheme(
+        forceTheme
+          ? { ...resolved, id: forceTheme, extends: forceTheme, source: "builtin" }
+          : resolved
+      );
       setSettings(settingsRes.data ?? {});
     });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [forceTheme]);
 
   const base = (["university", "language-academy", "online-course"].includes(theme.extends)
     ? theme.extends
@@ -54,5 +68,19 @@ export default function ThemeShell({ children }: { children: React.ReactNode }) 
       <main className="main-area">{children}</main>
       <Footer variant={chrome.footerVariant} settings={settings} />
     </div>
+  );
+}
+
+export default function ThemeShell({
+  children,
+  forceTheme,
+}: {
+  children: React.ReactNode;
+  forceTheme?: KhThemeId;
+}) {
+  return (
+    <KhI18nProvider>
+      <ThemeChrome forceTheme={forceTheme}>{children}</ThemeChrome>
+    </KhI18nProvider>
   );
 }

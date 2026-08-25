@@ -29,5 +29,18 @@ return [
     'view_all_resources' => 'View all resources',
     'no_resources_for_topic' => 'No resources available for this topic yet.',
     'browse_topic' => 'Browse topic',
+    'records' => 'Records',
+    'read_more' => 'Read more',
+    'login' => 'Login',
+    'publish' => 'Publish',
+    'language' => 'Language',
+    'layout_auto' => 'Auto',
+    'layout_ltr' => 'LTR',
+    'layout_rtl' => 'RTL',
+    'text_direction' => 'Text direction',
+    'no_items' => 'No items yet.',
+    'loading' => 'Loading…',
+    'missing_item' => 'Missing item id.',
+    'untitled' => 'Untitled',
 
 ];

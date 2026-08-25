@@ -123,6 +123,7 @@ Route::group(["prefix" =>"lookup"],function(){
     Route::get('/static-links', [LookupApiController::class, 'staticLinks']);
     Route::get('/settings', [LookupApiController::class,"settings"]);
     Route::get('/frontend-theme', [LookupApiController::class, 'frontendTheme']); // lookup/frontend-theme
+    Route::get('/i18n', [LookupApiController::class, 'i18n']); // lookup/i18n
 });
 
 Route::get('faqs', [\App\Http\Controllers\Api\FaqsApiController::class, 'index']);

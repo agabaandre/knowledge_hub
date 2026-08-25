@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import KhLanguageSelect from "@/nucleus/molecules/KhLanguageSelect";
 import KhNav from "@/nucleus/molecules/KhNav";
+import { useKhI18n } from "@/nucleus/i18n/KhI18nProvider";
 import { KH_HUB_LOGIN, KH_HUB_PUBLISH, type KhSettings } from "@/nucleus/theme/types";
 
 function Brand({ settings }: { settings?: KhSettings | null }) {
-  const name = settings?.site_name || "Knowledge Hub";
+  const { t } = useKhI18n();
+  const name = settings?.site_name || t("ui_body.site_title", "Knowledge Hub");
   const logo = settings?.logo;
   return (
     <Link href="/" className="bd-header-logo d-flex align-items-center gap-2">
@@ -15,6 +18,23 @@ function Brand({ settings }: { settings?: KhSettings | null }) {
       ) : null}
       <span className="fw-semibold">{name}</span>
     </Link>
+  );
+}
+
+function HeaderActions({ includePublish = true }: { includePublish?: boolean }) {
+  const { t } = useKhI18n();
+  return (
+    <div className="bd-header-sign-btn d-flex align-items-center gap-3">
+      <KhLanguageSelect />
+      <a className="bd-btn-text text-primary" href={KH_HUB_LOGIN}>
+        {t("frontend_nav.login", "Login")}
+      </a>
+      {includePublish ? (
+        <a className="bd-btn btn-outline-border-primary h-40px" href={KH_HUB_PUBLISH}>
+          {t("frontend_nav.publish", "Publish")}
+        </a>
+      ) : null}
+    </div>
   );
 }
 
@@ -62,14 +82,7 @@ export function UniversityHeader({ settings }: { settings?: KhSettings | null })
               </nav>
             </div>
             <div className="bd-header-right">
-              <div className="bd-header-sign-btn">
-                <a className="bd-btn-text text-primary" href={KH_HUB_LOGIN}>
-                  Login
-                </a>
-                <a className="bd-btn btn-outline-border-primary h-40px" href={KH_HUB_PUBLISH}>
-                  Publish
-                </a>
-              </div>
+              <HeaderActions includePublish />
             </div>
           </div>
         </div>
@@ -92,9 +105,7 @@ export function LanguageAcademyHeader({ settings }: { settings?: KhSettings | nu
             </nav>
           </div>
           <div className="bd-header-right">
-            <a className="bd-btn btn-primary" href={KH_HUB_LOGIN}>
-              Login
-            </a>
+            <HeaderActions includePublish />
           </div>
         </div>
       </div>
@@ -128,9 +139,7 @@ export function OnlineCourseHeader({ settings }: { settings?: KhSettings | null 
               </nav>
             </div>
             <div className="bd-header-right">
-              <a className="bd-btn btn-primary" href={KH_HUB_LOGIN}>
-                Login
-              </a>
+              <HeaderActions includePublish />
             </div>
           </div>
         </div>

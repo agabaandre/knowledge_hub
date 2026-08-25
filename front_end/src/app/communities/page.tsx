@@ -8,8 +8,8 @@ export default function CommunitiesPage() {
   return (
     <ThemeShell>
       <KhListingPage
-        title="Communities"
-        intro="Communities of practice on the Knowledge Hub."
+        titleKey="frontend_nav.communities"
+        introKey="home_sections.communities_intro"
         endpoint="/communities?page_size=12"
         hrefBase="/communities/show/"
       />

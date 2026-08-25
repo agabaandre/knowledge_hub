@@ -75,6 +75,7 @@
 (function() {
     var gridUrl = @json(route('admin.language-management.grid'));
     var aiTranslateUrl = @json(route('admin.language-management.ai-translate'));
+    var copyEnglishUrl = @json(route('admin.language-management.copy-english'));
     var csrfToken = @json(csrf_token());
     var localeEl = document.getElementById('lm-locale');
     var groupEl = document.getElementById('lm-group');
@@ -142,6 +143,71 @@
     groupEl.addEventListener('change', loadGrid);
 
     document.addEventListener('click', function(e) {
+        var copyBtn = e.target && e.target.closest ? e.target.closest('#lm-copy-english-btn') : null;
+        if (copyBtn) {
+            var locInput = document.getElementById('lm-input-locale');
+            var grpInput = document.getElementById('lm-input-group');
+            if (!locInput || !grpInput) return;
+
+            var locale = locInput.value;
+            var group = grpInput.value;
+            if (!locale || locale === 'en') {
+                alert('Select a non-English locale to copy English into.');
+                return;
+            }
+
+            if (!confirm('Fill empty translation fields from English? Existing translations are kept. You can edit before saving.')) {
+                return;
+            }
+
+            copyBtn.disabled = true;
+            var copyIcon = copyBtn.querySelector('i');
+            var copyPrev = copyIcon ? copyIcon.className : '';
+            if (copyIcon) {
+                copyIcon.className = 'fa fa-spinner fa-spin me-1';
+            }
+
+            fetch(copyEnglishUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ locale: locale, group: group, overwrite: false })
+            })
+            .then(function(res) {
+                return res.json().then(function(data) {
+                    return { ok: res.ok, status: res.status, data: data };
+                });
+            })
+            .then(function(wrapped) {
+                var data = wrapped.data;
+                if (!wrapped.ok || !data || !data.ok) {
+                    var msg = (data && data.message) ? data.message : ('Request failed (' + wrapped.status + ')');
+                    throw new Error(msg);
+                }
+                var map = data.translations || {};
+                var inputs = document.querySelectorAll('.lm-translation-input');
+                inputs.forEach(function(inp) {
+                    var key = inp.getAttribute('data-key');
+                    if (key && Object.prototype.hasOwnProperty.call(map, key)) {
+                        inp.value = map[key];
+                    }
+                });
+            })
+            .catch(function(err) {
+                alert(err.message || 'Copy from English failed.');
+            })
+            .finally(function() {
+                copyBtn.disabled = false;
+                if (copyIcon) copyIcon.className = copyPrev;
+            });
+            return;
+        }
+
         var btn = e.target && e.target.closest ? e.target.closest('#lm-ai-translate-btn') : null;
         if (!btn) return;
 

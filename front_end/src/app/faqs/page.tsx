@@ -8,8 +8,8 @@ export default function FaqsPage() {
   return (
     <ThemeShell>
       <KhListingPage
-        title="FAQs"
-        intro="Frequently asked questions."
+        titleKey="frontend_nav.faqs"
+        introKey="home_sections.faqs_intro"
         endpoint="/faqs"
         hrefBase="/faqs/"
       />

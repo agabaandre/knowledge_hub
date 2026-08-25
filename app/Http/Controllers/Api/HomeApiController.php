@@ -80,19 +80,19 @@ class HomeApiController extends ApiController
                 'sections' => [
                     $this->homeSection(
                         'recommended',
-                        $settings->section_title_recommended ?? 'Recommended',
+                        \App\Support\UiLocaleLabels::homeSection('recommended') ?: ($settings->section_title_recommended ?? 'Recommended'),
                         (bool) ($settings->show_featured ?? false) && $recommended->isNotEmpty(),
                         $recommended
                     ),
                     $this->homeSection(
                         'top_searches',
-                        $settings->section_title_top_searches ?? 'Top Searches',
+                        \App\Support\UiLocaleLabels::homeSection('top_searches') ?: ($settings->section_title_top_searches ?? 'Top Searches'),
                         (bool) ($settings->show_top_searches ?? false) && $topSearches->isNotEmpty(),
                         $topSearches
                     ),
                     $this->homeSection(
                         'flagship_initiatives',
-                        $settings->section_title_flagship_initiatives ?? 'Flagship Initiatives',
+                        \App\Support\UiLocaleLabels::homeSection('flagship_initiatives') ?: ($settings->section_title_flagship_initiatives ?? 'Flagship Initiatives'),
                         $initiatives->isNotEmpty(),
                         $initiatives
                     ),

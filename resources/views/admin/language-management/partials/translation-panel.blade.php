@@ -7,6 +7,10 @@
         <span id="lm-panel-title">{{ $groups[$currentGroup] ?? $currentGroup }}</span>
         <div class="d-flex align-items-center flex-wrap gap-1">
             @if ($currentLocale !== 'en')
+                <button type="button" class="btn btn-outline-primary btn-sm" id="lm-copy-english-btn"
+                        title="Copy English defaults into empty fields. Review and click Save.">
+                    <i class="fa fa-copy me-1"></i> Copy from English
+                </button>
                 <button type="button" class="btn btn-outline-secondary btn-sm" id="lm-ai-translate-btn"
                         title="Use OpenAI to translate English into this locale. Review and click Save.">
                     <i class="fa fa-magic me-1"></i> AI translate

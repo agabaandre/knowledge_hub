@@ -96,6 +96,45 @@ class FrontEndApacheConfigTest extends TestCase
         }
     }
 
+    public function test_next_frontend_uses_khub_api_i18n_theme_cards_and_no_template_demo(): void
+    {
+        $client = file_get_contents(base_path('front_end/src/nucleus/api/client.ts'));
+        $card = file_get_contents(base_path('front_end/src/nucleus/molecules/KhRecordCard.tsx'));
+        $header = file_get_contents(base_path('front_end/src/nucleus/molecules/KhHeaders.tsx'));
+        $footer = file_get_contents(base_path('front_end/src/nucleus/molecules/KhPortalFooter.tsx'));
+        $university = file_get_contents(base_path('front_end/src/app/university/page.tsx'));
+        $academy = file_get_contents(base_path('front_end/src/app/language-academy/page.tsx'));
+        $online = file_get_contents(base_path('front_end/src/app/online-course/page.tsx'));
+        $shell = file_get_contents(base_path('front_end/src/nucleus/theme/ThemeShell.tsx'));
+
+        $this->assertStringContainsString('khub.africacdc.org/docs', $client);
+        $this->assertStringContainsString('Accept-Language', $client);
+        $this->assertFileExists(base_path('front_end/src/nucleus/i18n/KhI18nProvider.tsx'));
+        $this->assertFileExists(base_path('front_end/src/nucleus/molecules/KhLanguageSelect.tsx'));
+
+        $i18n = file_get_contents(base_path('front_end/src/nucleus/i18n/KhI18nProvider.tsx'));
+        $select = file_get_contents(base_path('front_end/src/nucleus/molecules/KhLanguageSelect.tsx'));
+
+        $this->assertStringContainsString('layout_ltr', $i18n);
+        $this->assertStringContainsString('khub_dir', $i18n);
+        $this->assertStringContainsString('flag', $select);
+        $this->assertStringContainsString('LTR', $select);
+        $this->assertStringContainsString('lookup/i18n', $i18n);
+
+        $this->assertStringContainsString('bd-blog-wrapper style-four', $card);
+        $this->assertStringContainsString('khItemCover', $card);
+        $this->assertStringContainsString('KhLanguageSelect', $header);
+        $this->assertStringNotContainsString('UniversityMain', $university);
+        $this->assertStringNotContainsString('LanguageAcademyMain', $academy);
+        $this->assertStringNotContainsString('OnlineCourseMain', $online);
+        $this->assertStringContainsString('KhHome', $university);
+        $this->assertStringContainsString('forceTheme', $university);
+        $this->assertStringContainsString('forceTheme', $shell);
+        $this->assertStringNotContainsString('MainFooter', $footer);
+        $this->assertStringNotContainsString('iStudy', $footer);
+        $this->assertStringNotContainsString('istudy@mail.com', $footer);
+    }
+
     public function test_published_static_resolver_maps_subdirectory_uris_to_files(): void
     {
         require_once base_path('front_end/front-end-static.php');
