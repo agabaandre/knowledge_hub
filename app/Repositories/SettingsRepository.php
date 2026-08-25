@@ -521,6 +521,9 @@ class SettingsRepository
                 'partner_logo_max_height' => $request->input('partner_logo_max_height', \App\Support\FooterPartners::LOGO_MAX_HEIGHT_DEFAULT),
             ]);
         }
+        if (Schema::hasColumn('setting', 'frontend_theme')) {
+            $settings->frontend_theme = \App\Support\FrontendThemes::sanitizeId($request->input('frontend_theme'));
+        }
 
         $settings->save();
 

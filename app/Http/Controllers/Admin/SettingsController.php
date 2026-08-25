@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\SettingsRepository;
 use App\Support\EmailConfig;
+use App\Support\FrontendThemes;
 use App\Support\SsoConfig;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -63,6 +64,9 @@ class SettingsController extends Controller
         $data['hubRegions'] = Schema::hasTable('region')
             ? \App\Models\Region::orderBy('region_name')->get()
             : collect();
+        $data['frontendThemes'] = FrontendThemes::builtinCatalog();
+        $data['frontendThemePacks'] = FrontendThemes::packsFromSettings(settings());
+        $data['activeFrontendTheme'] = FrontendThemes::resolve(settings());
         return view('admin.settings.index', $data);
     }
   
@@ -389,5 +393,100 @@ class SettingsController extends Controller
             return back()->with('alert-danger', 'Import failed: ' . $e->getMessage());
         }
         return back()->with('alert-success', 'Configuration imported successfully. Active theme settings have been updated (images were not changed).');
+    }
+
+    public function storeFrontendThemePack(Request $request)
+    {
+        $file = $request->file('frontend_theme_pack');
+        if (! $file || strtolower((string) $file->getClientOriginalExtension()) !== 'zip') {
+            return back()->with(['alert-danger' => 'Upload a .zip theme pack that contains theme.json.', 'status' => 'failure']);
+        }
+
+        if (! Schema::hasColumn('setting', 'frontend_theme_packs')) {
+            return back()->with(['alert-danger' => 'Run migrations to enable frontend theme packs.', 'status' => 'failure']);
+        }
+
+        $tmpDir = storage_path('app/theme-upload-'.uniqid('', true));
+        try {
+            $manifest = FrontendThemes::extractPack($file->getRealPath(), $tmpDir);
+        } catch (\InvalidArgumentException $e) {
+            return back()->with(['alert-danger' => $e->getMessage(), 'status' => 'failure']);
+        }
+
+        $id = $manifest['id'];
+        if (FrontendThemes::isBuiltin($id)) {
+            $id = $id.'-'.substr(sha1(uniqid('', true)), 0, 6);
+            $manifest['id'] = $id;
+        }
+
+        $dest = FrontendThemes::storagePath($id);
+        if (is_dir($dest)) {
+            \Illuminate\Support\Facades\File::deleteDirectory($dest);
+        }
+        if (! @rename($tmpDir, $dest)) {
+            \Illuminate\Support\Facades\File::copyDirectory($tmpDir, $dest);
+            \Illuminate\Support\Facades\File::deleteDirectory($tmpDir);
+        }
+
+        $cssRel = 'frontend-themes/'.$id.'/tokens.css';
+        $cssUrl = is_file($dest.DIRECTORY_SEPARATOR.'tokens.css')
+            ? (function_exists('storage_link') ? storage_link($cssRel) : asset('storage/'.$cssRel))
+            : '';
+
+        $settings = \App\Models\Setting::where('status', 'active')->first();
+        if (! $settings) {
+            return back()->with(['alert-danger' => 'No active settings row found.', 'status' => 'failure']);
+        }
+
+        $packs = FrontendThemes::packsFromSettings($settings);
+        $packs = array_values(array_filter($packs, static fn ($pack) => ($pack['id'] ?? '') !== $id));
+        $packs[] = [
+            'id' => $id,
+            'name' => $manifest['name'],
+            'extends' => $manifest['extends'],
+            'css_url' => $cssUrl,
+            'source' => 'upload',
+        ];
+        $settings->frontend_theme_packs = json_encode($packs);
+        if ($request->boolean('activate_frontend_theme') && Schema::hasColumn('setting', 'frontend_theme')) {
+            $settings->frontend_theme = $id;
+        }
+        $settings->save();
+        clear_settings_cache();
+        clear_cache();
+
+        return back()->with(['alert-success' => 'Theme pack “'.$manifest['name'].'” uploaded.', 'status' => 'success']);
+    }
+
+    public function destroyFrontendThemePack(Request $request, string $slug)
+    {
+        $id = FrontendThemes::sanitizeId($slug);
+        if (FrontendThemes::isBuiltin($id)) {
+            return back()->with(['alert-danger' => 'Built-in themes cannot be deleted.', 'status' => 'failure']);
+        }
+
+        $settings = \App\Models\Setting::where('status', 'active')->first();
+        if (! $settings || ! Schema::hasColumn('setting', 'frontend_theme_packs')) {
+            return back()->with(['alert-danger' => 'No theme packs to delete.', 'status' => 'failure']);
+        }
+
+        $packs = array_values(array_filter(
+            FrontendThemes::packsFromSettings($settings),
+            static fn ($pack) => ($pack['id'] ?? '') !== $id
+        ));
+        $settings->frontend_theme_packs = json_encode($packs);
+        if (Schema::hasColumn('setting', 'frontend_theme') && FrontendThemes::sanitizeId($settings->frontend_theme ?? null) === $id) {
+            $settings->frontend_theme = FrontendThemes::DEFAULT;
+        }
+        $settings->save();
+
+        $dest = FrontendThemes::storagePath($id);
+        if (is_dir($dest)) {
+            \Illuminate\Support\Facades\File::deleteDirectory($dest);
+        }
+        clear_settings_cache();
+        clear_cache();
+
+        return back()->with(['alert-success' => 'Theme pack removed.', 'status' => 'success']);
     }
 }

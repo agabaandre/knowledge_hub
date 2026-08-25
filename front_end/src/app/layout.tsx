@@ -10,6 +10,7 @@ import ReduxProvider from "@/redux/provider";
 import { VideoProvider } from "@/contextApi/VideoProvider";
 import GlobalVideoModal from "@/components/common/popup/GlobalVideoModal";
 import { Metadata } from "next";
+import "@/nucleus/theme/tokens.css";
 
 // Load Roboto font
 const roboto = Roboto({
@@ -26,8 +27,8 @@ const bigShoulders = Big_Shoulders({
 });
 
 export const metadata: Metadata = {
-  title: "iStudy - Education & Online Courses React NextJs Template",
-  description: "iStudy is a versatile React NextJs template for educational institutions and online learning platforms, featuring multiple homepage layouts, instructor/student dashboards, and tailored designs for schools, universities, language centers, Quran learning, and more.",
+  title: "Knowledge Hub",
+  description: "Africa CDC Knowledge Hub — records, forums, communities, and health topics.",
 };
 
 export default function RootLayout({

@@ -1,22 +1,16 @@
-//@refresh
-import HomeMain from "@/components/home/HomeMain";
-import Wrapper from "@/layout/DefaultWrapper";
+import ThemeShell from "@/nucleus/theme/ThemeShell";
+import KhHome from "@/nucleus/home/KhHome";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Home - Education & Online Courses React NextJs Template",
+  title: "Knowledge Hub",
+  description: "Africa CDC Knowledge Hub public frontend",
 };
 
-const Home = () => {
+export default function Home() {
   return (
-    <>
-        <Wrapper>
-          <main className="main-area">
-            <HomeMain />
-          </main>
-        </Wrapper>
-    </>
+    <ThemeShell>
+      <KhHome />
+    </ThemeShell>
   );
 }
-
-export default Home

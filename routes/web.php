@@ -390,6 +390,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web', 'admin.access
     Route::post("/configure/custom-font/delete/{id}", [SettingsController::class, 'deleteCustomFont'])->name('admin.config.custom-font.delete');
     Route::get("/configure/export-config", [SettingsController::class, 'exportConfig'])->name('admin.config.export');
     Route::post("/configure/import-config", [SettingsController::class, 'importConfig'])->name('admin.config.import');
+    Route::post("/configure/frontend-theme", [SettingsController::class, 'storeFrontendThemePack'])->name('admin.config.frontend-theme.store');
+    Route::post("/configure/frontend-theme/{slug}/delete", [SettingsController::class, 'destroyFrontendThemePack'])->name('admin.config.frontend-theme.delete');
 
     Route::get('/language-management', [LanguageManagementController::class, 'index'])->name('admin.language-management.index');
     Route::get('/language-management/grid', [LanguageManagementController::class, 'grid'])->name('admin.language-management.grid');

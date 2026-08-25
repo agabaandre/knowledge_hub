@@ -38,18 +38,19 @@ class FrontEndApacheConfigTest extends TestCase
         $this->assertStringContainsString('public-spa', file_get_contents(base_path('front_end/front-end-proxy.php')));
     }
 
-    public function test_next_and_eslint_config_are_on_the_latest_16_3_release(): void
+    public function test_next_app_tracks_latest_stable_next_and_has_a_theme_nucleus(): void
     {
-        $pkg = json_decode((string) file_get_contents(base_path('front_end/package.json')), true, 512, JSON_THROW_ON_ERROR);
-        $next = $pkg['dependencies']['next'];
-        $eslint = $pkg['devDependencies']['eslint-config-next'];
+        $package = json_decode((string) file_get_contents(base_path('front_end/package.json')), true);
+        $config = file_get_contents(base_path('front_end/src/nucleus/theme/registry.ts'));
+        $home = file_get_contents(base_path('front_end/src/app/page.tsx'));
 
-        $this->assertSame($next, $eslint, 'next and eslint-config-next must stay on the same version');
-        $this->assertGreaterThanOrEqual(
-            0,
-            version_compare($next, '16.3.2'),
-            'front_end must use Next.js 16.3.2 or newer, found '.$next
-        );
+        $this->assertSame('16.3.2', $package['dependencies']['next']);
+        $this->assertSame('16.3.2', $package['devDependencies']['eslint-config-next']);
+        $this->assertStringContainsString('university', $config);
+        $this->assertStringContainsString('language-academy', $config);
+        $this->assertStringContainsString('online-course', $config);
+        $this->assertStringContainsString('ThemeShell', $home);
+        $this->assertStringContainsString('KhHome', $home);
     }
 
     public function test_next_production_build_is_a_static_export(): void

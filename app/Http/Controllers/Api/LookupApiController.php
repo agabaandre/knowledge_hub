@@ -371,4 +371,16 @@ class LookupApiController extends ApiController
             "data" => settings()
         ];
     }
+
+    public function frontendTheme()
+    {
+        return [
+            'status' => 200,
+            'data' => \App\Support\FrontendThemes::resolve(settings()),
+            'catalog' => array_merge(
+                \App\Support\FrontendThemes::builtinCatalog(),
+                \App\Support\FrontendThemes::packsFromSettings(settings())
+            ),
+        ];
+    }
 }

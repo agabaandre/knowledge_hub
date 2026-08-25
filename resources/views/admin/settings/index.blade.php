@@ -1008,6 +1008,11 @@
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="frontend-tab" data-tab="frontend" type="button" role="tab" aria-controls="frontend" aria-selected="false">
+                        <i class="fa fa-desktop me-2"></i>Frontend
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
                     <button class="nav-link" id="colors-tab" data-tab="colors" type="button" role="tab" aria-controls="colors" aria-selected="false">
                         <i class="fa fa-palette me-2"></i>Colors &amp; Typography
                     </button>
@@ -1065,6 +1070,7 @@
                 @include('admin.settings.partials.tab_navigation')
                 @include('admin.settings.partials.tab_homepage')
                 @include('admin.settings.partials.tab_search')
+                @include('admin.settings.partials.tab_frontend')
 
                 <!-- Contact Tab -->
                 <div class="tab-pane fade" id="contact" role="tabpanel">
@@ -1815,6 +1821,14 @@
                 <form id="settings-custom-font-upload-form" action="{{ route('admin.config.custom-font.store') }}" method="post" enctype="multipart/form-data" class="d-none" aria-hidden="true">
                     @csrf
                 </form>
+                <form id="frontend-theme-upload-form" action="{{ route('admin.config.frontend-theme.store') }}" method="post" enctype="multipart/form-data" class="d-none" aria-hidden="true">
+                    @csrf
+                </form>
+                @foreach(($frontendThemePacks ?? []) as $pack)
+                    <form id="frontend-theme-delete-{{ $pack['id'] }}" action="{{ route('admin.config.frontend-theme.delete', $pack['id']) }}" method="post" class="d-none" aria-hidden="true">
+                        @csrf
+                    </form>
+                @endforeach
                 @if(isset($customFonts) && $customFonts->count() > 0)
                     @foreach($customFonts as $cf)
                         <form id="custom-font-delete-{{ $cf->id }}" action="{{ route('admin.config.custom-font.delete', $cf->id) }}" method="post" class="d-none" aria-hidden="true">

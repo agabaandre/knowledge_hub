@@ -1,0 +1,9 @@
+{
+  "id": "starter",
+  "name": "Starter theme",
+  "extends": "university",
+  "tokens": {
+    "primary": "#119A48",
+    "secondary": "#0F6B38"
+  }
+}

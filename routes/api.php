@@ -122,7 +122,10 @@ Route::group(["prefix" =>"lookup"],function(){
     Route::get('/licenses', [LookupApiController::class, 'licenses']);
     Route::get('/static-links', [LookupApiController::class, 'staticLinks']);
     Route::get('/settings', [LookupApiController::class,"settings"]);
+    Route::get('/frontend-theme', [LookupApiController::class, 'frontendTheme']); // lookup/frontend-theme
 });
+
+Route::get('faqs', [\App\Http\Controllers\Api\FaqsApiController::class, 'index']);
 
 Route::get('/log',function(){
 

@@ -1,0 +1,23 @@
+.kh-theme--university {
+  --bd-primary: #07a169;
+}
+
+.kh-theme--language-academy {
+  --bd-primary: #3b6d11;
+}
+
+.kh-theme--online-course {
+  --bd-primary: #144bff;
+}
+
+.kh-theme .main-menu ul {
+  display: flex;
+  gap: 1.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.kh-theme .main-menu a {
+  font-weight: 600;
+}

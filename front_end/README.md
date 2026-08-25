@@ -31,6 +31,18 @@ Skip a rebuild if `out/` is already current:
 
 Optional Apache snippet (`apache-front-end.conf`): websocket HMR for `npm run dev`, plus `Alias /assets` because the theme uses root-relative `/assets/...`. Do **not** `ProxyPass` the whole `/knowledge_hub/front_end` path — that hides the published files and 502s when Node is down. Include the file from `httpd.conf` after enabling `mod_proxy`, `mod_proxy_http`, and `mod_proxy_wstunnel`.
 
+## Themes (nucleus / molecules)
+
+The public portal at `/knowledge_hub/front_end/` uses a shared **nucleus** (`src/nucleus/`) plus three built-in chrome kits:
+
+- University — `/university/` remains a design preview
+- Language Academy — `/language-academy/`
+- Online Course — `/online-course/`
+
+Admin **Configure → Frontend** picks the default template (`frontend_theme`). The shell reads `/api/lookup/frontend-theme`. Knowledge Hub records, forums, communities, health topics, and FAQs load from `/api`.
+
+To spin up a new pack, copy `src/themes/_starter/`, set `theme.json` `extends` to one of the three bases, zip it, and upload it on Configure. Packs overlay CSS tokens; they reuse nucleus molecules (nav, cards, partner bar).
+
 ## Development
 
 To use live reload, remove the published tree so PHP proxies to Next on port 3001:
