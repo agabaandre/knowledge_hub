@@ -9,6 +9,7 @@ use App\Repositories\UsersRepository;
 use App\Rules\InternationalPhoneKnownCallingCode;
 use App\Rules\NotDisposableEmail;
 use App\Services\SocialLoginService;
+use App\Support\ApiUserDetails;
 use App\Support\OAuthAccountSecurity;
 use Auth;
 use Carbon\Carbon;
@@ -402,21 +403,9 @@ class AuthApiController extends ApiController
      */
     private function profilePayload(User $user): array
     {
-        $u = User::query()
-            ->with(['preferences', 'country', 'author', 'access_level', 'communities'])
-            ->find($user->id);
+        $u = ApiUserDetails::loadForFull((int) $user->id);
 
-        if (! $u) {
-            return [];
-        }
-
-        $payload = $u->makeHidden(['password', 'remember_token'])->toArray();
-        // Mirror web account form / update payload naming for clients
-        $payload['preference_subtheme_ids'] = $u->preferences->pluck('subtheme_id')->values()->all();
-        $payload['level_id'] = $u->access_level_id;
-        $payload['community_ids'] = $u->communities->pluck('id')->values()->all();
-
-        return $payload;
+        return $u ? ApiUserDetails::fullDetails($u) : [];
     }
     
 

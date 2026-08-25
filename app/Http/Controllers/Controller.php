@@ -20,7 +20,7 @@ use Illuminate\Routing\Controller as BaseController;
  * )
  *
  * @OA\Tag(name="Authentication", description="Register, login, password reset, token refresh, and social login.")
- * @OA\Tag(name="User", description="Authenticated profile, library, and account endpoints (`auth:api`).")
+ * @OA\Tag(name="User", description="User details (`GET /api/users/{id}` public, `GET /api/users/me` and `GET /api/profile` authenticated), library, and account endpoints.")
  * @OA\Tag(name="Publications", description="Search, list, detail, favourites, comments, content requests, and home-style section feeds. Some GET routes use optional Passport token middleware for personalisation.")
  * @OA\Tag(name="Home", description="Aggregated home dashboard payload.")
  * @OA\Tag(name="Lookup", description="Reference data for forms and filters: themes, jobs, communities, categories, authors, settings.")

@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\HealthTopicsApiController;
 use App\Http\Controllers\Api\MeApiController;
 use App\Http\Controllers\Api\CountriesApiController;
 use App\Http\Controllers\Api\FederatedHubApiController;
+use App\Http\Controllers\Api\UsersApiController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -48,11 +49,14 @@ Route::get('/refresh', [AuthApiController::class, 'refresh']);
 Route::post('/social-login', [AuthApiController::class, 'socialLogin']);
 
 
+Route::get('/users/{id}', [UsersApiController::class, 'show'])->whereNumber('id');
+
 Route::group(['middleware' => 'auth:api'],function(){
     Route::post('/profile/update', [AuthApiController::class, 'updateProfile']);
     Route::post('/change-password', [AuthApiController::class, 'changePassword']);
     Route::get('/logout', [AuthApiController::class, 'logout']);
     Route::get('/profile', [AuthApiController::class, 'profile']);
+    Route::get('/users/me', [UsersApiController::class, 'me']);
     Route::get('/me', [MeApiController::class, 'library']);
     Route::get('/me/chats', [MeApiController::class, 'chats']);
     Route::get('/me/forums', [MeApiController::class, 'forums']);

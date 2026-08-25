@@ -779,10 +779,10 @@
                 "responses": {
                     "200": {
                         "description": "Success",
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
                                         "status": {
                                             "type": "integer",
                                             "example": 200
@@ -1372,7 +1372,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                                        "type": "string"
+                            "type": "string"
                         }
                     },
                     {
@@ -1431,14 +1431,14 @@
                                             "example": "success"
                                         },
                                         "message": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
                             }
                         }
-                    }
-                },
+                    },
                     "403": {
                         "description": "Invitation email does not match signed-in user"
                     },
@@ -2677,8 +2677,8 @@
                                     "attachments": {
                                         "type": "array",
                                         "items": {
-                                        "type": "string",
-                                        "format": "binary"
+                                            "type": "string",
+                                            "format": "binary"
                                         }
                                     },
                                     "communities": {
@@ -2930,8 +2930,8 @@
                 "operationId": "ToggleForumCommentLike",
                 "requestBody": {
                     "required": true,
-                        "content": {
-                            "application/json": {
+                    "content": {
+                        "application/json": {
                             "schema": {
                                 "required": [
                                     "comment_id"
@@ -4040,7 +4040,7 @@
                                         "items": {
                                             "type": "integer"
                                         }
-                                        },
+                                    },
                                     "tag_all_my_communities": {
                                         "type": "boolean",
                                         "nullable": true
@@ -4617,7 +4617,7 @@
                                     "tags": {
                                         "type": "array",
                                         "items": {
-                                        "type": "integer"
+                                            "type": "integer"
                                         }
                                     },
                                     "theme": {
@@ -4798,7 +4798,7 @@
                         "name": "id",
                         "in": "path",
                         "required": true,
-                            "schema": {
+                        "schema": {
                             "type": "integer"
                         }
                     }
@@ -4853,10 +4853,10 @@
                     },
                     "404": {
                         "description": "Push notification not found"
-                            }
-                        }
                     }
-                },
+                }
+            }
+        },
         "/api/push-notifications/user": {
             "get": {
                 "tags": [
@@ -4895,21 +4895,21 @@
                 "operationId": "markNotificationsAsRead",
                 "requestBody": {
                     "required": true,
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
                                     "ids": {
-                                            "type": "array",
-                                            "items": {
+                                        "type": "array",
+                                        "items": {
                                             "type": "integer"
                                         }
                                     }
                                 },
-                                                "type": "object"
-                                            }
-                                        }
-                                    }
+                                "type": "object"
+                            }
+                        }
+                    }
                 },
                 "responses": {
                     "200": {
@@ -4955,6 +4955,95 @@
                     }
                 ]
             }
+        },
+        "/api/users/me": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get my user details",
+                "description": "Returns the authenticated user's full account (same payload as `GET /api/profile`). Send `Authorization: Bearer {token}` from `POST /api/login`.",
+                "operationId": "GetCurrentUserDetails",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{id}": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get user details",
+                "description": "Returns public profile fields for a user (name, photo, job, organisation, country, author). Email and phone are omitted. If a Bearer token is sent and the caller is that user (or has `alter_access_levels`), the full account payload is returned instead.",
+                "operationId": "GetUserDetails",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
         }
     },
     "tags": [
@@ -4972,7 +5061,7 @@
         },
         {
             "name": "User",
-            "description": "Authenticated profile, library, and account endpoints (`auth:api`)."
+            "description": "User details (`GET /api/users/{id}` public, `GET /api/users/me` and `GET /api/profile` authenticated), library, and account endpoints."
         },
         {
             "name": "Publications",
