@@ -10,9 +10,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
     "@popperjs/core": "^2.11.8",
     "@react-native-async-storage/async-storage": "^2.1.0",
     "@reduxjs/toolkit": "^2.5.0",
@@ -21,11 +18,14 @@
     "autoprefixer": "^10.4.20",
     "bootstrap": "^5.2.2",
     "framer-motion": "^12.0.5",
+    "next": "16.3.2",
     "nouislider": "^15.8.1",
     "postcss": "^8.4.49",
+    "react": "19.2.8",
     "react-apexcharts": "^1.7.0",
     "react-circular-progressbar": "^2.1.0",
     "react-countup": "^6.5.3",
+    "react-dom": "19.2.8",
     "react-hook-form": "^7.56.1",
     "react-intersection-observer": "^9.14.1",
     "react-parallax": "^3.5.1",
@@ -40,13 +40,13 @@
     "wow.js": "^1.2.2"
   },
   "devDependencies": {
+    "@types/bootstrap": "^5.2.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/bootstrap": "^5.2.10",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.3.2",
     "typescript": "^5"
   }
 }
