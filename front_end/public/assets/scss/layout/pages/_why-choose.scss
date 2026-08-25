@@ -1,0 +1,362 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  4.34 Why Choose css
+/*----------------------------------------*/
+
+.bd-why {
+    &-choose {
+        &-wrapper {
+            &.style-one {
+                .bd-why-choose-item {
+                    position: relative;
+                    text-align: center;
+                    padding: 0px 30px 30px 0px;
+                    margin-top: 25px;
+
+                    &:hover {
+                        .bd-why-choose-icon-thumb {
+                            animation: bd-bounce 800ms ease-out alternate;
+                            -webkit-animation: bd-bounce 800ms ease-out alternate;
+                        }
+                    }
+
+                    &::before {
+                        position: absolute;
+                        content: "";
+                        width: 1px;
+                        height: 100%;
+                        background: var(--bd-border-primary);
+                        right: 0;
+                        bottom: 0;
+                    }
+                }
+
+                .bd-why-choose-icon-thumb {
+                    max-width: 70px;
+                    margin: 0 auto 20px;
+                    position: relative;
+
+                    .bd-why-choose-icon {
+                        position: absolute;
+                        right: -35px;
+                        transform: translate(-50%, -50%);
+                        top: 10px;
+                        font-size: 60px;
+                        color: var(--bd-primary);
+                    }
+                }
+
+                .bd-why-choose-title {
+                    margin-bottom: 15px;
+                }
+            }
+
+            &.style-two {
+                background-color: var(--bd-bg-primary);
+                min-height: 100%;
+                .bd-why-choose-item {
+                    position: relative;
+                    text-align: center;
+                    padding: 30px 30px;
+                    background-color: var(--bd-bg-primary);
+                    border-radius: 6px;
+
+                    &.bg-flashlight {
+                        &::after {
+                            background-color: var(--bd-bg-primary);
+                        }
+                    }
+                    &:hover {
+                        .bd-why-choose-icon {
+                            svg * {
+                                stroke: var(--bd-primary);
+                            }
+                        }
+                    }
+                }
+
+                .bd-why-choose-title {
+                    margin-bottom: 15px;
+                }
+
+                .bd-why-choose-icon {
+                    margin-bottom: 15px;
+                    display: block;
+                }
+            }
+
+            &.style-three {
+                .bd-why-choose-item {
+                    position: relative;
+                    text-align: center;
+                    padding: 30px 20px;
+                    background-color: var(--bd-white);
+                    border-radius: 12px;
+                    z-index: 4;
+                    transition: all 0.3s linear;
+                    @media #{$xl} {
+                        padding: 20px 15px;
+                    }
+                    &:hover {
+                        box-shadow: 0px 6px 100px 0px rgba(8, 5, 33, 0.1);
+                        .bd-why-choose-icon img {
+                            animation: bd-bounce 800ms ease-out alternate;
+                            -webkit-animation: bd-bounce 800ms ease-out alternate;
+                        }
+                    }
+                }
+                .bd-why-choose-icon {
+                    margin-bottom: 15px;
+                    display: inline-block;
+                    
+                    img {
+                        width: 64px !important;
+                        transition: all 0.3s linear;
+                    }
+                }
+
+                .bd-why-choose-content {
+                    position: relative;
+                    z-index: 9;
+                }
+            }
+
+            &.style-four {
+                .bd-why-choose-icon-wrapper {
+                    -webkit-mask-image: url(../../../images/choose/why-mask.webp);
+                    mask-image: url(../../../images/choose/why-mask.webp);
+                    -webkit-mask-repeat: no-repeat;
+                    mask-repeat: no-repeat;
+                    -webkit-mask-size: cover;
+                    mask-size: cover;
+                    -webkit-mask-position: center;
+                    mask-position: center;
+                    display: inline-flex;
+                    width: 115px;
+                    height: 115px;
+                    background-color: var(--bd-white);
+                    justify-content: center;
+                    align-items: center;
+                    text-align: center;
+                    margin-bottom: 20px;
+                    transition: all 0.3s linear;
+                }
+
+                .bd-why-choose-icon {
+                    font-size: 36px;
+                    color: var(--bd-primary);
+                    line-height: 1;
+                }
+
+                .bd-why-choose-title {
+                    color: var(--bd-white);
+                }
+
+                .bd-why-choose-description {
+                    color: rgba($color: $white, $alpha: .70);
+                }
+            }
+        }
+
+        &-thumb-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 30px;
+            margin-left: 60px;
+            @media #{$lg} {
+                margin-left: 0;
+            }
+            @media #{$md,$sm,$xs} {
+                margin-left: 0;
+                flex-wrap: wrap;
+            }
+            .thumb-column {
+                display: flex;
+                flex-direction: column;
+                gap: 30px;
+                height: 100%;
+                @media #{$md,$sm,$xs} {
+                    flex-direction: row;
+                    width: 100%;
+                }
+                .thumb-one {
+                    height: 250px;
+                    width: 250px;
+                    @media #{$md,$sm,$xs} {
+                        height: 100%;
+                        width: 100%;
+                    }
+                    img {
+                        width: 100%;
+                        height: 100%;
+                        border-radius: 8px;
+                    }
+                }
+
+                .thumb-two {
+                    height: 250px;
+                    width: 250px;
+                    @media #{$md,$sm,$xs} {
+                        height: 100%;
+                        width: 100%;
+                    }
+                    img {
+                        width: 100%;
+                        height: 100%;
+                        border-radius: 8px;
+                    }
+                }
+            }
+
+            .main-thumb {
+                height: 360px;
+                width: 100%;
+                margin-top: 100px;
+                @media #{$md,$sm,$xs} {
+                    height: 100%;
+                    margin-top: 0;
+                }
+                img {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 8px;
+                }
+            }
+        }
+    }
+}
+
+.bd-why-shape-group {
+    .shape-1 {
+        position: absolute;
+        top: -120px;
+        right: -200px;
+        z-index: -1;
+    }
+
+    .shape-2 {
+        position: absolute;
+        top: -50px;
+        right: 115px;
+        z-index: -1;
+    }
+
+    .shape-3 {
+        position: absolute;
+        bottom: -50px;
+        right: 250px;
+        z-index: -1;
+        animation: opacity-on-off 5s ease-in-out 1s infinite alternate-reverse both;
+    }
+
+    .shape-4 {
+        position: absolute;
+        top: 213px;
+        left: 0;
+        z-index: -1;
+        transform: rotate(90deg);
+    }
+
+    .shape-5 {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        z-index: -1;
+    }
+
+    .shape-6 {
+        position: absolute;
+        bottom: -50px;
+        right: -200px;
+        z-index: -1;
+        animation: scaleUpCenter 4s cubic-bezier(0.12, 0, 0.39, 0) 0s infinite alternate-reverse none;
+    }
+}
+
+.bd-choose-thumb {
+    position: relative;
+    -webkit-mask-image: url(../../../images/choose/why-mask.webp);
+    mask-image: url(../../../images/choose/why-mask.webp);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    -webkit-mask-position: center;
+    mask-position: center;
+    display: inline-flex;
+
+    &-mask {
+        position: relative;
+        -webkit-mask-image: url(../../../images/choose/why-mask.webp);
+        mask-image: url(../../../images/choose/why-mask.webp);
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: cover;
+        mask-size: cover;
+        -webkit-mask-position: center;
+        mask-position: center;
+        display: inline-flex;
+        background-color: var(--bd-white);
+        padding: 10px;
+        margin-left: -20px;
+    }
+}
+
+.bd-why-choose-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 60px 30px;
+    justify-content: space-between;
+    align-items: center;
+
+    @media #{$xxs} {
+        grid-template-columns: repeat(1, 1fr);
+        gap: 20px 0;
+    }
+}
+
+@keyframes bd-bounce {
+
+    0%,
+    100%,
+    20%,
+    50%,
+    80% {
+        -webkit-transform: translateY(0);
+        -ms-transform: translateY(0);
+        transform: translateY(0)translateX(0%)
+    }
+
+    40% {
+        -webkit-transform: translateY(-8px);
+        -ms-transform: translateY(-8px);
+        transform: translateY(-8px)translateX(0%)
+    }
+
+    60% {
+        -webkit-transform: translateY(-4px);
+        -ms-transform: translateY(-4px);
+        transform: translateY(-4px)translateX(0%)
+    }
+}
+
+@keyframes scaleUpCenter {
+    0% {
+        transform: scale(0.2);
+    }
+
+    100% {
+        transform: scale(.5);
+    }
+}
+
+@keyframes opacity-on-off {
+    0% {
+        opacity: .3;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}

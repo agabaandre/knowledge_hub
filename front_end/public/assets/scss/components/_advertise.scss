@@ -1,0 +1,44 @@
+@use '../utils' as *;
+
+/*----------------------------------------*/
+/*  2.2 advertise
+/*----------------------------------------*/
+
+.bd-add-box {
+    padding: 20px 30px 30px;
+    border: 1px solid var(--bd-border-primary);
+    border-radius: 6px;
+}
+.bd-add-box-top {
+    margin-bottom: 20px;
+}
+.bd-add-box-title {
+    margin-bottom: 5px;
+}
+
+.bd-add-box-brand {
+    margin-bottom: 25px;
+
+    ul {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+        li {
+            list-style: none;
+            max-width: 150px;
+            height: 25px;
+
+            img {
+                width: 100%;
+                height: 100%;
+            }
+        }
+    }
+}
+
+.bd-add-box-bottom {
+    .bd-btn {
+        padding: 0 17px;
+    }
+}

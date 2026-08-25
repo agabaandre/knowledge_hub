@@ -1,0 +1,43 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  3.2.1 Blog tag css
+/*----------------------------------------*/
+
+.bd-blog-meta-item {
+    display: inline-flex;
+    gap: 0 8px;
+    align-items: center;
+    font-size: 16px;
+    font-weight: var(--bd-fw-regular);
+    &:not(:last-child) {
+        margin-right: 15px;
+        @media #{$xs} {
+            margin-right: 10px;
+        }
+    }
+    a {
+        &:hover {
+            color: var(--bd-primary);
+        }
+    }
+    .meta-icon {
+        color: var(--bd-primary);
+    }
+    .meta-thumb {
+        height: 40px;
+        width: 40px;
+        min-width: 40px;
+        img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+    }
+    .meta-text {
+        color: var(--bd-taxonomy-color);
+    }
+    .meta-author {
+        color: var(--bd-taxonomy-color);
+    }
+}

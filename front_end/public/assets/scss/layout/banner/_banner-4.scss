@@ -1,0 +1,116 @@
+@use '../../utils' as *;
+/*----------------------------------------*/
+/*  3.1.4 Banner Style 4
+/*----------------------------------------*/
+
+.bd-banner {
+    &-four {
+        position: relative;
+        display: flex;
+        align-items: center;
+        min-height: 940px;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        z-index: 2;
+        @media #{$xl} {
+            min-height: 860px;
+        }
+        @media #{$lg} {
+            min-height: 750px;
+        }
+        &-mask {
+            &::before {
+                position: absolute;
+                content: "";
+                left: 0;
+                bottom: -1px;
+                background-image: url(../../../images/banner/banner-4/kindergarten-banner-overly.webp);
+                z-index: 1;
+                width: 100%;
+                height: 100%;
+                background-repeat: no-repeat;
+                background-position: bottom;
+                background-size: contain;
+                z-index: 5;
+            }
+        }
+    }
+    &-bg {
+        position: absolute;
+        content: "";
+        right: 0;
+        top: 0;
+        height: 100%;
+        width: 521px;
+        background-color: var(--bd-primary);
+        z-index: -1;
+    
+        @media #{$md,$sm,$xs} {
+            width: 100%;
+            height: 35%;
+            top: auto;
+            bottom: 0;
+        }
+        @media #{$xxs} {
+            width: 100%;
+            height: 30%;
+            top: auto;
+            bottom: 0;
+        }
+    
+        &::before {
+            position: absolute;
+            content: "";
+            right: 0;
+            bottom: 0;
+            height: 100%;
+            width: 521px;
+            z-index: -1;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.44) 100%);
+    
+            @media #{$md,$sm,$xs} {
+                width: 100%;
+                height: 300px;
+            }
+        }
+    }
+    &-section-wrapper {
+        z-index: 5;
+        @media #{$md,$sm,$xs} {
+            padding-top: 150px;
+        }
+    }
+    &-thumb{
+        &-wrapper {
+            position: relative;
+            z-index: 4;
+        
+            .curly-arrow {
+                position: absolute;
+                left: 2%;
+                top: 15%;
+                z-index: 3;
+            }
+        }
+        &-four {
+            @media #{$lg} {
+                margin-top: 70px;
+            }
+        }
+    }
+    &-four-shape-wrap {
+        .shape-1 {
+            position: absolute;
+            top: 140px;
+            left: 0;
+            z-index: 1;
+        }
+    
+        .shape-2 {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+    }
+}

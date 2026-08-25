@@ -1,0 +1,243 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  4.23 Mission Vision css
+/*----------------------------------------*/
+.bd-why-choose-area {
+    .bd-counter-style-five.has-transparent .bd-counter-content {
+        h2 {
+            color: var(--bd-theme-black);
+        }
+
+        p {
+            color: var(--bd-body-text);
+        }
+    }
+}
+
+.bd-mission-vision-box {
+    border: 1px solid var(--bd-border-primary);
+    border-radius: 8px;
+    padding: 30px 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.bd-mission-vision-shape {
+    position: absolute;
+    right: -30px;
+    top: -30px;
+    opacity: .1;
+}
+
+.bd-mission-vision-icon {
+    margin-bottom: 15px;
+    display: inline-block;
+
+    img {
+        height: 64px;
+        object-fit: cover;
+    }
+}
+
+.bd-mission-vision-title {
+    margin-bottom: 15px;
+}
+
+.bd-core-values-bg {
+    position: relative;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba($color: $black, $alpha: .6);
+        pointer-events: none;
+        z-index: 0;
+    }
+}
+
+.bd-core-values-box {
+    padding: 30px 30px;
+    background-color: var(--bd-white);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    margin-bottom: 30px;
+
+    &.bg-flashlight::after {
+        background: var(--bd-white);
+    }
+}
+
+.bd-core-values-icon {
+    display: flex;
+    width: 80px;
+    height: 80px;
+    background-color: transparent;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    color: var(--bd-primary);
+    font-size: 33px;
+    margin-bottom: 25px;
+    transition: all 0.3s ease-in-out;
+    position: relative;
+    padding: 15px;
+
+    img {
+        width: 60px;
+    }
+
+    &::before {
+        position: absolute;
+        content: "";
+        height: 100%;
+        width: 100%;
+        left: 0;
+        top: 0;
+        border: 1px dashed var(--bd-primary);
+        border-radius: 50%;
+        transition: all 0.3s ease-in-out;
+        -webkit-animation-name: rotate-infinite;
+        -webkit-animation-duration: 55s;
+        -webkit-animation-iteration-count: infinite;
+        -webkit-animation-timing-function: linear;
+    }
+}
+
+/* rotate infinite animation */
+@include keyframes(rotate-infinite) {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.bd-core-values-title {
+    color: var(--bd-primary);
+    margin-bottom: 15px;
+}
+
+.bd-mission-vision-thumb-mask {
+    -webkit-mask-image: url("../../../images/mission/mission-vision-thumb-mask.webp");
+    mask-image: url("../../../images/mission/mission-vision-thumb-mask.webp");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-position: center;
+    mask-position: center;
+    display: inline-flex;
+
+    img {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.bd-promotion-thumb-mask {
+	-webkit-mask-image: url(../../../images/shape/wave-mask.svg);
+	mask-image: url(../../../images/shape/wave-mask.svg);
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-size: contain;
+	mask-size: contain;
+	display: inline-flex;
+}
+.bd-promotion-list-two {
+    ul {
+        display: flex;
+        list-style: none;
+        align-items: center;
+        background-image: linear-gradient(100.88deg, var(--secondary-rgb-1) 0.6%, var(--primary-rgb-1) 100%);
+        padding: 0 30px;
+        gap: 95px;
+        border-radius: 8px;
+
+        @media #{$lg} {
+            padding: 0 15px;
+            gap: 15px;
+        }
+
+        @media #{$md,$sm} {
+            gap: 0 30px;
+        }
+
+        @media #{$xs} {
+            flex-wrap: wrap;
+            gap: 0px;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            padding: 20px 0;
+
+            &:first-child {
+                &::before {
+                    content: "";
+                    position: absolute;
+                    background-color: var(--bd-border-primary);
+                    height: 100%;
+                    width: 1px;
+                    top: 0;
+                    inset-inline-end: -25px;
+
+                    @media #{$lg,$md,$sm,$xs} {
+                        display: none;
+                    }
+                }
+            }
+
+            .bd-promotion-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                height: 70px;
+                width: 70px;
+                min-width: 70px;
+                font-size: 36px;
+                border-radius: 50%;
+                color: var(--bd-white);
+            }
+
+            span {
+                font-weight: 600;
+                font-size: 18px;
+                line-height: 30px;
+            }
+        }
+    }
+}
+
+.bd-mvs-thumb {
+    img {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+    }
+}
+
+.bd-mvs-box {
+    p {
+        text-align: justify;
+    }
+}
+
+.bd-story-thumb {
+    img {
+        border-radius: 8px;
+    }
+}

@@ -1,0 +1,225 @@
+@use "../../utils" as *;
+
+/*----------------------------------------*/
+/*  3.3.1 Cart css
+/*----------------------------------------*/
+
+.bd-sidebar-cart {
+    &-area{
+        position: fixed;
+        right: 0;
+        top: 0;
+        width: 380px;
+        height: 100%;
+        @include transform(translateX(calc(100% + 80px)));
+        background: var(--bd-white)  none repeat scroll 0 0;
+        transition: 0.45s ease-in-out, opacity 0.45s ease-in-out;
+        z-index: 99999999999;
+        scrollbar-width: none;
+        @media #{$xs} {
+            width: 100%;;
+        }
+        &::-webkit-scrollbar {
+            display: none; /* for Chrome, Safari, and Opera */
+        }
+        &.bd-sidebar-cart-opened{
+            @include transform(translateX(0));
+        }
+    }
+    &-wrapper{
+        position: relative;
+        min-height: 100%;
+        padding: 30px 30px;
+    }
+    &-top{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--bd-border-primary);
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+    }
+	&-close{
+		&-btn{
+			background: transparent;
+			color: var(--bd-theme-black);
+			font-size: 28px;
+			&:hover{
+				@include transform(rotate(90deg));
+                color: var(--bd-primary);
+			}
+		}
+	}
+    &-widget{
+        height: calc(100vh - 310px);
+        overflow-y: scroll;
+        overscroll-behavior-y: contain;
+        scrollbar-width: none;
+        @media #{$xl,$lg} {
+            height: calc(100vh - 300px);
+        }
+        &::-webkit-scrollbar {
+            display: none; /* for Chrome, Safari, and Opera */
+        }
+        &-item{
+            position: relative;
+            display: flex;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(129,129,129,.2);
+            align-items: center;
+            &:first-child {
+                padding-top: 0;
+            }
+            &:last-child{
+                border-bottom: 0;
+            }
+        }
+    }
+    &-thumb{
+        border: 1px solid var(--bd-border-primary);
+        margin-right: 15px;
+        width: 80px;
+        height: 100%;
+        & img{
+            max-width: 80px !important;
+            max-height: 110px !important;
+            object-fit: cover;
+        }
+    }
+    &-title{
+        font-size: 18px;
+        margin-bottom: 4px;
+        font-weight: 500;
+        & a{
+            &:hover{
+                color: var(--bd-primary);
+            }
+        }
+    }
+    &-content{
+        padding-right: 20px;
+        & .bd-product-quantity{
+            width: 75px;
+            padding: 0;
+            .bd-cart-input[type="text"] {
+                height: 30px;
+                text-align: center;
+                font-size: 13px;
+                border: 1px solid var(--bd-border-primary);
+                background-color: var(--bd-white);
+                padding: 0;
+            }
+            .bd-cart-plus, 
+            .bd-cart-minus {
+                width: 20px;
+                height: 30px;
+                line-height: 30px;
+                display: inline-block;
+                text-align: center;
+                font-size: 13px;
+                left: 3px;
+                & svg{
+                    @include transform(translateY(-1px));
+                    width: 10px;
+                }
+                &::after{
+                    display: none;
+                }
+            }
+            & .bd-cart-plus{
+                left: auto;
+                right: 3px;
+            }
+        }
+    }
+    &-del{
+        position: absolute;
+        top: 15px;
+        right: 0;
+        width: 25px;
+        height: 25px;
+        line-height: 25px;
+        text-align: center;
+        color: var(--bd-theme-black);
+        font-size: 14px;
+        &:hover{
+            color: var(--bd-primary);
+        }
+    }
+    &-checkout{
+        padding-top: 15px;
+        width: 100%;
+        background: var(--bd-white);
+        border-top: 2px solid var(--bd-border-primary);
+        &-title{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            & h4{
+                display: inline-block;
+                margin-bottom: 0;
+                text-transform: capitalize;
+            }
+            & span{
+                font-size: 24px;
+                color: var(--bd-theme-black);
+                font-weight: 700;
+            }
+        }
+    }
+    &-price{
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--bd-primary);
+    }
+    &-quantity{
+        font-size: 14px;
+        font-weight: 500;
+    }
+    &-empty{
+        width: 60%;
+        margin: 0 auto;
+        margin-top: 20px;
+        margin-bottom: 50px;
+        & img{
+            margin-bottom: 30px;
+        }
+        & p{
+            font-size: 16px;
+            color: var(--bd-theme-black);
+            margin-bottom: 15px;
+        }
+    }
+}
+
+.body-overlay{
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    width: 100%;
+    height: 100%;
+    background: rgba($color: $theme-black, $alpha: .5);
+    backdrop-filter: blur(10px);
+    -moz-backdrop-filter: blur(10px);
+    visibility: hidden;
+    opacity: 0;
+    transition: 0.45s ease-in-out;
+    &.apply{
+        opacity: 1;
+        visibility: visible;
+    }
+    &.opened{
+        opacity: 1;
+        visibility: visible;
+    }
+    &:hover{
+        cursor: url(../../../images/shape/cross-out.webp), pointer;
+    }
+}
+.bd-sidebar-cart-thumb{
+    img{
+
+    }
+}

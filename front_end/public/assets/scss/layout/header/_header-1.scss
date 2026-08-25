@@ -1,0 +1,44 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  3.5.1 Header Style 1
+/*----------------------------------------*/
+.header-style-one {
+	background-color: var(--bd-white);
+	box-shadow: 0px 1px 2px 1px rgba(3, 11, 30, 0.06), 0px 1px 1px 0px rgba(3, 11, 30, 0.1);
+}
+
+.bd-header-left {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0 44px;
+	@media #{$xxl} {
+		gap: 0 20px;
+	}
+	@media #{$xl} {
+		gap: 0 15px;
+	}
+}
+
+.bd-header-right {
+	display: flex;
+	align-items: center;
+	gap: 0 36px;
+
+	@media #{$xl, $xxs} {
+		gap: 0 15px;
+	}
+}
+
+.bd-header-sign-btn {
+	display: flex;
+	align-items: center;
+	gap: 0 20px;
+	@media #{$xl} {
+		gap: 0 10px;
+	}
+	@media #{$sm,$xs} {
+		display: none;
+	}
+}

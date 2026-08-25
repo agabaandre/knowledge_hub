@@ -1,0 +1,493 @@
+@use "../utils" as *;
+
+/*----------------------------------------*/
+/*  2.9 Breadcrumb
+/*----------------------------------------*/
+
+.bd-breadcrumb {
+	position: relative;
+	z-index: 15;
+	min-height: 450px;
+
+	@media #{$sm,$xs} {
+		min-height: 350px;
+	}
+
+	&.style-two {
+		min-height: 300px;
+
+		.bd-breadcrumb-title {
+			color: var(--bd-theme-black);
+		}
+	}
+
+	&-bg {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		background-repeat: no-repeat;
+		background-size: cover;
+		background-position: center right;
+		z-index: 2;
+
+		&::before {
+			position: absolute;
+			content: '';
+			width: 100%;
+			height: 100%;
+			left: 0;
+			top: 0;
+			z-index: -1;
+			background: linear-gradient(90deg, rgba(7, 161, 105, 0.6) 0%, rgba(255, 255, 255, 0) 50%);
+			@media #{$md,$sm,$xs} {
+				background-color: var(--bd-theme-black);
+				opacity: .5;
+			}
+		}
+
+		&-two {
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 0;
+			bottom: 0;
+			background-repeat: no-repeat;
+			background-size: cover;
+			background-position: center right;
+		}
+		&.style-three {
+			&::before{
+				position: absolute;
+				content: '';
+				width: 100%;
+				height: 100%;
+				left: 0;
+				top: 0;
+				z-index: -1;
+				background: var(--bd-theme-black);
+				opacity: .5;
+			}
+		}
+	}
+
+	&-title {
+		font-size: 54px;
+		color: var(--bd-white);
+		font-weight: var(--bd-fw-sbold);
+		margin-bottom: 25px;
+		@media #{$sm,$xs} {
+			font-size: 36px;
+		}
+	}
+
+	&-shape {
+		.shape-1 {
+			position: absolute;
+			left: 60px;
+			bottom: 50px;
+			animation: upDown 1.8s ease-in-out 1.8s forwards infinite alternate;
+			z-index: 2;
+
+			@media #{$xs} {
+				left: 10px;
+				bottom: 20px;
+				width: 50px;
+			}
+		}
+
+		.shape-2 {
+			position: absolute;
+			right: 450px;
+			top: 40px;
+			animation: scaleZeroOne 5s cubic-bezier(0.12, 0, 0.39, 0) 0s infinite alternate both;
+			z-index: 2;
+		}
+
+		.shape-3 {
+			position: absolute;
+			right: 200px;
+			top: 30px;
+			animation: scaleZeroOne 5s cubic-bezier(0.12, 0, 0.39, 0) 0s infinite alternate both;
+			z-index: 2;
+
+			@media #{$xs} {
+				right: 30px;
+				top: 30px;
+				width: 50px;
+			}
+		}
+	}
+
+	&-list {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 10px;
+		color: var(--bd-theme-black);
+		margin-left: 30px;
+		font-weight: var(--bd-fw-medium);
+		font-size: 16px;
+
+		@media #{$sm,$xs} {
+			align-items: flex-start;
+			justify-content: flex-start;
+		}
+
+		&.has-white {
+			color: var(--bd-white);
+
+			a {
+				color: var(--bd-white);
+
+				&::before {
+					color: var(--bd-white);
+				}
+			}
+		}
+
+		span {
+			a {
+				transition: all 0.3s ease-in-out;
+				position: relative;
+
+				&::before {
+					position: absolute;
+					content: "\e932";
+					font-family: var(--ff-icomoon);
+					color: var(--bd-theme-black);
+					inset-inline-start: -30px;
+					top: 7px;
+					transform: translateY(-50%);
+					font-size: 16px;
+					transition: all 0.3s ease-in-out;
+				}
+
+				&:hover {
+					color: var(--bd-primary);
+
+					&::before {
+						color: var(--bd-primary);
+					}
+				}
+			}
+		}
+
+		.divider {
+			margin-top: 1px;
+		}
+	}
+
+	&-list-two {
+		display: flex;
+		justify-content: center;
+		gap: 30px;
+		color: var(--bd-theme-black);
+
+		&.has-white {
+			color: var(--bd-white);
+
+			span {
+				&::before {
+					color: var(--bd-white);
+				}
+			}
+		}
+
+		span {
+			position: relative;
+
+			&:not(:last-child)::before {
+				position: absolute;
+				content: "\f105";
+				font-family: var(--ff-fontawesome);
+				color: var(--bd-theme-black);
+				inset-inline-end: -18px;
+				top: 12px;
+				transform: translateY(-50%);
+				font-size: 14px;
+			}
+
+			i {
+				margin-inline-end: 10px;
+			}
+		}
+	}
+
+	&-banner-area {
+		min-height: 720px;
+	}
+}
+
+/* school breadcrumb area start */
+.bd-school-breadcrumb {
+	&-area {
+		position: relative;
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 9;
+	}
+
+	&-bg {
+		height: 580px;
+		width: 100%;
+		background-position: center;
+		background-size: cover;
+		background-repeat: no-repeat;
+		position: relative;
+
+		&::before {
+			position: absolute;
+			content: "";
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba($color: $black, $alpha: .6);
+			z-index: -1;
+		}
+	}
+
+	&-subtitle {
+		font-size: 14px;
+		font-weight: 600;
+		text-transform: uppercase;
+		color: var(--bd-white);
+		background-color: rgba($color: $primary, $alpha: .5);
+		padding: 0 10px;
+		border-radius: 50px;
+		display: inline-flex;
+		height: 30px;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 10px;
+	}
+
+	&-desc {
+		font-size: 16px;
+		color: rgba($color: $white, $alpha: .70);
+		max-width: 550px;
+		margin: 0 auto;
+		margin-bottom: 30px;
+	}
+}
+
+/* school breadcrumb area end */
+
+/* course breadcrumb */
+.bd-course-breadcrumb {
+	&-area {
+		background-color: rgba($color: $primary, $alpha: .05);
+	}
+
+	&-description {
+		color: var(--bd-theme-black);
+	}
+}
+
+/* course breadcrumb end */
+
+/* Quran breadcrumb css */
+.bd-quran-breadcrumb {
+	&-wrapper {
+		display: grid;
+		grid-template-columns: auto 55%;
+		align-items: center;
+		height: 805px;
+		@media #{$xxl} {
+			height: 595px;
+		}
+		@media #{$xl,$lg} {
+			height: 100%;
+		}
+		@media #{$md,$sm,$xs} {
+			grid-template-columns: auto;
+			height: 100%;
+		}
+	}
+
+	&-content {
+		padding: 30px 100px;
+		@media #{$xl,$lg} {
+			padding: 30px 15px;
+		}
+		@media #{$md} {
+			padding: 60px 15px;
+		}
+		@media #{$sm,$xs} {
+			padding: 65px 15px;
+		}
+	}
+
+	&-title {
+		color: var(--bd-white);
+		font-size: 56px;
+		margin-bottom: 40px;
+		@media #{$lg} {
+			font-size: 42px;
+  			margin-bottom: 30px;
+		}
+		@media #{$sm,$xs} {
+			font-size: 36px;
+			margin-bottom: 30px;
+		}
+	}
+	&-thumb {
+		height: 100%;
+	}
+	&-subtile {
+		font-size: 16px;
+		text-transform: uppercase;
+		color: var(--bd-white);
+		background-color: var(--bd-secondary);
+		margin-bottom: 10px;
+		padding: 3px 15px 3px 15px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		height: 27px;
+		letter-spacing: 2px;
+	}
+
+	&-desc {
+		color: rgba($color: $white, $alpha: .70);
+	}
+
+	&-thumb {
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+}
+
+/* Quran breadcrumb css end */
+
+/* blog details breadcrumb */
+.bd-blog-details {
+	&-breadcrumb-bg {
+		position: relative;
+		z-index: 1;
+		background-color: var(--primary-rgb-05);
+		background-position: center top;
+		background-size: cover;
+		background-repeat: no-repeat;
+	}
+
+	&-breadcrumb-tag {
+		margin-bottom: 12px;
+	}
+
+	&-breadcrumb-title {
+		margin-bottom: 21px;
+	}
+	&-breadcrumb-meta {
+		display: inline-flex;
+		flex-wrap: wrap;
+		gap: 15px 0;
+	}
+}
+
+.inner-shape-dots {
+	position: absolute;
+	left: 100px;
+	top: 175px;
+	animation: updown-three 2.5s linear 0s infinite alternate;
+	z-index: -1;
+	@media #{$x4l,$x3l,$xxl} {
+		left: 10px;  
+	}
+	@media #{$xl,$lg,$md,$sm,$xs} {
+		display: none;
+	}
+}
+
+@keyframes updown-three {
+	0% {
+		transform: translateY(-20px);
+	}
+
+	100% {
+		transform: translateY(0px);
+	}
+}
+
+/* blog details breadcrumb end */
+
+.bd-dashboard-breadcrumb-bg {
+	min-height: 360px;
+	border-radius: 12px;
+	@media #{$sm} {
+		min-height: 370px;
+	}
+	@media #{$xs} {
+		min-height: 520px;
+	}
+}
+
+.bd-rank-badge {
+	position: absolute;
+	left: 110px;
+	top: -40px;
+	@media #{$xs} {
+		right: 70px;
+		left: auto;
+  		top: -30px;
+	}
+	.badge-content {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		display: flex;
+		align-items: center;
+		flex-direction: column;
+		justify-content: center;
+		text-align: center;
+
+		.icon {
+			display: block;
+			color: var(--bd-theme-black);
+			line-height: 1;
+		}
+
+		.number {
+			font-size: 20px;
+			color: var(--bd-theme-black);
+			line-height: 1;
+			display: flex;
+			align-items: flex-end;
+			gap: 3px;
+			margin-bottom: 3px;
+
+			.sub {
+				font-size: 14px;
+			}
+		}
+	}
+}
+
+/* elements breadcrumb area start */
+.bd-elements {
+	&-breadcrumb-area {
+		padding-top: 30px;
+		padding-bottom: 30px;
+	}
+
+	&-breadcrumb-content {
+		padding-top: 20px;
+		padding-bottom: 20px;
+	}
+
+	&-breadcrumb-title {
+		color: var(--bd-theme-black);
+		font-weight: var(--bd-fw-sbold);
+		margin-bottom: 15px;
+	}
+}
+
+/* elements breadcrumb area end */

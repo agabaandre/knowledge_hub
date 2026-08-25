@@ -1,0 +1,425 @@
+@use '../utils' as *;
+
+/*---------------------------------
+	1.2 Typography SCSS
+---------------------------------*/
+
+* {
+	margin: 0;
+	padding: 0;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+html {
+	font-size: 10px;
+}
+
+body {
+	color: var(--bd-body-text);
+	font-family: var(--bd-ff-body);
+	font-size: var(--bd-fs-body);
+	font-weight: normal;
+	line-height: 1.5;
+	background: var(--bd-body-primary);
+}
+
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3,
+h4,
+.h5,
+h5,
+.h5,
+h6,
+.h6 {
+	color: var(--bd-theme-black);
+	margin-top: 0px;
+	line-height: 1.25;
+	margin-bottom: 0;
+	font-weight: var(--bd-fw-bold);
+	word-break: break-word;
+	font-family: var(--bd-ff-title);
+}
+
+h1,
+.h1 {
+	font-size: var(--bd-fs-h1);
+	line-height: 1.25;
+	font-weight: var(--bd-fw-bold);
+	font-family: var(--bd-ff-title);
+
+	@media #{$xl} {
+		font-size: 50px;
+	}
+
+	@media #{$lg} {
+		font-size: 50px;
+	}
+
+	@media #{$md} {
+		font-size: 38px;
+	}
+
+	@media #{$sm} {
+		font-size: 38px;
+	}
+
+	@media #{$xs} {
+		font-size: 32px;
+	}
+
+	&.medium {
+		font-size: 58px;
+
+		@media #{$sm} {
+			font-size: 38px;
+		}
+
+		@media #{$xs} {
+			font-size: 32px;
+		}
+	}
+
+	&.small {
+		font-size: 54px;
+
+		@media #{$sm} {
+			font-size: 38px;
+		}
+
+		@media #{$xs} {
+			font-size: 32px;
+		}
+	}
+}
+
+h2,
+.h2 {
+	font-size: var(--bd-fs-h2);
+	font-weight: var(--bd-fw-bold);
+
+	@media #{$lg} {
+		font-size: 36px;
+	}
+
+	@media #{$md} {
+		font-size: 40px;
+	}
+
+	@media #{$sm} {
+		font-size: 40px;
+	}
+
+	@media #{$sm} {
+		font-size: 36px;
+	}
+
+	@media #{$xs} {
+		font-size: 32px;
+	}
+
+	@media #{$xxs} {
+		font-size: 26px;
+	}
+
+	&.medium {
+		font-size: 44px;
+	}
+
+	&.small {
+		font-size: 40px;
+		line-height: 1.1;
+
+		@media #{$xs} {
+			font-size: 30px;
+		}
+	}
+
+	&.x-small {
+		font-size: 32px;
+		line-height: 1.25;
+	}
+}
+
+h3,
+.h3 {
+	font-size: var(--bd-fs-h3);
+	font-weight: var(--bd-fw-bold);
+
+	@media #{$sm} {
+		font-size: 28px;
+	}
+
+	@media #{$xs} {
+		font-size: 24px;
+	}
+
+	&.medium {
+		font-size: 32px;
+	}
+}
+
+h4,
+.h4 {
+	font-size: var(--bd-fs-h4);
+	font-weight: var(--bd-fw-bold);
+
+	@media #{$sm,$xs} {
+		font-size: 22px;
+	}
+
+	&.medium {
+		font-size: 28px;
+	}
+}
+
+h5,
+.h5 {
+	font-size: var(--bd-fs-h5);
+	font-weight: var(--bd-fw-bold);
+
+	&.small {
+		font-size: 20px;
+	}
+
+	@media #{$xs} {
+		font-size: 20px;
+	}
+}
+
+h6,
+.h6 {
+	font-size: var(--bd-fs-h6);
+	font-weight: var(--bd-fw-bold);
+
+	&.small {
+		font-size: 18px;
+	}
+
+	@media #{$xs} {
+		font-size: 18px;
+	}
+}
+
+ul {
+	margin: 0px;
+	padding: 0px;
+}
+
+p {
+	font-size: var(--bd-fs-p);
+	font-family: var(--bd-ff-p);
+	font-weight: var(--bd-fw-normal);
+	color: var(--bd-body-text);
+	margin-bottom: 30px;
+	line-height: 30px;
+
+	&.b1 {
+		font-size: var(--bd-fs-b1);
+		line-height: 1.714;
+	}
+
+	&.b2 {
+		font-size: var(--bd-fs-b2);
+		line-height: 1.625;
+	}
+
+	&.b3 {
+		font-size: var(--bd-fs-b3);
+		line-height: 1.55;
+	}
+
+	&.b4 {
+		font-size: var(--bd-fs-b4);
+		line-height: 1.454;
+	}
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.b1 {
+	font-size: var(--bd-fs-b1);
+	line-height: 1.714;
+}
+
+.b2 {
+	font-size: var(--bd-fs-b2);
+	line-height: 1.625;
+}
+
+.b3 {
+	font-size: var(--bd-fs-b3);
+	line-height: 1.55;
+}
+
+.b4 {
+	font-size: var(--bd-fs-b4);
+	line-height: 1.454;
+}
+
+a {
+	text-decoration: none;
+}
+
+a,
+.btn,
+button,
+span,
+sub,
+sup,
+p,
+input,
+select,
+textarea,
+img,
+svg,
+.transition-3,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	@extend %bd-transition-3;
+}
+
+a:focus,
+.button:focus {
+	text-decoration: none;
+	outline: none;
+}
+
+a:focus,
+a:hover {
+	// text-decoration: none;
+	// color: inherit;
+}
+
+a,
+button {
+	color: inherit;
+	outline: none;
+	border: none;
+	background: transparent;
+}
+
+img {
+	max-width: 100%;
+	object-fit: cover;
+}
+
+button:hover {
+	cursor: pointer;
+}
+
+button:focus {
+	outline: 0;
+}
+
+.uppercase {
+	text-transform: uppercase;
+}
+
+.capitalize {
+	text-transform: capitalize;
+}
+
+hr:not([size]) {
+	margin: 0;
+	border-color: var(--bd-border-primary);
+	opacity: 1;
+	border-width: 1px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="password"],
+input[type="date"],
+input[type="file"],
+input[type="url"],
+select,
+textarea {
+	outline: none;
+	background-color: transparent;
+	height: 50px;
+	width: 100%;
+	font-size: 16px;
+	@include border-radius(6px);
+	border: 1px solid var(--bd-border-primary);
+	color: var(--bd-black);
+	padding-inline-start: 16px;
+	padding-inline-end: 16px;
+
+	&:focus {
+		border-color: var(--bd-primary);
+	}
+}
+
+input[type="file"] {
+	&::file-selector-button {
+		font: var(--bd-ff-body);
+		-webkit-appearance: button;
+		margin-left: -17px;
+		width: 115px;
+		height: 50px;
+		border: none;
+		border-radius: 6px 0 0 6px;
+		color: var(--bd-theme-black);
+		cursor: pointer;
+		padding: 0 30px 0 25px;
+		font-size: 16px;
+		font-weight: var(--bd-fw-medium);
+	}
+}
+
+textarea {
+	line-height: 1.4;
+	padding-top: 17px;
+	padding-bottom: 17px;
+	min-height: 150px;
+
+	&:focus {
+		border-color: var(--bd-primary);
+	}
+}
+
+*::-moz-selection {
+	background: var(--bd-secondary);
+	color: var(--bd-white);
+	text-shadow: none;
+}
+
+::-moz-selection {
+	background: var(--bd-primary);
+	color: var(--bd-white);
+	text-shadow: none;
+}
+
+::selection {
+	background: var(--bd-primary);
+	color: var(--bd-white);
+	text-shadow: none;
+}
+
+*::-moz-placeholder {
+	opacity: 1;
+	font-size: 16px;
+	color: var(--bd-placeholder);
+}
+
+*::placeholder {
+	opacity: 1;
+	font-size: 16px;
+	font-weight: 400;
+	font-family: var(--bd-ff-title);
+	color: var(--bd-placeholder);
+}

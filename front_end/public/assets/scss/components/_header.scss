@@ -1,0 +1,144 @@
+@use "../utils" as *;
+/*----------------------------------------
+	header css
+----------------------------------------*/
+
+.header {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: transparent;
+  padding: 21px 0;
+  @media #{$sm,$xs} {
+    padding: 15px 0;
+  }
+}
+.bd-sticky {
+  position: fixed !important;
+  top: 0;
+  z-index: 111;
+  inset-inline-end: 0;
+  inset-inline-start: 0;
+  width: 100%;
+  -webkit-animation: 500ms ease-in-out 0s normal none 1 running fadeInDown;
+  animation: 500ms ease-in-out 0s normal none 1 running fadeInDown;
+  box-shadow: 0px 1px 28px 0px rgba(0, 0, 0, 0.12);
+  background: var(--bd-white);
+  border-top: 0;
+}
+
+.header-border {
+  border-bottom: 1px solid var(--bd-border-primary);
+}
+
+.bd-doc-sidebar {
+  position: sticky;
+  top: 120px;
+}
+.header-menu nav ul {
+  display: flex;
+  gap: 20px 40px;
+  list-style: none;
+  justify-content: flex-end;
+  align-items: center;
+  li {
+    &:hover {
+      a {
+        color: var(--bd-primary);
+      }
+    }
+  }
+}
+.header-menu ul li a {
+  color: var(--bd-theme-black);
+  font-weight: 500;
+  font-size: 18px;
+}
+.bd-doc-sidebar .nav-doc-sidebar li .bd-progress-bar {
+  position: absolute;
+  background: #e8e8e8;
+  bottom: 0;
+  left: 0;
+  top: 0;
+  max-height: 48px;
+}
+.nav-doc-sidebar {
+  padding-top: 10px;
+  padding-bottom: 100px;
+  overflow-y: scroll;
+  height: 80vh;
+  padding-right: 10px;
+}
+.offcanvas__info {
+  background: var(--bd-white) none repeat scroll 0 0;
+  position: fixed;
+  top: 0;
+  width: 400px;
+  height: 100%;
+  inset-inline-start: -490px;
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 99999;
+  overflow-y: scroll;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  backdrop-filter: blur(37px);
+  padding: 30px;
+  @media #{$xxs} {
+    width: 100%;
+  }
+}
+.offcanvas__info.info-open {
+  opacity: 1;
+  inset-inline-start: 0;
+}
+.mean-container .mean-nav ul {
+  display: block !important;
+}
+.offcanvas__overlay {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  background: var(--bd-theme-black);
+  z-index: 999;
+  top: 0;
+  opacity: 0;
+  visibility: hidden;
+  right: 0;
+  -webkit-transition: all 0.3s ease-out 0s;
+  -moz-transition: all 0.3s ease-out 0s;
+  -ms-transition: all 0.3s ease-out 0s;
+  -o-transition: all 0.3s ease-out 0s;
+  transition: all 0.3s ease-out 0s;
+}
+.offcanvas__overlay.overlay-open {
+  opacity: 0.5;
+  visibility: visible;
+}
+.mean-container .mean-nav {
+  margin-top: 0;
+}
+.mean-container a.meanmenu-reveal {
+  display: none;
+}
+.mean-container .mean-bar {
+  background: transparent;
+}
+.mean-container .mean-nav {
+  background: transparent;
+}
+.mean-container .mean-nav ul li a {
+  color: #000;
+}
+.offcanvas-toggle {
+  font-size: 30px;
+  cursor: pointer;
+  color: var(--bd-theme-black);
+}
+.menu-close-btn {
+  font-size: 35px;
+  cursor: pointer;
+}
+.fix {
+  overflow: hidden;
+}

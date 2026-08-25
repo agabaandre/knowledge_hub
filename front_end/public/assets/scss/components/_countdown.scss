@@ -1,0 +1,120 @@
+@use "../utils" as *;
+
+/*----------------------------------------*/
+/*  2.13 countdown
+/*----------------------------------------*/
+
+.bd-countdown {
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    .countdown-item {
+        padding: 15px 15px;
+        color: var(--bd-theme-black);
+        background-color: var(--bd-bg-primary);
+        border-radius: 6px;
+        width: 150px;
+        height: 150px;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        font-weight: 700;
+        @media #{$sm,$xs} {
+            padding: 10px 10px;
+            font-size: 32px;
+            height: 100px;
+        }
+        span {
+            color: var(--bd-body-text);
+            font-size: 18px;
+            font-weight: 400;
+            display: inline-block;
+        }
+    }
+    &.style-02 {
+        .countdown-item {
+            color: var(--bd-theme-black);
+            background-color: transparent;
+            width: auto;
+            height: auto;
+            display: flex;
+            font-size: 68px;
+            font-weight: 700;
+            line-height: 1;
+        }
+    }
+    &.style-03 {
+        .countdown-item {
+            color: var(--bd-theme-black);
+            background-color: transparent;
+            width: auto;
+            height: auto;
+            flex-direction: column-reverse;
+            font-size: 68px;
+            font-weight: 700;
+            line-height: 1;
+            span {
+                margin-bottom: 10px;
+            }
+        }
+    }
+    &.style-04 {
+        gap: 30px 100px;
+        .countdown-item {
+            color: var(--bd-theme-black);
+            background-color: transparent;
+            width: auto;
+            height: auto;
+            font-size: 68px;
+            font-weight: 700;
+            line-height: 1;
+            position: relative;
+            &:not(:last-child) {
+                &::after {
+                    position: absolute;
+                    content: ":";
+                    inset-inline-end: -50px;
+                    inset-block-start: 13px;
+                }
+            }
+        }
+    }
+    &.style-05 {
+        gap: 30px 100px;
+        .countdown-item {
+            color: var(--bd-theme-black);
+            background-color: transparent;
+            width: auto;
+            height: auto;
+            font-size: 68px;
+            font-weight: 700;
+            line-height: 1;
+            position: relative;
+            &:not(:last-child) {
+                &::after {
+                    position: absolute;
+                    content: ":";
+                    inset-inline-end: -50px;
+                    inset-block-start: 13px;
+                }
+            }
+            span {
+                display: none;
+            }
+        }
+    }
+    &.has-white {
+        .countdown-item {
+            color: var(--bd-white);
+            background-color: transparent;
+            span {
+                color: var(--bd-body-text);
+            }
+        }
+    }
+}

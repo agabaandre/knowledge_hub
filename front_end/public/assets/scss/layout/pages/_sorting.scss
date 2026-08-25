@@ -1,0 +1,192 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  4.31 sorting css
+/*----------------------------------------*/
+
+.bd-sorting-item-found {
+    font-size: 16px;
+    font-weight: var(--bd-fw-sbold);
+
+    span {
+        color: var(--bd-primary);
+    }
+}
+
+.bd-top-sorting-right {
+    @media #{$xs} {
+        flex-wrap: wrap;
+    }
+}
+
+.bd-sorting-select {
+    &.nice-select {
+        min-width: 225px;
+        padding-left: 50px;
+        padding-right: 44px;
+
+        &::before {
+            display: block;
+            height: auto;
+            pointer-events: none;
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            -webkit-transition: all 0.15s ease-in-out;
+            transition: all 0.15s ease-in-out;
+            content: "\f0b0";
+            font-family: "Font Awesome 6 Pro";
+            font-size: 16px;
+            -webkit-transform: translateY(-50%);
+            -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
+            margin-top: 0;
+            height: auto;
+            width: auto;
+            color: var(--bd-theme-black);
+            -webkit-transition: 0.3s;
+            transition: 0.3s;
+        }
+    }
+}
+
+.bd-layout-switcher {
+    display: flex;
+    align-items: center;
+
+    label {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--bd-theme-black);
+        cursor: pointer;
+        min-width: 35px;
+    }
+}
+
+.bd-switcher-btn {
+    display: flex;
+    align-items: center;
+    margin: -5px;
+    padding-left: 10px;
+    list-style: none;
+
+    li {
+        margin: 5px;
+    }
+}
+
+.bd-filter {
+    &-course {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 45px;
+        flex-wrap: wrap;
+        gap: 15px;
+
+        @media #{$xl,$lg,$md,$sm,$xs} {
+            overflow-x: scroll;
+            overflow-y: hidden !important;
+            overflow: scroll;
+            overflow-y: scroll;
+            flex-wrap: nowrap !important;
+            white-space: nowrap;
+            justify-content: flex-start;
+            padding-bottom: 10px;
+            margin-bottom: 35px;
+        }
+
+        .filter-item {
+            cursor: pointer;
+            text-align: center;
+            font-size: 16px;
+            font-weight: var(--bd-fw-regular);
+            text-transform: capitalize;
+            background-color: transparent;
+            color: var(--bd-theme-black);
+            padding: 0 30px;
+            height: 50px;
+            border: 1px solid var(--bd-primary);
+            margin: 0px;
+            -webkit-transition: all 0.3s ease-in-out;
+            transition: all 0.3s ease-in-out;
+            position: relative;
+            z-index: 1;
+            line-height: 1;
+            border-radius: 6px;
+
+            &.active {
+                color: var(--bd-white);
+                background: var(--bd-primary);
+                border-color: var(--bd-primary);
+            }
+        }
+    }
+
+    &-layout-trigger {
+        display: inline-block;
+        border: 1px solid var(--bd-border-primary);
+        border-radius: 3px;
+        padding: 8px;
+        color: var(--bd-theme-black);
+        font-size: 26px;
+        line-height: 1;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+        width: 50px;
+        height: 50px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        &.active {
+            border-color: var(--bd-primary);
+            color: var(--bd-primary);
+        }
+    }
+
+    &-type-text {
+        display: none;
+
+        &.active {
+            display: inline-block;
+        }
+    }
+}
+
+.display-layout-grid,
+.display-layout-list {
+    display: none;
+
+    &.active {
+        display: flex;
+        animation: layout-slide-in .4s ease-in-out;
+    }
+}
+
+/* Keyframes for the layout sliding in effect */
+@keyframes layout-slide-in {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.course-rating-spaceing {
+    label i {
+        margin-right: 4px;
+    }
+}
+
+.rating-spacing-2 i {
+    margin-right: 4px;
+}
+
+.rating-spacing li i {
+    margin-right: 4px;
+}

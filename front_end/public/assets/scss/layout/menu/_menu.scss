@@ -1,0 +1,535 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  3.6.1 Main menu css
+/*----------------------------------------*/
+
+.main-menu {
+    >ul {
+        display: inline-flex;
+        gap: 0 44px;
+
+        @media #{$xxl} {
+            gap: 0 15px;
+        }
+
+        @media #{$xl} {
+            gap: 0 10px;
+        }
+
+        >li {
+            &:hover {
+                >a {
+                    color: var(--bd-primary);
+                }
+
+                >ul {
+                    opacity: 1;
+                    pointer-events: all;
+                    top: 100%;
+                    &.submenu li {
+                        &:hover {
+                            >ul {
+                                opacity: 1;
+                                pointer-events: all;
+                                left: 100%;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    li {
+        position: relative;
+        list-style: none;
+
+        a {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--bd-theme-black);
+            padding: 28px 0px;
+            display: inline-block;
+            font-family: var(--bd-ff-body);
+            position: relative;
+            transition: all 0.3s linear;
+            text-transform: capitalize;
+
+            &.active {
+                color: var(--bd-primary);
+            }
+        }
+    }
+
+    .submenu {
+        background-color: var(--bd-white);
+        box-shadow: 0px 30px 70px 0px rgba(11, 6, 70, 0.08);
+        padding: 18px 0px;
+        width: 260px;
+        position: absolute;
+        left: 0;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 10;
+        transition: all 0.5s;
+        top: 100%;
+        border-radius: 0 0 4px 4px;
+        top: 100px;
+        @media #{$xxl, $xl} {
+            width: 240px;
+        }
+        ul {
+            background-color: var(--bd-white);
+            padding: 18px 0px;
+            width: 240px;
+            position: absolute;
+            left: calc(100% + 10px);
+            top: 0;
+            opacity: 0;
+            z-index: 10;
+            transition: all 0.5s;
+            border-radius: 0 4px 4px 4px;
+            @media #{$xxl, $xl} {
+                width: 200px;
+            }
+        }
+
+        li {
+            position: relative;
+            padding: 0 0;
+            padding-left: 20px;
+            padding-right: 0;
+            @media #{$xxl, $xl} {
+                padding-left: 10px;
+            }
+            &:hover {
+                >a {
+                    color: var(--bd-primary);
+                }
+
+                >ul {
+                    opacity: 1;
+                    transform: none !important;
+                    pointer-events: all;
+                }
+            }
+
+            a {
+                font-size: 16px;
+                color: var(--bd-theme-black);
+                padding: 8px 12px;
+                display: block;
+                transition: all 0.5s;
+                text-align: left;
+                cursor: pointer;
+
+                &.active {
+                    color: var(--bd-primary);
+                }
+            }
+        }
+    }
+
+    .has-mega-menu {
+        position: static;
+        transition: all 15s ease-in-out;
+    }
+
+    .mega-menu {
+        background-color: var(--bd-white);
+        box-shadow: 0px 20px 30px rgba(1, 15, 28, 0.1);
+        padding: 30px 30px;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 1320px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        column-gap: 50px;
+        justify-content: center;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 20;
+        transition: all 0.5s;
+        top: 100px;
+        text-align: start;
+        border-radius: 0 0 8px 8px;
+        @media #{$xl} {
+            width: 100%;
+            column-gap: 30px;
+        }
+
+        li:has(ul) {
+            >a {
+                &:after {
+                    content: "";
+                }
+            }
+        }
+
+        li {
+            a {
+                font-size: 16px;
+                font-weight: 500;
+                color: var(--bd-theme-black);
+                padding: 5px;
+                display: inline-block;
+                align-items: center;
+                gap: 8px;
+                background: transparent;
+                border-radius: 8px;
+                transition: all 0.3s;
+
+                &:hover {
+                    color: var(--bd-primary);
+                }
+
+                &.active {
+                    color: var(--bd-primary);
+                }
+            }
+        }
+
+        .title {
+            font-weight: 500;
+            color: var(--bd-theme-black);
+            border-bottom: 1px solid var(--bd-border-primary);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            pointer-events: none;
+            border-radius: 0;
+            display: block;
+        }
+    }
+
+    .mega-style-2 {
+        padding: 0 15%;
+        gap: 0;
+        grid-template-columns: repeat(2, 1fr);
+
+        .title {
+            height: 70px;
+            padding-bottom: 0;
+            margin-bottom: 0;
+            position: relative;
+            overflow: visible;
+            padding-left: 30px;
+
+            &:after {
+                position: absolute;
+                content: "";
+                width: 5000px;
+                height: 1px;
+                background-color: #333337;
+                bottom: -1px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+
+        >li {
+            &:not(:first-child) {
+                border-left: 1px solid #333337;
+            }
+        }
+
+        ul {
+            column-count: 2;
+            position: relative;
+            padding: 20px 0;
+
+            &:after {
+                position: absolute;
+                content: "";
+                width: 1px;
+                height: 700px;
+                background-color: #333337;
+                top: 0;
+                left: 50%;
+                z-index: 1;
+            }
+
+            li {
+                a {
+                    padding-left: 30px;
+                }
+            }
+        }
+    }
+
+    .mega-grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+        row-gap: 60px;
+    }
+
+    .mega-grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+        row-gap: 60px;
+    }
+
+    .mega-grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0 30px;
+    }
+
+    .mega-grid-5 {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0 30px;
+    }
+
+    .mega-grid-6 {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 30px;
+    }
+
+    .home-menu-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        row-gap: 20px;
+        column-gap: 20px;
+        padding-bottom: 25px;
+    }
+
+    .list-3-column {
+        ul {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            column-gap: 50px;
+
+            @media #{$xl} {
+                column-gap: 30px;
+            }
+        }
+    }
+
+    .span-first-item {
+        ul {
+            li:first-child {
+                grid-column: 1 / -1;
+                column-span: all;
+            }
+        }
+    }
+
+    &-2 {
+        @media #{$lg} {
+            display: none;
+        }
+
+        li {
+            display: inline-block;
+            padding: 0 10px;
+
+            a {
+                display: block;
+                font-weight: 500;
+                font-size: 20px;
+                line-height: 1.5;
+                color: var(--bd-white);
+                padding: 10px;
+                text-transform: capitalize;
+
+                &:hover {
+                    color: var(--bd-primary);
+                }
+
+                @media #{$xl} {
+                    padding: 5px 0;
+                }
+            }
+        }
+    }
+
+    &-3 {
+        li {
+            display: inline-block;
+            margin-right: 45px;
+
+            @media #{$lg} {
+                margin-right: 25px;
+            }
+
+            &:last-child {
+                margin-right: 0;
+            }
+
+            a {
+                color: var(--bd-white);
+                font-weight: 500;
+                font-size: 18px;
+                line-height: 26px;
+
+                &:hover {
+                    color: var(--bd-primary);
+                }
+            }
+        }
+    }
+
+    &-4 {
+        li {
+            display: inline-block;
+            margin-right: 50px;
+
+            a {
+                font-size: 14px;
+                font-weight: 500;
+                line-height: 1.5;
+                color: var(--bd-white);
+                text-transform: uppercase;
+
+                &:hover {
+                    color: var(--bd-primary);
+                }
+            }
+        }
+    }
+}
+
+.main-menu .mega-style-3 .title,
+.main-menu .mega-style-2 .title {
+    padding-top: 28px;
+}
+
+.main-menu li .has-arrow {
+    >a::before {
+        content: "\f107";
+        font-family: var(--ff-fontawesome);
+        font-weight: 600;
+        position: absolute;
+        right: 32px;
+        transition: all 0.3s ease-in-out;
+        @media #{$xxl, $xl} {
+            right: 20px;
+        }
+    }
+
+    &:hover a::before {
+        transform: rotate(-90deg);
+    }
+}
+
+.last-children {
+    @media #{$xl,$lg,$md,$sm,$xs} {
+        &.submenu {
+            right: 10px;
+            left: auto;
+
+            ul {
+                right: calc(100% + 10px);
+                left: auto;
+            }
+        }
+
+        & .has-arrow:hover a::after {
+            transform: rotate(90deg) !important;
+        }
+    }
+
+}
+
+.main-menu>ul>li {
+    @media #{$xxl,$xl,$lg,$md,$sm,$xs} {
+        &:hover>ul.last-children.submenu li:hover>ul {
+            right: 100%;
+            left: auto;
+        }
+    }
+}
+
+.home-menu {
+    &-item {
+        position: relative;
+        line-height: 1;
+        padding: 0 0 !important;
+        text-align: center;
+
+        @media #{$md,$sm,$xs} {
+            margin-bottom: 20px;
+            padding-top: 20px;
+        }
+
+        &:hover {
+            .home-menu-thumb {
+                &::before {
+                    opacity: 0.5;
+                }
+            }
+        }
+    }
+
+    &-thumb {
+        position: relative;
+        border: 1px solid var(--bd-border-primary);
+        border-radius: 6px;
+        margin-bottom: 15px;
+
+        &::before {
+            position: absolute;
+            content: "";
+            height: 100%;
+            width: 100%;
+            background: var(--bd-secondary);
+            opacity: 0;
+            transition: all 0.3s linear;
+            left: 0;
+            bottom: 0;
+            border-radius: 6px;
+        }
+
+        img {
+            width: 100%;
+            border-radius: 6px;
+        }
+    }
+
+    &-title {
+        line-height: 1;
+    }
+}
+
+/* primary title */
+.main-menu ul>li:hover>ul>li:hover>.title {
+    color: var(--bd-primary);
+}
+
+.bd-sticky .main-menu li a {
+    color: var(--bd-theme-black);
+    &.active {
+        color: var(--bd-primary);
+    }
+}
+
+.bd-sticky .main-menu>ul>li:hover>a {
+    color: var(--bd-primary);
+}
+
+.main-menu>ul>li>a {
+    &::after {
+        content: "\f107";
+        font-family: var(--ff-fontawesome);
+        margin-left: 5px;
+        font-weight: 500;
+        font-size: 14px;
+        display: inline-block;
+        transition: all 0.3s 0s ease-out;
+    }
+
+    &:hover {
+        &::after {
+            transform: rotate(180deg);
+        }
+    }
+}
+
+// dropdown position styles
+.nav-position-one {
+    .main-menu>ul>li:nth-child(2):hover ul li ul {
+        @media #{$xl} {
+            right: auto !important;
+            left: 100% !important;
+        }
+    }
+}

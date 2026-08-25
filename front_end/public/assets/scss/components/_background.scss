@@ -1,0 +1,113 @@
+@use "../utils" as *;
+
+/*----------------------------------------*/
+/*  2.5 Background
+/*----------------------------------------*/
+
+.bd-noise-bg {
+    position: relative;
+    z-index: 5;
+
+    &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url(../../images/bg/theme-1-bg.webp);
+        z-index: -1;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+    }
+}
+
+.theme-bg {
+    background-color: var(--bd-primary);
+}
+
+.theme-bg-05 {
+    background-color: var(--primary-rgb-05);
+}
+
+
+.primary-bg {
+    background-color: var(--bd-bg-primary);
+}
+
+.theme-bg-secondary {
+    background-color: var(--bd-bg-secondary);
+}
+
+.full-black-bg {
+    background-color: var(--bd-black);
+}
+
+.theme-black {
+    background-color: var(--bd-theme-black);
+}
+
+.secondary-bg {
+    background-color: var(--bd-secondary);
+}
+.secondary-bg-05 {
+    background-color: var(--secondary-rgb-05);
+}
+.success-bg {
+    background-color: var(--bd-success);
+}
+
+.info-bg {
+    background-color: var(--bd-info);
+}
+
+.warning-bg {
+    background-color: var(--bd-warning);
+}
+
+.danger-bg {
+    background-color: var(--bd-danger);
+}
+
+.teal-bg {
+    background-color: var(--bd-teal);
+}
+
+.gary-bg {
+    background-color: var(--bd-gray);
+}
+
+.white-bg {
+    background-color: var(--bd-white);
+}
+
+.gradient-bg {
+    background: linear-gradient(92.77deg, rgba(7, 161, 105, 0.15) 1.33%, rgba(251, 140, 0, 0.15) 129.72%) !important;
+}
+
+
+.bd-kinder-bg {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	top: 0;
+	background-repeat: no-repeat;
+	background-position: center;
+	mix-blend-mode: luminosity;
+	opacity: 0.05;
+    z-index: -1;
+    &-overlay{
+        &::before {
+            content: "";
+            height: 50%;
+            width: 84%;
+            position: absolute;
+            top: 0;
+            inset-inline-start: 8%;
+            background: linear-gradient(180.87deg, var(--bd-primary) 0.69%, rgba(17, 161, 145, 0) 96.75%);
+            z-index: -1;
+        }
+    }
+}

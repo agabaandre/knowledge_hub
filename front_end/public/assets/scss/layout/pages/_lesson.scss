@@ -1,0 +1,327 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  4.2 Lesson css
+/*----------------------------------------*/
+
+.bd-lesson {
+    &-logo {
+        padding: 20px 30px;
+        border-bottom: 1px solid var(--bd-border-primary);
+    }
+
+    &-content {
+        background-color: var(--bd-bg-primary);
+        position: fixed;
+        inset-inline-start: 0;
+        top: 0;
+        width: 450px;
+        height: 100%;
+        z-index: 99;
+        transition: all 0.5s ease;
+        overflow-y: scroll;
+        @media #{$lg,$md,$sm,$xs} {
+            inset-inline-start: -450px;
+        }
+        @media #{$xs} {
+            width: 300px;
+        }
+
+        &.collapsed {
+            inset-inline-start: -450px;
+            @media #{$lg,$md,$sm,$xs} {
+                inset-inline-start: 0px;
+            }
+        }
+
+        @media #{$lg,$md,$sm,$xs} {
+            inset-inline-start: -450px;
+        }
+
+        &.open {
+            inset-inline-start: 0;
+        }
+
+        >.title {
+            font-size: 20px;
+            padding: 17px 20px;
+        }
+    }
+
+    &-video-wrap {
+        margin-bottom: 30px;
+        position: relative;
+
+        .plyr__poster {
+            background-size: cover;
+        }
+
+        .plyr__control--overlaid {
+            padding: 24px;
+            background: var(--bd-primary);
+        }
+
+        .plyr__control--overlaid:hover {
+            background: var(--bd-secondary);
+        }
+    }
+
+    &-video-title-wrap {
+        display: flex;
+        align-items: center;
+        background: var(--bd-primary);
+        padding: 13px 20px;
+        justify-content: space-between;
+        gap: 10px;
+
+        &-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+
+            a,button {
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(255, 255, 255, 0.1294117647);
+                border-radius: 50%;
+                color: var(--bd-white);
+                flex: 0 0 auto;
+            }
+
+            span {
+                display: block;
+                color: var(--bd-white);
+                font-size: 20px;
+                font-weight: 500;
+            }
+        }
+
+        &-right {
+            a {
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(255, 255, 255, 0.1294117647);
+                color: var(--bd-white);
+                border-radius: 50%;
+                flex: 0 0 auto;
+            }
+        }
+    }
+
+    &-next-prev-button {
+        button {
+            position: absolute;
+            left: 20px;
+            top: -15px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba($color: $primary, $alpha: .30);
+            color: var(--bd-black);
+            line-height: 0;
+            font-size: 18px;
+
+            &.next-button {
+                left: auto;
+                right: 20px;
+            }
+
+            &:hover {
+                color: var(--bd-white);
+                background-color: var(--bd-primary);
+            }
+        }
+    }
+
+    &-details-content {
+        margin-right: 50px;
+    }
+
+    &-about {
+        margin-bottom: 50px;
+        position: relative;
+
+        .tab-style-two {
+            .nav-link {
+                font-size: 22px;
+            }
+
+            .tab-content {
+                padding: 0 30px;
+            }
+        }
+
+        .bd-lesson-materials {
+            font-size: 20px;
+            color: var(--bd-text-muted);
+            font-weight: 500;
+            transition: var(--transition);
+
+            &:hover {
+                color: var(--bd-primary);
+            }
+
+            i {
+                margin-right: 5px;
+            }
+        }
+    }
+}
+
+.plyr--full-ui input[type=range] {
+    color: var(--bd-primary);
+}
+
+
+.app-offcanvas-overlay.overlay-open {
+    @media (max-width: 1199px) {
+        background-color: rgba(0, 0, 0, 0.6);
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
+        z-index: 10;
+    }
+
+    &:hover {
+        cursor: url(../../../images/shape/cross-out.webp), pointer;
+    }
+}
+
+.bd-lesson-player {
+    position: absolute;
+    inset-inline-end: 0;
+    width: calc(100% - 450px);
+    transition: all 0.5s ease;
+    top: 0;
+
+    @media #{$lg,$md,$sm,$xs} {
+        width: 100%;
+    }
+
+    &.collapsed {
+        width: 100%;
+    }
+}
+
+
+
+.bd-learners{
+    &-area {
+        @media #{$md,$sm,$xs} {
+            background-color: var(--primary-rgb-05);
+        }
+    }
+    &-bg {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        background-repeat: no-repeat;
+        background-position: top;
+        background-size: cover;
+        z-index: -1;
+    
+        @media #{$md,$sm,$xs} {
+            display: none;
+        }
+    }
+    &-content {
+        .single-item {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            @media #{$xs} {
+                flex-wrap: wrap;
+            }
+            &:not(:last-child) {
+                margin-bottom: 30px;
+            }
+    
+            .thumb {
+                width: 150px;
+                height: 150px;
+                min-width: 150px;
+                @media #{$xs} {
+                    width: 100%;
+                    height: 100%;
+                    min-width: 100%;
+                }
+                img {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 8px;
+                }
+            }
+    
+            .content {
+                .title {
+                    margin-bottom: 10px;
+                    color: var(--bd-primary);
+                }
+            }
+        }
+    }
+    &-counter {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    
+        @media #{$md,$sm,$xs} {
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 30px;
+    
+            .bd-counter-style-nine.bd-counter-item {
+                .bd-counter-total {
+                    font-size: 62px;
+                    opacity: 0.10;
+                    color: var(--bd-black);
+                }
+    
+                p {
+                    color: var(--bd-black);
+                }
+            }
+        }
+        @media #{$xs} {
+            gap: 30px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            .bd-counter-style-nine.bd-counter-item {
+                .bd-counter-total {
+                    font-size: 48px;
+                }
+                p {
+                    font-size: 20px;
+                }
+            }
+        }
+    
+    }
+    &-counter-item {
+        .thumb {
+            width: 50px;
+        }
+    
+        .title {
+            color: var(--bd-white);
+        }
+    
+        .subtitle {
+            color: var(--bd-light-gray);
+        }
+    }
+}

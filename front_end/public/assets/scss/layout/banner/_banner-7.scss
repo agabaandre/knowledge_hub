@@ -1,0 +1,224 @@
+@use '../../utils' as *;
+/*----------------------------------------*/
+/*  3.1.5 Banner Style 5
+/*----------------------------------------*/
+
+.bd-banner-seven {
+    min-height: 700px;
+    display: flex;
+    align-items: center;
+    z-index: 5;
+    padding: 50px 0;
+
+    @media #{$xl} {
+        min-height: 700px;
+    }
+
+    @media #{$lg,$md} {
+        padding-top: 100px;
+    }
+    .bd-banner-tag {
+        &-two {
+            position: absolute;
+            top: 110px;
+            left: -80px;
+            z-index: 5;
+            animation: upDown 1.8s ease-in-out 1.8s forwards infinite alternate;
+            @media #{$xxl} {
+                left: -120px;
+            }
+            @media #{$lg,$md} {
+                left: 0px;
+            }
+            @media #{$sm,$xs} {
+                display: none;
+            }
+
+            .inner {
+                background: var(--bd-white);
+                border-right: 4px solid var(--bd-secondary);
+                border-bottom: 4px solid var(--bd-secondary);
+                padding: 15px 19px 15px 19px;
+                border-radius: 6px;
+                position: relative;
+                z-index: 5;
+            }
+
+            .icon {
+                display: flex;
+                align-items: center;
+                gap: 0 25px;
+                margin-bottom: 15px;
+            }
+
+            .content {
+                display: flex;
+                align-items: center;
+                gap: 0 13px;
+
+                .title {
+                    font-size: 30px;
+                    line-height: 30px;
+                    font-weight: 600;
+                    color: var(--bd-primary);
+                }
+
+                .subtitle {
+                    font-size: 12px;
+                    color: #171717;
+                }
+            }
+        }
+    }
+}
+
+.bd-banner-seven-thumb {
+    max-width: 565px;
+    margin-left: auto;
+    margin-bottom: -50px;
+    position: relative;
+    z-index: 5;
+    @media #{$xl} {
+        margin-bottom: -155px;
+    }
+    @media #{$lg,$md} {
+        margin: 0 auto;
+        margin-bottom: -50px;
+    }
+}
+.bd-banner-language {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+	width: 620px;
+    @media #{$sm,$xs} {
+        grid-template-columns: repeat(2, 1fr);
+        width: 100%;
+    }
+    @media #{$xxs} {
+        grid-template-columns: repeat(1, 1fr);
+        width: 100%;
+    }
+}
+.bd-banner-language {
+    .item {
+        background-color: var(--bd-white);
+        display: inline-flex;
+        align-items: center;
+        gap: 0 10px;
+        padding: 0 15px;
+        height: 50px;
+        box-shadow: 0px 4px 10px 0px rgba(131, 131, 131, 0.1);
+        border-radius: 6px;
+        transition: var(--transition);
+        &:hover {
+            background-color: var(--bd-primary);
+            .language-name {
+                color: var(--bd-white);
+            }
+        }
+    }
+
+    .language-thumb {
+        width: 36px;
+        min-width: 36px;
+        height: 36px;
+
+        img {
+            width: 100%;
+            height: 100%;
+            border-radius: 100%;
+        }
+    }
+    .language-name {
+        font-size: 16px;
+        font-weight: var(--bd-fw-medium);
+        color: var(--bd-theme-black);
+        transition: var(--transition);
+    }
+}
+
+.bd-banner-seven-shape {
+    position: absolute;
+    // animation: slideRight 25s linear 0s infinite alternate-reverse both;
+    top: 40px;
+    opacity: .05;
+    left: 300px;
+    @media #{$sm,$xs} {
+        display: none;
+    }
+    &-two {
+        position: absolute;
+        top: 50px;
+        left: 50px;
+        width: 50px;
+        opacity: .3;
+        @media #{$lg,$md,$sm} {
+            top: 20px;
+        }
+    }
+    &-three {
+        position: absolute;
+        top: 50px;
+        right: 100px;
+        width: 50px;
+        opacity: .3;
+        @media #{$lg,$md,$sm} {
+            top: 20px;
+        }
+    }
+    &-four {
+        position: absolute;
+        bottom: 50px;
+        left: 100px;
+        width: 50px;
+        opacity: .3;
+    }
+    &-five {
+        position: absolute;
+        bottom: 50px;
+        right: 100px;
+        width: 50px;
+        opacity: .3;
+        @media #{$xxl} {
+            bottom: 40px;
+            right: 50px;
+        }
+        @media #{$xl} {
+            bottom: 30px;
+            right: 500px;
+        }
+    }
+    &-six {
+        position: absolute;
+        bottom: 100px;
+        left: 980px;
+        width: 50px;
+        opacity: .3;
+        @media #{$xxl} {
+            left: 700px;
+        }
+        @media #{$xl} {
+            bottom: 120px;
+            left: 450px;
+        }
+        @media #{$lg} {
+            bottom: 500px;
+            left: 850px;
+        }
+        @media #{$md} {
+            bottom: 550px;
+            left: 600px;
+        }
+    }
+}
+
+@keyframes slideRight {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(220px);
+    }
+}

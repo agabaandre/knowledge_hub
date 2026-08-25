@@ -1,0 +1,6 @@
+sass --watch main.scss:../css/main.css
+
+
+
+Youtube Video:
+https://www.youtube.com/watch?v=b0fUtt4tTQM&ab_channel=BDevs

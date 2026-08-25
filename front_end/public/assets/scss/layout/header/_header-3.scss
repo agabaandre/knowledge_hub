@@ -1,0 +1,70 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  3.5.3 Header Style 3
+/*----------------------------------------*/
+
+.header-style-three {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 99;
+
+    .main-menu li a {
+        color: var(--bd-white);
+        &.active {
+            color: var(--bd-secondary);
+        }
+    }
+
+    .main-menu>ul>li:hover>a {
+        color: var(--bd-secondary);
+    }
+
+    .bd-header-meta {
+        .meta-icon {
+            color: var(--bd-white);
+        }
+
+        .item-number {
+            background-color: var(--bd-white);
+            color: var(--bd-theme-black);
+        }
+    }
+
+    .bar-icon span {
+        background: var(--bd-white);
+    }
+
+    &.bd-sticky {
+        .bd-header-logo {
+            display: none;
+
+            &-sticky {
+                display: block;
+            }
+        }
+
+        .bd-header-meta {
+            .meta-icon {
+                color: var(--bd-primary);
+            }
+
+            .item-number {
+                background-color: var(--bd-primary);
+                color: var(--bd-white);
+            }
+        }
+
+        .bar-icon span {
+            background: var(--bd-theme-black);
+        }
+    }
+
+    .bd-header-logo-sticky {
+        display: none;
+        padding: 27px 0px;
+        line-height: 1;
+    }
+}

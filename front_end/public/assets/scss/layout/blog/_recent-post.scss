@@ -1,0 +1,50 @@
+@use "../../utils" as *;
+
+/*----------------------------------------*/
+/*  3.2.4 Recent Post css
+/*----------------------------------------*/
+
+.bd-recent-post{
+    &-item {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        @media #{$lg,$xs} {
+            flex-direction: column;
+        }
+        &:not(:last-child) {
+            margin-bottom: 20px;
+        }
+    }
+    &-thumb {
+        width: 80px;
+        min-width: 80px;
+        height: 80px;
+        @media #{$lg,$xs} {
+            width: 100%;
+            max-width: 100%;
+            height: 100%;
+        }
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+    }
+    &-title {
+        font-size: 18px;
+    }
+    &-meta {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        .icon {
+            color: var(--bd-primary);
+        }
+        .date {
+            color: var(--bd-theme-black);
+        }
+    }
+}

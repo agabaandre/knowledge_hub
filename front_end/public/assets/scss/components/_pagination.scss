@@ -1,0 +1,45 @@
+@use '../utils' as *;
+
+/*----------------------------------------
+   2.18 Basic pagination
+-----------------------------------------*/
+
+.basic {
+   &-pagination {
+      margin-top: 50px;
+      text-align: center;
+      ul {
+         display: inline-flex;
+         gap: 15px;
+
+         li {
+            list-style: none;
+            a {
+               width: 40px;
+               height: 40px;
+               display: inline-flex;
+               align-items: center;
+               justify-content: center;
+               position: relative;
+               font-weight: 600;
+               font-size: 16px;
+               background-color: transparent;
+               @include border-radius(4px);
+               &:hover {
+                  background-color: var(--bd-bg-primary);
+                  color: var(--bd-primary);
+               }
+            }
+            .current {
+               background-color: var(--bd-primary);
+               color: var(--bd-white);
+            }
+            .prev, .next {
+               background-color: var(--bd-bg-primary);
+               color: var(--bd-primary);
+               font-size: 20px;
+            }
+         }
+      }
+   }
+}

@@ -1,0 +1,114 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  4.14 FAq css
+/*----------------------------------------*/
+
+.bd-faq-content {
+    .accordion-common-style.accordion-bg .accordion-body {
+        background-color: var(--bd-bg-primary);
+    }
+
+    &.has-white-bg {
+        .accordion-common-style.accordion-bg .accordion-body {
+            background-color: var(--bd-white);
+        }
+    }
+
+    &.modern-schooling {
+        .accordion-common-style.accordion-bg .accordion-body {
+            background-color: var(--primary-rgb-05);
+        }
+    }
+}
+.bd-faq-thumb {
+    &.style-two {
+        img {
+            border-radius: 6px;
+        }
+    }
+
+    &.style-three {
+        width: 300px;
+
+        @media #{$md,$xs,$sm} {
+            width: 100%;
+        }
+
+        img {
+            height: 100%;
+            border-radius: 6px;
+        }
+
+        &.has-small {
+            &:first-child {
+                margin-bottom: 20px;
+            }
+        }
+    }
+}
+.bd-faq-small-thumb {
+    margin-bottom: -30px;
+    margin-top: 30px;
+
+    @media #{$md,$xs,$sm} {
+        margin-bottom: 0;
+        margin-top: 0;
+    }
+}
+.bd-faq-shape {
+    .shape-1 {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: -1;
+    }
+
+    .shape-2 {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        z-index: -1;
+    }
+}
+.bd-faq-page-shape {
+    position: absolute;
+    right: 0;
+    bottom: -100px;
+}
+.bd-faq-thumb {
+    &-wrapper {
+        margin-left: 20px;
+        position: relative;
+    }
+
+    &-two {
+        img {
+            -webkit-border-radius: 51% 49% 77% 23%/65% 50% 50% 35%;
+            -moz-border-radius: 51% 49% 77% 23%/65% 50% 50% 35%;
+            border-radius: 51% 49% 77% 23%/65% 50% 50% 35%;
+            -webkit-animation: image-radius-anim 5s linear infinite alternate;
+            -moz-animation: image-radius-anim 5s linear infinite alternate;
+            -o-animation: image-radius-anim 5s linear infinite alternate;
+            animation: image-radius-anim 5s linear infinite alternate;
+            transition: all 0.3s ease-out 0s;
+        }
+    }
+}
+
+.bd-faq-tab-menu {
+    .nav-pills {
+        flex-direction: column;
+        gap: 15px;
+        .nav-link{
+            font-size: 26px;
+            color: var(--bd-theme-black);
+            padding: 0;
+            font-weight: var(--bd-fw-medium);
+            &.active {
+                color: var(--bd-primary);
+                background-color: transparent;
+            }
+        }
+    }
+}

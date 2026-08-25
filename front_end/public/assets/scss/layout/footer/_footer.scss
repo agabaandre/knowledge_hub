@@ -1,0 +1,226 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  3.4.3 Footer Style
+/*----------------------------------------*/
+
+.bd-footer {
+    &-widget {
+        .bd-footer-widget-title {
+            margin-bottom: 20px;
+        }
+
+        &-logo {
+            margin-bottom: 20px;
+        }
+
+        &-description {
+            color: var(--bd-theme-black);
+            margin-bottom: 25px;
+            &.light-color {
+                color: var(--bd-white);
+            }
+        }
+
+        .bd-footer-widget-links {
+            ul {
+                li {
+                    list-style: none;
+                    font-weight: var(--bd-fw-medium);
+
+                    a {
+                        color: var(--bd-theme-black);
+                    }
+
+                    &:not(:last-child) {
+                        margin-bottom: 10px;
+                    }
+                }
+            }
+
+            &.has-white {
+                ul {
+                    li {
+                        a {
+                            color: var(--bd-white);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    &-area {
+        &.has-footer-space {
+            padding: 190px 0 100px;
+
+            @media #{$xs} {
+                padding: 65px 0 65px;
+            }
+        }
+    }
+}
+
+.bd-footer-widget-contact-item {
+    display: flex;
+    gap: 10px;
+    color: var(--bd-taxonomy-color);
+
+    span {
+        font-weight: 500;
+    }
+
+    a {
+        &:hover {
+            color: var(--bd-primary);
+        }
+    }
+
+    &:not(:last-child) {
+        margin-bottom: 10px;
+    }
+
+    &.has-white {
+        color: var(--bd-white);
+
+        a {
+            color: rgba($color: $white, $alpha: .90);
+
+            &:hover {
+                color: var(--bd-secondary);
+            }
+        }
+    }
+}
+
+.bd-footer-subscribe-form {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+    margin-bottom: 25px;
+
+    @media #{$lg,$md,$sm,$xs} {
+        flex-wrap: wrap;
+    }
+
+    &.style-two {
+        position: relative;
+        margin-bottom: 15px;
+
+        input {
+            padding-inline-start: 20px;
+            padding-inline-end: 130px;
+            color: var(--bd-white);
+            &::placeholder{
+                color: var(--bd-light);
+            }
+        }
+
+        .bd-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 0 20px;
+        }
+        &.place-text-white {
+            input {
+                color: var(--bd-white);
+                &::placeholder {
+                    color: var(--bd-light);
+                }
+            }
+        }
+    }
+}
+
+.footer-1-col-2 {
+    margin-left: 100px;
+
+    @media #{$lg} {
+        margin-left: 50px;
+    }
+
+    @media #{$md,$sm,$xs} {
+        margin-left: 0;
+    }
+}
+
+.footer-1-col-3 {
+    margin-left: 70px;
+
+    @media #{$lg} {
+        margin-left: 50px;
+    }
+
+    @media #{$md,$sm,$xs} {
+        margin-left: 0;
+    }
+}
+
+.footer-4-col-2 {
+    margin-inline-start: 130px;
+
+    @media #{$xl} {
+        margin-inline-start: 100px;
+    }
+
+    @media #{$lg} {
+        margin-inline-start: 90px;
+    }
+
+    @media #{$md,$sm,$xs} {
+        margin-inline-start: 0px;
+    }
+}
+.footer-4-col-3 {
+    margin-inline-start: 60px;
+
+    @media #{$xl} {
+        margin-inline-start: 50px;
+    }
+
+    @media #{$lg} {
+        margin-inline-start: 32px;
+    }
+
+    @media #{$md,$sm,$xs} {
+        margin-inline-start: 0px;
+    }
+
+}
+
+
+.bd-footer-top {
+	border-bottom: 1px solid var(--bd-white);
+}
+.bd-footer-wave {
+    padding-top: 125px;
+}
+
+.bd-wave {
+    background: url("../../../images/shape/wave.svg") repeat-x;
+    position: absolute;
+    top: 40px;
+    width: 6400px;
+    height: 198px;
+    animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+    transform: translate3d(0, 0, 0);
+
+    &:nth-of-type(2) {
+        top: 40px;
+        animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) -0.125s infinite, swell 7s ease -1.25s infinite;
+        opacity: 1;
+    }
+
+    &-wrapper {
+        height: 135px;
+        width: 100%;
+        position: absolute;
+        top: -10px;
+        left: 0;
+        background: var(--bd-white);
+    }
+}

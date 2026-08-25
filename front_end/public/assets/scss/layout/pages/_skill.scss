@@ -1,0 +1,77 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  4.30 skill css
+/*----------------------------------------*/
+
+.bd-skill{
+    &-content-wrapper{
+        &.style-one{
+            .single-progress{
+                &:not(:last-child){
+                    margin-bottom: 25px;
+                }
+                .title{
+                    margin-bottom: 13px;
+                }
+            }
+        }
+    }
+    &-thumb-wrapper{
+        &.style-one{
+            &.bd-skill-thumb-wrapper{
+                position: relative;
+            }
+            .bd-skill-thumb{
+                max-width: 520px;
+                margin: 0 auto;
+                position: relative;
+                border-radius: 12px;
+                overflow: hidden;
+                @media #{$md} {
+                    max-width: 100%;
+                }
+                &::before{
+                    position: absolute;
+                    content: "";
+                    width: 100%;
+                    height: 100%;
+                    background: var(--bd-theme-black);
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    opacity: 0.3;
+                    border-radius: 6px;
+                }
+                img{
+                    width: 100%;
+                }
+            }
+            .bd-skill-video{
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%,-50%);
+                z-index: 3;
+            }
+            .has-bg{
+                .icon{
+                    background: var(--bd-white);
+                    color: var(--bd-primary);
+                    width: 80px;
+                    height: 80px;
+                    &:hover{
+                        background: var(--bd-primary);
+                        color: var(--bd-white);
+                    }
+                }
+            }
+        }
+    }
+}
+
+.bd-skill-progress-wrapper {
+    .progress {
+        background-color: var(--bd-light);
+    }
+}

@@ -1,0 +1,283 @@
+@use '../../utils' as *;
+/*----------------------------------------*/
+/*  3.1.1 banner Style 1
+/*----------------------------------------*/
+
+.bd-banner-one {
+    min-height: 930px;
+    display: flex;
+    align-items: center;
+    z-index: 5;
+
+    @media #{$xl} {
+        min-height: 740px;
+    }
+
+    @media #{$lg,$md} {
+        padding-top: 220px;
+    }
+
+    @media #{$sm} {
+        padding-top: 250px;
+    }
+
+    @media #{$xs} {
+        padding-top: 260px;
+    }
+    &-content {
+        margin-top: 120px;
+        @media #{$lg,$md,$sm,$xs} {
+            margin-top: 0px;
+        }
+    }
+    .bd-banner {
+        &-subtitle {
+            position: relative;
+            color: var(--bd-primary);
+            margin-bottom: 20px;
+            display: block;
+            text-transform: uppercase;
+        }
+
+        &-title {
+            letter-spacing: -0.02em;
+        }
+
+        &-thumb {
+            margin-bottom: -170px;
+            margin-left: 30px;
+
+            @media #{$lg,$md,$sm,$xs} {
+                margin-bottom: 0;
+            }
+        }
+
+        &-tag {
+            &-one {
+                position: absolute;
+                top: 113px;
+                left: 49px;
+                animation: upDown 1.8s ease-in-out 1.8s forwards infinite alternate;
+
+                @media #{$xl} {
+                    left: 0;
+                }
+
+                @media #{$sm} {
+                    top: 100px;
+                    left: 0;
+                }
+
+                @media #{$xs} {
+                    display: none;
+                }
+
+                .shape {
+                    position: absolute;
+                    right: -30px;
+                    top: -26px;
+
+                    @media #{$xl,$lg,$md,$sm,$xs} {
+                        display: none;
+                    }
+                }
+
+                .inner {
+                    background: var(--bd-white);
+                    border-right: 5px solid var(--bd-secondary);
+                    border-bottom: 5px solid var(--bd-secondary);
+                    padding: 24px 50px 24px 20px;
+                    display: flex;
+                    align-items: center;
+                    border-radius: 6px;
+                    position: relative;
+                    z-index: 5;
+
+                    @media #{$sm,$xs} {
+                        padding: 20px 20px 20px 20px;
+                    }
+                }
+
+                .content {
+                    margin-left: 15px;
+
+                    .title {
+                        font-size: 30px;
+                        line-height: 30px;
+                        font-weight: 600;
+                        color: var(--bd-theme-black);
+                        margin-bottom: 6px;
+                    }
+
+                    .subtitle {
+                        font-size: 12px;
+                        color: #171717;
+                    }
+                }
+            }
+
+            &-two {
+                position: absolute;
+                bottom: 280px;
+                right: -160px;
+                animation: upDown 1.8s ease-in-out 1.8s forwards infinite alternate;
+
+                @media #{$x3l} {
+                    right: -100px;
+                }
+
+                @media #{$xxl} {
+                    right: 0px;
+                }
+
+                @media #{$xl} {
+                    right: 0px;
+                    bottom: 100px;
+                }
+
+                @media #{$lg,$md} {
+                    right: 30px;
+                }
+
+                @media #{$sm} {
+                    bottom: 100px;
+                    right: 0px;
+                }
+
+                @media #{$xs} {
+                    display: none;
+                }
+
+                .inner {
+                    background: var(--bd-white);
+                    border-right: 4px solid var(--bd-primary);
+                    border-bottom: 4px solid var(--bd-primary);
+                    padding: 15px 19px 15px 19px;
+                    border-radius: 6px;
+                    position: relative;
+                    z-index: 5;
+                }
+
+                .icon {
+                    display: flex;
+                    align-items: center;
+                    gap: 0 25px;
+                    margin-bottom: 15px;
+                }
+
+                .content {
+                    display: flex;
+                    align-items: center;
+                    gap: 0 13px;
+
+                    .title {
+                        font-size: 30px;
+                        line-height: 30px;
+                        font-weight: 600;
+                        color: var(--bd-primary);
+                    }
+
+                    .subtitle {
+                        font-size: 12px;
+                        color: #171717;
+                    }
+                }
+            }
+        }
+
+        &-shape {
+            .shape-1 {
+                position: absolute;
+                left: 45px;
+                top: 200px;
+                animation: upDown 1.8s ease-in-out 1.8s forwards infinite alternate;
+
+                @media #{$xl,$lg,$md,$sm,$xs} {
+                    display: none;
+                }
+            }
+
+            .shape-2 {
+                position: absolute;
+                bottom: 75px;
+                left: 45px;
+                animation: right-2-left 1.8s ease-in-out 1.8s forwards infinite alternate;
+
+                @media #{$xs} {
+                    bottom: 20px;
+                }
+            }
+
+            .shape-3 {
+                position: absolute;
+                right: 100px;
+                top: 160px;
+                animation: scaleZeroOne 5s cubic-bezier(0.12, 0, 0.39, 0) 0s infinite alternate both;
+                width: 50px;
+
+                @media #{$sm} {
+                    top: 200px;
+                }
+
+                @media #{$xs} {
+                    right: 20px;
+                    top: 20px;
+                    width: 40px;
+                }
+            }
+
+            .shape-4 {
+                position: absolute;
+                bottom: 115px;
+                left: 720px;
+
+                @media #{$md,$sm,$xs} {
+                    display: none;
+                }
+            }
+
+            .shape-5 {
+                position: absolute;
+                right: 175px;
+                bottom: 420px;
+
+                @media #{$sm,$xs} {
+                    display: none;
+                }
+            }
+        }
+    }
+}
+
+.rotateme {
+    -webkit-animation-name: rotateme;
+    animation-name: rotateme;
+    -webkit-animation-duration: 10s;
+    animation-duration: 10s;
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+    animation-timing-function: linear;
+}
+
+@keyframes rotateme {
+    from {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+
+    to {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes rotateme {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}

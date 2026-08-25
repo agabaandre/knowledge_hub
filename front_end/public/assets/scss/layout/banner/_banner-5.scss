@@ -1,0 +1,266 @@
+@use '../../utils' as *;
+/*----------------------------------------*/
+/*  3.1.5 Banner Style 5
+/*----------------------------------------*/
+
+.bd-banner-five {
+    min-height: 930px;
+    display: flex;
+    align-items: center;
+
+    @media #{$xl} {
+        min-height: 780px;
+    }
+
+    @media #{$lg} {
+        min-height: 730px;
+    }
+
+    .bd-banner-section-wrapper {
+        padding-top: 100px;
+
+        @media #{$lg} {
+            padding-top: 140px;
+        }
+
+        @media #{$md} {
+            padding-top: 200px;
+            padding-bottom: 100px;
+        }
+        @media #{$sm} {
+            padding-top: 150px;
+            padding-bottom: 120px;
+        }
+        @media #{$xs} {
+            padding-top: 120px;
+            padding-bottom: 120px;
+        }
+        @media #{$xxs} {
+            padding-top: 160px;
+            padding-bottom: 100px;
+        }
+    }
+
+    .bd-banner-title {
+        font-size: 62px;
+        color: var(--bd-white);
+        @media #{$sm,$xs} {
+            font-size: 48px;
+        }
+        @media #{$xxs} {
+            font-size: 36px;
+        }
+    }
+
+    .bd-banner-description {
+        color: rgba($color: $white, $alpha: .70);
+    }
+
+    .bd-banner-thumb-shape {
+        position: absolute;
+        width: 850px;
+        bottom: 0;
+        left: 0;
+
+        @media #{$xl} {
+            width: 600px;
+        }
+
+        @media #{$lg,$md,$sm,$xs,$xxs} {
+            width: 100%;
+            height: auto;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+    }
+
+    .bd-banner-thumb-wrapper {
+        margin-left: 110px;
+        position: relative;
+        margin-bottom: -225px;
+
+        @media #{$x3l} {
+            margin-left: 70px;
+        }
+
+        @media #{$xxl} {
+            margin-left: 0;
+        }
+
+        @media #{$xl} {
+            margin-left: 0;
+            margin-bottom: -180px;
+        }
+
+        @media #{$lg} {
+            margin-left: 0;
+            margin-bottom: -260px;
+        }
+        @media #{$md,$sm,$xs} {
+            margin-left: 0;
+            margin-bottom: 0;
+        }
+        @media #{$xxs} {
+            margin-left: 0;
+            margin-bottom: -10px;
+        }
+    }
+
+    .bd-banner-thumb {
+        position: relative;
+        z-index: 10;
+        transform: translateX(15px);
+
+        @media #{$x3l} {
+            transform: translateX(38px);
+        }
+
+        @media #{$xl} {
+            max-width: 540px;
+        }
+
+        @media #{$lg} {
+            transform: translateX(0);
+            text-align: center;
+            width: 400px;
+            margin: 0 auto;
+        }
+        @media #{$sm} {
+            transform: translateX(0px);
+            width: 450px;
+            text-align: center;
+            margin: 0 auto;
+        }
+        @media #{$xs} {
+            transform: translateX(0px);
+            width: 400px;
+            text-align: center;
+            margin: 0 auto;
+        }
+        @media #{$xxs} {
+            transform: translateX(0px);
+            width: 310px;
+            text-align: center;
+            margin: 0 auto;
+        }
+    }
+
+    .bd-banner-shape {
+        .shape-1 {
+            top: 0;
+            left: 80px;
+            z-index: -1;
+            @media #{$lg} {
+                top: -50px;
+                left: 100px;
+            }
+        }
+
+        .shape-2 {
+            bottom: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .shape-3 {
+            top: 0;
+            right: 0;
+            z-index: -1;
+        }
+
+        .shape-4 {
+            top: 220px;
+            left: 920px;
+
+            @media #{$x4l} {
+                left: 820px;
+            }
+            @media #{$x3l} {
+                left: 720px;
+            }
+            @media #{$xxl} {
+                left: 560px;
+            }
+            @media #{$xl} {
+                top: 120px;
+                left: 470px;
+            }
+            @media #{$lg} {
+                top: 130px;
+                left: 470px;
+                width: 70px;
+            }
+            img {
+                object-fit: contain;
+            }
+        }
+
+        .shape-5 {
+            top: 285px;
+            left: 995px;
+
+            @media #{$x4l} {
+                left: 865px;
+            }
+            @media #{$x3l} {
+                left: 795px;
+            }
+            @media #{$xxl} {
+                left: 625px;
+            }
+            @media #{$xl} {
+                top: 185px;
+                left: 535px;
+            }
+            @media #{$lg,$md,$sm,$xs} {
+                display: none;
+            }
+        }
+    }
+
+    .bd-banner-social {
+        display: flex;
+        align-items: center;
+        gap: 75px;
+        position: absolute;
+        right: -50px;
+        transform: rotate(-90deg);
+        top: 490px;
+        color: var(--bd-white);
+        z-index: 99999;
+
+        @media #{$xxl,$xl} {
+            right: -80px;
+        }
+
+        @media #{$lg,$md,$sm,$xs} {
+            margin-top: 30px;
+            position: inherit;
+            transform: rotate(0deg);
+        }
+
+        .social-icon-style-01 ul li a:hover {
+            color: var(--bd-secondary);
+        }
+
+        span {
+            position: relative;
+
+            &::after {
+                position: absolute;
+                content: "";
+                top: 50%;
+                right: -50px;
+                width: 40px;
+                height: 1px;
+                background-color: var(--bd-white);
+                transform: translateY(-50%);
+            }
+        }
+
+        .social-icon-style-01 ul li a {
+            font-size: 16px;
+        }
+    }
+}

@@ -1,0 +1,73 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  3.5.2 Header Style 2
+/*----------------------------------------*/
+
+.header-style-two {
+	position: absolute;
+	left: 0;
+	right: 0;
+	z-index: 99;
+
+	.bd-header-area {
+		background-color: var(--bd-white);
+		margin: 0 120px;
+		padding: 0 30px;
+		box-shadow: 0px 30px 100px 0px rgba(0, 0, 0, 0.2);
+		border-radius: 10px;
+		@media #{$xxl} {
+			margin: 0 40px;
+		}
+		@media #{$xl,$lg,$md} {
+			margin: 0 50px;
+		}
+		@media #{$sm,$xs} {
+            margin: 0 30px;
+        }
+		@media #{$xxs} {
+            margin: 15px 10px;
+			padding: 0 15px;
+        }
+		&.bd-sticky {
+			margin: 0;
+			border-radius: 0px;
+			padding: 0 0;
+			.bd-header-inner {
+				padding: 0 150px;
+				@media #{$xxl} {
+					padding: 0 70px;
+				}
+		
+				@media #{$xl,$lg,$md} {
+					padding: 0 80px;
+				}
+
+				@media #{$sm,$xs} {
+					padding: 0 60px;
+				}
+		
+				@media #{$xxs} {
+					padding: 0 15px;
+				}
+			}
+		}
+	}
+
+	.bd-header-inner {
+		padding: 0 0;
+	}
+
+	.btn-outline-primary {
+		border: 1px solid var(--bd-white);
+		color: var(--bd-white);
+
+		&:hover {
+			border-color: var(--bd-primary);
+		}
+	}
+
+	.bar-icon span {
+		background: var(--bd-theme-black);
+	}
+}

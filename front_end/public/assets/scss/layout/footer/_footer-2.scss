@@ -1,0 +1,124 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  3.4.2 Footer Style
+/*----------------------------------------*/
+
+.bd-footer {
+    &-area {
+        &.style-two {
+            .bd-footer-widget-title {
+                margin-bottom: 20px;
+                color: rgba($color: $white, $alpha: .65);
+            }
+
+            .bd-footer-widget-links {
+                ul {
+                    li {
+                        list-style: none;
+
+                        a {
+                            color: var(--bd-white);
+                        }
+
+                        &:not(:last-child) {
+                            margin-bottom: 10px;
+                        }
+                    }
+                }
+            }
+
+            .bd-footer-widget-description {
+                color: var(--bd-white);
+            }
+
+            .checkout-option label {
+                color: var(--bd-white);
+            }
+        }
+    }
+
+    &-widget {
+        .bd-footer-widget-title {
+            margin-bottom: 20px;
+            color: var(--bd-body-text);
+            &.has-color-off {
+                color: rgba($color: $white, $alpha: .60);
+            }
+        }
+
+        &.footer-2 {
+            &-col-2 {
+                margin-left: 40px;
+
+                @media #{$xl,$lg,$md,$sm,$xs} {
+                    margin-left: 0;
+                }
+            }
+
+            &-col-3 {
+                margin-left: 40px;
+
+                @media #{$xl,$lg,$md,$sm,$xs} {
+                    margin-left: 0;
+                }
+            }
+
+            &-col-4 {
+                margin-left: 40px;
+
+                @media #{$xl,$lg,$md,$sm,$xs} {
+                    margin-left: 0;
+                }
+            }
+        }
+    }
+}
+
+.footer-3-col-2 {
+    margin-left: 120px;
+    @media #{$md,$sm,$xs} {
+        margin-left: 0;
+    }
+}
+
+.footer-3-col-3 {
+    margin-left: 70px;
+    @media #{$md,$sm,$xs} {
+        margin-left: 0;
+    }
+}
+
+.footer-5-col-2 {
+	margin-left: 20px;
+    @media #{$sm,$xs} {
+        margin-left: 0;
+    }
+}
+
+
+.bd-footer-shape {
+    @media #{$xxl,$xl,$lg,$md,$sm,$xs} {
+        display: none;
+    }
+    .shape-1 {
+        position: absolute;
+        bottom: 0;
+        left: 20px;
+        z-index: 6;
+        opacity: .6;
+    }
+    .shape-2 {
+        position: absolute;
+        bottom: 0;
+        right: 20px;
+        z-index: 6;
+        opacity: .6;
+    }
+}
+
+.bd-footer-top-shape {
+    img {
+        width: 100%;
+    }
+}

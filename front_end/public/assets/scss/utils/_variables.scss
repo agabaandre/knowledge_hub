@@ -1,0 +1,110 @@
+
+:root {
+
+  /**  @font family declaration */
+  --bd-ff-body: 'Roboto', sans-serif;
+  --bd-ff-title: 'Roboto', sans-serif;
+  --bd-ff-style: 'Big Shoulders Display', sans-serif;
+  --bd-ff-p: 'Roboto', sans-serif;
+  --ff-fontawesome: "Font Awesome 6 Pro";
+  --ff-icomoon: "icomoon";
+
+  /** @color declaration */
+
+  --bd-white: #FFFFFF;
+  --bd-black: #000000;
+  --bd-light: #C8C8C8;
+  --bd-theme-black: #00170F;
+  --bd-placeholder: rgba(30, 30, 30, 0.4);
+
+  --bd-body-primary: #FFFFFF;
+
+  --bd-primary: #07A169;
+  --bd-secondary: #FFB800;
+  --bd-success: #00db22;
+  --bd-info: #0dcaf0;
+  --bd-warning: #ffc107;
+  --bd-danger: #FF0033;
+  --bd-teal: #20c997;
+  
+  --bd-body-text: #808080;
+  --bd-taxonomy-color: #4d4d4d;
+  --bd-label-color: #0A0A0A;
+  --bd-rating-color: #FEC300;
+  --bd-text-muted: #6c757d;
+
+  --bd-gray: #C5C6C7;
+  --bd-light-gray: #D5D5D5;
+
+  --bd-bg-primary: #F5F5F5;
+  --bd-bg-secondary: #EDF3F5;
+  --bd-border-primary: #E5E5E5;
+  --bd-border-secondary: rgba(220, 220, 220, 1);
+  
+  --bd-gradient-1: linear-gradient(90deg, #F5F5F5 52.13%, rgba(245, 245, 245, 0.7) 100%);
+  --primary-rgb: 7, 161, 105;
+  --primary-rgb-0: rgba(var(--primary-rgb), 0.0);
+  --primary-rgb-05: rgba(var(--primary-rgb), 0.05);
+  --primary-rgb-1: rgba(var(--primary-rgb), 0.1);
+  --primary-rgb-15: rgba(var(--primary-rgb), 0.15);
+  --primary-rgb-5: rgba(var(--primary-rgb), 0.5);
+  --primary-rgb-7: rgba(var(--primary-rgb), 0.7);
+
+  --secondary-rgb: 251, 140, 0;
+  --secondary-rgb-0: rgba(var(--secondary-rgb), 0.0);
+  --secondary-rgb-1: rgba(var(--secondary-rgb), 0.1);
+  --secondary-rgb-05: rgba(var(--secondary-rgb), 0.05);
+  --secondary-rgb-15: rgba(var(--secondary-rgb), 0.15);
+  --secondary-rgb-3: rgba(var(--secondary-rgb), 0.3);
+  --secondary-rgb-5: rgba(var(--secondary-rgb), 0.5);
+  --secondary-rgb-7: rgba(var(--secondary-rgb), 0.7);
+
+  /** extra color */
+  --bd-extra-color01: #4C6EF5;
+  --bd-extra-color02: #FF8C00;
+  --bd-extra-color03: #9F7AEA;
+  --bd-extra-color04: #D946EF;
+  --bd-extra-color05: #38BDF8;
+  --bd-extra-color06: #EC4899;
+  --bd-extra-color07: #22C55E;
+  --bd-extra-color08: #3B82F6;
+
+  /** @font weight declaration */
+  --bd-fw-normal: normal;
+  --bd-fw-thin: 100;
+  --bd-fw-elight: 200;
+  --bd-fw-light: 300;
+  --bd-fw-regular: 400;
+  --bd-fw-medium: 500;
+  --bd-fw-sbold: 600;
+  --bd-fw-bold: 700;
+  --bd-fw-ebold: 800;
+  --bd-fw-black: 900;
+
+  /** @font size declaration */
+  --bd-fs-body: 16px;
+  --bd-fs-p: 16px;
+  --bd-fs-h1: 68px;
+  --bd-fs-h2: 48px;
+  --bd-fs-h3: 38px;
+  --bd-fs-h4: 28px;
+  --bd-fs-h5: 22px;
+  --bd-fs-h6: 20px;
+  --bd-fs-b1: 14px;
+  --bd-fs-b2: 16px;
+  --bd-fs-b3: 18px;
+  --bd-fs-b4: 22px;
+
+  /** @transition value declaration */
+  --transition: all .3s ease-in-out;
+  --transition-5: all .5s ease-in-out;
+}
+$white: #ffffff;
+$black: #000000;
+$theme-black: #00170F;
+$primary: #07A169;
+$secondary: #FFB800;
+$success: #00db22;
+$info: #0dcaf0;
+$warning: #ffc107;
+$danger: #FF0033;

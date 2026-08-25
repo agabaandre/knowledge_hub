@@ -1,0 +1,100 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  3.6.2 Mobile Menu css
+/*----------------------------------------*/
+
+.bd-mobile-menu-smaller{
+  display: none;
+  @media #{$lg,$md,$sm,$xs} {
+    display: block;
+  }
+}
+.bd-offcanvas-menu ul li {
+    position: relative;
+    list-style: none;
+  
+    &:not(:last-child) {
+      margin-bottom: 8px;
+    }
+  
+    &>a {
+      display: block;
+      font-size: 16px;
+      color: var(--bd-theme-black);
+      padding: 10px 0;
+      padding-inline-end: 20px;
+      &.active {
+        color: var(--bd-primary);
+      }
+      &:hover {
+        color: var(--bd-primary);
+      }
+    }
+  
+    &.active {
+      &>a {
+        color: var(--bd-primary);
+      }
+  
+      &>.bd-menu-close {
+        background-color: var(--bd-primary);
+        border-color: var(--bd-primary);
+        color: var(--bd-white);
+  
+        i {
+          -webkit-transform: rotate(90deg);
+          -moz-transform: rotate(90deg);
+          -ms-transform: rotate(90deg);
+          -o-transform: rotate(90deg);
+          transform: rotate(90deg);
+        }
+      }
+    }
+  
+    &>a {
+      border-bottom: 1px solid rgba($color: $white, $alpha: .1);
+    }
+  
+    & .submenu,
+    .mega-menu {
+      display: none;
+      padding-inline-start: 20px;
+      //   &.child {
+      //     display: none;
+      //     padding-inline-start: 20px;
+      //   }
+    }
+  
+    & .has-homemenu {
+      padding-inline-start: 0;
+    }
+  
+    & .homemenu-title {
+      color: var(--bd-white);
+    }
+  }
+  
+  .bd-menu-close {
+    position: absolute;
+    inset-inline-end: 0;
+    top: 8px;
+    font-size: 18px;
+    color: #7F8387;
+    z-index: 1;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #7F8387;
+    -webkit-transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    -moz-transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    -ms-transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    -o-transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, color 0.3s ease-in-out;
+  
+    i {
+      transition: all 0.3s ease-in-out;
+    }
+  }

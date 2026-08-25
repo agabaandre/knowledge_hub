@@ -1,0 +1,62 @@
+@use "../utils" as *;
+
+/*----------------------------------------*/
+/*  2.12 Color Short Code
+/*----------------------------------------*/
+.white-text {
+    color: var(--bd-white) !important;
+}
+.white-text-9 {
+    color: rgba($color: $white, $alpha: .90);
+}
+.white-text-7 {
+    color: rgba($color: $white, $alpha: .70);
+}
+.text-black {
+    color: var(--bd-black);
+}
+.light-text {
+    color: var(--bd-light);
+}
+.text-theme-black {
+    color: var(--bd-theme-black)
+}
+.text-primary {
+    color: var(--bd-primary) !important;
+}
+.text-secondary {
+    color: var(--bd-secondary) !important;
+}
+.text-success {
+    color: var(--bd-success);
+}
+.text-info {
+    color: var(--bd-info);
+}
+.text-warning {
+    color: var(--bd-warning) !important;
+}
+.text-danger {
+    color: var(--bd-danger);
+}
+.body-text {
+    color: var(--bd-body-text);
+}
+.taxonomy-color {
+    color: var(--bd-taxonomy-color);
+}
+.title-color {
+    color: var(--bd-theme-black) !important;
+}
+.label-color {
+    color: var(--bd-label-color);
+}
+.rating-color {
+    color: var(--bd-rating-color);
+}
+.bd-text-muted {
+    color: var(--bd-text-muted);
+}
+.bg-text-color {
+    color: var(--bd-bg-primary);
+}

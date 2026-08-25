@@ -1,0 +1,258 @@
+@font-face {
+  font-family: 'icomoon';
+  src:  url('../../fonts/icomoon.eot?mntcio');
+  src:  url('../../fonts/icomoon.eot?mntcio#iefix') format('embedded-opentype'),
+    url('../../fonts/icomoon.ttf?mntcio') format('truetype'),
+    url('../../fonts/icomoon.woff?mntcio') format('woff'),
+    url('../../fonts/icomoon.svg?mntcio#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-shield-check:before {
+  content: "\e900";
+}
+.icon-quiz:before {
+  content: "\e914";
+}
+.icon-quran-memorization:before {
+  content: "\e915";
+}
+.icon-quran-translation:before {
+  content: "\e916";
+}
+.icon-tajweed-lessons:before {
+  content: "\e917";
+}
+.icon-teacher:before {
+  content: "\e918";
+}
+.icon-account-business:before {
+  content: "\e919";
+}
+.icon-dance-music:before {
+  content: "\e91a";
+}
+.icon-phototgraphy:before {
+  content: "\e91b";
+}
+.icon-open-book:before {
+  content: "\e91c";
+}
+.icon-book-stack:before {
+  content: "\e91d";
+}
+.icon-books-pile:before {
+  content: "\e91e";
+}
+.icon-graduation-cap:before {
+  content: "\e91f";
+}
+.icon-hotel:before {
+  content: "\e920";
+}
+.icon-documentation:before {
+  content: "\e922";
+}
+.icon-circle-user:before {
+  content: "\e924";
+}
+.icon-comment:before {
+  content: "\e925";
+}
+.icon-profile:before {
+  content: "\e926";
+}
+.icon-art-design:before {
+  content: "\e927";
+}
+.icon-business-analysis:before {
+  content: "\e928";
+}
+.icon-data-science:before {
+  content: "\e92a";
+}
+.icon-fitness:before {
+  content: "\e92b";
+}
+.icon-graphics-design:before {
+  content: "\e92c";
+}
+.icon-human-research:before {
+  content: "\e92d";
+}
+.icon-marketing:before {
+  content: "\e92e";
+}
+.icon-globe1:before {
+  content: "\e92f";
+}
+.icon-home:before {
+  content: "\e932";
+}
+.icon-envelope-b:before {
+  content: "\e933";
+}
+.icon-share:before {
+  content: "\e934";
+}
+.icon-bar:before {
+  content: "\e935";
+}
+.icon-pin:before {
+  content: "\e936";
+}
+.icon-doc:before {
+  content: "\e937";
+}
+.icon-flag:before {
+  content: "\e938";
+}
+.icon-call-ring:before {
+  content: "\e939";
+}
+.icon-call:before {
+  content: "\e93a";
+}
+.icon-web-development:before {
+  content: "\e93b";
+}
+.icon-career-growth:before {
+  content: "\e93c";
+}
+.icon-expert-trainers:before {
+  content: "\e93d";
+}
+.icon-online-class:before {
+  content: "\e93e";
+}
+.icon-faculty-directory:before {
+  content: "\e93f";
+}
+.icon-online-learning:before {
+  content: "\e940";
+}
+.icon-scholarship-financial:before {
+  content: "\e941";
+}
+.icon-envelope:before {
+  content: "\e942";
+}
+.icon-location-fill:before {
+  content: "\e943";
+}
+.icon-instagram:before {
+  content: "\e944";
+}
+.icon-android:before {
+  content: "\e945";
+}
+.icon-apple:before {
+  content: "\e946";
+}
+.icon-academic-buildings:before {
+  content: "\e947";
+}
+.icon-arts-culture:before {
+  content: "\e948";
+}
+.icon-youtube:before {
+  content: "\e949";
+}
+.icon-linkedin:before {
+  content: "\e94a";
+}
+.icon-facebook:before {
+  content: "\e94b";
+}
+.icon-twitter-x:before {
+  content: "\e94c";
+}
+.icon-cleander-check:before {
+  content: "\e94d";
+}
+.icon-person:before {
+  content: "\e94e";
+}
+.icon-play:before {
+  content: "\e94f";
+}
+.icon-library:before {
+  content: "\e950";
+}
+.icon-global-certificate:before {
+  content: "\e951";
+}
+.icon-syllabus:before {
+  content: "\e952";
+}
+.icon-university:before {
+  content: "\e953";
+}
+.icon-business-economics:before {
+  content: "\e954";
+}
+.icon-campaigns:before {
+  content: "\e955";
+}
+.icon-environmental-studies:before {
+  content: "\e956";
+}
+.icon-support:before {
+  content: "\e957";
+}
+.icon-heart:before {
+  content: "\e958";
+}
+.icon-percent:before {
+  content: "\e959";
+}
+.icon-health-physical:before {
+  content: "\e95a";
+}
+.icon-humanities:before {
+  content: "\e95b";
+}
+.icon-language-literature:before {
+  content: "\e95d";
+}
+.icon-star:before {
+  content: "\e95e";
+}
+.icon-social-science:before {
+  content: "\e95f";
+}
+.icon-cleander:before {
+  content: "\e960";
+}
+.icon-vocational-technical:before {
+  content: "\e961";
+}
+.icon-language-literature1:before {
+  content: "\e962";
+}
+.icon-mathematics:before {
+  content: "\e963";
+}
+.icon-physical-education:before {
+  content: "\e964";
+}
+.icon-science-nature:before {
+  content: "\e965";
+}

@@ -1,0 +1,119 @@
+@use "../../utils" as *;
+
+/*----------------------------------------*/
+/*  3.3.1 Cart css
+/*----------------------------------------*/
+
+.shop-table-content {
+	table {
+		border-color: var(--bd-border-primary);
+		text-align: center;
+		> thead {
+			vertical-align: middle;
+			th {
+				font-size: 16px;
+				font-weight: 500;
+			}
+		}
+		> tbody {
+			vertical-align: middle;
+		}
+		.product-thumbnail img {
+			width: 65px !important;
+            padding: 10px 0 !important;
+			max-height: 120px !important;
+		}
+		.bd-product-quantity {
+			margin: auto;
+		}
+	}
+}
+
+.removeRow {
+	color: var(--bd-theme-black);
+	transition: all 0.3s ease-in-out;
+	&:hover {
+		color: var(--bd-danger);
+	}
+}
+
+.bd-cart-checkout-wrapper {
+	background: var(--bd-bg-primary);
+	padding: 36px 24px 28px;
+	border-radius: 8px;
+}
+.bd-cart-checkout-top {
+	padding-bottom: 13px;
+	margin-bottom: 19px;
+	border-bottom: 1px solid var(--bd-border-primary);
+}
+.bd-cart-checkout-top span {
+	font-size: 20px;
+	color: var(--bd-theme-black);
+	font-weight: 500;
+}
+.bd-cart-checkout-shipping {
+	padding-bottom: 16px;
+	border-bottom: 1px solid var(--bd-border-primary);
+	margin-bottom: 15px;
+}
+.bd-cart-checkout-shipping-title {
+	font-weight: 500;
+	font-size: 20px;
+	margin-bottom: 15px;
+	font-family: var(--bd-ff-body);
+	color: var(--bd-theme-black);
+}
+.bd-cart-checkout-shipping-option:not(:last-child) {
+	margin-bottom: 5px;
+}
+.bd-cart-checkout-shipping-option {
+	input[type="radio"] ~ label::before {
+		border: 1px solid var(--bd-theme-black);
+	}
+	input[type="radio"]:checked ~ label::before {
+		border-color: var(--bd-primary);
+	}
+	input[type="radio"]:checked ~ label::after {
+		background-color: var(--bd-primary);
+	}
+}
+.bd-cart-checkout-shipping-option label {
+	color: var(--bd-theme-black);
+	position: relative;
+	padding-left: 25px;
+	display: flex;
+	justify-content: space-between;
+}
+.bd-cart-checkout-shipping-option label span {
+	color: var(--bd-primary);
+}
+.bd-cart-checkout-total {
+	margin-bottom: 25px;
+}
+.bd-cart-checkout-total span {
+	font-weight: 500;
+	font-size: 18px;
+	color: var(--bd-theme-black);
+}
+
+
+.bd-cart-coupon-input-box {
+	label {
+		font-size: 18px;
+		color: var(--bd-theme-black);
+		margin-bottom: 10px;
+		font-weight: var(--bd-fw-sbold);
+	}
+	input[type="text"] {
+		max-width: 282px;
+	  }
+}
+
+.cart-instructor-image{
+	left: 5px !important;
+}
+.product-cart-thumb{
+	margin-right: 0px !important;
+	border: none !important;
+}

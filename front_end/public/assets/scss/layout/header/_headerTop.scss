@@ -1,0 +1,141 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  3.5.6 Header Style 1
+/*----------------------------------------*/
+
+.bd-header-top {
+    background-color: var(--bd-primary);
+    padding: 10px 100px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    @media #{$x4l,$x3l} {
+        padding: 10px 15px;
+    }
+    @media #{$xxl} {
+        padding: 10px 55px;
+    }
+    @media #{$xl} {
+        padding: 10px 15px;
+    }
+
+    @media #{$lg} {
+        padding: 10px 33px;
+    }
+    @media #{$md} {
+        padding: 10px 40px;
+    }
+    @media #{$sm} {
+        padding: 10px 35px;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+    @media #{$xs} {
+        padding: 15px 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+    &.style-three{
+        background-color: var(--bd-secondary);
+        .bd-header-top-left ul li:first-child::before {
+            background-color: rgba($color: $black, $alpha: .50);
+        }
+        .bd-header-top-left ul li span {
+            color: var(--bd-black);
+        }
+        .bd-header-top-left ul li a {
+            color: var(--bd-black);
+        }
+        .bd-header-top-right span {
+            color: var(--bd-black);;
+        }
+        .bd-header-top-right a {
+            color: var(--bd-black);
+        }
+    }
+    &.style-two {
+        background-color: transparent;
+        padding: 15px 120px;
+        @media #{$xxl} {
+            padding: 15px 40px;
+        }
+        @media #{$xl,$lg,$md} {
+            padding: 15px 50px;
+        }
+        @media #{$sm,$xs} {
+            padding: 15px 30px;
+        }
+        @media #{$xxs} {
+            padding: 15px 15px;
+        }
+    }
+    &-left {
+        ul {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0 56px;
+            @media #{$xs} {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+            li {
+                &:first-child {
+                    position: relative;
+
+                    &:before {
+                        position: absolute;
+                        content: "";
+                        width: 1px;
+                        height: 20px;
+                        inset-inline-end: -26px;
+                        top: 50%;
+                        background-color: rgba($color: $white, $alpha: .50);
+                        transform: translateY(-50%);
+                        @media #{$xs} {
+                            display: none;
+                        }
+                    }
+                }
+
+                span {
+                    color: var(--bd-white);
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    font-size: 14px;
+                    margin-inline-end: 12px;
+                }
+
+                & a {
+                    color: var(--bd-white);
+                    font-size: 16px;
+                    transition: all 0.3s linear;
+                }
+            }
+        }
+    }
+
+    &-right {
+        span {
+            color: var(--bd-white);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 14px;
+            margin-inline-end: 12px;
+        }
+
+        & a {
+            color: var(--bd-white);
+            font-size: 16px;
+        }
+    }
+}

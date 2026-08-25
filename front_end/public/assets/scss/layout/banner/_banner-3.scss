@@ -1,0 +1,283 @@
+@use '../../utils' as *;
+/*----------------------------------------*/
+/*  3.1.3 banner Style 3
+/*----------------------------------------*/
+
+.bd-banner-three {
+    height: 768px;
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    @media #{$xl} {
+        height: 695px;
+    }
+
+    @media #{$lg,$md} {
+        height: auto;
+        padding-top: 100px;
+    }
+
+    @media #{$sm,$xs} {
+        height: auto;
+        padding-top: 60px;
+    }
+
+    .bd-banner-thumb {
+        margin-right: -303px;
+        margin-bottom: -150px;
+        margin-left: -70px;
+
+        @media #{$xxl} {
+            margin-right: -170px;
+            margin-bottom: -190px;
+        }
+
+        @media #{$xl} {
+            margin-right: -120px;
+            margin-bottom: -205px;
+        }
+
+        @media #{$lg,$md,$sm} {
+            margin-right: -33px;
+            margin-bottom: 0px;
+            margin-left: 0;
+        }
+
+        @media #{$xs} {
+            margin-right: -12px;
+            margin-bottom: 0px;
+            margin-left: 0;
+        }
+    }
+
+    .bd-banner-tag-one {
+        position: absolute;
+        top: 10px;
+        left: 60px;
+
+        @media #{$xl} {
+            top: -100px;
+            left: 0;
+        }
+
+        @media #{$md,$sm,$xs} {
+            top: 40px;
+            left: 0;
+        }
+
+        @media #{$xxs} {
+            display: none;
+        }
+
+        .shape-one {
+            position: absolute;
+            right: -80px;
+            z-index: 1;
+            top: -33px;
+
+            @media #{$sm,$xs} {
+                display: none;
+            }
+        }
+
+        .shape-two {
+            position: absolute;
+            z-index: 999;
+            right: 20px;
+            top: 42px;
+
+            @media #{$xs} {
+                display: none;
+            }
+        }
+
+        .inner {
+            background: var(--bd-white);
+            border-right: 5px solid var(--bd-secondary);
+            border-bottom: 5px solid var(--bd-secondary);
+            padding: 17px 85px 10px 18px;
+            border-radius: 6px;
+            position: relative;
+            z-index: 5;
+            box-shadow: 0px 8px 40px rgba(0, 0, 0, 0.08);
+
+            @media #{$xs} {
+                padding: 17px 18px 10px 18px;
+            }
+        }
+
+        .icon {
+            display: flex;
+            align-items: center;
+            gap: 0 25px;
+            margin-bottom: 15px;
+        }
+
+        .title {
+
+            span {
+                font-size: 18px;
+                font-weight: 600;
+                color: var(--bd-secondary);
+            }
+        }
+    }
+
+    .bd-banner-search-form-input {
+        input {
+            border-radius: 12px;
+            border: 1px solid rgba(23, 23, 23, .16);
+            padding-inline-start: 30px;
+            padding-inline-end: 80px;
+            background-color: var(--bd-white);
+            height: 60px;
+        }
+
+        button {
+            position: absolute;
+            inset-inline-end: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            right: 6px;
+            font-weight: 500;
+            font-size: 16px;
+            text-transform: capitalize;
+            height: 48px;
+            width: 48px;
+            z-index: 5;
+        }
+    }
+
+    .features-list {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+
+        &-item {
+            display: inline-flex;
+            align-items: center;
+            padding: 14px 15px;
+            gap: 12px;
+            border-radius: 6px;
+
+            @media #{$xl} {
+                padding: 14px 11px;
+                gap: 8px;
+            }
+
+            @media #{$xxs} {
+                padding: 10px 10px;
+            }
+
+            &:nth-child(1) {
+                background-color: rgba($color: $primary, $alpha: .10);
+            }
+
+            &:nth-child(2) {
+                background-color: rgba($color: $secondary, $alpha: .10);
+            }
+
+            &:nth-child(3) {
+                background-color: rgba($color: $info, $alpha: .10);
+            }
+
+            .thumb {
+                img {
+                    width: 28px;
+                    height: 28px;
+                }
+            }
+
+            .title {
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            .subtitle {
+                color: #575757;
+            }
+        }
+    }
+
+    .bd-banner-shape {
+        .shape-1 {
+            left: 134px;
+            top: 134px;
+
+            @media #{$xl} {
+                top: 80px;
+            }
+        }
+
+        .shape-2 {
+            left: 0;
+            bottom: 175px;
+
+            @media #{$xxl} {
+                left: -20px;
+                bottom: -30px;
+            }
+
+            @media #{$xl} {
+                display: none;
+            }
+        }
+
+        .shape-3 {
+            left: 900px;
+            top: 97px;
+
+        }
+
+        .shape-4 {
+            right: 875px;
+            bottom: 382px;
+
+            @media #{$xxl} {
+                right: 650px;
+            }
+
+            @media #{$xl} {
+                right: 480px;
+                bottom: 335px;
+            }
+        }
+
+        .shape-5 {
+            right: 181px;
+            top: 88px;
+
+            @media #{$xl} {
+                right: 120px;
+                top: 50px;
+            }
+        }
+
+        .shape-6 {
+            right: 95px;
+            top: 362px;
+
+            @media #{$xxl} {
+                right: 380px;
+            }
+
+            @media #{$xl} {
+                display: none;
+            }
+        }
+    }
+}
+
+.shape-move {
+    .shape-1,
+    .shape-2,
+    .shape-3,
+    .shape-4,
+    .shape-5,
+    .shape-6 {
+        will-change: transform;
+        transition: transform 0.1s ease-out;
+    }
+}

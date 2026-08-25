@@ -1,0 +1,104 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  4.6 Coming Soon css
+/*----------------------------------------*/
+.bd-coming-soon-content {
+	background: rgba(7, 161, 105, 0.3);
+	border-radius: 16px;
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(0px);
+	-webkit-backdrop-filter: blur(0px);
+	padding: 50px 50px;
+	@media #{$sm,$xs} {
+		padding: 30px 30px;
+	}
+}
+
+.bd-coming-soon-logo {
+	margin-bottom: 10px;
+
+	img {
+		margin-bottom: 5px;
+	}
+
+	p {
+		font-size: 14px;
+		color: var(--bd-white);
+	}
+}
+
+.bd-coming-soon-title {
+	color: var(--bd-white);
+	margin-bottom: 20px;
+	font-size: 100px;
+	line-height: 1;
+	@media #{$lg} {
+		font-size: 80px;
+	}
+	@media #{$md} {
+		font-size: 68px;
+	}
+	@media #{$sm,$xs} {
+		font-size: 36px;
+	}
+}
+
+.bd-coming-soon-subtitle {
+	font-size: 20px;
+	color: var(--bd-white);
+	max-width: 850px;
+	margin: 0 auto;
+	margin-bottom: 50px;
+	@media #{$sm,$xs} {
+		max-width: 100%;
+	}
+}
+
+.bd-coming-soon-bg {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	height: 100vh;
+}
+
+.bd-coming-soon-form {
+	position: relative;
+	width: 640px;
+	margin: 0 auto;
+
+	@media #{$md,$sm,$xs} {
+		width: 100%;
+	}
+
+	input {
+		padding-inline-start: 20px;
+		padding-inline-end: 130px;
+		color: var(--bd-white);
+		height: 60px;
+
+		@media #{$md} {
+			padding-inline-end: 150px;
+		}
+		@media #{$sm,$xs} {
+			padding-inline-end: 20px;
+		}
+		&::placeholder {
+			color: var(--bd-white);
+		}
+	}
+
+	.bd-btn {
+		position: absolute;
+		right: 5px;
+		top: 50%;
+		transform: translateY(-50%);
+
+		@media #{$sm,$xs} {
+			position: initial;
+			transform: translateY(0%);
+			margin-top: 15px;
+			width: 100%;
+		}
+	}
+}

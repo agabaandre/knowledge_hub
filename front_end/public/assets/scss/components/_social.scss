@@ -1,0 +1,296 @@
+@use "../utils" as *;
+
+/*----------------------------------------*/
+/*  2.4 social
+/*----------------------------------------*/
+
+.social-icon-list {
+    display: inline-flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    @media #{$lg,$sm} {
+        gap: 10px;
+    }
+    @media #{$xxs} {
+        gap: 7px;
+    }
+
+    li {
+        list-style: none;
+    }
+}
+
+.social-icon-style-01 {
+    ul {
+        li {
+            a {
+                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 30px;
+
+                &:hover {
+                    color: var(--bd-primary);
+                }
+            }
+
+            &:hover {
+                .facebook {
+                    color: #1877F2;
+                }
+
+                .twitter {
+                    color: #1DA1F2;
+                }
+
+                .linkedin {
+                    color: #0A66C2;
+                }
+
+                .instagram {
+                    color: #E4405F;
+                }
+
+                .dribbble {
+                    color: #EA4C89;
+                }
+
+                .behance {
+                    color: #0057FF;
+                }
+
+                .google {
+                    color: #4285F4;
+                }
+            }
+        }
+    }
+}
+
+.theme-social {
+    ul {
+        li {
+            a {
+                color: var(--bd-theme-black);
+                background-color: transparent;
+                width: 40px;
+                height: 40px;
+                display: inline-flex;
+                border: 1px solid var(--bd-border-primary);
+                border-radius: 3px;
+                text-align: center;
+                justify-content: center;
+                align-items: center;
+                transition: all 0.3s ease-in-out;
+
+                i {
+                    transition: all 0.3s ease-in-out;
+                }
+
+                &:hover {
+                    color: var(--bd-white);
+                    border-color: var(--bd-primary);
+                    background-color: var(--bd-primary);
+                }
+
+                @media #{$lg} {
+                    width: 30px;
+                    height: 30px;
+                }
+            }
+
+            &:hover {
+                .facebook {
+                    background-color: #1877F2;
+                    border-color: #1877F2;
+                }
+
+                .twitter {
+                    background-color: #1DA1F2;
+                    border-color: #1DA1F2;
+                }
+
+                .linkedin {
+                    background-color: #0A66C2;
+                    border-color: #0A66C2;
+                }
+
+                .instagram {
+                    background-color: #E4405F;
+                    border-color: #E4405F;
+                }
+
+                .dribbble {
+                    background-color: #EA4C89;
+                    border-color: #EA4C89;
+                }
+
+                .behance {
+                    background-color: #0057FF;
+                    border-color: #0057FF;
+                }
+
+                .google {
+                    background-color: #4285F4;
+                    border-color: #4285F4;
+                }
+                .youtube {
+                    background-color: #FF0000;
+                    border-color: #FF0000;
+                }
+                
+                .pinterest {
+                    background-color: #BD081C;
+                    border-color: #BD081C;
+                }
+                
+                .snapchat {
+                    background-color: #FFFC00;
+                    border-color: #FFFC00;
+                }
+                
+                .whatsapp {
+                    background-color: #25D366;
+                    border-color: #25D366;
+                }
+                
+                .tiktok {
+                    background-color: #010101;
+                    border-color: #010101;
+                }
+                
+                .github {
+                    background-color: #181717;
+                    border-color: #181717;
+                }
+                
+                .slack {
+                    background-color: #4A154B;
+                    border-color: #4A154B;
+                }
+            }
+        }
+    }
+
+    &.circle {
+        a {
+            border-radius: 50px;
+
+            &:hover {
+                border-color: var(--bd-primary);
+            }
+        }
+    }
+
+    &.has-white {
+        a {
+            color: var(--bd-white);
+
+            &:hover {
+                color: var(--bd-primary);
+                border-color: var(--bd-white);
+                background-color: var(--bd-white);
+            }
+        }
+    }
+
+    &.has-bg {
+        a {
+            color: var(--bd-white);
+            border: none;
+            background-color: rgba($color: $white, $alpha: .10);
+        }
+    }
+
+    &.social-large {
+        a {
+            font-size: 20px;
+            width: 56px;
+            height: 56px;
+        }
+    }
+
+    &.secondary {
+        a {
+            color: var(--bd-white);
+            border: 1px solid var(--bd-border-primary);
+
+            i {
+                transition: all 0.3s ease-in-out;
+            }
+
+            &:hover {
+                color: var(--bd-white);
+                border-color: var(--bd-secondary);
+                background-color: var(--bd-secondary);
+            }
+        }
+    }
+    &.social-brand-color {
+        ul li {
+            a {
+                color: var(--bd-white);
+                border: none;
+                transform: translateY(0px);
+            }
+            &:hover {
+                transform: translateY(-3px);
+            }
+            .facebook {
+                background-color: #1877F2;
+            }
+
+            .twitter {
+                background-color: #1DA1F2;
+            }
+
+            .linkedin {
+                background-color: #0A66C2;
+            }
+
+            .instagram {
+                background-color: #E4405F;
+            }
+
+            .dribbble {
+                background-color: #EA4C89;
+            }
+
+            .behance {
+                background-color: #0057FF;
+            }
+
+            .google {
+                background-color: #4285F4;
+            }
+            .youtube {
+                background-color: #FF0000;
+            }
+            
+            .pinterest {
+                background-color: #BD081C;
+            }
+            
+            .snapchat {
+                background-color: #FFFC00;
+            }
+            
+            .whatsapp {
+                background-color: #25D366;
+            }
+            
+            .tiktok {
+                background-color: #010101;
+            }
+            
+            .github {
+                background-color: #181717;
+            }
+            
+            .slack {
+                background-color: #4A154B;
+            }
+        }
+    }
+}

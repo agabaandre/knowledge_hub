@@ -1,0 +1,48 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  4.17 Gallery css
+/*----------------------------------------*/
+
+.bd-campus-gallery-big-img {
+    width: 100%;
+    height: 442px;
+    @media #{$lg,$md,$sm,$xs} {
+        height: 100%;
+    }
+    img {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+    }
+}
+
+.bd-campus-gallery-min-img {
+    width: 100%;
+    height: 320px;
+    @media #{$lg,$md,$sm,$xs} {
+        height: 100%;
+    }
+    img {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+    }
+}
+.bd-gallery-thumb {
+    height: 100%;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 12px;
+    img {
+        border-radius: 12px;
+        width: 100%;
+        height: 100%;
+        transition: all 0.3s ease-out 0s;
+    }
+    &:hover {
+        img {
+            transform: scale(1.1);
+        }
+    }
+}

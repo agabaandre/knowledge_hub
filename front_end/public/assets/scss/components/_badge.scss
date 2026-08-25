@@ -1,0 +1,206 @@
+@use "../utils" as *;
+
+/*----------------------------------------*/
+/*  2.7 Badge
+/*----------------------------------------*/
+
+.bd-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: .4rem .8rem;
+    white-space: nowrap;
+    background-color: var(--bd-primary);
+    color: var(--bd-white);
+    font-weight: var(--bd-fw-medium);
+    font-size: 14px;
+    letter-spacing: .02rem;
+    transition: all 0.3s ease-in-out;
+    border-radius: 3px;
+    img {
+        width: 30px;
+        height: 30px;
+        margin-inline-end: 5px;
+        border-radius: 50px;
+    }
+
+    &.large {
+        padding: 5px 10px;
+        font-size: 16px;
+    }
+}
+
+.badge {
+    &-primary {
+        background-color: var(--bd-primary);
+    }
+
+    &-secondary {
+        background-color: var(--bd-secondary);
+    }
+
+    &-success {
+        background-color: var(--bd-success);
+    }
+
+    &-warning {
+        background-color: var(--bd-warning);
+    }
+
+    &-danger {
+        background-color: var(--bd-danger);
+    }
+
+    &-info {
+        background-color: var(--bd-info);
+    }
+
+    &-light {
+        color: var(--bd-theme-black);
+        background-color: var(--bd-light);
+    }
+
+    &-dark {
+        color: var(--bd-white);
+        background-color: var(--bd-theme-black);
+    }
+
+    &-outline {
+        &-primary {
+            border: 1px solid var(--bd-border-primary);
+
+            &:hover {
+                color: var(--bd-white);
+                background-color: var(--bd-primary);
+                border-color: var(--bd-primary);
+            }
+        }
+
+        &-secondary {
+            border: 1px solid var(--bd-secondary);
+
+            &:hover {
+                color: var(--bd-white);
+                background-color: var(--bd-secondary);
+                border-color: var(--bd-secondary);
+            }
+        }
+
+        &-success {
+            border: 1px solid var(--bd-success);
+
+            &:hover {
+                color: var(--bd-white);
+                background-color: var(--bd-success);
+                border-color: var(--bd-success);
+            }
+        }
+
+        &-warning {
+            border: 1px solid var(--bd-warning);
+
+            &:hover {
+                color: var(--bd-white);
+                background-color: var(--bd-warning);
+                border-color: var(--bd-warning);
+            }
+        }
+
+        &-danger {
+            border: 1px solid var(--bd-danger);
+
+            &:hover {
+                color: var(--bd-white);
+                background-color: var(--bd-danger);
+                border-color: var(--bd-danger);
+            }
+        }
+
+        &-info {
+            border: 1px solid var(--bd-info);
+
+            &:hover {
+                color: var(--bd-white);
+                background-color: var(--bd-info);
+                border-color: var(--bd-info);
+            }
+        }
+
+        &-light {
+            color: var(--bd-theme-black);
+            border: 1px solid var(--bd-light);
+
+            &:hover {
+                color: var(--bd-white);
+                background-color: var(--bd-primary);
+                border-color: var(--bd-primary);
+            }
+        }
+
+        &-dark {
+            border: 1px solid var(--bd-theme-black);
+
+            &:hover {
+                color: var(--bd-white);
+                background-color: var(--bd-theme-black);
+                border-color: var(--bd-theme-black);
+            }
+        }
+    }
+}
+
+.badge-transparent {
+    color: var(--bd-theme-black);
+    background-color: transparent;
+}
+
+.bd-circle-badge {
+    display: inline-flex;
+    width: 70px;
+    height: 70px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--bd-white);
+    text-align: center;
+    line-height: 1;
+    &.primary {
+        background-color: var(--bd-primary);
+    }
+
+    &.secondary {
+        background-color: var(--bd-secondary);
+    }
+
+    &.success {
+        background-color: var(--bd-success);
+    }
+
+    &.warning {
+        background-color: var(--bd-warning);
+    }
+
+    &.danger {
+        background-color: var(--bd-danger);
+    }
+
+    &.info {
+        background-color: var(--bd-info);
+    }
+
+    &.light {
+        color: var(--bd-theme-black);
+        background-color: var(--bd-light);
+    }
+
+    &.dark {
+        color: var(--bd-white);
+        background-color: var(--bd-theme-black);
+    }
+
+    &.white {
+        color: var(--bd-theme-black);
+        background-color: var(--bd-white);
+    }
+}

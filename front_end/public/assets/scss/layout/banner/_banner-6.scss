@@ -1,0 +1,118 @@
+@use '../../utils' as *;
+/*----------------------------------------*/
+/*  3.1.5 Banner Style 5
+/*----------------------------------------*/
+
+.bd-banner{
+    &-six {
+        min-height: 700px;
+        display: flex;
+        align-items: center;
+    }
+    &-content-six {
+        .bd-banner-title {
+            color: var(--bd-white);
+            font-size: 60px;
+            @media #{$md} {
+                font-size: 42px;
+            }
+            @media #{$sm,$xs} {
+                font-size: 36px;
+            }
+        }
+    
+        .bd-banner-subtitle {
+            position: relative;
+            color: var(--bd-white);
+            margin-bottom: 20px;
+            display: block;
+            text-transform: uppercase;
+        }
+    
+        .bd-banner-description {
+            color: rgba($color: $white, $alpha: .90);
+        }
+    }
+    &-thumb {
+        margin-left: 30px;
+    }
+}
+
+.bookSlider {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    & .swiper-slide-active {
+        .bd-book-slider-item {
+            position: relative;
+        
+            &:hover {
+                .bd-book-slider-btn {
+                    opacity: 1;
+                    visibility: visible;
+                }
+                .bd-book-slider-thumb {
+                    &::before {
+                        opacity: 0;
+                        visibility: hidden;
+                    }
+                    &::after {
+                        opacity: 1;
+                        visibility: visible;
+                    }
+                }
+            }
+        }
+        .bd-book-slider-thumb {
+            position: relative;
+            &::before {
+                position: absolute;
+                content: "";
+                display: block;
+                height: 100%;
+                width: 100%;
+                top: 0;
+                left: 0;
+                opacity: 1;
+                visibility: visible;
+                transition: all 0.3s linear;
+                background: linear-gradient(359.23deg, rgba(7, 161, 105, 0.25) 0.63%, rgba(255, 255, 255, 0) 99.34%);
+            }
+            &::after {
+                position: absolute;
+                content: "";
+                display: block;
+                height: 100%;
+                width: 100%;
+                top: 0;
+                left: 0;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s linear;
+                background: linear-gradient(359.23deg, rgba(0, 23, 15, 0.35) 0.63%, rgba(0, 23, 15, 0.35) 99.34%);
+            }
+        }
+    }
+}
+
+.bd-book-slider{
+    &-btn {
+        position: absolute;
+        left: 30px;
+        bottom: 30px;
+        z-index: 5;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s linear;
+    }
+    &-pagination {
+        .swiper-pagination-bullet {
+            background-color: var(--bd-white);
+            opacity: 1;
+    
+            &.swiper-pagination-bullet-active {
+                background-color: var(--bd-secondary);
+            }
+        }
+    }
+}

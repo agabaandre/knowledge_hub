@@ -5,6 +5,9 @@
 
     RewriteEngine On
 
+    # Next.js frontend — same skip pattern as /staff/staff-portal before CodeIgniter.
+    RewriteRule ^front_end(/|$) - [L]
+
     RewriteCond %{REQUEST_FILENAME} -d [OR]
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteCond %{REQUEST_URI} !^/\.well-known/cpanel-dcv/[0-9a-zA-Z_-]+$

@@ -1,0 +1,144 @@
+@use '../utils' as *;
+
+/*---------------------------------
+	1.3 Default Spacing SCSS
+---------------------------------*/
+
+.section-space {
+	padding-top: 100px;
+	padding-bottom: 100px;
+
+	@media #{$md} {
+		padding-top: 80px;
+		padding-bottom: 80px;
+	}
+
+	@media #{$sm,$xs} {
+		padding-top: 65px;
+		padding-bottom: 65px;
+	}
+}
+
+.section-space-top {
+	padding-top: 100px;
+
+	@media #{$md} {
+		padding-top: 80px;
+	}
+
+	@media #{$sm,$xs} {
+		padding-top: 65px;
+	}
+}
+
+.section-space-bottom {
+	padding-bottom: 100px;
+
+	@media #{$md} {
+		padding-bottom: 80px;
+	}
+
+	@media #{$sm,$xs} {
+		padding-bottom: 65px;
+	}
+}
+
+.section-space-medium {
+	padding-top: 80px;
+	padding-bottom: 80px;
+
+	@media #{$md} {
+		padding-top: 60px;
+		padding-bottom: 60px;
+	}
+
+	@media #{$sm,$xs} {
+		padding-top: 50px;
+		padding-bottom: 50px;
+	}
+}
+.section-space-medium-bottom {
+	padding-bottom: 80px;
+
+	@media #{$md} {
+		padding-bottom: 60px;
+	}
+
+	@media #{$sm,$xs} {
+		padding-bottom: 50px;
+	}
+}
+
+.section-space-small {
+	padding-top: 60px;
+	padding-bottom: 60px;
+
+	@media #{$sm,$xs} {
+		padding-top: 50px;
+		padding-bottom: 50px;
+	}
+}
+
+.section-space-small-top {
+	padding-top: 60px;
+
+	@media #{$sm,$xs} {
+		padding-top: 50px;
+	}
+}
+
+.section-space-small-bottom {
+	padding-bottom: 60px;
+
+	@media #{$sm,$xs} {
+		padding-bottom: 50px;
+	}
+}
+
+.section-space-large {
+	padding-top: 150px;
+	padding-bottom: 150px;
+}
+
+.section-space-top-large {
+	padding-top: 150px;
+}
+
+.section-space-bottom-large {
+	padding-bottom: 150px;
+}
+
+.section-title-space {
+	margin-bottom: 50px;
+
+	@media #{$xs} {
+		margin-bottom: 40px;
+	}
+}
+
+.section-space-margin {
+	margin-top: 100px;
+	margin-bottom: 100px;
+
+	@media #{$md} {
+		margin-top: 80px;
+		margin-bottom: 80px;
+	}
+
+	@media #{$sm,$xs} {
+		margin-top: 65px;
+		margin-bottom: 65px;
+	}
+}
+
+.section-space-margin-bottom {
+	margin-bottom: 100px;
+
+	@media #{$md} {
+		margin-bottom: 80px;
+	}
+
+	@media #{$sm,$xs} {
+		margin-bottom: 65px;
+	}
+}

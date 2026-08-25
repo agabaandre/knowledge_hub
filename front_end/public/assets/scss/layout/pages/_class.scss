@@ -1,0 +1,54 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  4.5 Class css
+/*----------------------------------------*/
+
+.bd-academic-calendar-box {
+	border-radius: 12px;
+	box-shadow: 0px 8px 40px 0px rgba(0, 0, 0, 0.1);
+	background-color: var(--bd-white);
+	padding: 30px 30px;
+    display: flex;
+    gap: 50px;
+    justify-content: space-between;
+    @media #{$md,$sm,$xs} {
+        flex-wrap: wrap;
+        flex-direction: column-reverse;
+        gap: 30px;
+        padding: 20px 20px;
+    }
+    &.row-reverse {
+        flex-direction: row-reverse;
+        @media #{$md,$sm,$xs} {
+            flex-direction: column-reverse;
+        }
+    }
+    .content {
+        width: 50%;
+        @media #{$md,$sm,$xs} {
+            width: 100%;
+        }
+    }
+    .thumb {
+        width: 50%;
+        @media #{$md,$sm,$xs} {
+            width: 100%;
+        }
+        img {
+            border-radius: 8px;
+            width: 100%;
+        }
+    }
+}
+.bd-academic-calendar-list {
+    li {
+        list-style: none;
+        strong {
+            color: var(--bd-theme-black);
+        }
+        &:not(:last-child){
+            margin-bottom: 8px;
+        }
+    }
+}

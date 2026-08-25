@@ -1,0 +1,451 @@
+@use '../../utils' as *;
+
+/*----------------------------------------*/
+/*  4.10 call to action css
+/*----------------------------------------*/
+
+.bd-cta {
+    &-wrapper {
+        &.style-one {
+            .bd-cta {
+                &-item {
+                    position: relative;
+                    border-radius: 6px;
+                    overflow: hidden;
+                    padding: 50px 30px;
+                    display: flex;
+                    gap: 30px;
+                    align-items: center;
+
+                    @media #{$xs} {
+                        flex-direction: column-reverse;
+                    }
+
+                    &.bg-1 {
+                        background-color: var(--primary-rgb-15);
+
+                        &::before {
+                            position: absolute;
+                            content: "";
+                            top: -50px;
+                            right: -50px;
+                            width: 216px;
+                            height: 216px;
+                            background-color: var(--primary-rgb-15);
+                            border-radius: 100%;
+                        }
+                    }
+
+                    &.bg-2 {
+                        background-color: var(--secondary-rgb-15);
+
+                        &::before {
+                            position: absolute;
+                            content: "";
+                            top: -50px;
+                            right: -50px;
+                            width: 216px;
+                            height: 216px;
+                            background-color: var(--secondary-rgb-15);
+                            border-radius: 100%;
+                        }
+                    }
+
+                    &:hover {
+                        .bd-cta-bg {
+                            img {
+                                transform: scale(1.05);
+                            }
+                        }
+                    }
+                }
+
+                &-content {
+                    position: relative;
+                    width: 335px;
+                    z-index: 1;
+
+                    @media #{$xs} {
+                        width: 100%;
+                    }
+                }
+
+                &-tittle {
+                    margin-bottom: 30px;
+                }
+
+                &-subtitle {
+                    margin-bottom: 10px;
+                    display: block;
+                    color: var(--bd-primary);
+                    font-weight: 700;
+                    text-transform: uppercase;
+                }
+            }
+        }
+
+        &.style-two {
+            .bd-cta {
+                &-bg {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    opacity: 0.35;
+                    background-position: center;
+                    background-size: cover;
+                    background-repeat: no-repeat;
+
+                    &-overlay {
+                        &::after {
+                            content: "";
+                            background: var(--bd-primary);
+                            height: 100%;
+                            width: 100%;
+                            position: absolute;
+                            left: 0;
+                            top: 0;
+                            z-index: -1;
+                        }
+                    }
+                }
+
+                &-shape {
+                    &-1 {
+                        position: absolute;
+                        inset-inline-start: 0;
+                        top: 0;
+                    }
+
+                    &-2 {
+                        position: absolute;
+                        inset-inline-start: 230px;
+                        top: 50px;
+                        animation: scaleZeroOne 5s cubic-bezier(0.12, 0, 0.39, 0) 0s infinite alternate both;
+                    }
+
+                    &-3 {
+                        position: absolute;
+                        top: 50px;
+                        inset-inline-end: 80px;
+                        animation: scaleZeroOne 6s cubic-bezier(0.12, 0, 0.39, 0) 0s infinite alternate both;
+                    }
+
+                    &-4 {
+                        position: absolute;
+                        inset-inline-end: 450px;
+                        top: 30px;
+                        animation: scaleZeroOne 5s cubic-bezier(0.12, 0, 0.39, 0) 0s infinite alternate both;
+                    }
+
+                    &-5 {
+                        position: absolute;
+                        inset-inline-start: 110px;
+                        bottom: 88px;
+                        animation: scaleZeroOne 6s cubic-bezier(0.12, 0, 0.39, 0) 0s infinite alternate both;
+                    }
+
+                    &-6 {
+                        position: absolute;
+                        inset-inline-start: 440px;
+                        bottom: 127px;
+                        animation: scaleZeroOne 6s cubic-bezier(0.12, 0, 0.39, 0) 0s infinite alternate both;
+
+                        @media #{$xl} {
+                            inset-inline-start: 440px;
+                            bottom: 40px;
+                        }
+                    }
+
+                    &-7 {
+                        position: absolute;
+                        inset-inline-end: 287px;
+                        bottom: 83px;
+                        animation: scaleZeroOne 5s cubic-bezier(0.12, 0, 0.39, 0) 0s infinite alternate both;
+
+                        @media #{$xl} {
+                            inset-inline-end: 165px;
+                            bottom: 83px;
+                        }
+                    }
+
+                    &-8 {
+                        position: absolute;
+                        inset-inline-end: 0;
+                        bottom: 0;
+                    }
+                }
+            }
+
+            .bd-section-paragraph {
+                max-width: 550px;
+                margin: 0 auto;
+            }
+        }
+
+        &.style-three {
+            .thumb {
+                img {
+                    position: absolute;
+                    left: 0;
+                    border: 4px;
+                    border-radius: 20px;
+                    width: 100%;
+                    height: 100%;
+                    margin-right: 0;
+                }
+            }
+
+            .bd-cta-box {
+                display: grid;
+                grid-template-columns: 560px auto;
+                align-items: center;
+                padding: 60px 60px 60px 60px;
+                background-color: var(--bd-primary);
+                border-radius: 8px;
+                justify-content: space-between;
+
+                @media #{$lg} {
+                    grid-template-columns: 400px auto;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                @media #{$md} {
+                    grid-template-columns: auto;
+                    gap: 30px;
+                    padding: 60px 30px 60px 30px;
+                    justify-content: center;
+                    text-align: center;
+                }
+
+                @media #{$sm,$xs} {
+                    grid-template-columns: auto;
+                    gap: 30px;
+                    padding: 60px 20px 60px 20px;
+                    justify-content: center;
+                    text-align: center;
+                }
+            }
+
+            .number {
+                font-size: 34px;
+                font-weight: 700;
+                color: var(--bd-white);
+            }
+        }
+
+        &.style-four {
+            border-radius: 6px;
+            padding: 50px 50px;
+            position: relative;
+            overflow: hidden;
+
+            @media #{$md} {
+                padding: 50px 30px;
+            }
+
+            &::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                height: 100%;
+                background-image: url(../../../images/shape/cta-bg-line.webp);
+                background-size: cover;
+                background-repeat: no-repeat;
+                background-position: center;
+                opacity: .3;
+            }
+
+            .bd-cta {
+                &-item {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    position: relative;
+                    z-index: 1;
+
+                    @media #{$sm,$xs} {
+                        flex-direction: column;
+                        text-align: center;
+                        gap: 30px;
+                    }
+                }
+
+                &-content {
+                    .title {
+                        margin-bottom: 0;
+                        color: var(--bd-white);
+                    }
+
+                    .subtitle {
+                        font-size: 20px;
+                        font-weight: 500;
+                        color: var(--bd-white);
+                    }
+                }
+
+                &-separator {
+                    margin: 0 30px;
+
+                    span {
+                        display: block;
+                        text-align: center;
+                        height: 70px;
+                        width: 70px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 50%;
+                        color: var(--bd-primary);
+                        background-color: var(--bd-white);
+
+                        img {
+                            width: 36px;
+                            height: 36px;
+                        }
+                    }
+                }
+            }
+        }
+
+        &.style-five {
+            .bd-cta {
+                &-content {
+                    @media #{$md} {
+                        padding-top: 80px;
+                    }
+                
+                    @media #{$sm,$xs} {
+                        padding-top: 65px;
+                    }
+                }
+                &-thumb {
+                    &-wrapper {
+                        position: relative;
+                        z-index: 1;
+                        max-width: 510px;
+                        margin: 10px auto 0;
+                    }
+
+                    &-shape {
+                        z-index: -1;
+                        position: absolute;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 30px 30px;
+                        top: 50%;
+                        left: 55%;
+                        width: 388px;
+                        -webkit-transform: translate(-50%, -50%);
+                        -moz-transform: translate(-50%, -50%);
+                        -ms-transform: translate(-50%, -50%);
+                        -o-transform: translate(-50%, -50%);
+                        transform: translate(-50%, -50%);
+
+                        img {
+                            width: 100%;
+                        }
+                    }
+                }
+            }
+        }
+
+        &.style-six {
+            .bd-cta-thumb {
+                position: absolute;
+                bottom: -3px;
+                right: 75px;
+
+                @media #{$xxl} {
+                    right: 0px;
+                    width: 800px;
+                }
+
+                @media #{$xl} {
+                    right: 0px;
+                    width: 700px;
+                }
+            }
+
+            .bd-cta-shape-wrap {
+                .shape-1 {
+                    position: absolute;
+                    top: 80px;
+                    left: 140px;
+
+                    @media #{$xxl} {
+                        top: 30px;
+                    }
+                }
+
+                .shape-2 {
+                    position: absolute;
+                    left: 70px;
+                    bottom: 40px;
+                }
+
+                .shape-3 {
+                    position: absolute;
+                    left: 50%;
+                    bottom: 200px;
+                    transform: translateX(-50%);
+                }
+
+                .shape-4 {
+                    position: absolute;
+                    right: 35px;
+                    bottom: 25px;
+                }
+            }
+        }
+    }
+    &-btn {
+        position: relative;
+        z-index: 2;
+    }
+}
+.rel-z-2 {
+    position: relative;
+    z-index: 2;
+}
+.bd-cta-section-wave {
+    position: relative;
+
+    &::before {
+        position: absolute;
+        content: "";
+        background: url(../../../images/shape/kg-sky-shape-1.webp);
+        background-position: top;
+        background-repeat: no-repeat;
+        background-size: cover;
+        width: 100%;
+        height: 40px;
+        top: -10px;
+        left: 0;
+    }
+}
+.bd-cta-five-shape {
+    .shape-1{
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+    .shape-2 {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+    }
+}
+.bd-cta-content {
+    .bd-course-details-list ul li {
+        color: var(--bd-white);
+        align-items: center;
+        span {
+            margin-top: 0;
+        }
+    }
+}

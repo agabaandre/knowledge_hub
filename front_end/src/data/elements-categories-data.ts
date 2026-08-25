@@ -1,0 +1,55 @@
+interface IElements {
+    id: number;
+    icon: string;
+    label: string;
+}
+const elementsData: IElements[] = [
+    { id: 1, icon: "fa-light fa-folder", label: "Accordion" },
+    { id: 2, icon: "fa-light fa-columns", label: "Advance Tab" },
+    { id: 3, icon: "fa-light fa-square", label: "Button" },
+    { id: 4, icon: "fa-light fa-certificate", label: "Badge" },
+    { id: 5, icon: "fa-light fa-share-alt", label: "Social Icons" },
+    { id: 6, icon: "fa-light fa-highlighter", label: "Highlights" },
+    { id: 7, icon: "fa-light fa-chart-bar", label: "Progress Bar" },
+    { id: 8, icon: "fa-light fa-stopwatch", label: "Countdown" },
+    { id: 9, icon: "fa-light fa-list", label: "Courses List" },
+    { id: 10, icon: "fa-light fa-th", label: "Courses Grid" },
+    { id: 11, icon: "fa-light fa-tags", label: "Categories" },
+    { id: 12, icon: "fa-light fa-info-circle", label: "About" },
+    { id: 13, icon: "fa-light fa-pen-alt", label: "Blog" },
+    { id: 14, icon: "fa-light fa-user-tie", label: "Instructor" },
+    { id: 15, icon: "fa-light fa-building", label: "Brand" },
+    { id: 16, icon: "fa-light fa-calendar-alt", label: "Event" },
+    { id: 17, icon: "fa-light fa-quote-right", label: "Testimonial" },
+    { id: 18, icon: "fa-light fa-bullhorn", label: "Call To Action" },
+    { id: 19, icon: "fa-light fa-envelope", label: "Newsletter" },
+    { id: 20, icon: "fa-light fa-dollar-sign", label: "Pricing" },
+    { id: 21, icon: "fa-light fa-check-circle", label: "Why Choose" },
+    { id: 22, icon: "fa-light fa-shopping-cart", label: "Shop" },
+    { id: 23, icon: "fa-light fa-lock", label: "Authentication" },
+    { id: 24, icon: "fa-solid fa-graduation-cap", label: "Online Courses" },
+    { id: 25, icon: "fa-regular fa-building-columns", label: "University Programs" },
+    { id: 26, icon: "fa-light fa-school", label: "Modern Schooling" },
+    { id: 27, icon: "fa-light fa-apple-whole", label: "Kindergarten" },
+    { id: 28, icon: "fa-regular fa-quran", label: "Quran Learning" },
+    { id: 29, icon: "fa-solid fa-cart-shopping", label: "Shop" },
+    { id: 30, icon: "fa-regular fa-play", label: "Video Courses" },
+    { id: 31, icon: "fa-light fa-book-open-reader", label: "Library Access" },
+    { id: 32, icon: "fa-solid fa-chalkboard-user", label: "Classroom Programs" },
+    { id: 33, icon: "fa-regular fa-hand-sparkles", label: "Creative Activities" },
+    { id: 34, icon: "fa-light fa-pray", label: "Quran Recitation" },
+    { id: 35, icon: "fa-light fa-gift", label: "Educational Tools" },
+    { id: 36, icon: "fa-light fa-user-graduate", label: "Alumni Network" },
+    { id: 37, icon: "fa-solid fa-puzzle-piece", label: "Learning Games" },
+    { id: 38, icon: "fa-regular fa-ball-pile", label: "Play Area" },
+    { id: 39, icon: "fa-light fa-mosque", label: "Islamic Studies" },
+    { id: 40, icon: "fa-light fa-tags", label: "Special Offers" },
+    { id: 41, icon: "fa-regular fa-clock", label: "Flexible Timing" },
+    { id: 42, icon: "fa-light fa-building", label: "Campus Facilities" },
+    { id: 43, icon: "fa-regular fa-users", label: "Parent-Teacher Meetings" },
+    { id: 44, icon: "fa-light fa-baby", label: "Early Education" },
+    { id: 45, icon: "fa-regular fa-star-and-crescent", label: "Daily Duas" },
+    { id: 46, icon: "fa-solid fa-box-open", label: "New Arrivals" }
+];
+
+export default elementsData;
