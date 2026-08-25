@@ -13,10 +13,17 @@ class SetSecurityHeaders
     {
         $response = $next($request);
 
-        foreach (SecurityHeaders::all() as $name => $value) {
+        $headers = $this->isApiRequest($request) ? SecurityHeaders::api() : SecurityHeaders::web();
+
+        foreach ($headers as $name => $value) {
             $response->headers->set($name, $value);
         }
 
         return $response;
+    }
+
+    private function isApiRequest(Request $request): bool
+    {
+        return $request->is('api') || $request->is('api/*');
     }
 }
