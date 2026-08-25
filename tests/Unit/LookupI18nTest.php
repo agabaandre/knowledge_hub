@@ -26,10 +26,13 @@ class LookupI18nTest extends TestCase
         $this->assertStringContainsString("lookup/i18n", $api);
         $this->assertStringContainsString('function i18n', $controller);
         $this->assertStringContainsString('selectorMap', $controller);
-        $this->assertStringContainsString('layout_ltr', $controller);
+        $this->assertStringContainsString('LocaleDirection::direction', $controller);
         $this->assertStringContainsString('khub.africacdc.org/docs', $controller);
-        $this->assertStringContainsString('khub_dir', $encrypt);
-        $this->assertStringContainsString('direction_cookie', $config);
+        $this->assertStringNotContainsString('khub_dir', $controller);
+        $this->assertStringNotContainsString('direction_mode', $controller);
+        $this->assertStringNotContainsString('ltr_available', $controller);
+        $this->assertStringNotContainsString('khub_dir', $encrypt);
+        $this->assertStringNotContainsString('direction_cookie', $config);
     }
 
     public function test_au_locale_files_cover_frontend_groups(): void

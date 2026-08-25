@@ -115,11 +115,12 @@ class FrontEndApacheConfigTest extends TestCase
         $i18n = file_get_contents(base_path('front_end/src/nucleus/i18n/KhI18nProvider.tsx'));
         $select = file_get_contents(base_path('front_end/src/nucleus/molecules/KhLanguageSelect.tsx'));
 
-        $this->assertStringContainsString('layout_ltr', $i18n);
-        $this->assertStringContainsString('khub_dir', $i18n);
-        $this->assertStringContainsString('flag', $select);
-        $this->assertStringContainsString('LTR', $select);
         $this->assertStringContainsString('lookup/i18n', $i18n);
+        $this->assertStringNotContainsString('khub_dir', $i18n);
+        $this->assertStringNotContainsString('setDirectionMode', $i18n);
+        $this->assertStringContainsString('flag', $select);
+        $this->assertStringNotContainsString('kh-direction', $select);
+        $this->assertStringNotContainsString('layout_ltr', $select);
 
         $this->assertStringContainsString('bd-blog-wrapper style-four', $card);
         $this->assertStringContainsString('khItemCover', $card);

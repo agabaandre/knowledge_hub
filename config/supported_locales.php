@@ -64,8 +64,6 @@ return [
     | Cookie set when user picks a language (Laravel locale, complements googtrans)
     |--------------------------------------------------------------------------
     */
-    'direction_cookie' => 'khub_dir',
-
     'locale_cookie' => 'khub_locale',
 
     'locale_cookie_minutes' => 60 * 24 * 365,

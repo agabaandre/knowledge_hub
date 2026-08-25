@@ -11,8 +11,6 @@ import {
 } from "react";
 import { khGet, khReadCookie, khWriteCookie } from "@/nucleus/api/client";
 
-export type KhDirectionMode = "auto" | "ltr" | "rtl";
-
 export type KhLanguage = {
   code: string;
   name: string;
@@ -24,10 +22,8 @@ export type KhLanguage = {
 type KhI18nPayload = {
   locale: string;
   direction: "ltr" | "rtl";
-  direction_mode?: KhDirectionMode;
   is_rtl?: boolean;
   rtl_locales?: string[];
-  ltr_available?: boolean;
   languages?: KhLanguage[];
   labels?: Record<string, string>;
 };
@@ -35,13 +31,11 @@ type KhI18nPayload = {
 type KhI18nContextValue = {
   locale: string;
   direction: "ltr" | "rtl";
-  directionMode: KhDirectionMode;
   languages: KhLanguage[];
   labels: Record<string, string>;
   ready: boolean;
   t: (key: string, fallback?: string) => string;
   setLocale: (code: string) => void;
-  setDirectionMode: (mode: KhDirectionMode) => void;
 };
 
 const KhI18nContext = createContext<KhI18nContextValue | null>(null);
@@ -57,16 +51,16 @@ const FALLBACK_LABELS: Record<string, string> = {
   "frontend_nav.publish": "Publish",
   "frontend_nav.read_more": "Read more",
   "frontend_nav.language": "Language",
-  "frontend_nav.layout_auto": "Auto",
-  "frontend_nav.layout_ltr": "LTR",
-  "frontend_nav.layout_rtl": "RTL",
-  "frontend_nav.text_direction": "Text direction",
   "frontend_nav.no_items": "No items yet.",
   "frontend_nav.loading": "Loading…",
   "frontend_nav.missing_item": "Missing item id.",
   "frontend_nav.untitled": "Untitled",
   "home_sections.footer_explore": "Explore",
 };
+
+function directionForLocale(locale: string): "ltr" | "rtl" {
+  return locale === "ar" ? "rtl" : "ltr";
+}
 
 function applyDocumentDirection(locale: string, direction: "ltr" | "rtl") {
   if (typeof document === "undefined") {
@@ -80,26 +74,18 @@ function applyDocumentDirection(locale: string, direction: "ltr" | "rtl") {
 
 export function KhI18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState(() => khReadCookie("khub_locale") || "en");
-  const [directionMode, setDirectionModeState] = useState<KhDirectionMode>(() => {
-    const stored = khReadCookie("khub_dir");
-    return stored === "ltr" || stored === "rtl" || stored === "auto" ? stored : "auto";
-  });
-  const [direction, setDirection] = useState<"ltr" | "rtl">("ltr");
+  const [direction, setDirection] = useState<"ltr" | "rtl">(() => directionForLocale(khReadCookie("khub_locale") || "en"));
   const [languages, setLanguages] = useState<KhLanguage[]>([]);
   const [labels, setLabels] = useState<Record<string, string>>(FALLBACK_LABELS);
   const [ready, setReady] = useState(false);
 
-  const load = useCallback(async (nextLocale: string, nextMode: KhDirectionMode) => {
-    const payload = await khGet<{ data?: KhI18nPayload }>(
-      `/lookup/i18n?direction=${encodeURIComponent(nextMode)}`,
-      nextLocale
-    );
+  const load = useCallback(async (nextLocale: string) => {
+    const payload = await khGet<{ data?: KhI18nPayload }>("/lookup/i18n", nextLocale);
     const data = payload.data ?? ({} as KhI18nPayload);
     const resolvedLocale = data.locale || nextLocale;
     const resolvedDirection = data.direction === "rtl" ? "rtl" : "ltr";
     setLocaleState(resolvedLocale);
     setDirection(resolvedDirection);
-    setDirectionModeState(data.direction_mode === "ltr" || data.direction_mode === "rtl" ? data.direction_mode : nextMode);
     setLanguages(Array.isArray(data.languages) ? data.languages : []);
     setLabels({ ...FALLBACK_LABELS, ...(data.labels ?? {}) });
     applyDocumentDirection(resolvedLocale, resolvedDirection);
@@ -108,16 +94,16 @@ export function KhI18nProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    load(locale, directionMode).catch(() => {
+    load(locale).catch(() => {
       if (!cancelled) {
-        applyDocumentDirection(locale, locale === "ar" && directionMode !== "ltr" ? "rtl" : "ltr");
+        applyDocumentDirection(locale, directionForLocale(locale));
         setReady(true);
       }
     });
     return () => {
       cancelled = true;
     };
-    // Initial load only; later changes go through setters.
+    // Initial load only; later changes go through setLocale.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -125,18 +111,9 @@ export function KhI18nProvider({ children }: { children: ReactNode }) {
     (code: string) => {
       khWriteCookie("khub_locale", code);
       setLocaleState(code);
-      load(code, directionMode).catch(() => undefined);
+      load(code).catch(() => undefined);
     },
-    [directionMode, load]
-  );
-
-  const setDirectionMode = useCallback(
-    (mode: KhDirectionMode) => {
-      khWriteCookie("khub_dir", mode);
-      setDirectionModeState(mode);
-      load(locale, mode).catch(() => undefined);
-    },
-    [locale, load]
+    [load]
   );
 
   const t = useCallback(
@@ -154,15 +131,13 @@ export function KhI18nProvider({ children }: { children: ReactNode }) {
     () => ({
       locale,
       direction,
-      directionMode,
       languages,
       labels,
       ready,
       t,
       setLocale,
-      setDirectionMode,
     }),
-    [locale, direction, directionMode, languages, labels, ready, t, setLocale, setDirectionMode]
+    [locale, direction, languages, labels, ready, t, setLocale]
   );
 
   return <KhI18nContext.Provider value={value}>{children}</KhI18nContext.Provider>;
@@ -174,13 +149,11 @@ export function useKhI18n(): KhI18nContextValue {
     return {
       locale: "en",
       direction: "ltr",
-      directionMode: "auto",
       languages: [],
       labels: FALLBACK_LABELS,
       ready: false,
       t: (key, fallback) => fallback ?? FALLBACK_LABELS[key] ?? key,
       setLocale: () => undefined,
-      setDirectionMode: () => undefined,
     };
   }
   return ctx;

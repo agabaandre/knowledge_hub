@@ -389,10 +389,9 @@ class LookupApiController extends ApiController
      *     path="/api/lookup/i18n",
      *     operationId="FrontendI18n",
      *     tags={"Lookup"},
-     *     summary="UI locale, flags, LTR/RTL, and translation labels",
-     *     description="Returns Africa CDC AU languages (with existing Knowledge Hub flags), document direction (including an explicit LTR option), and native UI labels such as frontend_nav.layout_ltr. Used by the Next.js frontend. See https://khub.africacdc.org/docs/#/.",
+     *     summary="UI locale, flags, language-tied LTR/RTL, and translation labels",
+     *     description="Returns Africa CDC AU languages (with existing Knowledge Hub flags). Document direction is derived from the locale (Arabic RTL, other AU languages LTR). Used by the Next.js frontend. See https://khub.africacdc.org/docs/#/.",
      *     @OA\Parameter(name="locale", in="query", required=false, @OA\Schema(type="string", example="fr")),
-     *     @OA\Parameter(name="direction", in="query", required=false, description="auto, ltr, or rtl", @OA\Schema(type="string", example="ltr")),
      *     @OA\Response(response=200, description="Successful", @OA\JsonContent())
      * )
      */
@@ -419,15 +418,7 @@ class LookupApiController extends ApiController
 
         \Illuminate\Support\Facades\App::setLocale($locale);
 
-        $dirCookie = (string) config('supported_locales.direction_cookie', 'khub_dir');
-        $dirMode = strtolower((string) ($request->query('direction') ?? $request->cookie($dirCookie) ?? 'auto'));
-        if (! in_array($dirMode, ['auto', 'ltr', 'rtl'], true)) {
-            $dirMode = 'auto';
-        }
-
-        $direction = $dirMode === 'auto'
-            ? \App\Support\LocaleDirection::direction($locale)
-            : $dirMode;
+        $direction = \App\Support\LocaleDirection::direction($locale);
 
         $languages = [];
         foreach (\App\Models\SiteLanguage::selectorMap() as $code => $meta) {
@@ -445,10 +436,8 @@ class LookupApiController extends ApiController
             'data' => [
                 'locale' => $locale,
                 'direction' => $direction,
-                'direction_mode' => $dirMode,
                 'is_rtl' => $direction === 'rtl',
                 'rtl_locales' => \App\Support\LocaleDirection::rtlLocales(),
-                'ltr_available' => true,
                 'languages' => $languages,
                 'labels' => \App\Support\UiLocaleLabels::exportForCurrentLocale(),
                 'docs' => 'https://khub.africacdc.org/docs/#/',

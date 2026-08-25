@@ -14,7 +14,6 @@ class EncryptCookies extends Middleware
     protected $except = [
         // Set from frontend language selector (plain cookie; not sensitive)
         'khub_locale',
-        'khub_dir',
         'googtrans',
     ];
 }
