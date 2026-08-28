@@ -232,7 +232,21 @@
                         <div class="user-card-section">
                             <div class="user-card-section-title">Assignment</div>
                             <p><strong>Job</strong><br>{{ $u->job_title ?: '—' }}</p>
-                            <p><strong>Country</strong><br>{{ $u->country_name ?: '—' }}</p>
+                            <p><strong>Country</strong><br>
+                                @php
+                                    $displayCountry = $u->country_name ?? null;
+                                    if (
+                                        empty($displayCountry)
+                                        && function_exists('hub_is_country_portal')
+                                        && hub_is_country_portal()
+                                        && function_exists('hub_owner_country')
+                                        && hub_owner_country()
+                                    ) {
+                                        $displayCountry = hub_owner_country()->name;
+                                    }
+                                @endphp
+                                {{ $displayCountry ?: '—' }}
+                            </p>
                             <p><strong>Access level</strong><br>{{ $u->access_level_name ?: '—' }}</p>
                             <p><strong>Author</strong><br>
                                 @if(!empty($u->author_id) && !empty($u->author_name))
@@ -375,7 +389,7 @@
             $('#edit_last_name').val(lastName);
             $('#edit_email').val(email);
             $('#edit_phone').val(phone);
-            $('#edit_country_id').val(countryId).trigger('change');
+            $('#edit_country_id').val(countryId || $('#edit_country_id').val()).trigger('change');
             $('#edit_administrative_unit_id').val(administrativeUnitId).trigger('change');
             $('#edit_author_id').val(authorId).trigger('change');
             $('#edit_verified').prop('checked', !!verified);
@@ -387,7 +401,7 @@
             if ($('#edit_level_id').hasClass('select2-hidden-accessible')) {
                 $('#edit_level_id').select2('destroy');
             }
-            if ($('#edit_country_id').hasClass('select2-hidden-accessible')) {
+            if ($('#edit_country_id').is('select') && $('#edit_country_id').hasClass('select2-hidden-accessible')) {
                 $('#edit_country_id').select2('destroy');
             }
             if ($('#edit_administrative_unit_id').hasClass('select2-hidden-accessible')) {
@@ -397,7 +411,11 @@
                 $('#edit_author_id').select2('destroy');
             }
 
-            $('#edit_role_id, #edit_level_id, #edit_country_id, #edit_administrative_unit_id, #edit_author_id').select2({
+            var $select2Targets = $('#edit_role_id, #edit_level_id, #edit_administrative_unit_id, #edit_author_id');
+            if ($('#edit_country_id').is('select')) {
+                $select2Targets = $select2Targets.add('#edit_country_id');
+            }
+            $select2Targets.select2({
                 width: '100%'
             });
 
@@ -408,7 +426,9 @@
                 if (!levelIsViewer) {
                     $('#edit_role_id').val(roleId).trigger('change');
                 }
-                $('#edit_country_id').val(countryId).trigger('change');
+                if ($('#edit_country_id').is('select')) {
+                    $('#edit_country_id').val(countryId).trigger('change');
+                }
                 $('#edit_administrative_unit_id').val(administrativeUnitId).trigger('change');
                 $('#edit_author_id').val(authorId).trigger('change');
             }, 100);

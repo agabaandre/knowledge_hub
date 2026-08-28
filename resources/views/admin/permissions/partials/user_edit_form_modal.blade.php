@@ -10,21 +10,23 @@
                             </div>
 
                             <div class="modal-body text-left">
-                                
-                                    @if(states_enabled())
+                                    @php
+                                        $hubOwnerCountry = function_exists('hub_owner_country') ? hub_owner_country() : null;
+                                        $hubOwnerCountryId = $hubOwnerCountry?->id ?? (function_exists('hub_owner_country_id') ? hub_owner_country_id() : null);
+                                        $isCountryHub = function_exists('hub_is_country_portal') && hub_is_country_portal();
+                                    @endphp
                                     <div class="form-group ">
                                         <label class="text-bold">
                                             <i class="icon-collaboration mr-2"></i>
                                             Access Level
                                         </label>
-                                        <select class="form-control form-control-select2 select js-access-level-select" name="level_id" data-fouc readonly>
-                                           <option selected disabled>Choose Level</option>
+                                        <select class="form-control form-control-select2 select js-access-level-select" name="level_id" data-fouc>
+                                           <option value="">Choose Level</option>
                                             @foreach($levels as $level)
                                             <option value="{{ $level->id }}" data-level-name="{{ $level->level_name }}" {{ ($level->id == @$user->access_level_id)?'selected':'' }}>{{ strtoupper($level->level_name) }}</option>
                                             @endforeach
                                         </select>
                                     </div>
-                                    @endif
 
                                 <div class="form-group js-user-role-group" id="user_edit_role_group_{{ $user->id }}">
                                         @csrf
@@ -32,9 +34,9 @@
                                             <i class="icon-collaboration mr-2"></i>
                                             {{ __('auth.role') }}
                                         </label>
-                                        <select class="form-control form-control-select2 select js-user-role-select" name="role_id" data-fouc readonly>
+                                        <select class="form-control form-control-select2 select js-user-role-select" name="role_id" data-fouc>
                                             @if(empty(@$userRole->id))
-                                            <option selected disabled>Choose Role</option>
+                                            <option value="" selected>Choose Role</option>
                                             @endif
                                             @foreach($roles as $role)
                                             <option value="{{ $role->id }}" {{ ($role->id == @$userRole->id)?'selected':'' }}>{{ strtoupper($role->name) }}</option>
@@ -43,15 +45,18 @@
                                     </div>
 
                                     <div class="row">
-                                    @if(states_enabled())
                                     <div class="form-group col-md-6  col-sm-6">
                                         <label class="text-bold">
                                             <i class="icon-collaboration mr-2"></i>
-                                            Member State
+                                            Country
                                         </label>
-                                        @include('partials.countries.dropdown',['selected'=>@$user->country_id])
+                                        @if ($isCountryHub && $hubOwnerCountryId)
+                                            <input type="hidden" name="country_id" value="{{ $hubOwnerCountryId }}">
+                                            <input type="text" class="form-control" value="{{ $hubOwnerCountry?->name ?? ('#'.$hubOwnerCountryId) }}" readonly>
+                                        @else
+                                            @include('partials.countries.dropdown',['selected'=>@$user->country_id])
+                                        @endif
                                     </div>
-                                    @endif
 
                                     <input name="user_id" value="{{$user->id}}" type="hidden">
 
@@ -79,4 +84,3 @@
                         </div>
                     </div>
                 </div>
-

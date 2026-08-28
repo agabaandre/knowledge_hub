@@ -12,6 +12,11 @@
 
                 <div class="modal-body">
                     @csrf
+                    @php
+                        $hubOwnerCountry = function_exists('hub_owner_country') ? hub_owner_country() : null;
+                        $hubOwnerCountryId = $hubOwnerCountry?->id ?? (function_exists('hub_owner_country_id') ? hub_owner_country_id() : null);
+                        $isCountryHub = function_exists('hub_is_country_portal') && hub_is_country_portal();
+                    @endphp
                     <div class="row bg-white">
 
                         <div class="form-group col-md-6  col-sm-12 ">
@@ -35,29 +40,26 @@
                                 value="{{ old('mobile') }}" required />
                         </div>
 
-                        @if (states_enabled())
-                            <div class="form-group col-md-6  col-sm-12">
-                                <label class="text-bold">
-                                    <i class="icon-collaboration mr-2"></i>
-                                    Access Level
-                                </label>
-                                <select class="form-control form-control-select2 select js-access-level-select" id="add_level_id" name="level_id" data-fouc
-                                    readonly>
-                                    <option selected disabled>Choose Level</option>
-                                    @foreach ($levels as $level)
-                                        <option value="{{ $level->id }}" data-level-name="{{ $level->level_name }}"
-                                            {{ $level->id == @$user->access_level_id ? 'selected' : '' }}>
-                                            {{ strtoupper($level->level_name) }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        @endif
+                        <div class="form-group col-md-6  col-sm-12">
+                            <label class="text-bold">
+                                <i class="icon-collaboration mr-2"></i>
+                                Access Level
+                            </label>
+                            <select class="form-control form-control-select2 select js-access-level-select" id="add_level_id" name="level_id" data-fouc>
+                                <option value="">Choose Level</option>
+                                @foreach ($levels as $level)
+                                    <option value="{{ $level->id }}" data-level-name="{{ $level->level_name }}"
+                                        {{ (string) $level->id === (string) old('level_id', @$user->access_level_id) ? 'selected' : '' }}>
+                                        {{ strtoupper($level->level_name) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="form-group col-md-6  col-sm-12 js-user-role-group" id="add_user_role_group">
                             <label class="text-bold">
                                 <i class="icon-collaboration mr-2"></i>
                                 {{ __('auth.user') }} {{ __('auth.role') }}
                             </label>
-                            <select class="form-control form-control-select2 select js-user-role-select" name="role_id" id="add_role_id" data-fouc readonly>
+                            <select class="form-control form-control-select2 select js-user-role-select" name="role_id" id="add_role_id" data-fouc>
                                 @if (empty(old('role_id')))
                                     <option value="" selected>Choose Role</option>
                                 @endif
@@ -69,15 +71,26 @@
                             </select>
                         </div>
 
-                        @if (states_enabled())
-                            <div class="form-group col-md-6  col-sm-12">
-                                <label class="text-bold">
-                                    <i class="icon-collaboration mr-2"></i>
-                                    Member State
-                                </label>
-                                @include('partials.countries.dropdown')
-                            </div>
-                        @else
+                        <div class="form-group col-md-6  col-sm-12">
+                            <label class="text-bold">
+                                <i class="icon-collaboration mr-2"></i>
+                                Country
+                            </label>
+                            @if ($isCountryHub && $hubOwnerCountryId)
+                                <input type="hidden" name="country_id" value="{{ $hubOwnerCountryId }}">
+                                <input type="text" class="form-control text-bold" value="{{ $hubOwnerCountry?->name ?? ('#'.$hubOwnerCountryId) }}" readonly>
+                                <small class="text-muted">Set from this country hub configuration (hub_owner_country).</small>
+                            @else
+                                @include('partials.countries.dropdown', [
+                                    'field' => 'country_id',
+                                    'selected' => old('country_id'),
+                                    'class' => 'select2',
+                                    'id' => 'add_country_id',
+                                ])
+                            @endif
+                        </div>
+
+                        @if (! states_enabled())
                             <div class="form-group col-md-6  col-sm-12">
                                 <label class="text-bold">
                                     <i class="icon-collaboration mr-2"></i>

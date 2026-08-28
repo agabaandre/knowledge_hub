@@ -11,6 +11,11 @@
       </div>
       <form method="POST" action="{{ route('permissions.saveuser') }}">
         @csrf
+        @php
+            $hubOwnerCountry = function_exists('hub_owner_country') ? hub_owner_country() : null;
+            $hubOwnerCountryId = $hubOwnerCountry?->id ?? (function_exists('hub_owner_country_id') ? hub_owner_country_id() : null);
+            $isCountryHub = function_exists('hub_is_country_portal') && hub_is_country_portal();
+        @endphp
         <div class="modal-body">
             <input type="hidden" name="id" id="edit_user_id"/>
             <div class="row">
@@ -33,7 +38,6 @@
                 <input type="text" class="form-control text-bold" placeholder="Mobile" name="mobile" id="edit_phone" required />
               </div>
 
-              @if (states_enabled())
               <div class="form-group col-md-6 col-sm-12">
                 <label class="text-bold">
                   <i class="icon-collaboration mr-2"></i>
@@ -46,7 +50,6 @@
                   @endforeach
                 </select>
               </div>
-              @endif
 
               <div class="form-group col-md-6 col-sm-12 js-user-role-group" id="edit_user_role_group">
                 <label class="text-bold">
@@ -61,15 +64,21 @@
                 </select>
               </div>
 
-              @if (states_enabled())
               <div class="form-group col-md-6 col-sm-12">
                 <label class="text-bold">
                   <i class="icon-collaboration mr-2"></i>
-                  Member State
+                  Country
                 </label>
-                @include('partials.countries.dropdown', ['field' => 'country_id', 'selected' => '', 'class' => 'select2', 'id' => 'edit_country_id'])
+                @if ($isCountryHub && $hubOwnerCountryId)
+                  <input type="hidden" name="country_id" id="edit_country_id" value="{{ $hubOwnerCountryId }}">
+                  <input type="text" class="form-control text-bold" value="{{ $hubOwnerCountry?->name ?? ('#'.$hubOwnerCountryId) }}" readonly>
+                  <small class="text-muted">Set from this country hub configuration (hub_owner_country).</small>
+                @else
+                  @include('partials.countries.dropdown', ['field' => 'country_id', 'selected' => '', 'class' => 'select2', 'id' => 'edit_country_id'])
+                @endif
               </div>
-              @else 
+
+              @if (! states_enabled())
               <div class="form-group col-md-6 col-sm-12">
                 <label class="text-bold">
                   <i class="icon-collaboration mr-2"></i>
@@ -172,5 +181,3 @@
     </div>
   </div>
 </div>
-
-

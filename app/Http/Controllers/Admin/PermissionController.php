@@ -48,7 +48,14 @@ class PermissionController extends Controller
     public function users(Request $request)
     {
         $data['roles'] = Role::all();
-        $data['levels'] = AccessLevel::all();
+        // Prefer unique level names so duplicate seeded rows (Viewer/Country/…) do not confuse the UI.
+        $data['levels'] = AccessLevel::query()
+            ->orderBy('id')
+            ->get()
+            ->unique(function ($level) {
+                return strtolower((string) $level->level_name);
+            })
+            ->values();
         
         // Load countries and authors for dropdowns
         $data['countries'] = \App\Models\Country::orderBy('name')->get();
@@ -268,7 +275,6 @@ class PermissionController extends Controller
 
         $lastName       = $request->last_name;
         $firstName      = $request->first_name;
-        $country_id  = $request->country_id;
         $nin       = $request->nin;
         $email     = $request->email;
         $mobile    = $request->mobile;
@@ -279,6 +285,11 @@ class PermissionController extends Controller
         if($request->id)
          $user = User::find($request->id);
 
+        $country_id = self::resolveUserCountryIdForSave(
+            $request->filled('country_id') ? (int) $request->country_id : null
+        );
+        $accessLevelId = self::resolveAccessLevelIdForSave($request, $user->access_level_id ?? null);
+
         $user->first_name = $firstName;
         $user->last_name  = $lastName;
         $user->country_id  = $country_id;
@@ -286,7 +297,7 @@ class PermissionController extends Controller
         $user->email     = $email;
         $user->name      = $lastName." ".$firstName;
         $user->author_id =  $request->author_id;
-        $user->access_level_id =  $request->level_id;
+        $user->access_level_id =  $accessLevelId;
         $user->administrative_unit_id =  $request->administrative_unit_id;
         if($request->has('status')){ $user->status = (int)$request->status; }
         if($request->has('is_verified')){ $user->is_verified = (int)!!$request->is_verified; if($user->is_verified && empty($user->email_verified_at)){ $user->email_verified_at = now(); } }
@@ -462,13 +473,18 @@ class PermissionController extends Controller
 
         $userId = $request->user_id;
         $roleId = $request->role_id;
-        $isViewer = $this->isViewerAccessLevel($request->level_id ?? null);
 
         $user   = User::find($userId);
         $old_data = $user;
 
-        $user->access_level_id = $request->level_id;
+        $accessLevelId = self::resolveAccessLevelIdForSave($request, $user->access_level_id);
+        $isViewer = $this->isViewerAccessLevel($accessLevelId);
+
+        $user->access_level_id = $accessLevelId;
         $user->author_id       = $request->author_id;
+        $user->country_id      = self::resolveUserCountryIdForSave(
+            $request->filled('country_id') ? (int) $request->country_id : ($user->country_id ? (int) $user->country_id : null)
+        );
         $user->update();
 
         $user->syncRoles([]);
@@ -487,6 +503,37 @@ class PermissionController extends Controller
         $alert = ['alert-'.$alert_class=>$msg];
 
         return redirect()->route('permissions.users')->with($alert);
+    }
+
+    /**
+     * Country hubs always store the configured owner country on the user account.
+     */
+    public static function resolveUserCountryIdForSave(?int $requestCountryId): ?int
+    {
+        if (function_exists('hub_is_country_portal') && hub_is_country_portal()) {
+            $ownerId = function_exists('hub_owner_country_id') ? hub_owner_country_id() : null;
+            if ($ownerId) {
+                return (int) $ownerId;
+            }
+        }
+
+        return $requestCountryId;
+    }
+
+    /**
+     * Keep the existing access level when the form omits level_id (e.g. older country-hub layouts).
+     */
+    public static function resolveAccessLevelIdForSave(Request $request, $existingLevelId = null): ?int
+    {
+        if (! $request->exists('level_id')) {
+            return $existingLevelId !== null && $existingLevelId !== ''
+                ? (int) $existingLevelId
+                : null;
+        }
+
+        $levelId = $request->input('level_id');
+
+        return ($levelId !== null && $levelId !== '') ? (int) $levelId : null;
     }
 
     /*
