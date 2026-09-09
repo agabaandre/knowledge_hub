@@ -170,6 +170,9 @@
         $related_publications ?? null
     );
     $jsonLdFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
+
+    $publicationCitationTags = \App\Support\PublicationCitationMeta::highwireTags($publication);
+    $publicationCitationLinks = \App\Support\PublicationCitationMeta::citationLinks($publication);
 @endphp
 
 @section('structured_data')
@@ -953,6 +956,20 @@
                             <a href="https://doi.org/{{ $publication->doi }}" target="_blank" rel="noopener noreferrer" style="color: #911C39; text-decoration: none;">
                                 {{ $publication->doi }} <i class="fa fa-external-link-alt" style="font-size: 0.75rem;"></i>
                             </a>
+                        </span>
+                        @endif
+
+                        @if(!empty($publicationCitationLinks))
+                        <label class="meta-label">Track citations</label>
+                        <span class="meta-value">
+                            <span class="text-muted d-block mb-1" style="font-size: 0.85rem;">Look up this work in external citation indexes (opens in a new tab).</span>
+                            <div class="d-flex flex-wrap gap-2 mt-1">
+                                @foreach($publicationCitationLinks as $citeLink)
+                                    <a href="{{ $citeLink['url'] }}" target="_blank" rel="noopener noreferrer" class="badge badge-secondary" style="text-decoration: none;">
+                                        {{ $citeLink['label'] }} <i class="fa fa-external-link-alt" style="font-size: 0.7rem;"></i>
+                                    </a>
+                                @endforeach
+                            </div>
                         </span>
                         @endif
                         

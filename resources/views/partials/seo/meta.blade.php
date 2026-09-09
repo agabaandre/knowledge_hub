@@ -54,6 +54,13 @@
 {{-- Canonical URL --}}
 <link rel="canonical" href="{{ $canonicalUrl }}">
 
+@if(!empty($publicationCitationTags))
+{{-- Google Scholar / Highwire Press citation meta --}}
+@foreach($publicationCitationTags as $citationTag)
+<meta name="{{ $citationTag['name'] }}" content="{{ $citationTag['content'] }}">
+@endforeach
+@endif
+
 {{-- Alternate Languages (if multilingual) --}}
 @if(isset($alternateLanguages))
     @foreach($alternateLanguages as $lang => $url)
