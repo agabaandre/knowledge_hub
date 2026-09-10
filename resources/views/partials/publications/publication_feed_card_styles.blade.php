@@ -659,3 +659,56 @@
     .publication-feed-card-scope .publication-card-actions {
         justify-content: flex-start !important;
     }
+
+    .publication-citations-details {
+        display: inline-block;
+        max-width: 100%;
+    }
+
+    .publication-citations-details > summary {
+        list-style: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        user-select: none;
+    }
+
+    .publication-citations-details > summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .publication-citations-details__menu {
+        margin-top: 0.35rem;
+        min-width: 12.5rem;
+        max-width: 18rem;
+        padding: 0.35rem;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.35rem;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    .publication-citations-details__hint {
+        font-size: 0.7rem;
+        color: #64748b;
+        padding: 0.25rem 0.5rem 0.4rem;
+    }
+
+    .publication-citations-details__link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.4rem 0.55rem;
+        border-radius: 0.25rem;
+        color: #334155;
+        text-decoration: none;
+        font-size: 0.8125rem;
+        font-weight: 500;
+    }
+
+    .publication-citations-details__link:hover {
+        background: rgba(17, 154, 72, 0.08);
+        color: {{ $primaryColor }};
+        text-decoration: none;
+    }

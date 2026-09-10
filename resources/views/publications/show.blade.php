@@ -960,16 +960,13 @@
                         @endif
 
                         @if(!empty($publicationCitationLinks))
-                        <label class="meta-label">Track citations</label>
+                        <label class="meta-label">Citations</label>
                         <span class="meta-value">
                             <span class="text-muted d-block mb-1" style="font-size: 0.85rem;">Look up this work in external citation indexes (opens in a new tab).</span>
-                            <div class="d-flex flex-wrap gap-2 mt-1">
-                                @foreach($publicationCitationLinks as $citeLink)
-                                    <a href="{{ $citeLink['url'] }}" target="_blank" rel="noopener noreferrer" class="badge badge-secondary" style="text-decoration: none;">
-                                        {{ $citeLink['label'] }} <i class="fa fa-external-link-alt" style="font-size: 0.7rem;"></i>
-                                    </a>
-                                @endforeach
-                            </div>
+                            @include('common.publication_citations_button', [
+                                'publication' => $publication,
+                                'btnClass' => 'btn btn-sm btn-outline-secondary',
+                            ])
                         </span>
                         @endif
                         

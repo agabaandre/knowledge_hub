@@ -192,6 +192,7 @@
                             <i class="fa fa-eye mr-1"></i> Read more
                         </a>
                         @include('common.khub_ai_publication_button', ['publication' => $row])
+                        @include('common.publication_citations_button', ['publication' => $row])
                         @auth
                             <button type="button"
                                     class="btn btn-sm btn-primary community-pub-action-btn--primary"

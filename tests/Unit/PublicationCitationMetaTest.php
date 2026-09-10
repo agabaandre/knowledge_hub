@@ -87,11 +87,16 @@ class PublicationCitationMetaTest extends TestCase
     {
         $show = file_get_contents(resource_path('views/publications/show.blade.php'));
         $meta = file_get_contents(resource_path('views/partials/seo/meta.blade.php'));
+        $card = file_get_contents(resource_path('views/partials/publications/publication_feed_card.blade.php'));
+        $button = file_get_contents(resource_path('views/common/publication_citations_button.blade.php'));
 
         $this->assertStringContainsString('PublicationCitationMeta::highwireTags', $show);
         $this->assertStringContainsString('PublicationCitationMeta::citationLinks', $show);
         $this->assertStringContainsString('publicationCitationTags', $meta);
         $this->assertStringContainsString('Highwire Press', $meta);
-        $this->assertStringContainsString('Track citations', $show);
+        $this->assertStringContainsString('publication_citations_button', $show);
+        $this->assertStringContainsString('publication_citations_button', $card);
+        $this->assertStringContainsString('Citations', $button);
+        $this->assertStringContainsString('PublicationCitationMeta::citationLinks', $button);
     }
 }
