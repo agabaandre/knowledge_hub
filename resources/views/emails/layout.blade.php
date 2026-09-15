@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{ $title ?? 'Africa CDC Knowledge Hub' }}</title>
+    <title>{{ $title ?? (settings()->site_name ?? 'Africa CDC Knowledge Hub') }}</title>
     <!--[if mso]>
     <style type="text/css">
         body, table, td {font-family: Arial, Helvetica, sans-serif !important;}
@@ -25,15 +25,15 @@
                                     <td align="center">
                                         <a href="{{ url('/') }}" style="text-decoration: none; display: inline-block;">
                                             @php
-                                                // Use Africa CDC official logo from their website
-                                                $logoUrl = 'https://africacdc.org/wp-content/uploads/2020/02/AfricaCDC_Logo.png';
-                                                // Fallback to settings logo if needed, but prefer the official one
-                                                if (empty($logoUrl) || !filter_var($logoUrl, FILTER_VALIDATE_URL)) {
-                                                    $logoUrl = settings()->logo ?? asset('assets/images/logo.png');
-                                                    $logoUrl = filter_var($logoUrl, FILTER_VALIDATE_URL) ? $logoUrl : url($logoUrl);
+                                                // Same logo as the home page header (APP_URL / storage), not a remote hardcoded asset.
+                                                $logoUrl = settings()->logo ?? null;
+                                                if (empty($logoUrl) || ! filter_var($logoUrl, FILTER_VALIDATE_URL)) {
+                                                    $fallback = asset('assets/images/logo.png');
+                                                    $logoUrl = filter_var($fallback, FILTER_VALIDATE_URL) ? $fallback : url($fallback);
                                                 }
+                                                $siteName = settings()->site_name ?? 'Africa CDC Knowledge Hub';
                                             @endphp
-                                            <img src="{{ $logoUrl }}" alt="Africa CDC Knowledge Hub" style="max-width: 200px; height: auto; display: block;" />
+                                            <img src="{{ $logoUrl }}" alt="{{ $siteName }}" style="max-width: 200px; height: auto; display: block;" />
                                         </a>
                                     </td>
                                 </tr>
@@ -55,7 +55,7 @@
                                 <tr>
                                     <td align="center" style="padding-bottom: 20px;">
                                         <p style="margin: 0; font-size: 14px; color: #64748b; line-height: 1.6;">
-                                            <strong style="color: #119A48;">Africa CDC Knowledge Hub</strong><br>
+                                            <strong style="color: #119A48;">{{ $siteName ?? (settings()->site_name ?? 'Africa CDC Knowledge Hub') }}</strong><br>
                                             Comprehensive knowledge repository for public health resources
                                         </p>
                                     </td>
@@ -78,8 +78,8 @@
                                 <tr>
                                     <td align="center" style="border-top: 1px solid #e2e8f0; padding-top: 20px;">
                                         <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.5;">
-                                            This email was sent by Africa CDC Knowledge Hub<br>
-                                            © {{ date('Y') }} Africa CDC. All rights reserved.
+                                            This email was sent by {{ $siteName ?? (settings()->site_name ?? 'Africa CDC Knowledge Hub') }}<br>
+                                            © {{ date('Y') }} {{ $siteName ?? (settings()->site_name ?? 'Africa CDC') }}. All rights reserved.
                                         </p>
                                     </td>
                                 </tr>
