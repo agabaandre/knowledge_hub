@@ -10,6 +10,8 @@
       Header always set Referrer-Policy "no-referrer"
       Header always set Strict-Transport-Security "max-age=31536000"
       Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+      Header always unset X-Powered-By
+      Header unset X-Powered-By
     </IfModule>
 
     RewriteEngine On

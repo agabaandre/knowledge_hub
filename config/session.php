@@ -168,7 +168,11 @@ return [
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    // Default Secure when APP_URL is https so production ZAP/TLS scans pass even if
+    // SESSION_SECURE_COOKIE is unset. Override explicitly for local HTTP if needed.
+    'secure' => env('SESSION_SECURE_COOKIE') !== null
+        ? filter_var(env('SESSION_SECURE_COOKIE'), FILTER_VALIDATE_BOOLEAN)
+        : (is_string(env('APP_URL')) && str_starts_with(strtolower((string) env('APP_URL')), 'https://')),
 
     /*
     |--------------------------------------------------------------------------

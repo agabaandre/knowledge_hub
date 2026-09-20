@@ -23,5 +23,6 @@ class SecurityHeadersResponseTest extends TestCase
         $response->assertHeader('Referrer-Policy', 'no-referrer');
         $response->assertHeader('Strict-Transport-Security', 'max-age=31536000');
         $response->assertHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+        $this->assertNull($response->headers->get('X-Powered-By'));
     }
 }

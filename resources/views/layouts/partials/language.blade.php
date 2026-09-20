@@ -1,6 +1,5 @@
 <div id="google_translate_element" style="display:none;"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.2/js/bootstrap-select.min.js" type="text/javascript"></script>
-@php
+11
     use App\Models\SiteLanguage;
     $uiLocale = active_ui_locale();
     $localeCookiePath = config('supported_locales.cookie_path', '/');

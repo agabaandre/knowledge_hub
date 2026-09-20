@@ -63,12 +63,22 @@ class LocaleSwitchController extends Controller
             'labels' => UiLocaleLabels::exportForCurrentLocale(),
         ]);
 
-        $response->cookie($cookieName, $locale, $cookieMinutes, $cookiePath, null, false, false);
+        $response->cookie(
+            $cookieName,
+            $locale,
+            $cookieMinutes,
+            $cookiePath,
+            null,
+            cookie_secure_flag(),
+            true,
+            false,
+            config('session.same_site', 'lax')
+        );
 
         if ($locale === 'en') {
-            $response->cookie('googtrans', '', -1, $cookiePath, null, false, false);
+            $response->cookie('googtrans', '', -1, $cookiePath, null, cookie_secure_flag(), false, false, config('session.same_site', 'lax'));
         } else {
-            $response->cookie('googtrans', '/auto/'.$googleCode, $cookieMinutes, $cookiePath, null, false, false);
+            $response->cookie('googtrans', '/auto/'.$googleCode, $cookieMinutes, $cookiePath, null, cookie_secure_flag(), false, false, config('session.same_site', 'lax'));
         }
 
         return $response;
@@ -94,12 +104,22 @@ class LocaleSwitchController extends Controller
         }
 
         $response = redirect($redirect);
-        $response->cookie($cookieName, $locale, $cookieMinutes, $cookiePath, null, false, false);
+        $response->cookie(
+            $cookieName,
+            $locale,
+            $cookieMinutes,
+            $cookiePath,
+            null,
+            cookie_secure_flag(),
+            true,
+            false,
+            config('session.same_site', 'lax')
+        );
 
         if ($locale === 'en') {
-            $response->cookie('googtrans', '', -1, $cookiePath, null, false, false);
+            $response->cookie('googtrans', '', -1, $cookiePath, null, cookie_secure_flag(), false, false, config('session.same_site', 'lax'));
         } else {
-            $response->cookie('googtrans', '/auto/'.$googleCode, $cookieMinutes, $cookiePath, null, false, false);
+            $response->cookie('googtrans', '/auto/'.$googleCode, $cookieMinutes, $cookiePath, null, cookie_secure_flag(), false, false, config('session.same_site', 'lax'));
         }
 
         return $response;

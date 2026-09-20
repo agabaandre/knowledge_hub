@@ -17,10 +17,6 @@
 
 <link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
 
-@if (empty($theme))
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-@endif
-
 <link href="{{ asset('frontend/css/styles.css') }}" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('frontend/css/quiz.css') }}">
 <link rel="stylesheet" href="{{ asset('frontend/css/sharing.css') }}">
@@ -30,9 +26,11 @@
     crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet"
-    type="text/css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Wruczek/Bootstrap-Cookie-Alert@gh-pages/cookiealert.css">
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    integrity="sha384-jjBocnsQb7zTYSozEemReuje+/6FUtVswDdIPdDMA6SVLBCt51rVkrz/V/sTnKOu"
+    crossorigin="anonymous" referrerpolicy="no-referrer" type="text/css" />
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"
+    integrity="sha384-vIQIPaHJRqkO8xhnLxSZ0rHF6LyiWXbLF3grsa9pv9yDFyOPGrE1teHOuRNMJoZs"
+    crossorigin="anonymous" referrerpolicy="no-referrer">
 
 <link rel="stylesheet" href="{{ asset('frontend/js/aos/dist/aos.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/webfont-medical-icons/css/wfmi-style.css') }}">

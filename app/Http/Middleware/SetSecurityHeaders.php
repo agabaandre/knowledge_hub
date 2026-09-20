@@ -19,6 +19,9 @@ class SetSecurityHeaders
             $response->headers->set($name, $value);
         }
 
+        $response->headers->remove('X-Powered-By');
+        $response->headers->remove('Server');
+
         return $response;
     }
 

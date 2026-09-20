@@ -12,10 +12,50 @@ if(!function_exists('get_cookie')){
 	}
 }
 
+if (! function_exists('cookie_secure_flag')) {
+	/**
+	 * Whether cookies should be marked Secure (HTTPS-only).
+	 */
+	function cookie_secure_flag(): bool
+	{
+		$secure = config('session.secure');
+		if ($secure !== null) {
+			return (bool) $secure;
+		}
+
+		if (function_exists('request')) {
+			try {
+				$req = request();
+				if ($req) {
+					return $req->isSecure();
+				}
+			} catch (\Throwable $e) {
+				// fall through
+			}
+		}
+
+		return (! empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+			|| (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443)
+			|| (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower((string) $_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https');
+	}
+}
+
 
 if(!function_exists('set_cookie')){
 	function set_cookie($cookie_name,$value="yes"){
-		setcookie($cookie_name, $value, time() + (86400 * 30 * 90), "/");
+		$sameSite = strtolower((string) (config('session.same_site') ?: 'lax'));
+		$sameSiteHeader = match ($sameSite) {
+			'strict' => 'Strict',
+			'none' => 'None',
+			default => 'Lax',
+		};
+		setcookie($cookie_name, $value, [
+			'expires' => time() + (86400 * 30 * 90),
+			'path' => '/',
+			'secure' => cookie_secure_flag(),
+			'httponly' => true,
+			'samesite' => $sameSiteHeader,
+		]);
 	}
 }
 
