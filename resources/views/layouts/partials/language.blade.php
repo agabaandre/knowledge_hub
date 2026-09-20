@@ -1,5 +1,8 @@
 <div id="google_translate_element" style="display:none;"></div>
-11
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.2/js/bootstrap-select.min.js"
+    integrity="sha384-gYEWPc4PqVsUcmUA/F1H9PPNjnNvS8CHniaAOtoRluGxpLVqO2dwtGnA/gK3NVAg"
+    crossorigin="anonymous" referrerpolicy="no-referrer" type="text/javascript"></script>
+@php
     use App\Models\SiteLanguage;
     $uiLocale = active_ui_locale();
     $localeCookiePath = config('supported_locales.cookie_path', '/');
