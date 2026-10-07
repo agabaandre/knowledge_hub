@@ -144,16 +144,29 @@
             outline: none;
         }
 
-        /* Select dropdown styling */
+        /* Native selects: .form-control padding clips option text on WebKit */
         .form-control select,
         select.form-control {
             color: #2d3748 !important;
             background-color: #ffffff !important;
+            height: 2.75rem;
+            min-height: 2.75rem;
+            padding: 0 2.25rem 0 0.875rem;
+            line-height: 2.65rem;
+            font-size: 0.95rem;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%234a5568' d='M1.4.6L6 5.2 10.6.6 12 2 6 8 0 2z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.875rem center;
+            background-size: 12px 8px;
         }
 
-        select.form-control option {
+        select.form-control option,
+        select.form-control optgroup {
             color: #2d3748 !important;
             background-color: #ffffff !important;
+            line-height: 1.4;
             padding: 0.5rem;
         }
 
