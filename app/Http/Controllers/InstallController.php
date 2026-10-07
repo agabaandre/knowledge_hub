@@ -434,6 +434,15 @@ class InstallController extends Controller
                 'exchange_auth_method' => old('exchange_auth_method', $active?->exchange_auth_method ?? env('EXCHANGE_AUTH_METHOD', 'client_credentials')),
                 'exchange_redirect_uri' => old('exchange_redirect_uri', $active?->exchange_redirect_uri ?? env('EXCHANGE_REDIRECT_URI', '')),
                 'exchange_scope' => old('exchange_scope', $active?->exchange_scope ?? env('EXCHANGE_SCOPE', 'https://graph.microsoft.com/.default')),
+                'mail_http_base_url' => old('mail_http_base_url', $active?->mail_http_base_url ?? env('MAIL_HTTP_BASE_URL', 'https://notifications.africacdc.org/api/v1')),
+                'mail_http_client_id' => old('mail_http_client_id', $active?->mail_http_client_id ?? env('MAIL_HTTP_CLIENT_ID', '')),
+                'mail_http_client_secret' => old('mail_http_client_secret', $active?->mail_http_client_secret ?? ''),
+                'mail_api_key' => old('mail_api_key', $active?->mail_api_key ?? env('MAIL_API_KEY', '')),
+                'mail_api_secret' => old('mail_api_secret', $active?->mail_api_secret ?? env('MAIL_API_SECRET', '')),
+                'mail_api_domain' => old('mail_api_domain', $active?->mail_api_domain ?? env('MAIL_API_DOMAIN', '')),
+                'mail_api_region' => old('mail_api_region', $active?->mail_api_region ?? env('MAIL_API_REGION', 'us')),
+                'mail_api_base_url' => old('mail_api_base_url', $active?->mail_api_base_url ?? env('MAIL_API_BASE_URL', '')),
+                'mail_api_message_stream' => old('mail_api_message_stream', $active?->mail_api_message_stream ?? env('MAIL_API_MESSAGE_STREAM', 'outbound')),
             ],
         ]);
     }
@@ -536,18 +545,33 @@ class InstallController extends Controller
     {
         $driver = $request->input('mail_mailer', 'exchange');
         $rules = [
-            'mail_mailer' => 'required|in:log,smtp,exchange',
+            'mail_mailer' => 'required|in:'.implode(',', \App\Support\EmailDrivers::SUPPORTED),
             'mail_from_address' => 'required|email|max:255',
             'mail_from_name' => 'required|string|max:255',
             'test_email' => 'nullable|email|max:255',
         ];
 
-        if ($driver === 'smtp') {
-            $rules['mail_host'] = 'required|string|max:255';
-            $rules['mail_port'] = 'required|integer|min:1|max:65535';
+        if (in_array($driver, ['smtp', 'zoho'], true)) {
+            $rules['mail_host'] = $driver === 'zoho' ? 'nullable|string|max:255' : 'required|string|max:255';
+            $rules['mail_port'] = 'nullable|integer|min:1|max:65535';
             $rules['mail_username'] = 'nullable|string|max:255';
             $rules['mail_password'] = 'nullable|string|max:255';
-            $rules['mail_encryption'] = 'required|in:tls,ssl,none';
+            $rules['mail_encryption'] = 'nullable|in:tls,ssl,none';
+        }
+
+        if ($driver === 'http') {
+            $rules['mail_http_base_url'] = 'nullable|string|max:500';
+            $rules['mail_http_client_id'] = 'required|string|max:255';
+            $rules['mail_http_client_secret'] = 'required|string|max:2000';
+        }
+
+        if (\App\Support\EmailDrivers::usesApi((string) $driver)) {
+            $rules['mail_api_key'] = 'required|string|max:2000';
+            $rules['mail_api_secret'] = $driver === 'mailjet' ? 'required|string|max:2000' : 'nullable|string|max:2000';
+            $rules['mail_api_domain'] = $driver === 'mailgun' ? 'required|string|max:255' : 'nullable|string|max:255';
+            $rules['mail_api_region'] = 'nullable|in:us,eu';
+            $rules['mail_api_base_url'] = 'nullable|string|max:500';
+            $rules['mail_api_message_stream'] = 'nullable|string|max:100';
         }
 
         if ($driver === 'exchange') {

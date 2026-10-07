@@ -807,13 +807,30 @@ class InstallerService
             $payload['email_driver'] = $driver === 'log' ? 'exchange' : $driver;
         }
 
-        if ($driver === 'smtp') {
-            $payload['mail_host'] = $mail['mail_host'] ?? '';
-            $payload['mail_port'] = (string) ($mail['mail_port'] ?? '587');
+        if (in_array($driver, ['smtp', 'zoho'], true)) {
+            $defaults = \App\Support\EmailDrivers::smtpDefaults($driver);
+            $payload['mail_host'] = $mail['mail_host'] ?? $defaults['host'];
+            $payload['mail_port'] = (string) ($mail['mail_port'] ?? $defaults['port']);
             $payload['mail_username'] = $mail['mail_username'] ?? '';
             $payload['mail_password'] = $mail['mail_password'] ?? '';
-            $encryption = $mail['mail_encryption'] ?? 'tls';
+            $encryption = $mail['mail_encryption'] ?? $defaults['encryption'];
             $payload['mail_encryption'] = in_array($encryption, ['tls', 'ssl', 'none'], true) ? $encryption : 'tls';
+        } elseif ($driver === 'http') {
+            if (Schema::hasColumn('setting', 'mail_http_client_id')) {
+                $payload['mail_http_base_url'] = $mail['mail_http_base_url']
+                    ?? 'https://notifications.africacdc.org/api/v1';
+                $payload['mail_http_client_id'] = $mail['mail_http_client_id'] ?? '';
+                $payload['mail_http_client_secret'] = $mail['mail_http_client_secret'] ?? '';
+            }
+        } elseif (\App\Support\EmailDrivers::usesApi($driver)) {
+            if (Schema::hasColumn('setting', 'mail_api_key')) {
+                $payload['mail_api_key'] = $mail['mail_api_key'] ?? '';
+                $payload['mail_api_secret'] = $mail['mail_api_secret'] ?? '';
+                $payload['mail_api_domain'] = $mail['mail_api_domain'] ?? '';
+                $payload['mail_api_region'] = $mail['mail_api_region'] ?? 'us';
+                $payload['mail_api_base_url'] = $mail['mail_api_base_url'] ?? '';
+                $payload['mail_api_message_stream'] = $mail['mail_api_message_stream'] ?? 'outbound';
+            }
         } elseif ($driver === 'exchange') {
             $payload['exchange_tenant_id'] = $mail['exchange_tenant_id'] ?? '';
             $payload['exchange_client_id'] = $mail['exchange_client_id'] ?? '';

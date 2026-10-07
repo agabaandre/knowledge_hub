@@ -23,6 +23,16 @@ class MailConfigTestService
             return $this->testExchange($payload);
         }
 
+        if ($driver === 'http') {
+            return $this->testHttp($payload);
+        }
+
+        if ($driver === 'log' || \App\Support\EmailDrivers::usesApi($driver)) {
+            $this->applyTemporaryConfig($payload);
+
+            return (new TransactionalMailClient())->test($driver);
+        }
+
         return $this->testSmtp($payload);
     }
 
@@ -100,6 +110,36 @@ class MailConfigTestService
      * @param  array<string, mixed>  $payload
      * @return array{ok: bool, message?: string, error?: string}
      */
+    private function testHttp(array $payload): array
+    {
+        $clientId = trim((string) ($payload['mail_http_client_id'] ?? ''));
+        $clientSecret = (string) ($payload['mail_http_client_secret'] ?? '');
+        $baseUrl = trim((string) ($payload['mail_http_base_url'] ?? 'https://notifications.africacdc.org/api/v1'));
+
+        if ($clientId === '' || $clientSecret === '') {
+            return ['ok' => false, 'error' => 'HTTP client ID and client secret are required.'];
+        }
+
+        try {
+            config([
+                'emails.http.base_url' => $baseUrl !== '' ? $baseUrl : 'https://notifications.africacdc.org/api/v1',
+                'emails.http.client_id' => $clientId,
+                'emails.http.client_secret' => $clientSecret,
+            ]);
+
+            $client = new HttpNotificationsMailClient();
+            $client->authenticate();
+
+            return ['ok' => true, 'message' => 'Africa CDC Email Server authentication successful.'];
+        } catch (\Throwable $e) {
+            return ['ok' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array{ok: bool, message?: string, error?: string}
+     */
     private function testExchange(array $payload): array
     {
         $tenantId = trim((string) ($payload['exchange_tenant_id'] ?? ''));
@@ -159,6 +199,16 @@ class MailConfigTestService
             'emails.password' => (string) ($payload['mail_password'] ?? ''),
             'emails.smtp_secure' => (string) ($payload['mail_encryption'] ?? 'tls') ?: 'tls',
             'emails.sender' => $fromName,
+            'emails.http.base_url' => (string) ($payload['mail_http_base_url'] ?? 'https://notifications.africacdc.org/api/v1'),
+            'emails.http.client_id' => (string) ($payload['mail_http_client_id'] ?? ''),
+            'emails.http.client_secret' => (string) ($payload['mail_http_client_secret'] ?? ''),
+            'emails.api.key' => (string) ($payload['mail_api_key'] ?? ''),
+            'emails.api.secret' => (string) ($payload['mail_api_secret'] ?? ''),
+            'emails.api.domain' => (string) ($payload['mail_api_domain'] ?? ''),
+            'emails.api.region' => (string) ($payload['mail_api_region'] ?? 'us'),
+            'emails.api.base_url' => (string) ($payload['mail_api_base_url'] ?? ''),
+            'emails.api.message_stream' => (string) ($payload['mail_api_message_stream'] ?? 'outbound'),
+            'emails.from_address' => (string) ($payload['mail_from_address'] ?? ''),
             'exchange-email.tenant_id' => (string) ($payload['exchange_tenant_id'] ?? ''),
             'exchange-email.client_id' => (string) ($payload['exchange_client_id'] ?? ''),
             'exchange-email.client_secret' => (string) ($payload['exchange_client_secret'] ?? ''),

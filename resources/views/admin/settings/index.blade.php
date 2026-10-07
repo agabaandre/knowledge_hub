@@ -1117,7 +1117,24 @@
                         @php
                             $emailDriverForm = $emailFields['email_driver']['form_value'] ?? $emailFields['email_driver']['value'] ?? 'exchange';
                             $emailDriverEffective = $emailFields['email_driver']['value'] ?? 'exchange';
-                            $showExchange = $emailDriverForm === 'exchange';
+                            $emailPanel = \App\Support\EmailDrivers::panelFor($emailDriverForm);
+                            $showExchange = $emailPanel === 'exchange';
+                            $showSmtp = $emailPanel === 'smtp';
+                            $showHttp = $emailPanel === 'http';
+                            $showApi = $emailPanel === 'api';
+                            $httpFieldsReady = array_key_exists('mail_http_client_id', $emailFields);
+                            $apiFieldsReady = array_key_exists('mail_api_key', $emailFields);
+                            $emailDriverDefs = collect(\App\Support\EmailDrivers::definitions())
+                                ->filter(function ($def) use ($httpFieldsReady, $apiFieldsReady) {
+                                    if ($def['panel'] === 'http' && ! $httpFieldsReady) {
+                                        return false;
+                                    }
+                                    if ($def['panel'] === 'api' && ! $apiFieldsReady) {
+                                        return false;
+                                    }
+                                    return true;
+                                })
+                                ->groupBy('category');
                         @endphp
 
                         <div class="form-section-title">
@@ -1128,14 +1145,21 @@
                         <div class="email-section-intro">
                             <i class="fa fa-info-circle"></i>
                             Choose the default sending method for system emails (password reset, notifications, reminders).
+                            Prefer <strong>Africa CDC Email Server (HTTP)</strong> — the same notifications service used by Staff Portal.
+                            Also supports Zoho, SendGrid, Mailgun, Postmark, Mailjet, SMTP, and Exchange.
                             Values saved here are stored in the database and <strong>override</strong> any matching <code>.env</code> mail settings.
                     </div>
 
-                        <div class="form-group" style="max-width: 360px;">
+                        <div class="form-group" style="max-width: 420px;">
                             <label class="branding-field-label d-block" for="email_driver">Default sending method</label>
                             <select name="email_driver" id="email_driver" class="form-control">
-                                <option value="exchange" {{ $emailDriverForm === 'exchange' ? 'selected' : '' }}>Microsoft Exchange</option>
-                                <option value="smtp" {{ $emailDriverForm === 'smtp' ? 'selected' : '' }}>SMTP</option>
+                                @foreach($emailDriverDefs as $category => $drivers)
+                                    <optgroup label="{{ $category }}">
+                                        @foreach($drivers as $def)
+                                            <option value="{{ $def['key'] }}" {{ $emailDriverForm === $def['key'] ? 'selected' : '' }}>{{ $def['label'] }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
                         </select>
                             </div>
                         <p class="email-effective-hint mb-3">Currently active: <strong>{{ strtoupper($emailDriverEffective) }}</strong></p>
@@ -1175,6 +1199,47 @@
                             </div>
                         </div>
                     </div>
+
+                        @if($httpFieldsReady)
+                        <div class="email-config-panel js-email-driver-panel" id="email-panel-http" style="{{ $showHttp ? '' : 'display:none;' }}">
+                            <h4 class="email-config-panel__title"><i class="fa fa-cloud"></i>Africa CDC Email Server (HTTP)</h4>
+                            <p class="text-muted small mb-3">
+                                Uses <a href="https://notifications.africacdc.org/api/documentation" target="_blank" rel="noopener">notifications.africacdc.org</a>
+                                with client-credentials JWT — same provider as Staff Portal email servers.
+                            </p>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>API base URL
+                                            @if($emailFields['mail_http_base_url']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
+                                        </label>
+                                        <input type="text" name="mail_http_base_url" class="form-control"
+                                               value="{{ $emailFields['mail_http_base_url']['form_value'] ?? '' }}"
+                                               placeholder="https://notifications.africacdc.org/api/v1">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Client ID
+                                            @if($emailFields['mail_http_client_id']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
+                                        </label>
+                                        <input type="text" name="mail_http_client_id" class="form-control"
+                                               value="{{ $emailFields['mail_http_client_id']['form_value'] ?? '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-0">
+                                        <label>Client secret
+                                            @if($emailFields['mail_http_client_secret']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
+                                        </label>
+                                        <input type="password" name="mail_http_client_secret" class="form-control" autocomplete="new-password"
+                                               placeholder="{{ !empty($emailFields['mail_http_client_secret']['db_value']) ? '•••••••• (leave blank to keep)' : 'Enter client secret' }}"
+                                               {{ ($emailFields['mail_http_client_secret']['env_locked'] ?? false) ? 'readonly' : '' }}>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
 
                         <div class="email-config-panel js-email-driver-panel" id="email-panel-exchange" style="{{ $showExchange ? '' : 'display:none;' }}">
                             <h4 class="email-config-panel__title"><i class="fa fa-windows"></i>Microsoft Exchange / Graph API</h4>
@@ -1240,17 +1305,20 @@
                     </div>
                 </div>
 
-                        <div class="email-config-panel js-email-driver-panel" id="email-panel-smtp" style="{{ $showExchange ? 'display:none;' : '' }}">
-                            <h4 class="email-config-panel__title"><i class="fa fa-server"></i>SMTP server</h4>
+                        <div class="email-config-panel js-email-driver-panel" id="email-panel-smtp" style="{{ $showSmtp ? '' : 'display:none;' }}">
+                            <h4 class="email-config-panel__title"><i class="fa fa-server"></i><span id="smtp-panel-title">SMTP server</span></h4>
+                            <p class="text-muted small mb-3" id="smtp-panel-hint" style="{{ $emailDriverForm === 'zoho' ? '' : 'display:none;' }}">
+                                Zoho Mail uses SMTP. Leave host blank to default to <code>smtp.zoho.com</code> on port 587 (TLS).
+                            </p>
                     <div class="row">
                                 <div class="col-md-8">
                             <div class="form-group">
                                         <label>Host
                                             @if($emailFields['mail_host']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
-                                        <input type="text" name="mail_host" class="form-control"
+                                        <input type="text" name="mail_host" id="mail_host" class="form-control"
                                                value="{{ $emailFields['mail_host']['form_value'] ?? '' }}"
-                                               placeholder="{{ $emailFields['mail_host']['value'] ?? 'smtp.office365.com' }}">
+                                               placeholder="{{ $emailDriverForm === 'zoho' ? 'smtp.zoho.com' : ($emailFields['mail_host']['value'] ?? 'smtp.office365.com') }}">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -1297,6 +1365,81 @@
                         </div>
                             </div>
                     </div>
+
+                        @if($apiFieldsReady)
+                        <div class="email-config-panel js-email-driver-panel" id="email-panel-api" style="{{ $showApi ? '' : 'display:none;' }}">
+                            <h4 class="email-config-panel__title"><i class="fa fa-key"></i><span id="api-panel-title">API provider</span></h4>
+                            <p class="text-muted small mb-3" id="api-panel-hint">Enter credentials for the selected transactional provider.</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label id="mail-api-key-label">API key / token
+                                            @if($emailFields['mail_api_key']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
+                                        </label>
+                                        <input type="password" name="mail_api_key" class="form-control" autocomplete="new-password"
+                                               placeholder="{{ !empty($emailFields['mail_api_key']['db_value']) ? '•••••••• (leave blank to keep)' : 'Enter API key' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 js-api-field-secret">
+                                    <div class="form-group">
+                                        <label>API secret (Mailjet)
+                                            @if($emailFields['mail_api_secret']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
+                                        </label>
+                                        <input type="password" name="mail_api_secret" class="form-control" autocomplete="new-password"
+                                               placeholder="{{ !empty($emailFields['mail_api_secret']['db_value']) ? '•••••••• (leave blank to keep)' : 'Enter API secret' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 js-api-field-domain">
+                                    <div class="form-group">
+                                        <label>Sending domain (Mailgun)
+                                            @if($emailFields['mail_api_domain']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
+                                        </label>
+                                        <input type="text" name="mail_api_domain" class="form-control"
+                                               value="{{ $emailFields['mail_api_domain']['form_value'] ?? '' }}"
+                                               placeholder="mg.example.com">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 js-api-field-region">
+                                    <div class="form-group">
+                                        <label>Region (Mailgun)</label>
+                                        @php $apiRegion = $emailFields['mail_api_region']['form_value'] ?? 'us'; @endphp
+                                        <select name="mail_api_region" class="form-control">
+                                            <option value="us" {{ $apiRegion === 'us' ? 'selected' : '' }}>US</option>
+                                            <option value="eu" {{ $apiRegion === 'eu' ? 'selected' : '' }}>EU</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 js-api-field-base-url">
+                                    <div class="form-group">
+                                        <label>API base URL (SendGrid, optional)
+                                            @if($emailFields['mail_api_base_url']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
+                                        </label>
+                                        <input type="text" name="mail_api_base_url" class="form-control"
+                                               value="{{ $emailFields['mail_api_base_url']['form_value'] ?? '' }}"
+                                               placeholder="https://api.sendgrid.com/v3">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 js-api-field-stream">
+                                    <div class="form-group mb-0">
+                                        <label>Message stream (Postmark)
+                                            @if($emailFields['mail_api_message_stream']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
+                                        </label>
+                                        <input type="text" name="mail_api_message_stream" class="form-control"
+                                               value="{{ $emailFields['mail_api_message_stream']['form_value'] ?? '' }}"
+                                               placeholder="outbound">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        <div class="email-config-panel js-email-driver-panel" id="email-panel-log" style="{{ $emailPanel === 'log' ? '' : 'display:none;' }}">
+                            <h4 class="email-config-panel__title"><i class="fa fa-file-alt"></i>Log only</h4>
+                            <p class="text-muted small mb-0">
+                                Messages are written to the application log and are <strong>not</strong> delivered to recipients.
+                                Use this for local development and testing.
+                            </p>
+                        </div>
                     @endif
                 </div>
 
@@ -2213,17 +2356,54 @@
 
         $(function() {
             // Tab switching functionality
+            var emailDriverPanels = {
+                http: 'http',
+                exchange: 'exchange',
+                smtp: 'smtp',
+                zoho: 'smtp',
+                sendgrid: 'api',
+                mailgun: 'api',
+                postmark: 'api',
+                mailjet: 'api',
+                log: 'log'
+            };
+
             function syncEmailDriverPanels() {
                 var $driver = $('#email_driver');
                 if (!$driver.length) {
                     return;
                 }
                 var driver = $driver.val() || 'exchange';
+                var panel = emailDriverPanels[driver] || 'exchange';
                 $('.js-email-driver-panel').hide();
-                if (driver === 'smtp') {
-                    $('#email-panel-smtp').show();
-                } else {
-                    $('#email-panel-exchange').show();
+                $('#email-panel-' + panel).show();
+
+                if (panel === 'smtp') {
+                    $('#smtp-panel-title').text(driver === 'zoho' ? 'Zoho Mail (SMTP)' : 'SMTP server');
+                    $('#smtp-panel-hint').toggle(driver === 'zoho');
+                    if (driver === 'zoho' && !$('#mail_host').val()) {
+                        $('#mail_host').attr('placeholder', 'smtp.zoho.com');
+                    }
+                }
+
+                if (panel === 'api') {
+                    var titles = {
+                        sendgrid: 'SendGrid',
+                        mailgun: 'Mailgun',
+                        postmark: 'Postmark',
+                        mailjet: 'Mailjet'
+                    };
+                    $('#api-panel-title').text((titles[driver] || 'API') + ' credentials');
+                    $('.js-api-field-secret').toggle(driver === 'mailjet');
+                    $('.js-api-field-domain, .js-api-field-region').toggle(driver === 'mailgun');
+                    $('.js-api-field-base-url').toggle(driver === 'sendgrid');
+                    $('.js-api-field-stream').toggle(driver === 'postmark');
+                    $('#mail-api-key-label').contents().filter(function () {
+                        return this.nodeType === 3;
+                    }).first().replaceWith(
+                        driver === 'postmark' ? 'Server API token ' :
+                        driver === 'mailjet' ? 'API key ' : 'API key / token '
+                    );
                 }
             }
 

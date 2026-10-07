@@ -84,7 +84,7 @@ class EmailConfig
         }
 
         if (EnvFirstConfig::envEffective('MAIL_MAILER') !== null && EnvFirstConfig::envEffective('MAIL_MAILER') !== ''
-            && in_array(EnvFirstConfig::envEffective('MAIL_MAILER'), ['smtp', 'exchange'], true)) {
+            && EmailDrivers::isSupported((string) EnvFirstConfig::envEffective('MAIL_MAILER'))) {
             return 'env';
         }
 
@@ -128,6 +128,58 @@ class EmailConfig
                 'client_credentials'
             ),
         ]);
+
+        if (Schema::hasColumn('setting', 'mail_http_client_id')) {
+            config([
+                'emails.http.base_url' => self::resolve(
+                    'MAIL_HTTP_BASE_URL',
+                    'mail_http_base_url',
+                    'https://notifications.africacdc.org/api/v1'
+                ) ?: 'https://notifications.africacdc.org/api/v1',
+                'emails.http.client_id' => self::resolve('MAIL_HTTP_CLIENT_ID', 'mail_http_client_id'),
+                'emails.http.client_secret' => self::resolve('MAIL_HTTP_CLIENT_SECRET', 'mail_http_client_secret'),
+            ]);
+        } else {
+            config([
+                'emails.http.base_url' => env('MAIL_HTTP_BASE_URL', 'https://notifications.africacdc.org/api/v1'),
+                'emails.http.client_id' => env('MAIL_HTTP_CLIENT_ID'),
+                'emails.http.client_secret' => env('MAIL_HTTP_CLIENT_SECRET'),
+            ]);
+        }
+
+        if (Schema::hasColumn('setting', 'mail_api_key')) {
+            config([
+                'emails.api.key' => self::resolve('MAIL_API_KEY', 'mail_api_key'),
+                'emails.api.secret' => self::resolve('MAIL_API_SECRET', 'mail_api_secret'),
+                'emails.api.domain' => self::resolve('MAIL_API_DOMAIN', 'mail_api_domain'),
+                'emails.api.region' => self::resolve('MAIL_API_REGION', 'mail_api_region', 'us') ?: 'us',
+                'emails.api.base_url' => self::resolve('MAIL_API_BASE_URL', 'mail_api_base_url'),
+                'emails.api.message_stream' => self::resolve('MAIL_API_MESSAGE_STREAM', 'mail_api_message_stream', 'outbound') ?: 'outbound',
+            ]);
+        } else {
+            config([
+                'emails.api.key' => env('MAIL_API_KEY'),
+                'emails.api.secret' => env('MAIL_API_SECRET'),
+                'emails.api.domain' => env('MAIL_API_DOMAIN'),
+                'emails.api.region' => env('MAIL_API_REGION', 'us'),
+                'emails.api.base_url' => env('MAIL_API_BASE_URL'),
+                'emails.api.message_stream' => env('MAIL_API_MESSAGE_STREAM', 'outbound'),
+            ]);
+        }
+
+        // Zoho SMTP defaults when host/port left blank
+        if (self::driver() === 'zoho') {
+            $defaults = EmailDrivers::smtpDefaults('zoho');
+            if (trim((string) config('emails.host')) === '') {
+                config(['emails.host' => $defaults['host']]);
+            }
+            if (trim((string) config('emails.port')) === '') {
+                config(['emails.port' => $defaults['port']]);
+            }
+            if (trim((string) config('emails.smtp_secure')) === '') {
+                config(['emails.smtp_secure' => $defaults['encryption']]);
+            }
+        }
     }
 
     /**
@@ -151,6 +203,21 @@ class EmailConfig
             'exchange_scope' => ['env_key' => 'EXCHANGE_SCOPE', 'db_column' => 'exchange_scope', 'default' => 'https://graph.microsoft.com/.default'],
             'exchange_auth_method' => ['env_key' => 'EXCHANGE_AUTH_METHOD', 'db_column' => 'exchange_auth_method', 'default' => 'client_credentials'],
         ];
+
+        if (Schema::hasColumn('setting', 'mail_http_client_id')) {
+            $map['mail_http_base_url'] = ['env_key' => 'MAIL_HTTP_BASE_URL', 'db_column' => 'mail_http_base_url', 'default' => 'https://notifications.africacdc.org/api/v1'];
+            $map['mail_http_client_id'] = ['env_key' => 'MAIL_HTTP_CLIENT_ID', 'db_column' => 'mail_http_client_id', 'default' => ''];
+            $map['mail_http_client_secret'] = ['env_key' => 'MAIL_HTTP_CLIENT_SECRET', 'db_column' => 'mail_http_client_secret', 'default' => '', 'secret' => true];
+        }
+
+        if (Schema::hasColumn('setting', 'mail_api_key')) {
+            $map['mail_api_key'] = ['env_key' => 'MAIL_API_KEY', 'db_column' => 'mail_api_key', 'default' => '', 'secret' => true];
+            $map['mail_api_secret'] = ['env_key' => 'MAIL_API_SECRET', 'db_column' => 'mail_api_secret', 'default' => '', 'secret' => true];
+            $map['mail_api_domain'] = ['env_key' => 'MAIL_API_DOMAIN', 'db_column' => 'mail_api_domain', 'default' => ''];
+            $map['mail_api_region'] = ['env_key' => 'MAIL_API_REGION', 'db_column' => 'mail_api_region', 'default' => 'us'];
+            $map['mail_api_base_url'] = ['env_key' => 'MAIL_API_BASE_URL', 'db_column' => 'mail_api_base_url', 'default' => ''];
+            $map['mail_api_message_stream'] = ['env_key' => 'MAIL_API_MESSAGE_STREAM', 'db_column' => 'mail_api_message_stream', 'default' => 'outbound'];
+        }
 
         $db = self::dbSettings();
         $fields = [];
@@ -193,7 +260,7 @@ class EmailConfig
         }
 
         $mailMailer = EnvFirstConfig::envEffective('MAIL_MAILER');
-        if ($mailMailer !== null && $mailMailer !== '' && in_array($mailMailer, ['smtp', 'exchange'], true)) {
+        if ($mailMailer !== null && $mailMailer !== '' && EmailDrivers::isSupported((string) $mailMailer)) {
             return self::normalizeDriver((string) $mailMailer);
         }
 
@@ -202,7 +269,7 @@ class EmailConfig
 
     private static function normalizeDriver(string $driver): string
     {
-        return $driver === 'smtp' ? 'smtp' : 'exchange';
+        return EmailDrivers::normalize($driver);
     }
 
     private static function envKeyToDbColumn(string $envKey): string

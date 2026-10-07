@@ -654,7 +654,9 @@ class SettingsRepository
     {
         $envDriver = \App\Support\EmailConfig::envDriverFromEnv();
         $submittedDriver = $request->input('email_driver', 'exchange');
-        $submittedDriver = in_array($submittedDriver, ['smtp', 'exchange'], true) ? $submittedDriver : 'exchange';
+        $submittedDriver = \App\Support\EmailDrivers::isSupported((string) $submittedDriver)
+            ? \App\Support\EmailDrivers::normalize((string) $submittedDriver)
+            : 'exchange';
         $settings->email_driver = $submittedDriver !== $envDriver ? $submittedDriver : null;
 
         \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_host', 'MAIL_HOST', 'mail_host');
@@ -669,6 +671,28 @@ class SettingsRepository
         \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'exchange_client_secret', 'EXCHANGE_CLIENT_SECRET', 'exchange_client_secret', true);
         \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'exchange_redirect_uri', 'EXCHANGE_REDIRECT_URI', 'exchange_redirect_uri');
         \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'exchange_scope', 'EXCHANGE_SCOPE', 'exchange_scope', false, 'https://graph.microsoft.com/.default');
+        if (\Illuminate\Support\Facades\Schema::hasColumn('setting', 'mail_http_client_id')) {
+            \App\Support\EnvFirstConfig::applySubmittedOverride(
+                $settings,
+                $request,
+                'mail_http_base_url',
+                'MAIL_HTTP_BASE_URL',
+                'mail_http_base_url',
+                false,
+                'https://notifications.africacdc.org/api/v1'
+            );
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_http_client_id', 'MAIL_HTTP_CLIENT_ID', 'mail_http_client_id');
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_http_client_secret', 'MAIL_HTTP_CLIENT_SECRET', 'mail_http_client_secret', true);
+        }
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('setting', 'mail_api_key')) {
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_api_key', 'MAIL_API_KEY', 'mail_api_key', true);
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_api_secret', 'MAIL_API_SECRET', 'mail_api_secret', true);
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_api_domain', 'MAIL_API_DOMAIN', 'mail_api_domain');
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_api_region', 'MAIL_API_REGION', 'mail_api_region', false, 'us');
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_api_base_url', 'MAIL_API_BASE_URL', 'mail_api_base_url');
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_api_message_stream', 'MAIL_API_MESSAGE_STREAM', 'mail_api_message_stream', false, 'outbound');
+        }
 
         if ($request->has('exchange_auth_method')) {
             $submittedAuth = $request->input('exchange_auth_method', 'client_credentials');

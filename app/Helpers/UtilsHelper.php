@@ -570,6 +570,9 @@ function send_email($request){
     $exchangeConfig = config('exchange-email');
     $exchangeConfigured = !empty($exchangeConfig['tenant_id']) && !empty($exchangeConfig['client_id']) && !empty($exchangeConfig['client_secret']);
     $useExchange = ($emailDriver === 'exchange') && $exchangeConfigured;
+    $httpClient = new \App\Services\HttpNotificationsMailClient();
+    $httpConfigured = $httpClient->isConfigured();
+    $useHttp = ($emailDriver === 'http') && $httpConfigured;
 
     // Normalize email data - handle both 'title' and 'subject' fields; recipient from 'email' or 'to'
     $subject = $request->subject ?? $request->title ?? 'Knowledge Resource Center Email';
@@ -581,7 +584,48 @@ function send_email($request){
         return array('success'=>false,'message'=>"Email address is required.");
     }
     $email = is_string($email) ? trim($email) : $email;
-    \Log::info('send_email: sending to recipient', ['to' => $email, 'subject' => $subject]);
+    \Log::info('send_email: sending to recipient', ['to' => $email, 'subject' => $subject, 'driver' => $emailDriver]);
+
+    if ($emailDriver === 'http' && ! $httpConfigured) {
+        \Log::error('Email driver is http but Africa CDC Email Server credentials are missing.');
+        return array('success'=>false,'message'=>"Email is set to Africa CDC Email Server (HTTP) but credentials are missing. Configure MAIL_HTTP_CLIENT_ID and MAIL_HTTP_CLIENT_SECRET in .env or Admin → Configure → Email.");
+    }
+
+    if ($useHttp) {
+        try {
+            $httpClient->send($email, $subject, $body);
+
+            return array('success'=>true,'message'=>"Email has been sent via Africa CDC Email Server.");
+        } catch (\Throwable $e) {
+            \Log::error('HTTP notifications email failed: '.$e->getMessage(), [
+                'email' => $email,
+                'subject' => $subject,
+            ]);
+
+            return array('success'=>false,'message'=>"Email sending failed via Africa CDC Email Server: ".$e->getMessage());
+        }
+    }
+
+    if ($emailDriver === 'log' || \App\Support\EmailDrivers::usesApi($emailDriver)) {
+        $tx = new \App\Services\TransactionalMailClient();
+        if ($emailDriver !== 'log' && ! $tx->isConfigured($emailDriver)) {
+            return array('success'=>false,'message'=>"Email is set to {$emailDriver} but API credentials are missing. Configure them under Admin → Configure → Email.");
+        }
+        try {
+            $tx->send($emailDriver, $email, $subject, $body);
+
+            return array('success'=>true,'message'=> $emailDriver === 'log'
+                ? 'Email written to application log.'
+                : "Email has been sent via {$emailDriver}.");
+        } catch (\Throwable $e) {
+            \Log::error(strtoupper($emailDriver).' email failed: '.$e->getMessage(), [
+                'email' => $email,
+                'subject' => $subject,
+            ]);
+
+            return array('success'=>false,'message'=>"Email sending failed via {$emailDriver}: ".$e->getMessage());
+        }
+    }
 
     // When driver is 'exchange' but Exchange is not configured, do NOT fall back to SMTP
     if ($emailDriver === 'exchange' && !$exchangeConfigured) {
@@ -620,8 +664,17 @@ function send_email($request){
         }
     }
 
-    // Use PHPMailer/SMTP when driver is 'smtp' or when Exchange is not configured
+    // Use PHPMailer/SMTP for smtp / zoho (and legacy fallbacks)
+    if (! \App\Support\EmailDrivers::usesSmtp($emailDriver) && $emailDriver !== 'exchange') {
+        return array('success'=>false,'message'=>"Unsupported email driver: {$emailDriver}");
+    }
+
     \Log::info('Using SMTP for sending (driver: ' . $emailDriver . ')');
+
+    $smtpDefaults = \App\Support\EmailDrivers::smtpDefaults($emailDriver);
+    $smtpHost = trim((string) config('emails.host')) ?: $smtpDefaults['host'];
+    $smtpPort = trim((string) config('emails.port')) ?: $smtpDefaults['port'];
+    $smtpSecure = trim((string) config('emails.smtp_secure')) ?: $smtpDefaults['encryption'];
     
     $mail = new PHPMailer(true);     // Passing `true` enables exceptions
 
@@ -629,20 +682,21 @@ function send_email($request){
         // Email server settings
         $mail->SMTPDebug = 0;
         $mail->isSMTP();
-        $mail->Host       = config('emails.host');             //  smtp host
+        $mail->Host       = $smtpHost;
         $mail->SMTPAuth   = true;
         $mail->Username   = config('emails.username');   //  sender username
         $mail->Password   = config('emails.password');       // sender password
-        $mail->SMTPSecure = config('emails.smtp_secure');                  // encryption - ssl/tls
-        $mail->Port       = config('emails.port');  
-        $mail->FromName = config('emails.sender');                // port - 587/465
+        $mail->SMTPSecure = $smtpSecure === 'none' ? '' : $smtpSecure;
+        $mail->Port       = $smtpPort;
+        $mail->FromName = config('emails.sender');
 
-        $mail->setFrom(config('emails.username'), config('emails.sender'),true);
+        $fromAddress = config('emails.from_address') ?: config('emails.username');
+        $mail->setFrom($fromAddress, config('emails.sender'),true);
         $mail->addAddress($email);
       //  $mail->addCC($request->emailCc);
       //  $mail->addBCC($request->emailBcc);
 
-        $mail->addReplyTo(config('emails.username'), config('emails.sender'));
+        $mail->addReplyTo($fromAddress, config('emails.sender'));
 
         // if(isset($_FILES['emailAttachments'])) {
         //     for ($i=0; $i < count($_FILES['emailAttachments']['tmp_name']); $i++) {
