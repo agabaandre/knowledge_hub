@@ -12,12 +12,13 @@ return new class extends Migration
             return;
         }
 
+        // TEXT avoids InnoDB "Row size too large" on the already-wide setting row.
         Schema::table('setting', function (Blueprint $table) {
             if (! Schema::hasColumn('setting', 'mail_http_base_url')) {
-                $table->string('mail_http_base_url', 500)->nullable()->after('exchange_auth_method');
+                $table->text('mail_http_base_url')->nullable()->after('exchange_auth_method');
             }
             if (! Schema::hasColumn('setting', 'mail_http_client_id')) {
-                $table->string('mail_http_client_id', 255)->nullable()->after('mail_http_base_url');
+                $table->text('mail_http_client_id')->nullable()->after('mail_http_base_url');
             }
             if (! Schema::hasColumn('setting', 'mail_http_client_secret')) {
                 $table->text('mail_http_client_secret')->nullable()->after('mail_http_client_id');
