@@ -278,7 +278,7 @@ class EnvFirstConfig
      * @param  mixed  $a
      * @param  mixed  $b
      */
-    private static function valuesDiffer($a, $b): bool
+    public static function valuesDiffer($a, $b): bool
     {
         if (is_bool($a) || is_bool($b)) {
             return filter_var($a, FILTER_VALIDATE_BOOLEAN) !== filter_var($b, FILTER_VALIDATE_BOOLEAN);

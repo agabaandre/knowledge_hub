@@ -823,7 +823,16 @@ class InstallerService
                 $payload['mail_http_client_secret'] = $mail['mail_http_client_secret'] ?? '';
             }
         } elseif (\App\Support\EmailDrivers::usesApi($driver)) {
-            if (Schema::hasColumn('setting', 'mail_api_key')) {
+            if (Schema::hasColumn('setting', 'mail_api_config')) {
+                $payload['mail_api_config'] = \App\Support\EmailConfig::encodeApiConfig([
+                    'mail_api_key' => $mail['mail_api_key'] ?? '',
+                    'mail_api_secret' => $mail['mail_api_secret'] ?? '',
+                    'mail_api_domain' => $mail['mail_api_domain'] ?? '',
+                    'mail_api_region' => $mail['mail_api_region'] ?? 'us',
+                    'mail_api_base_url' => $mail['mail_api_base_url'] ?? '',
+                    'mail_api_message_stream' => $mail['mail_api_message_stream'] ?? 'outbound',
+                ]);
+            } elseif (Schema::hasColumn('setting', 'mail_api_key')) {
                 $payload['mail_api_key'] = $mail['mail_api_key'] ?? '';
                 $payload['mail_api_secret'] = $mail['mail_api_secret'] ?? '';
                 $payload['mail_api_domain'] = $mail['mail_api_domain'] ?? '';

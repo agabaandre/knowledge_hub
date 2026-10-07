@@ -37,6 +37,83 @@ class EmailConfig
         return (string) config('emails.http.docs_url', '');
     }
 
+    /**
+     * Flat form/env field => JSON key inside mail_api_config.
+     *
+     * @return array<string, string>
+     */
+    public static function apiConfigFieldMap(): array
+    {
+        return [
+            'mail_api_key' => 'key',
+            'mail_api_secret' => 'secret',
+            'mail_api_domain' => 'domain',
+            'mail_api_region' => 'region',
+            'mail_api_base_url' => 'base_url',
+            'mail_api_message_stream' => 'message_stream',
+        ];
+    }
+
+    public static function hasApiConfigStorage(): bool
+    {
+        return Schema::hasTable('setting')
+            && (Schema::hasColumn('setting', 'mail_api_config')
+                || Schema::hasColumn('setting', 'mail_api_key'));
+    }
+
+    /**
+     * @return array<string, string|null>
+     */
+    public static function decodeApiConfig(?string $json): array
+    {
+        $decoded = json_decode((string) $json, true);
+        if (! is_array($decoded)) {
+            return [];
+        }
+
+        $out = [];
+        foreach (self::apiConfigFieldMap() as $field => $jsonKey) {
+            $value = $decoded[$jsonKey] ?? null;
+            $out[$field] = ($value === null || $value === '') ? null : (string) $value;
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param  array<string, mixed>  $flat
+     */
+    public static function encodeApiConfig(array $flat): ?string
+    {
+        $cfg = [];
+        foreach (self::apiConfigFieldMap() as $field => $jsonKey) {
+            $value = $flat[$field] ?? null;
+            if ($value !== null && $value !== '') {
+                $cfg[$jsonKey] = (string) $value;
+            }
+        }
+
+        return $cfg === [] ? null : json_encode($cfg, JSON_UNESCAPED_SLASHES);
+    }
+
+    public static function hydrateApiFields(?object $row): ?object
+    {
+        if (! $row) {
+            return $row;
+        }
+
+        if (property_exists($row, 'mail_api_config') || Schema::hasColumn('setting', 'mail_api_config')) {
+            $flat = self::decodeApiConfig(isset($row->mail_api_config) ? (string) $row->mail_api_config : null);
+            foreach (self::apiConfigFieldMap() as $field => $_jsonKey) {
+                if (! property_exists($row, $field) || $row->{$field} === null || $row->{$field} === '') {
+                    $row->{$field} = $flat[$field] ?? null;
+                }
+            }
+        }
+
+        return $row;
+    }
+
     public static function dbSettings(): ?object
     {
         if (self::$dbSettings !== null) {
@@ -47,8 +124,10 @@ class EmailConfig
             return null;
         }
 
-        self::$dbSettings = \DB::table('setting')->where('status', 'active')->first()
-            ?: \DB::table('setting')->first();
+        self::$dbSettings = self::hydrateApiFields(
+            \DB::table('setting')->where('status', 'active')->first()
+                ?: \DB::table('setting')->first()
+        );
 
         return self::$dbSettings;
     }
@@ -166,7 +245,7 @@ class EmailConfig
             ]);
         }
 
-        if (Schema::hasColumn('setting', 'mail_api_key')) {
+        if (self::hasApiConfigStorage()) {
             config([
                 'emails.api.key' => self::resolve('MAIL_API_KEY', 'mail_api_key'),
                 'emails.api.secret' => self::resolve('MAIL_API_SECRET', 'mail_api_secret'),
@@ -229,7 +308,7 @@ class EmailConfig
             $map['mail_http_client_secret'] = ['env_key' => 'MAIL_HTTP_CLIENT_SECRET', 'db_column' => 'mail_http_client_secret', 'default' => '', 'secret' => true];
         }
 
-        if (Schema::hasColumn('setting', 'mail_api_key')) {
+        if (self::hasApiConfigStorage()) {
             $map['mail_api_key'] = ['env_key' => 'MAIL_API_KEY', 'db_column' => 'mail_api_key', 'default' => '', 'secret' => true];
             $map['mail_api_secret'] = ['env_key' => 'MAIL_API_SECRET', 'db_column' => 'mail_api_secret', 'default' => '', 'secret' => true];
             $map['mail_api_domain'] = ['env_key' => 'MAIL_API_DOMAIN', 'db_column' => 'mail_api_domain', 'default' => ''];

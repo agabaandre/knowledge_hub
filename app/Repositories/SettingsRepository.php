@@ -685,7 +685,9 @@ class SettingsRepository
             \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_http_client_secret', 'MAIL_HTTP_CLIENT_SECRET', 'mail_http_client_secret', true);
         }
 
-        if (\Illuminate\Support\Facades\Schema::hasColumn('setting', 'mail_api_key')) {
+        if (\Illuminate\Support\Facades\Schema::hasColumn('setting', 'mail_api_config')) {
+            $this->applyMailApiConfigOverrides($settings, $request);
+        } elseif (\Illuminate\Support\Facades\Schema::hasColumn('setting', 'mail_api_key')) {
             \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_api_key', 'MAIL_API_KEY', 'mail_api_key', true);
             \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_api_secret', 'MAIL_API_SECRET', 'mail_api_secret', true);
             \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_api_domain', 'MAIL_API_DOMAIN', 'mail_api_domain');
@@ -702,6 +704,48 @@ class SettingsRepository
             $envAuth = (string) \App\Support\EnvFirstConfig::envEffective('EXCHANGE_AUTH_METHOD', 'client_credentials');
             $settings->exchange_auth_method = $submittedAuth !== $envAuth ? $submittedAuth : null;
         }
+    }
+
+    private function applyMailApiConfigOverrides(Setting $settings, Request $request): void
+    {
+        $flat = \App\Support\EmailConfig::decodeApiConfig(
+            is_string($settings->mail_api_config ?? null) ? $settings->mail_api_config : null
+        );
+
+        $specs = [
+            'mail_api_key' => ['env' => 'MAIL_API_KEY', 'secret' => true, 'default' => ''],
+            'mail_api_secret' => ['env' => 'MAIL_API_SECRET', 'secret' => true, 'default' => ''],
+            'mail_api_domain' => ['env' => 'MAIL_API_DOMAIN', 'secret' => false, 'default' => ''],
+            'mail_api_region' => ['env' => 'MAIL_API_REGION', 'secret' => false, 'default' => 'us'],
+            'mail_api_base_url' => ['env' => 'MAIL_API_BASE_URL', 'secret' => false, 'default' => ''],
+            'mail_api_message_stream' => ['env' => 'MAIL_API_MESSAGE_STREAM', 'secret' => false, 'default' => 'outbound'],
+        ];
+
+        foreach ($specs as $requestKey => $meta) {
+            $envEffective = \App\Support\EnvFirstConfig::envEffective($meta['env'], $meta['default']);
+            if ($meta['secret']) {
+                if (! $request->filled($requestKey)) {
+                    continue;
+                }
+                $submitted = (string) $request->input($requestKey);
+                $flat[$requestKey] = \App\Support\EnvFirstConfig::valuesDiffer($submitted, $envEffective)
+                    ? $submitted
+                    : null;
+                continue;
+            }
+
+            if (! $request->has($requestKey)) {
+                continue;
+            }
+
+            $submitted = trim((string) $request->input($requestKey, ''));
+            $flat[$requestKey] = \App\Support\EnvFirstConfig::valuesDiffer($submitted, trim((string) $envEffective))
+                ? $submitted
+                : null;
+        }
+
+        $settings->mail_api_config = \App\Support\EmailConfig::encodeApiConfig($flat);
+        \App\Support\EmailConfig::clearCache();
     }
 
     private function applyLearningSettings(Setting $settings, Request $request): void

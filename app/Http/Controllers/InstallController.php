@@ -409,6 +409,9 @@ class InstallController extends Controller
         try {
             $active = Setting::query()->where('status', 'active')->first()
                 ?? Setting::query()->orderBy('id')->first();
+            if ($active) {
+                \App\Support\EmailConfig::hydrateApiFields($active);
+            }
         } catch (\Throwable) {
             $active = null;
         }
