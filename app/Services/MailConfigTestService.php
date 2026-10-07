@@ -114,7 +114,8 @@ class MailConfigTestService
     {
         $clientId = trim((string) ($payload['mail_http_client_id'] ?? ''));
         $clientSecret = (string) ($payload['mail_http_client_secret'] ?? '');
-        $baseUrl = trim((string) ($payload['mail_http_base_url'] ?? 'https://notifications.africacdc.org/api/v1'));
+        $defaultBase = \App\Support\EmailConfig::httpBaseUrlDefault();
+        $baseUrl = trim((string) ($payload['mail_http_base_url'] ?? $defaultBase));
 
         if ($clientId === '' || $clientSecret === '') {
             return ['ok' => false, 'error' => 'HTTP client ID and client secret are required.'];
@@ -122,7 +123,7 @@ class MailConfigTestService
 
         try {
             config([
-                'emails.http.base_url' => $baseUrl !== '' ? $baseUrl : 'https://notifications.africacdc.org/api/v1',
+                'emails.http.base_url' => $baseUrl !== '' ? $baseUrl : $defaultBase,
                 'emails.http.client_id' => $clientId,
                 'emails.http.client_secret' => $clientSecret,
             ]);
@@ -199,7 +200,7 @@ class MailConfigTestService
             'emails.password' => (string) ($payload['mail_password'] ?? ''),
             'emails.smtp_secure' => (string) ($payload['mail_encryption'] ?? 'tls') ?: 'tls',
             'emails.sender' => $fromName,
-            'emails.http.base_url' => (string) ($payload['mail_http_base_url'] ?? 'https://notifications.africacdc.org/api/v1'),
+            'emails.http.base_url' => (string) ($payload['mail_http_base_url'] ?? \App\Support\EmailConfig::httpBaseUrlDefault()),
             'emails.http.client_id' => (string) ($payload['mail_http_client_id'] ?? ''),
             'emails.http.client_secret' => (string) ($payload['mail_http_client_secret'] ?? ''),
             'emails.api.key' => (string) ($payload['mail_api_key'] ?? ''),

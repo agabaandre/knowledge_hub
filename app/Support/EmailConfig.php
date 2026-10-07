@@ -14,6 +14,29 @@ class EmailConfig
         EnvFirstConfig::clearEnvFileCache();
     }
 
+    /**
+     * Factory default for Africa CDC HTTP mail (from config/emails.php only).
+     */
+    public static function httpBaseUrlDefault(): string
+    {
+        return rtrim((string) config('emails.http.default_base_url', config('emails.http.base_url', '')), '/');
+    }
+
+    /**
+     * Effective HTTP mail API base URL (env / DB / config default).
+     */
+    public static function httpBaseUrl(): string
+    {
+        $resolved = self::resolve('MAIL_HTTP_BASE_URL', 'mail_http_base_url', self::httpBaseUrlDefault());
+
+        return rtrim((string) ($resolved ?: self::httpBaseUrlDefault()), '/');
+    }
+
+    public static function httpDocsUrl(): string
+    {
+        return (string) config('emails.http.docs_url', '');
+    }
+
     public static function dbSettings(): ?object
     {
         if (self::$dbSettings !== null) {
@@ -131,17 +154,13 @@ class EmailConfig
 
         if (Schema::hasColumn('setting', 'mail_http_client_id')) {
             config([
-                'emails.http.base_url' => self::resolve(
-                    'MAIL_HTTP_BASE_URL',
-                    'mail_http_base_url',
-                    'https://notifications.africacdc.org/api/v1'
-                ) ?: 'https://notifications.africacdc.org/api/v1',
+                'emails.http.base_url' => self::httpBaseUrl(),
                 'emails.http.client_id' => self::resolve('MAIL_HTTP_CLIENT_ID', 'mail_http_client_id'),
                 'emails.http.client_secret' => self::resolve('MAIL_HTTP_CLIENT_SECRET', 'mail_http_client_secret'),
             ]);
         } else {
             config([
-                'emails.http.base_url' => env('MAIL_HTTP_BASE_URL', 'https://notifications.africacdc.org/api/v1'),
+                'emails.http.base_url' => self::httpBaseUrlDefault() ?: env('MAIL_HTTP_BASE_URL'),
                 'emails.http.client_id' => env('MAIL_HTTP_CLIENT_ID'),
                 'emails.http.client_secret' => env('MAIL_HTTP_CLIENT_SECRET'),
             ]);
@@ -205,7 +224,7 @@ class EmailConfig
         ];
 
         if (Schema::hasColumn('setting', 'mail_http_client_id')) {
-            $map['mail_http_base_url'] = ['env_key' => 'MAIL_HTTP_BASE_URL', 'db_column' => 'mail_http_base_url', 'default' => 'https://notifications.africacdc.org/api/v1'];
+            $map['mail_http_base_url'] = ['env_key' => 'MAIL_HTTP_BASE_URL', 'db_column' => 'mail_http_base_url', 'default' => self::httpBaseUrlDefault()];
             $map['mail_http_client_id'] = ['env_key' => 'MAIL_HTTP_CLIENT_ID', 'db_column' => 'mail_http_client_id', 'default' => ''];
             $map['mail_http_client_secret'] = ['env_key' => 'MAIL_HTTP_CLIENT_SECRET', 'db_column' => 'mail_http_client_secret', 'default' => '', 'secret' => true];
         }

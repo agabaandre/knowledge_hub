@@ -818,7 +818,7 @@ class InstallerService
         } elseif ($driver === 'http') {
             if (Schema::hasColumn('setting', 'mail_http_client_id')) {
                 $payload['mail_http_base_url'] = $mail['mail_http_base_url']
-                    ?? 'https://notifications.africacdc.org/api/v1';
+                    ?: \App\Support\EmailConfig::httpBaseUrlDefault();
                 $payload['mail_http_client_id'] = $mail['mail_http_client_id'] ?? '';
                 $payload['mail_http_client_secret'] = $mail['mail_http_client_secret'] ?? '';
             }

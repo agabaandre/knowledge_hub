@@ -7,11 +7,10 @@ use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
 /**
- * Africa CDC Email Server (notifications.africacdc.org) — client-credentials JWT + /integrations/send.
+ * Africa CDC Email Server — client-credentials JWT + /integrations/send.
  *
  * Same transport used by Staff Portal ("Africa CDC SERVER" / HTTP mail).
- *
- * @see https://notifications.africacdc.org/api/documentation
+ * Base URL comes from config('emails.http.base_url') / MAIL_HTTP_BASE_URL.
  */
 class HttpNotificationsMailClient
 {
@@ -35,10 +34,7 @@ class HttpNotificationsMailClient
         array $bcc = [],
         array $attachments = [],
     ): void {
-        $base = rtrim((string) config(
-            'emails.http.base_url',
-            env('MAIL_HTTP_BASE_URL', 'https://notifications.africacdc.org/api/v1')
-        ), '/');
+        $base = $this->baseUrl();
         $token = $this->bearerToken($base);
         $recipients = is_array($to) ? $to : [$to];
         $apiAttachments = $this->normalizeAttachments($attachments);
@@ -87,12 +83,23 @@ class HttpNotificationsMailClient
      */
     public function authenticate(): string
     {
-        $base = rtrim((string) config(
-            'emails.http.base_url',
-            env('MAIL_HTTP_BASE_URL', 'https://notifications.africacdc.org/api/v1')
+        return $this->bearerToken($this->baseUrl());
+    }
+
+    private function baseUrl(): string
+    {
+        $base = rtrim((string) (
+            config('emails.http.base_url')
+            ?: \App\Support\EmailConfig::httpBaseUrlDefault()
         ), '/');
 
-        return $this->bearerToken($base);
+        if ($base === '') {
+            throw new RuntimeException(
+                'HTTP mail base URL is not configured. Set MAIL_HTTP_BASE_URL or emails.http.base_url.'
+            );
+        }
+
+        return $base;
     }
 
     /**

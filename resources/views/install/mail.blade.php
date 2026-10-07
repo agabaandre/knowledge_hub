@@ -50,13 +50,13 @@
         <div id="http-fields" class="row g-3">
             <div class="col-12">
                 <h3 class="h6 text-muted mb-0">Africa CDC Email Server (HTTP)</h3>
-                <p class="small text-muted mb-0">Same notifications.africacdc.org service used by Staff Portal.</p>
+                <p class="small text-muted mb-0">Same Africa CDC notifications gateway used by Staff Portal.</p>
             </div>
             <div class="col-12">
                 <label class="form-label">API base URL</label>
                 <input type="text" name="mail_http_base_url" class="form-control"
-                       value="{{ old('mail_http_base_url', $defaults['mail_http_base_url'] ?? 'https://notifications.africacdc.org/api/v1') }}"
-                       placeholder="https://notifications.africacdc.org/api/v1">
+                       value="{{ old('mail_http_base_url', $defaults['mail_http_base_url'] ?? \App\Support\EmailConfig::httpBaseUrlDefault()) }}"
+                       placeholder="{{ \App\Support\EmailConfig::httpBaseUrlDefault() }}">
             </div>
             <div class="col-md-6">
                 <label class="form-label">Client ID</label>

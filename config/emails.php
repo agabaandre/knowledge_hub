@@ -1,5 +1,9 @@
 <?php
 
+// Single source for Africa CDC HTTP mail defaults — do not copy these URLs elsewhere.
+$httpDefaultBaseUrl = 'https://notifications.africacdc.org/api/v1';
+$httpDefaultDocsUrl = 'https://notifications.africacdc.org/api/documentation';
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -22,11 +26,14 @@ return [
     'from_address'=> env('MAIL_FROM_ADDRESS'),
 
     /*
-    | Africa CDC Email Server (HTTP) — notifications.africacdc.org
-    | Docs: https://notifications.africacdc.org/api/documentation
+    | Africa CDC Email Server (HTTP)
+    | default_base_url is the single hardcoded default; everywhere else uses config().
+    | Override with MAIL_HTTP_BASE_URL or Admin → Configure → Email.
     */
     'http' => [
-        'base_url' => env('MAIL_HTTP_BASE_URL', 'https://notifications.africacdc.org/api/v1'),
+        'default_base_url' => $httpDefaultBaseUrl,
+        'base_url' => env('MAIL_HTTP_BASE_URL', $httpDefaultBaseUrl),
+        'docs_url' => env('MAIL_HTTP_DOCS_URL', $httpDefaultDocsUrl),
         'client_id' => env('MAIL_HTTP_CLIENT_ID'),
         'client_secret' => env('MAIL_HTTP_CLIENT_SECRET'),
     ],

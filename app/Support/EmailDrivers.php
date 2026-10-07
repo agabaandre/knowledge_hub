@@ -31,7 +31,7 @@ class EmailDrivers
                 'label' => 'Africa CDC Email Server (HTTP)',
                 'category' => 'Africa CDC',
                 'panel' => 'http',
-                'description' => 'notifications.africacdc.org — same as Staff Portal.',
+                'description' => 'Central Africa CDC notifications gateway — same as Staff Portal.',
             ],
             [
                 'key' => 'exchange',

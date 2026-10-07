@@ -434,7 +434,7 @@ class InstallController extends Controller
                 'exchange_auth_method' => old('exchange_auth_method', $active?->exchange_auth_method ?? env('EXCHANGE_AUTH_METHOD', 'client_credentials')),
                 'exchange_redirect_uri' => old('exchange_redirect_uri', $active?->exchange_redirect_uri ?? env('EXCHANGE_REDIRECT_URI', '')),
                 'exchange_scope' => old('exchange_scope', $active?->exchange_scope ?? env('EXCHANGE_SCOPE', 'https://graph.microsoft.com/.default')),
-                'mail_http_base_url' => old('mail_http_base_url', $active?->mail_http_base_url ?? env('MAIL_HTTP_BASE_URL', 'https://notifications.africacdc.org/api/v1')),
+                'mail_http_base_url' => old('mail_http_base_url', $active?->mail_http_base_url ?? \App\Support\EmailConfig::httpBaseUrlDefault()),
                 'mail_http_client_id' => old('mail_http_client_id', $active?->mail_http_client_id ?? env('MAIL_HTTP_CLIENT_ID', '')),
                 'mail_http_client_secret' => old('mail_http_client_secret', $active?->mail_http_client_secret ?? ''),
                 'mail_api_key' => old('mail_api_key', $active?->mail_api_key ?? env('MAIL_API_KEY', '')),

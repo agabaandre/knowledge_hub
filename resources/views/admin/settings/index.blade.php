@@ -1204,7 +1204,10 @@
                         <div class="email-config-panel js-email-driver-panel" id="email-panel-http" style="{{ $showHttp ? '' : 'display:none;' }}">
                             <h4 class="email-config-panel__title"><i class="fa fa-cloud"></i>Africa CDC Email Server (HTTP)</h4>
                             <p class="text-muted small mb-3">
-                                Uses <a href="https://notifications.africacdc.org/api/documentation" target="_blank" rel="noopener">notifications.africacdc.org</a>
+                                Uses the Africa CDC notifications gateway
+                                @if(\App\Support\EmailConfig::httpDocsUrl())
+                                    (<a href="{{ \App\Support\EmailConfig::httpDocsUrl() }}" target="_blank" rel="noopener">API docs</a>)
+                                @endif
                                 with client-credentials JWT — same provider as Staff Portal email servers.
                             </p>
                             <div class="row">
@@ -1215,7 +1218,7 @@
                                         </label>
                                         <input type="text" name="mail_http_base_url" class="form-control"
                                                value="{{ $emailFields['mail_http_base_url']['form_value'] ?? '' }}"
-                                               placeholder="https://notifications.africacdc.org/api/v1">
+                                               placeholder="{{ \App\Support\EmailConfig::httpBaseUrlDefault() }}">
                                     </div>
                                 </div>
                                 <div class="col-md-6">

@@ -679,7 +679,7 @@ class SettingsRepository
                 'MAIL_HTTP_BASE_URL',
                 'mail_http_base_url',
                 false,
-                'https://notifications.africacdc.org/api/v1'
+                \App\Support\EmailConfig::httpBaseUrlDefault()
             );
             \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_http_client_id', 'MAIL_HTTP_CLIENT_ID', 'mail_http_client_id');
             \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_http_client_secret', 'MAIL_HTTP_CLIENT_SECRET', 'mail_http_client_secret', true);
