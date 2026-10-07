@@ -46,8 +46,12 @@ return [
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
+            'host' => \App\Support\DockerServiceHost::resolve((string) env('DB_HOST', '127.0.0.1')),
+            'port' => \App\Support\DockerServiceHost::resolvePort(
+                (string) env('DB_HOST', '127.0.0.1'),
+                env('DB_PORT', '3306'),
+                env('DB_PORT_FORWARD') ?: env('DB_PORT', '3306')
+            ),
             'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
             'password' => env('DB_PASSWORD', ''),
