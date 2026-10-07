@@ -57,7 +57,7 @@ class MailConfigTestService
         $result = send_email((object) [
             'email' => trim($recipient),
             'subject' => 'Knowledge Hub mail test — '.now()->format('Y-m-d H:i:s'),
-            'body' => '<p>This is a test message from the Knowledge Hub installer.</p>',
+            'body' => '<p>This is a test message from Africa Health Knowledge Hub mail configuration.</p>',
         ]);
 
         if (is_array($result) && ($result['success'] ?? false)) {

@@ -382,6 +382,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web', 'admin.access
 
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');
+    Route::post("/configure/test-mail", [SettingsController::class, 'testMail'])->name('admin.config.test-mail');
     Route::post("/configure/federation-token", [SettingsController::class, 'generateFederationToken'])->name('admin.config.federation-token');
     Route::post("/configure/sso", [SettingsController::class, 'storeSso'])->name('admin.config.sso.save');
     Route::post("/configure/clear-cache", [SettingsController::class, 'clearCache'])->name('admin.config.clear-cache');

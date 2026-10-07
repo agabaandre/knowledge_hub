@@ -6,7 +6,9 @@ use App\Models\CustomFont;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\SettingsRepository;
+use App\Services\MailConfigTestService;
 use App\Support\EmailConfig;
+use App\Support\EmailDrivers;
 use App\Support\FrontendThemes;
 use App\Support\SsoConfig;
 use Illuminate\Support\Facades\DB;
@@ -488,5 +490,119 @@ class SettingsController extends Controller
         clear_cache();
 
         return back()->with(['alert-success' => 'Theme pack removed.', 'status' => 'success']);
+    }
+
+    public function testMail(Request $request, MailConfigTestService $mailTest)
+    {
+        $request->validate([
+            'email_driver' => 'nullable|string|in:'.implode(',', EmailDrivers::SUPPORTED),
+            'test_email' => 'nullable|email|max:255',
+            'mail_from_address' => 'nullable|email|max:255',
+            'mail_from_name' => 'nullable|string|max:255',
+            'mail_host' => 'nullable|string|max:255',
+            'mail_port' => 'nullable|integer|min:1|max:65535',
+            'mail_username' => 'nullable|string|max:255',
+            'mail_password' => 'nullable|string|max:2000',
+            'mail_encryption' => 'nullable|in:tls,ssl,none',
+            'mail_http_base_url' => 'nullable|string|max:500',
+            'mail_http_client_id' => 'nullable|string|max:500',
+            'mail_http_client_secret' => 'nullable|string|max:2000',
+            'mail_api_key' => 'nullable|string|max:2000',
+            'mail_api_secret' => 'nullable|string|max:2000',
+            'mail_api_domain' => 'nullable|string|max:255',
+            'mail_api_region' => 'nullable|in:us,eu',
+            'mail_api_base_url' => 'nullable|string|max:500',
+            'mail_api_message_stream' => 'nullable|string|max:100',
+            'exchange_tenant_id' => 'nullable|string|max:255',
+            'exchange_client_id' => 'nullable|string|max:255',
+            'exchange_client_secret' => 'nullable|string|max:2000',
+            'exchange_auth_method' => 'nullable|in:client_credentials,authorization_code',
+            'exchange_redirect_uri' => 'nullable|string|max:500',
+            'exchange_scope' => 'nullable|string|max:500',
+        ]);
+
+        EmailConfig::clearCache();
+
+        $payload = $this->mailTestPayloadFromRequest($request);
+        $recipient = $request->input('test_email');
+        if (! is_string($recipient) || trim($recipient) === '') {
+            $recipient = auth()->user()->email ?? null;
+        }
+
+        $result = $mailTest->testAndSend($payload, is_string($recipient) ? $recipient : null);
+
+        return response()->json($result, ($result['ok'] ?? false) ? 200 : 422);
+    }
+
+    /**
+     * Build a mail-test payload from the configure form, falling back to effective
+     * env/DB values when secret fields are left blank.
+     *
+     * @return array<string, mixed>
+     */
+    private function mailTestPayloadFromRequest(Request $request): array
+    {
+        $driver = EmailDrivers::normalize((string) (
+            $request->input('email_driver') ?: EmailConfig::driver()
+        ));
+
+        $value = static function (Request $request, string $key, string $envKey, ?string $column = null, $default = '') {
+            if ($request->filled($key)) {
+                return $request->input($key);
+            }
+
+            return EmailConfig::resolve($envKey, $column ?? strtolower($envKey), $default);
+        };
+
+        return [
+            'email_driver' => $driver,
+            'mail_mailer' => $driver,
+            'mail_from_address' => $value($request, 'mail_from_address', 'MAIL_FROM_ADDRESS', 'mail_from_address'),
+            'mail_from_name' => $value($request, 'mail_from_name', 'MAIL_FROM_NAME', 'mail_from_name', config('app.name')),
+            'mail_host' => $value($request, 'mail_host', 'MAIL_HOST', 'mail_host'),
+            'mail_port' => $value($request, 'mail_port', 'MAIL_PORT', 'mail_port', '587'),
+            'mail_username' => $value($request, 'mail_username', 'MAIL_USERNAME', 'mail_username'),
+            'mail_password' => $value($request, 'mail_password', 'MAIL_PASSWORD', 'mail_password'),
+            'mail_encryption' => $value($request, 'mail_encryption', 'MAIL_ENCRYPTION', 'mail_encryption', 'tls') ?: 'tls',
+            'mail_http_base_url' => $value(
+                $request,
+                'mail_http_base_url',
+                'MAIL_HTTP_BASE_URL',
+                'mail_http_base_url',
+                EmailConfig::httpBaseUrlDefault()
+            ),
+            'mail_http_client_id' => $value($request, 'mail_http_client_id', 'MAIL_HTTP_CLIENT_ID', 'mail_http_client_id'),
+            'mail_http_client_secret' => $value($request, 'mail_http_client_secret', 'MAIL_HTTP_CLIENT_SECRET', 'mail_http_client_secret'),
+            'mail_api_key' => $value($request, 'mail_api_key', 'MAIL_API_KEY', 'mail_api_key'),
+            'mail_api_secret' => $value($request, 'mail_api_secret', 'MAIL_API_SECRET', 'mail_api_secret'),
+            'mail_api_domain' => $value($request, 'mail_api_domain', 'MAIL_API_DOMAIN', 'mail_api_domain'),
+            'mail_api_region' => $value($request, 'mail_api_region', 'MAIL_API_REGION', 'mail_api_region', 'us') ?: 'us',
+            'mail_api_base_url' => $value($request, 'mail_api_base_url', 'MAIL_API_BASE_URL', 'mail_api_base_url'),
+            'mail_api_message_stream' => $value(
+                $request,
+                'mail_api_message_stream',
+                'MAIL_API_MESSAGE_STREAM',
+                'mail_api_message_stream',
+                'outbound'
+            ) ?: 'outbound',
+            'exchange_tenant_id' => $value($request, 'exchange_tenant_id', 'EXCHANGE_TENANT_ID', 'exchange_tenant_id'),
+            'exchange_client_id' => $value($request, 'exchange_client_id', 'EXCHANGE_CLIENT_ID', 'exchange_client_id'),
+            'exchange_client_secret' => $value($request, 'exchange_client_secret', 'EXCHANGE_CLIENT_SECRET', 'exchange_client_secret'),
+            'exchange_auth_method' => $value(
+                $request,
+                'exchange_auth_method',
+                'EXCHANGE_AUTH_METHOD',
+                'exchange_auth_method',
+                'client_credentials'
+            ) ?: 'client_credentials',
+            'exchange_redirect_uri' => $value($request, 'exchange_redirect_uri', 'EXCHANGE_REDIRECT_URI', 'exchange_redirect_uri'),
+            'exchange_scope' => $value(
+                $request,
+                'exchange_scope',
+                'EXCHANGE_SCOPE',
+                'exchange_scope',
+                'https://graph.microsoft.com/.default'
+            ),
+        ];
     }
 }

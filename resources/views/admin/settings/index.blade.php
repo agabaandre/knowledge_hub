@@ -1452,6 +1452,31 @@
                                 Use this for local development and testing.
                             </p>
                         </div>
+
+                        <div class="email-config-panel" id="email-panel-test">
+                            <h4 class="email-config-panel__title"><i class="fa fa-vial"></i>Test mail</h4>
+                            <p class="text-muted small mb-3">
+                                Verify the selected method with the values currently shown (blank secret fields reuse the saved / .env credentials).
+                                Optionally send a real test message.
+                            </p>
+                            <div class="row align-items-end">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-md-0">
+                                        <label for="admin_test_email">Send test email to</label>
+                                        <input type="email" name="test_email" id="admin_test_email" class="form-control"
+                                               value="{{ old('test_email', auth()->user()->email ?? '') }}"
+                                               placeholder="you@example.com" autocomplete="email">
+                                        <div class="email-effective-hint">Leave blank to use your account email. Connection is checked even if send is skipped for Log.</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <button type="button" class="btn btn-outline-secondary" id="admin-test-mail-btn">
+                                        <i class="fa fa-paper-plane me-1"></i> Test mail configuration
+                                    </button>
+                                    <div id="admin-test-mail-result" class="small mt-2 text-muted" role="status" aria-live="polite"></div>
+                                </div>
+                            </div>
+                        </div>
                     @endif
                 </div>
 
@@ -2421,6 +2446,57 @@
 
             $('#email_driver').on('change', syncEmailDriverPanels);
             syncEmailDriverPanels();
+
+            $('#admin-test-mail-btn').on('click', function () {
+                var $btn = $(this);
+                var $result = $('#admin-test-mail-result');
+                var form = document.getElementById('settings-main-form');
+                if (!form) {
+                    return;
+                }
+
+                $btn.prop('disabled', true);
+                $result.removeClass('text-success text-danger').addClass('text-muted').text('Testing…');
+
+                var body = new FormData(form);
+                body.set('email_driver', $('#email_driver').val() || 'exchange');
+                if ($('#admin_test_email').length) {
+                    body.set('test_email', $('#admin_test_email').val() || '');
+                }
+
+                fetch('{{ route("admin.config.test-mail") }}', {
+                    method: 'POST',
+                    body: body,
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(function (response) {
+                    return response.json().then(function (data) {
+                        return { ok: response.ok, data: data };
+                    });
+                })
+                .then(function (res) {
+                    if (res.data && res.data.ok) {
+                        $result.removeClass('text-muted text-danger').addClass('text-success')
+                            .text(res.data.message || 'Mail test succeeded.');
+                        return;
+                    }
+                    var err = (res.data && (res.data.error || res.data.message)) || 'Mail test failed.';
+                    if (res.data && res.data.errors) {
+                        err = Object.values(res.data.errors).flat().join(' ');
+                    }
+                    $result.removeClass('text-muted text-success').addClass('text-danger').text(err);
+                })
+                .catch(function () {
+                    $result.removeClass('text-muted text-success').addClass('text-danger')
+                        .text('Mail test request failed. Please try again.');
+                })
+                .finally(function () {
+                    $btn.prop('disabled', false);
+                });
+            });
 
             function activateSettingsTab(tabId) {
                 if (!tabId) {
