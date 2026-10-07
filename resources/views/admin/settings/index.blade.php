@@ -1123,17 +1123,12 @@
                             $showHttp = $emailPanel === 'http';
                             $showApi = $emailPanel === 'api';
                             $httpFieldsReady = array_key_exists('mail_http_client_id', $emailFields);
-                            $apiFieldsReady = array_key_exists('mail_api_key', $emailFields);
+                            $apiFieldsReady = array_key_exists('mail_api_key', $emailFields)
+                                || array_key_exists('mail_api_config', $emailFields)
+                                || \App\Support\EmailConfig::hasApiConfigStorage();
+                            // Always list every driver — do not hide options when a panel's
+                            // columns are missing (Select2 + filtered lists looked like "one value").
                             $emailDriverDefs = collect(\App\Support\EmailDrivers::definitions())
-                                ->filter(function ($def) use ($httpFieldsReady, $apiFieldsReady) {
-                                    if ($def['panel'] === 'http' && ! $httpFieldsReady) {
-                                        return false;
-                                    }
-                                    if ($def['panel'] === 'api' && ! $apiFieldsReady) {
-                                        return false;
-                                    }
-                                    return true;
-                                })
                                 ->groupBy('category');
                         @endphp
 
@@ -1152,7 +1147,8 @@
 
                         <div class="form-group" style="max-width: 420px;">
                             <label class="branding-field-label d-block" for="email_driver">Default sending method</label>
-                            <select name="email_driver" id="email_driver" class="form-control">
+                            {{-- no-select2: global select.form-control init breaks optgroups in hidden tabs --}}
+                            <select name="email_driver" id="email_driver" class="form-control no-select2">
                                 @foreach($emailDriverDefs as $category => $drivers)
                                     <optgroup label="{{ $category }}">
                                         @foreach($drivers as $def)
@@ -1160,7 +1156,7 @@
                                         @endforeach
                                     </optgroup>
                                 @endforeach
-                        </select>
+                            </select>
                             </div>
                         <p class="email-effective-hint mb-3">Currently active: <strong>{{ strtoupper($emailDriverEffective) }}</strong></p>
 
