@@ -152,15 +152,51 @@ if (! function_exists('site_favicon_mime')) {
 if(!function_exists('clear_settings_cache')){
     function clear_settings_cache(): void
     {
-        cache()->forget('settings');
+        $keys = ['settings'];
         if (\Illuminate\Support\Facades\Schema::hasTable('theme_settings')) {
             $themes = \Illuminate\Support\Facades\DB::table('theme_settings')
                 ->distinct()
                 ->pluck('theme');
             foreach ($themes as $themeKey) {
-                cache()->forget('theme_settings_'.$themeKey);
+                $keys[] = 'theme_settings_'.$themeKey;
             }
         }
+
+        foreach ($keys as $key) {
+            try {
+                cache()->forget($key);
+            } catch (\Throwable $e) {
+                // continue — file-store deletes can fail across _www vs CLI owners
+            }
+        }
+
+        // File cache shards are often created as _www:644. forget() then returns false for
+        // the deploy user (and sometimes for PHP-FPM). Force-unlink the hashed paths.
+        try {
+            $store = cache()->getStore();
+            if ($store instanceof \Illuminate\Cache\FileStore) {
+                $pathMethod = new \ReflectionMethod($store, 'path');
+                $pathMethod->setAccessible(true);
+                foreach ($keys as $key) {
+                    $path = $pathMethod->invoke($store, $key);
+                    if (is_string($path) && is_file($path)) {
+                        @chmod($path, 0666);
+                        @unlink($path);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // ignore
+        }
+
+        try {
+            if (class_exists(\App\Models\SiteLanguage::class)) {
+                \App\Models\SiteLanguage::flushCache();
+            }
+        } catch (\Throwable $e) {
+            // ignore
+        }
+
         if (function_exists('settings')) {
             settings(true);
         }
@@ -205,6 +241,22 @@ if(!function_exists('settings')){
 			}
 			return $settings;
         });
+
+		// Always refresh language from DB — file-cache forget often fails when shards are
+		// owned by _www (Apache) and the stale object keeps showing EN after Configure save.
+		if ($base && \Illuminate\Support\Facades\Schema::hasColumn('setting', 'language')) {
+			try {
+				$freshLanguage = DB::table('setting')->where('status', 'active')->value('language');
+				if ($freshLanguage === null || $freshLanguage === '') {
+					$freshLanguage = DB::table('setting')->orderByDesc('id')->value('language');
+				}
+				if (is_string($freshLanguage)) {
+					$base->language = $freshLanguage;
+				}
+			} catch (\Throwable $e) {
+				// keep cached language
+			}
+		}
 
 		// Per-theme overlay: load theme_settings for active theme (theme1., et, etc.) so each theme has its own config
 		$siteTheme = $base && isset($base->site_theme) ? trim((string) $base->site_theme) : '';
