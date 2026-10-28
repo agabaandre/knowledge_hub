@@ -141,7 +141,8 @@ class LanguageManagementController extends Controller
         $validated = $request->validate([
             'locale' => ['required', 'string', Rule::in($locales)],
             'group' => ['required', 'string', Rule::in($groups)],
-            'keys' => ['sometimes', 'array', 'max:40'],
+            // Keep request payloads small so each AI round-trip stays under proxy/PHP timeouts.
+            'keys' => ['sometimes', 'array', 'max:12'],
             'keys.*' => ['string', 'max:190'],
         ]);
 
@@ -200,6 +201,189 @@ class LanguageManagementController extends Controller
             'translations' => $result['translations'] ?? [],
             'translated' => count($result['translations'] ?? []),
             'requested' => count($english),
+        ]);
+    }
+
+    /**
+     * Build an async work queue for bulk AI translate (all sections and/or all locales).
+     * Client walks jobs in small AI chunks so the browser stays responsive.
+     */
+    public function bulkPlan(Request $request)
+    {
+        $groupsMap = $this->uiTranslations->groups();
+        $groupKeys = array_keys($groupsMap);
+        $locales = $this->uiTranslations->supportedLocales();
+
+        $validated = $request->validate([
+            'scope' => ['required', 'string', Rule::in(['sections', 'all_languages'])],
+            'locale' => ['nullable', 'string', Rule::in($locales)],
+            'only_missing' => ['sometimes', 'boolean'],
+        ]);
+
+        $onlyMissing = $request->boolean('only_missing', true);
+        $targetLocales = [];
+
+        if ($validated['scope'] === 'sections') {
+            $locale = (string) ($validated['locale'] ?? '');
+            if ($locale === '' || $locale === 'en') {
+                return response()->json([
+                    'ok' => false,
+                    'message' => __('admin_language_management.select_non_english_ai'),
+                ], 422);
+            }
+            $targetLocales = [$locale];
+        } else {
+            $targetLocales = array_values(array_filter(
+                $locales,
+                static fn (string $code): bool => $code !== 'en'
+            ));
+        }
+
+        if ($targetLocales === []) {
+            return response()->json([
+                'ok' => false,
+                'message' => __('admin_language_management.bulk_no_locales'),
+            ], 422);
+        }
+
+        $jobs = [];
+        $totalKeys = 0;
+        foreach ($targetLocales as $locale) {
+            foreach ($groupKeys as $group) {
+                $english = $this->uiTranslations->loadEnglishGroup($group);
+                if ($english === []) {
+                    continue;
+                }
+
+                $keys = $onlyMissing
+                    ? array_keys($this->uiTranslations->missingKeysForLocale($locale, $group))
+                    : array_keys($english);
+
+                if ($keys === []) {
+                    continue;
+                }
+
+                $jobs[] = [
+                    'locale' => $locale,
+                    'group' => $group,
+                    'group_label' => $groupsMap[$group] ?? $group,
+                    'keys' => $keys,
+                    'key_count' => count($keys),
+                ];
+                $totalKeys += count($keys);
+            }
+        }
+
+        return response()->json([
+            'ok' => true,
+            'scope' => $validated['scope'],
+            'only_missing' => $onlyMissing,
+            'jobs' => $jobs,
+            'job_count' => count($jobs),
+            'total_keys' => $totalKeys,
+            'locales' => $targetLocales,
+            'groups' => $groupKeys,
+        ]);
+    }
+
+    /**
+     * Translate a small key chunk with AI and merge-save into storage (for bulk async runs).
+     */
+    public function aiTranslateSave(Request $request, ChatGPTService $chatGpt)
+    {
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(180);
+        }
+
+        $groups = array_keys($this->uiTranslations->groups());
+        $locales = $this->uiTranslations->supportedLocales();
+
+        $validated = $request->validate([
+            'locale' => ['required', 'string', Rule::in($locales)],
+            'group' => ['required', 'string', Rule::in($groups)],
+            // Small chunks keep bulk AI translate responsive and avoid gateway timeouts.
+            'keys' => ['required', 'array', 'min:1', 'max:12'],
+            'keys.*' => ['string', 'max:190'],
+            'only_missing' => ['sometimes', 'boolean'],
+        ]);
+
+        if ($validated['locale'] === 'en') {
+            return response()->json([
+                'ok' => false,
+                'message' => __('admin_language_management.select_non_english_ai'),
+            ], 422);
+        }
+
+        if (AiConfig::resolveChatProviderForFeature('translation') === null) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'No AI provider is configured for UI translation. Set an API key under Admin → Settings → AI integrations (or OPEN_API_KEY).',
+            ], 503);
+        }
+
+        $onlyMissing = $request->boolean('only_missing', true);
+        if ($onlyMissing) {
+            $english = $this->uiTranslations->missingKeysForLocale(
+                $validated['locale'],
+                $validated['group'],
+                $validated['keys']
+            );
+        } else {
+            $all = $this->uiTranslations->loadEnglishGroup($validated['group']);
+            $english = [];
+            foreach ($validated['keys'] as $key) {
+                if (array_key_exists($key, $all)) {
+                    $english[$key] = $all[$key];
+                }
+            }
+        }
+
+        if ($english === []) {
+            return response()->json([
+                'ok' => true,
+                'skipped' => true,
+                'translated' => 0,
+                'saved' => 0,
+                'requested' => count($validated['keys']),
+                'message' => __('admin_language_management.bulk_chunk_skipped'),
+            ]);
+        }
+
+        $label = $this->localeDisplayName($validated['locale']);
+        $result = $chatGpt->translateUiStringBatch($label, $english);
+
+        if (! ($result['ok'] ?? false)) {
+            return response()->json([
+                'ok' => false,
+                'message' => $result['error'] ?? __('admin_language_management.ai_failed'),
+            ], 502);
+        }
+
+        $translations = $result['translations'] ?? [];
+        try {
+            $saved = $this->uiTranslations->mergeGroupTranslations(
+                $validated['locale'],
+                $validated['group'],
+                $translations
+            );
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'ok' => false,
+                'message' => __('admin_language_management.save_failed').' '.$e->getMessage(),
+            ], 500);
+        }
+
+        return response()->json([
+            'ok' => true,
+            'skipped' => false,
+            'translations' => $translations,
+            'translated' => count($translations),
+            'saved' => $saved,
+            'requested' => count($english),
+            'locale' => $validated['locale'],
+            'group' => $validated['group'],
         ]);
     }
 

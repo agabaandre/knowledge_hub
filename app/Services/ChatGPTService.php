@@ -484,8 +484,8 @@ class ChatGPTService implements AIModel{
         }
 
         $merged = [];
-        // Small chunks reduce truncation; short keys like "home" are often dropped by models in large JSON.
-        $chunks = array_chunk($englishKeyed, 8, true);
+        // Small chunks reduce truncation and keep each OpenAI call fast (UI also sends ≤4–5 keys).
+        $chunks = array_chunk($englishKeyed, 5, true);
 
         foreach ($chunks as $index => $chunk) {
             $part = $this->translateUiStringChunk($targetLanguageLabel, $chunk);

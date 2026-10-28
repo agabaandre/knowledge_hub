@@ -21,9 +21,30 @@
             </button>
         </div>
     </div>
+    <div class="card-body border-bottom py-2">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-8 col-lg-6">
+                <label class="visually-hidden sr-only" for="lm-search-english">{{ __('admin_language_management.search_english') }}</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="fa fa-search" aria-hidden="true"></i></span>
+                    <input type="search"
+                           id="lm-search-english"
+                           class="form-control"
+                           placeholder="{{ __('admin_language_management.search_english_placeholder') }}"
+                           autocomplete="off">
+                    <button type="button" class="btn btn-outline-secondary" id="lm-search-clear" title="{{ __('admin_language_management.search_clear') }}">
+                        <i class="fa fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-6">
+                <span id="lm-search-count" class="small text-muted"></span>
+            </div>
+        </div>
+    </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-striped table-hover mb-0 align-middle">
+            <table class="table table-striped table-hover mb-0 align-middle" id="lm-translation-table">
                 <thead class="table-light">
                     <tr>
                         <th class="text-center text-muted" style="width:3.5rem">#</th>
@@ -34,10 +55,15 @@
                 </thead>
                 <tbody id="lm-translation-tbody">
                     @foreach ($lines as $key => $value)
-                        <tr>
-                            <td class="text-center text-muted small">{{ $loop->iteration }}</td>
+                        @php
+                            $englishText = (string) ($english[$key] ?? '');
+                        @endphp
+                        <tr class="lm-translation-row"
+                            data-key="{{ $key }}"
+                            data-english="{{ $englishText }}">
+                            <td class="text-center text-muted small lm-row-num">{{ $loop->iteration }}</td>
                             <td><code class="small">{{ $key }}</code></td>
-                            <td class="small text-muted">{{ $english[$key] ?? '' }}</td>
+                            <td class="small text-muted lm-english-text">{{ $englishText }}</td>
                             <td>
                                 <input type="text"
                                        name="translations[{{ $key }}]"
@@ -50,6 +76,9 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
+        <div id="lm-search-empty" class="d-none text-center text-muted small py-4">
+            {{ __('admin_language_management.search_no_results') }}
         </div>
     </div>
     <div class="card-footer text-end">

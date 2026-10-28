@@ -233,6 +233,81 @@ class UiTranslationService
     }
 
     /**
+     * Merge partial translations into the stored locale group without wiping other keys.
+     *
+     * @param  array<string, string>  $partial
+     * @return int Number of keys written from $partial
+     */
+    public function mergeGroupTranslations(string $locale, string $group, array $partial): int
+    {
+        $en = $this->loadEnglishGroup($group);
+        if ($en === []) {
+            throw new \RuntimeException('English source file missing for group: '.$group);
+        }
+
+        $raw = $this->loadRawLocaleGroup($locale, $group);
+        $out = [];
+        foreach (array_keys($en) as $key) {
+            $existing = $raw[$key] ?? '';
+            $out[$key] = is_string($existing) ? $existing : (string) $existing;
+        }
+
+        $written = 0;
+        foreach ($partial as $key => $value) {
+            if (! array_key_exists($key, $en)) {
+                continue;
+            }
+            if (! is_string($value)) {
+                $value = (string) $value;
+            }
+            if (trim($value) === '') {
+                continue;
+            }
+            $out[$key] = $value;
+            $written++;
+        }
+
+        $this->saveGroup($locale, $group, $out);
+
+        return $written;
+    }
+
+    /**
+     * Keys that still need translation (empty or still identical to English).
+     *
+     * @param  list<string>|null  $onlyKeys
+     * @return array<string, string> English source keyed by translation key
+     */
+    public function missingKeysForLocale(string $locale, string $group, ?array $onlyKeys = null): array
+    {
+        $english = $this->loadEnglishGroup($group);
+        if ($english === []) {
+            return [];
+        }
+
+        if (is_array($onlyKeys) && $onlyKeys !== []) {
+            $subset = [];
+            foreach ($onlyKeys as $key) {
+                if (array_key_exists($key, $english)) {
+                    $subset[$key] = $english[$key];
+                }
+            }
+            $english = $subset;
+        }
+
+        $merged = $this->loadMergedGroup($locale, $group);
+        $missing = [];
+        foreach ($english as $key => $enValue) {
+            $current = trim((string) ($merged[$key] ?? ''));
+            if ($current === '' || $current === $enValue) {
+                $missing[$key] = $enValue;
+            }
+        }
+
+        return $missing;
+    }
+
+    /**
      * Persist locale group; only keys present in English are stored.
      *
      * @param  array<string, string>  $submitted

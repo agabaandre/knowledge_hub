@@ -30,6 +30,48 @@
         </div>
     </div>
 
+    <div class="card mb-3" id="lm-bulk-card">
+        <div class="card-body">
+            <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-2">
+                <div>
+                    <h2 class="h6 mb-1">{{ __('admin_language_management.bulk_title') }}</h2>
+                    <p class="text-muted small mb-0">{{ __('admin_language_management.bulk_intro') }}</p>
+                </div>
+                <div class="form-check mt-1">
+                    <input class="form-check-input" type="checkbox" id="lm-bulk-only-missing" checked>
+                    <label class="form-check-label small" for="lm-bulk-only-missing">
+                        {{ __('admin_language_management.bulk_only_missing') }}
+                    </label>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-primary btn-sm" id="lm-bulk-sections-btn"
+                        title="{{ __('admin_language_management.bulk_sections_title') }}">
+                    <i class="fa fa-layer-group me-1"></i>{{ __('admin_language_management.bulk_sections') }}
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="lm-bulk-all-langs-btn"
+                        title="{{ __('admin_language_management.bulk_all_languages_title') }}">
+                    <i class="fa fa-globe me-1"></i>{{ __('admin_language_management.bulk_all_languages') }}
+                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm d-none" id="lm-bulk-cancel-btn">
+                    <i class="fa fa-stop me-1"></i>{{ __('admin_language_management.bulk_cancel') }}
+                </button>
+            </div>
+            <div id="lm-bulk-progress" class="d-none mt-3">
+                <div class="d-flex justify-content-between small mb-1">
+                    <span id="lm-bulk-status" class="text-muted"></span>
+                    <span id="lm-bulk-counts" class="text-muted"></span>
+                </div>
+                <div class="progress" style="height: 0.55rem;">
+                    <div id="lm-bulk-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                         role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <pre id="lm-bulk-log" class="small bg-light border rounded p-2 mt-2 mb-0"
+                     style="max-height: 10rem; overflow: auto; white-space: pre-wrap;"></pre>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-2 mb-3 align-items-end" id="lm-filters">
         <div class="col-md-4">
             <label class="form-label" for="lm-locale">{{ __('admin_language_management.select_locale') }}</label>
@@ -77,6 +119,8 @@
     var gridUrl = @json(route('admin.language-management.grid'));
     var updateUrl = @json(route('admin.language-management.update'));
     var aiTranslateUrl = @json(route('admin.language-management.ai-translate'));
+    var aiTranslateSaveUrl = @json(route('admin.language-management.ai-translate-save'));
+    var bulkPlanUrl = @json(route('admin.language-management.bulk-plan'));
     var copyEnglishUrl = @json(route('admin.language-management.copy-english'));
     var csrfToken = @json(csrf_token());
     var i18n = {
@@ -96,8 +140,24 @@
         copyFailed: @json(__('admin_language_management.copy_failed')),
         aiTranslate: @json(__('admin_language_management.ai_translate')),
         aiTranslating: @json(__('admin_language_management.ai_translating')),
-        copyFromEnglish: @json(__('admin_language_management.copy_from_english'))
+        copyFromEnglish: @json(__('admin_language_management.copy_from_english')),
+        confirmBulkSections: @json(__('admin_language_management.confirm_bulk_sections')),
+        confirmBulkAllLanguages: @json(__('admin_language_management.confirm_bulk_all_languages')),
+        bulkPlanning: @json(__('admin_language_management.bulk_planning')),
+        bulkNothingTodo: @json(__('admin_language_management.bulk_nothing_todo')),
+        bulkRunning: @json(__('admin_language_management.bulk_running')),
+        bulkJobStatus: @json(__('admin_language_management.bulk_job_status')),
+        bulkDone: @json(__('admin_language_management.bulk_done')),
+        bulkCancelled: @json(__('admin_language_management.bulk_cancelled')),
+        bulkFailed: @json(__('admin_language_management.bulk_failed')),
+        bulkPlanFailed: @json(__('admin_language_management.bulk_plan_failed')),
+        searchShowing: @json(__('admin_language_management.search_showing')),
+        searchNoResults: @json(__('admin_language_management.search_no_results'))
     };
+
+    // Small AI payloads keep each request fast and avoid gateway / PHP timeouts.
+    var AI_CHUNK_SIZE = 4;
+    var AI_CHUNK_PAUSE_MS = 120;
 
     var localeEl = document.getElementById('lm-locale');
     var groupEl = document.getElementById('lm-group');
@@ -110,6 +170,69 @@
     var saveInFlight = false;
 
     if (!localeEl || !groupEl || !inner || !form) return;
+
+    function wait(ms) {
+        return new Promise(function(resolve) {
+            window.setTimeout(resolve, ms);
+        });
+    }
+
+    function chunkKeys(keys, size) {
+        var out = [];
+        for (var i = 0; i < keys.length; i += size) {
+            out.push(keys.slice(i, i + size));
+        }
+        return out;
+    }
+
+    function bindEnglishSearch() {
+        if (typeof window.jQuery === 'undefined' || !window.jQuery) {
+            return;
+        }
+        var $ = window.jQuery;
+        var $root = $(inner);
+        var $input = $root.find('#lm-search-english');
+        var $clear = $root.find('#lm-search-clear');
+        var $count = $root.find('#lm-search-count');
+        var $empty = $root.find('#lm-search-empty');
+        var $rows = $root.find('#lm-translation-tbody tr.lm-translation-row');
+
+        function applyFilter() {
+            var q = String($input.val() || '').toLowerCase().trim();
+            var visible = 0;
+            $rows.each(function() {
+                var $row = $(this);
+                var hay = (
+                    String($row.attr('data-key') || '') + ' ' +
+                    String($row.attr('data-english') || '') + ' ' +
+                    String($row.find('.lm-english-text').text() || '') + ' ' +
+                    String($row.find('.lm-translation-input').val() || '')
+                ).toLowerCase();
+                var show = !q || hay.indexOf(q) !== -1;
+                $row.toggle(show);
+                if (show) visible++;
+            });
+            if ($count.length) {
+                $count.text(
+                    i18n.searchShowing
+                        .replace(':visible', String(visible))
+                        .replace(':total', String($rows.length))
+                );
+            }
+            if ($empty.length) {
+                if (q && visible === 0) $empty.removeClass('d-none');
+                else $empty.addClass('d-none');
+            }
+        }
+
+        $input.off('.lmSearch').on('input.lmSearch keyup.lmSearch search.lmSearch', applyFilter);
+        $clear.off('.lmSearch').on('click.lmSearch', function() {
+            $input.val('');
+            applyFilter();
+            $input.trigger('focus');
+        });
+        applyFilter();
+    }
 
     function showFlash(message, type) {
         if (!flashEl || !flashText) {
@@ -256,6 +379,7 @@
             localeEl.value = data.locale;
             groupEl.value = data.group;
             syncUrl(data.locale, data.group);
+            bindEnglishSearch();
         })
         .catch(function() {
             showFlash(i18n.loadFailed, 'danger');
@@ -264,6 +388,8 @@
             showLoading(false);
         });
     }
+
+    bindEnglishSearch();
 
     localeEl.addEventListener('change', loadGrid);
     groupEl.addEventListener('change', loadGrid);
@@ -393,11 +519,8 @@
             return filled;
         }
 
-        var chunkSize = 8;
-        var chunks = [];
-        for (var i = 0; i < keys.length; i += chunkSize) {
-            chunks.push(keys.slice(i, i + chunkSize));
-        }
+        var chunkSize = AI_CHUNK_SIZE;
+        var chunks = chunkKeys(keys, chunkSize);
 
         var filledTotal = 0;
         var chunkIndex = 0;
@@ -439,7 +562,8 @@
                 filledTotal += applyMap(data.translations || {});
                 chunkIndex++;
                 setProgress(Math.min(chunkIndex * chunkSize, keys.length), keys.length);
-                return runNext();
+                // Yield between chunks so the UI stays responsive during long AI runs.
+                return wait(AI_CHUNK_PAUSE_MS).then(runNext);
             });
         }
 
@@ -448,6 +572,254 @@
             restoreBtn();
         });
     });
+
+    // ---- Bulk async AI translate (all sections / all languages) ----
+    var bulkSectionsBtn = document.getElementById('lm-bulk-sections-btn');
+    var bulkAllLangsBtn = document.getElementById('lm-bulk-all-langs-btn');
+    var bulkCancelBtn = document.getElementById('lm-bulk-cancel-btn');
+    var bulkOnlyMissingEl = document.getElementById('lm-bulk-only-missing');
+    var bulkProgress = document.getElementById('lm-bulk-progress');
+    var bulkStatus = document.getElementById('lm-bulk-status');
+    var bulkCounts = document.getElementById('lm-bulk-counts');
+    var bulkBar = document.getElementById('lm-bulk-bar');
+    var bulkLog = document.getElementById('lm-bulk-log');
+    var bulkCancelRequested = false;
+    var bulkRunning = false;
+
+    function setBulkUiRunning(running) {
+        bulkRunning = running;
+        if (bulkSectionsBtn) bulkSectionsBtn.disabled = running;
+        if (bulkAllLangsBtn) bulkAllLangsBtn.disabled = running;
+        if (bulkCancelBtn) {
+            if (running) bulkCancelBtn.classList.remove('d-none');
+            else bulkCancelBtn.classList.add('d-none');
+            bulkCancelBtn.disabled = !running;
+        }
+        if (localeEl) localeEl.disabled = running;
+        if (groupEl) groupEl.disabled = running;
+    }
+
+    function appendBulkLog(line) {
+        if (!bulkLog) return;
+        bulkLog.textContent += (bulkLog.textContent ? '\n' : '') + line;
+        bulkLog.scrollTop = bulkLog.scrollHeight;
+    }
+
+    function updateBulkProgress(doneKeys, totalKeys, statusText) {
+        if (bulkStatus) bulkStatus.textContent = statusText || '';
+        if (bulkCounts) {
+            bulkCounts.textContent = String(doneKeys) + ' / ' + String(totalKeys);
+        }
+        if (bulkBar) {
+            var pct = totalKeys > 0 ? Math.min(100, Math.round((doneKeys / totalKeys) * 100)) : 0;
+            bulkBar.style.width = pct + '%';
+            bulkBar.setAttribute('aria-valuenow', String(pct));
+            if (!bulkRunning) {
+                bulkBar.classList.remove('progress-bar-animated');
+            } else {
+                bulkBar.classList.add('progress-bar-animated');
+            }
+        }
+    }
+
+    function fetchBulkPlan(scope) {
+        var onlyMissing = bulkOnlyMissingEl ? !!bulkOnlyMissingEl.checked : true;
+        var params = new URLSearchParams();
+        params.set('scope', scope);
+        params.set('only_missing', onlyMissing ? '1' : '0');
+        if (scope === 'sections') {
+            params.set('locale', localeEl.value);
+        }
+        return fetch(bulkPlanUrl + '?' + params.toString(), {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            credentials: 'same-origin'
+        }).then(parseJsonResponse);
+    }
+
+    function translateSaveChunk(locale, group, keys, onlyMissing) {
+        return fetch(aiTranslateSaveUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                locale: locale,
+                group: group,
+                keys: keys,
+                only_missing: onlyMissing
+            })
+        }).then(parseJsonResponse);
+    }
+
+    function runBulk(scope) {
+        if (bulkRunning) return;
+
+        if (scope === 'sections' && (!localeEl.value || localeEl.value === 'en')) {
+            showFlash(i18n.selectNonEnglishAi, 'danger');
+            return;
+        }
+
+        var confirmMsg = scope === 'all_languages'
+            ? i18n.confirmBulkAllLanguages
+            : i18n.confirmBulkSections;
+        if (!confirm(confirmMsg)) return;
+
+        bulkCancelRequested = false;
+        setBulkUiRunning(true);
+        if (bulkProgress) bulkProgress.classList.remove('d-none');
+        if (bulkLog) bulkLog.textContent = '';
+        updateBulkProgress(0, 0, i18n.bulkPlanning);
+        appendBulkLog(i18n.bulkPlanning);
+
+        var onlyMissing = bulkOnlyMissingEl ? !!bulkOnlyMissingEl.checked : true;
+        var savedTotal = 0;
+        var doneKeys = 0;
+        var totalKeys = 0;
+        var failed = false;
+
+        fetchBulkPlan(scope)
+            .then(function(wrapped) {
+                var data = wrapped.data;
+                if (!wrapped.ok || !data || !data.ok) {
+                    throw new Error((data && data.message) || i18n.bulkPlanFailed);
+                }
+                var jobs = data.jobs || [];
+                totalKeys = data.total_keys || 0;
+                if (!jobs.length || totalKeys === 0) {
+                    updateBulkProgress(0, 0, i18n.bulkNothingTodo);
+                    appendBulkLog(i18n.bulkNothingTodo);
+                    showFlash(i18n.bulkNothingTodo, 'success');
+                    return null;
+                }
+
+                updateBulkProgress(0, totalKeys, i18n.bulkRunning
+                    .replace(':jobs', String(jobs.length))
+                    .replace(':keys', String(totalKeys)));
+                appendBulkLog(i18n.bulkRunning
+                    .replace(':jobs', String(jobs.length))
+                    .replace(':keys', String(totalKeys)));
+
+                var jobIndex = 0;
+
+                function runJob() {
+                    if (bulkCancelRequested) {
+                        return Promise.resolve('cancelled');
+                    }
+                    if (jobIndex >= jobs.length) {
+                        return Promise.resolve('done');
+                    }
+
+                    var job = jobs[jobIndex];
+                    var chunks = chunkKeys(job.keys || [], AI_CHUNK_SIZE);
+                    var chunkIndex = 0;
+                    var jobLabel = (job.locale || '').toUpperCase() + ' / ' + (job.group_label || job.group);
+
+                    appendBulkLog(i18n.bulkJobStatus
+                        .replace(':locale', String(job.locale || '').toUpperCase())
+                        .replace(':group', String(job.group_label || job.group))
+                        .replace(':keys', String(job.key_count || (job.keys || []).length)));
+
+                    function runChunk() {
+                        if (bulkCancelRequested) {
+                            return Promise.resolve('cancelled');
+                        }
+                        if (chunkIndex >= chunks.length) {
+                            jobIndex++;
+                            return runJob();
+                        }
+
+                        var keys = chunks[chunkIndex];
+                        updateBulkProgress(
+                            doneKeys,
+                            totalKeys,
+                            i18n.aiTranslating
+                                .replace(':done', String(doneKeys))
+                                .replace(':total', String(totalKeys)) + ' — ' + jobLabel
+                        );
+
+                        return translateSaveChunk(job.locale, job.group, keys, onlyMissing)
+                            .then(function(wrapped2) {
+                                var data2 = wrapped2.data;
+                                if (!wrapped2.ok || !data2 || !data2.ok) {
+                                    throw new Error((data2 && data2.message) || i18n.aiFailed);
+                                }
+                                var saved = data2.saved || data2.translated || 0;
+                                savedTotal += saved;
+                                doneKeys += keys.length;
+                                chunkIndex++;
+                                updateBulkProgress(
+                                    doneKeys,
+                                    totalKeys,
+                                    i18n.aiTranslating
+                                        .replace(':done', String(Math.min(doneKeys, totalKeys)))
+                                        .replace(':total', String(totalKeys)) + ' — ' + jobLabel
+                                );
+                                return wait(AI_CHUNK_PAUSE_MS).then(runChunk);
+                            });
+                    }
+
+                    return runChunk();
+                }
+
+                return runJob();
+            })
+            .then(function(result) {
+                if (result === null) return;
+                if (result === 'cancelled' || bulkCancelRequested) {
+                    appendBulkLog(i18n.bulkCancelled);
+                    updateBulkProgress(doneKeys, totalKeys, i18n.bulkCancelled);
+                    showFlash(i18n.bulkCancelled, 'danger');
+                    return;
+                }
+                var doneMsg = i18n.bulkDone
+                    .replace(':saved', String(savedTotal))
+                    .replace(':keys', String(totalKeys));
+                appendBulkLog(doneMsg);
+                updateBulkProgress(totalKeys, totalKeys, doneMsg);
+                showFlash(doneMsg, 'success');
+                // Refresh the visible editor so it reflects newly saved values.
+                loadGrid();
+            })
+            .catch(function(err) {
+                failed = true;
+                var msg = (err && err.message) || i18n.bulkFailed;
+                appendBulkLog(msg);
+                updateBulkProgress(doneKeys, totalKeys || doneKeys, msg);
+                showFlash(msg, 'danger');
+            })
+            .finally(function() {
+                setBulkUiRunning(false);
+                if (bulkBar && !failed && !bulkCancelRequested) {
+                    bulkBar.classList.remove('progress-bar-animated');
+                }
+            });
+    }
+
+    if (bulkSectionsBtn) {
+        bulkSectionsBtn.addEventListener('click', function() {
+            runBulk('sections');
+        });
+    }
+    if (bulkAllLangsBtn) {
+        bulkAllLangsBtn.addEventListener('click', function() {
+            runBulk('all_languages');
+        });
+    }
+    if (bulkCancelBtn) {
+        bulkCancelBtn.addEventListener('click', function() {
+            bulkCancelRequested = true;
+            bulkCancelBtn.disabled = true;
+            if (bulkStatus) bulkStatus.textContent = i18n.bulkCancelled;
+        });
+    }
 })();
 </script>
 @endsection
