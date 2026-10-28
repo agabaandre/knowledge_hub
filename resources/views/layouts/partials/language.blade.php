@@ -5,6 +5,7 @@
 @php
     use App\Models\SiteLanguage;
     $uiLocale = active_ui_locale();
+    $systemDefaultLocale = SiteLanguage::systemDefaultLocale();
     $localeCookiePath = config('supported_locales.cookie_path', '/');
     $basePath = request()->getBasePath();
     if (is_string($basePath) && $basePath !== '' && $basePath !== '/') {
@@ -13,10 +14,13 @@
     $googleCodesByLocale = collect(SiteLanguage::selectorMap())
         ->mapWithKeys(fn ($row, $code) => [$code => $row['google_code'] ?? $code])
         ->all();
+    $pageLanguageGoogle = $googleCodesByLocale[$systemDefaultLocale] ?? $systemDefaultLocale;
 @endphp
 <script type="text/javascript">
     window.khubGoogleTranslateReady = false;
     window.khubPendingGoogleTranslate = null;
+    window.khubSystemDefaultLocale = @json($systemDefaultLocale);
+    window.khubPageLanguageGoogle = @json($pageLanguageGoogle);
 
     function googleTranslateElementInit() {
         if (!document.getElementById('google_translate_element')) {
@@ -24,7 +28,7 @@
         }
 
         new google.translate.TranslateElement({
-            pageLanguage: 'en',
+            pageLanguage: window.khubPageLanguageGoogle || 'en',
             autoDisplay: false,
             disableAutoHover: true,
             showBanner: false
@@ -91,14 +95,17 @@
     }
 
     function doGTranslate(lang_code) {
-        var lang = lang_code || 'en';
+        var pageLang = window.khubPageLanguageGoogle || 'en';
+        var defaultLocale = window.khubSystemDefaultLocale || 'en';
+        var lang = lang_code || pageLang;
 
         if (!window.khubGoogleTranslateReady) {
             window.khubPendingGoogleTranslate = lang;
             return;
         }
 
-        if (lang === 'en') {
+        // Source / default site language: clear Google Translate overlay.
+        if (lang === pageLang || lang === defaultLocale) {
             var clearDate = new Date();
             clearDate.setTime(clearDate.getTime() - 1);
             document.cookie = "googtrans=; expires=" + clearDate.toUTCString() + "; path={{ $localeCookiePath }}";
@@ -113,13 +120,13 @@
             }
 
             if (typeof window.khubApplyDocumentDirection === 'function') {
-                window.khubApplyDocumentDirection('en');
+                window.khubApplyDocumentDirection(defaultLocale);
             }
 
             var teComboEn = document.querySelector('select.goog-te-combo:not(.menu-language-menu-container select)');
             if (teComboEn) {
                 var enIndex = Array.from(teComboEn.options).findIndex(function(option) {
-                    return option.value === 'en' || option.value === '';
+                    return option.value === pageLang || option.value === '' || option.value === defaultLocale;
                 });
                 if (enIndex !== -1) {
                     teComboEn.selectedIndex = enIndex;
@@ -184,23 +191,25 @@
         function bootGoogleTranslateFromCookies() {
             var cookieLang = GTranslateGetCurrentLang();
             var userLang = @json($uiLocale);
+            var defaultLocale = window.khubSystemDefaultLocale || 'en';
+            var pageLang = window.khubPageLanguageGoogle || 'en';
             var googleLang = khubGoogleCodeForLocale(userLang);
 
-            if (userLang && userLang !== 'en') {
+            if (userLang && userLang !== defaultLocale) {
                 if (cookieLang !== googleLang) {
                     var date = new Date();
                     date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
                     document.cookie = "googtrans=/auto/" + googleLang + "; expires=" + date.toUTCString() + "; path={{ $localeCookiePath }}";
                 }
                 doGTranslate(googleLang);
-            } else if (cookieLang && cookieLang !== 'en') {
+            } else if (cookieLang && cookieLang !== pageLang) {
                 doGTranslate(cookieLang);
             } else {
                 var clearDate = new Date();
                 clearDate.setTime(clearDate.getTime() - 1);
                 document.cookie = "googtrans=; expires=" + clearDate.toUTCString() + "; path={{ $localeCookiePath }}";
                 if (typeof window.khubApplyDocumentDirection === 'function') {
-                    window.khubApplyDocumentDirection('en');
+                    window.khubApplyDocumentDirection(defaultLocale);
                 }
             }
         }

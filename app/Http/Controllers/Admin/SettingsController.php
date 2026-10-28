@@ -69,6 +69,7 @@ class SettingsController extends Controller
         $data['frontendThemes'] = FrontendThemes::builtinCatalog();
         $data['frontendThemePacks'] = FrontendThemes::packsFromSettings(settings());
         $data['activeFrontendTheme'] = FrontendThemes::resolve(settings());
+        $data['siteLanguageOptions'] = \App\Models\SiteLanguage::selectorMap();
         return view('admin.settings.index', $data);
     }
   

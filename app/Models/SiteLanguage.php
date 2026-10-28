@@ -147,13 +147,85 @@ class SiteLanguage extends Model
     }
 
     /**
+     * Normalize admin / legacy language values to a locale code (e.g. french → fr).
+     */
+    public static function normalizeLocaleCode(?string $raw): ?string
+    {
+        if ($raw === null) {
+            return null;
+        }
+
+        $raw = strtolower(trim($raw));
+        if ($raw === '') {
+            return null;
+        }
+
+        $aliases = [
+            'english' => 'en',
+            'french' => 'fr',
+            'francais' => 'fr',
+            'français' => 'fr',
+            'arabic' => 'ar',
+            'spanish' => 'es',
+            'portuguese' => 'pt',
+            'swahili' => 'sw',
+            'kiswahili' => 'sw',
+            'amharic' => 'am',
+        ];
+
+        if (isset($aliases[$raw])) {
+            return $aliases[$raw];
+        }
+
+        if (preg_match('/^[a-z]{2}([_-][a-z0-9]+)*$/', $raw)) {
+            return str_replace('_', '-', $raw);
+        }
+
+        return null;
+    }
+
+    /**
+     * Site-wide default locale from Admin → Configure (setting.language),
+     * constrained to active Site Languages.
+     */
+    public static function systemDefaultLocale(): string
+    {
+        $codes = self::activeLocaleCodes();
+        $fallback = in_array('en', $codes, true) ? 'en' : ($codes[0] ?? config('supported_locales.default', 'en'));
+
+        $raw = null;
+        try {
+            if (function_exists('settings')) {
+                $raw = settings()->language ?? null;
+            }
+        } catch (\Throwable $e) {
+            $raw = null;
+        }
+
+        $normalized = self::normalizeLocaleCode(is_string($raw) ? $raw : null);
+        if ($normalized !== null && in_array($normalized, $codes, true)) {
+            return $normalized;
+        }
+
+        $cfgDefault = self::normalizeLocaleCode((string) config('supported_locales.default', 'en'));
+        if ($cfgDefault !== null && in_array($cfgDefault, $codes, true)) {
+            return $cfgDefault;
+        }
+
+        return $fallback;
+    }
+
+    /**
      * Resolve which locale is active for the UI (matches selector keys).
      */
     public static function resolveActiveLocale(?string $userLocale, ?string $googtransRaw, ?string $khubLocale): string
     {
         $map = self::selectorMap();
         $codes = array_keys($map);
-        $default = in_array('en', $codes, true) ? 'en' : ($codes[0] ?? 'en');
+        $default = self::systemDefaultLocale();
+        if (! in_array($default, $codes, true)) {
+            $default = in_array('en', $codes, true) ? 'en' : ($codes[0] ?? 'en');
+        }
 
         if (is_string($khubLocale) && $khubLocale !== '' && in_array($khubLocale, $codes, true)) {
             return $khubLocale;

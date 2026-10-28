@@ -67,6 +67,14 @@
         </div>
     </div>
 
+    @php $systemDefaultLocale = \App\Models\SiteLanguage::systemDefaultLocale(); @endphp
+    <div class="alert alert-info mb-4">
+        Site default language is <strong>{{ strtoupper($systemDefaultLocale) }}</strong>
+        (used for UI translations and the frontend language icon when visitors have not chosen a language).
+        Change it under
+        <a href="{{ route('admin.configure') }}#general" class="alert-link">Configure → General → Default language</a>.
+    </div>
+
     <div class="card">
         <div class="card-header fw-bold">Configured languages</div>
         <div class="card-body p-0">
@@ -88,7 +96,12 @@
                         @foreach ($languages as $lang)
                             <tr>
                                 <td class="text-center text-muted">{{ $loop->iteration }}</td>
-                                <td><code>{{ $lang->locale_code }}</code></td>
+                                <td>
+                                    <code>{{ $lang->locale_code }}</code>
+                                    @if (strtolower($lang->locale_code) === strtolower($systemDefaultLocale))
+                                        <span class="badge bg-success ms-1">Site default</span>
+                                    @endif
+                                </td>
                                 <td>{{ $lang->name }}</td>
                                 <td><code>{{ $lang->google_translate_code ?: '—' }}</code></td>
                                 <td>{{ $lang->flag_emoji }}</td>

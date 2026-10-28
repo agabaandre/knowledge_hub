@@ -123,6 +123,15 @@ class SettingsRepository
         $settings->title                = $request->title;
         $settings->site_description     = $request->site_description;
         $settings->seo_keywords         = $request->seo_keywords;
+        if (Schema::hasColumn('setting', 'language') && $request->has('language')) {
+            $requestedLocale = \App\Models\SiteLanguage::normalizeLocaleCode(
+                is_string($request->input('language')) ? $request->input('language') : null
+            );
+            $activeCodes = \App\Models\SiteLanguage::activeLocaleCodes();
+            if ($requestedLocale !== null && in_array($requestedLocale, $activeCodes, true)) {
+                $settings->language = $requestedLocale;
+            }
+        }
         if (Schema::hasColumn('setting', 'use_seo_friendly_urls')) {
             $settings->use_seo_friendly_urls = (bool) $request->boolean('use_seo_friendly_urls', true);
         }

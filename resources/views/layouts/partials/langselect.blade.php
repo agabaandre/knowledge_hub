@@ -477,6 +477,7 @@
 
     window.khubLangMeta = @json($languages);
     window.khubRtlLocales = @json(config('supported_locales.rtl_locales', ['ar']));
+    window.khubSystemDefaultLocale = @json(\App\Models\SiteLanguage::systemDefaultLocale());
     window.khubInitialNativeLabels = @json(\App\Support\UiLocaleLabels::exportForCurrentLocale());
     var khubLocaleCookieName = @json(config('supported_locales.locale_cookie', 'khub_locale'));
     @php
@@ -767,7 +768,8 @@
         googleCode = googleCode || localeCode;
 
         writeAppCookie(khubLocaleCookieName, localeCode, khubLocaleMaxAgeSec);
-        if (localeCode === 'en') {
+        var defaultLocale = window.khubSystemDefaultLocale || 'en';
+        if (localeCode === defaultLocale) {
             clearAppCookie('googtrans');
         } else {
             writeAppCookie('googtrans', '/auto/' + googleCode, khubLocaleMaxAgeSec);

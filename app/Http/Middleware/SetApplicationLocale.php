@@ -13,8 +13,7 @@ class SetApplicationLocale
     public function handle(Request $request, Closure $next): Response
     {
         $supported = SiteLanguage::activeLocaleCodes();
-        $defaultCfg = config('supported_locales.default', config('app.locale', 'en'));
-        $locale = in_array($defaultCfg, $supported, true) ? $defaultCfg : (in_array('en', $supported, true) ? 'en' : ($supported[0] ?? 'en'));
+        $locale = SiteLanguage::systemDefaultLocale();
 
         $queryLocale = $request->query('locale');
         if (is_string($queryLocale) && in_array($queryLocale, $supported, true)) {
@@ -36,7 +35,7 @@ class SetApplicationLocale
         );
 
         if (! in_array($locale, $supported, true)) {
-            $locale = in_array('en', $supported, true) ? 'en' : ($supported[0] ?? 'en');
+            $locale = SiteLanguage::systemDefaultLocale();
         }
 
         App::setLocale($locale);

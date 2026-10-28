@@ -996,7 +996,7 @@
     @endif
 
     <div class="alert alert-info d-flex flex-column flex-md-row align-items-md-center justify-content-between flex-wrap gap-2 mb-3">
-        <span><i class="fa fa-language me-2"></i><strong>{{ __('admin_nav.site_languages') }}</strong> — add locales, display names, and Google Translate codes (stored in the database). <strong>{{ __('admin_nav.language_management') }}</strong> — edit UI strings per locale.</span>
+        <span><i class="fa fa-language me-2"></i><strong>Default language</strong> is set on the General tab (dropdown from active site languages). <strong>{{ __('admin_nav.site_languages') }}</strong> — add locales, display names, and Google Translate codes. <strong>{{ __('admin_nav.language_management') }}</strong> — edit UI strings per locale.</span>
         <span class="d-flex gap-2 flex-shrink-0">
             <a href="{{ route('admin.site-languages.index') }}" class="btn btn-sm btn-outline-primary text-nowrap">{{ __('admin_nav.site_languages') }}</a>
             <a href="{{ route('admin.language-management.index') }}" class="btn btn-sm btn-outline-primary text-nowrap">{{ __('admin_nav.language_management') }}</a>
@@ -1090,33 +1090,33 @@
                     <div class="form-section-title">
                         <i class="fa fa-envelope"></i>
                         Contact Information
-                    </div>
+                </div>
 
                     <div class="row settings-grid-row">
                         <div class="col-md-4">
                             <div class="form-group settings-field--compact mb-0">
                                 <label>Email</label>
                                 <input type="email" name="email" value="{{ $settings->email }}" class="form-control" placeholder="contact@example.com">
-                            </div>
-                        </div>
+                </div>
+                </div>
                         <div class="col-md-4">
                             <div class="form-group settings-field--compact mb-0">
                                 <label>Phone</label>
                                 <input type="text" name="phone" value="{{ $settings->phone }}" class="form-control" placeholder="+1 234 567 8900">
                 </div>
-                        </div>
+                </div>
                         <div class="col-md-4">
                             <div class="form-group settings-field--compact mb-0">
                                 <label>Timezone</label>
                                 @include('partials.general.timezones', ['selected' => $settings->timezone])
-                </div>
-                        </div>
                     </div>
+                </div>
+            </div>
 
                 <div class="form-group">
                         <label>Address</label>
                         <textarea name="address" rows="3" class="form-control" placeholder="Enter site address">{{ $settings->address }}</textarea>
-                        </div>
+                </div>
                 </div>
 
                 <!-- Email Tab -->
@@ -1125,7 +1125,7 @@
                         <div class="alert alert-warning mb-0">
                             <i class="fa fa-exclamation-triangle mr-1"></i>
                             Email settings require a database migration. Run <code>php artisan migrate</code> to enable this section.
-                                </div>
+                </div>
                     @else
                         @php
                             $emailDriverForm = $emailFields['email_driver']['form_value'] ?? $emailFields['email_driver']['value'] ?? 'exchange';
@@ -1166,11 +1166,11 @@
                                     <optgroup label="{{ $category }}">
                                         @foreach($drivers as $def)
                                             <option value="{{ $def['key'] }}" {{ $emailDriverForm === $def['key'] ? 'selected' : '' }}>{{ $def['label'] }}</option>
-                                        @endforeach
+                                    @endforeach
                                     </optgroup>
-                                @endforeach
-                            </select>
-                            </div>
+                                    @endforeach
+                                </select>
+                                    </div>
                         <p class="email-effective-hint mb-3">Currently active: <strong>{{ strtoupper($emailDriverEffective) }}</strong></p>
 
                         <div class="email-config-panel" id="email-panel-shared">
@@ -1204,10 +1204,10 @@
                                         @if($emailFields['mail_from_name']['has_env_override'] ?? false)
                                             <div class="email-effective-hint">.env fallback: <strong>{{ $emailFields['mail_from_name']['value'] }}</strong> (database value overrides after save)</div>
                                         @endif
-                                    </div>
-                            </div>
-                        </div>
                     </div>
+                </div>
+                </div>
+            </div>
 
                         @if($httpFieldsReady)
                         <div class="email-config-panel js-email-driver-panel" id="email-panel-http" style="{{ $showHttp ? '' : 'display:none;' }}">
@@ -1219,27 +1219,27 @@
                                 @endif
                                 with client-credentials JWT — same provider as Staff Portal email servers.
                             </p>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-12">
+                <div class="form-group">
                                         <label>API base URL
                                             @if($emailFields['mail_http_base_url']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="mail_http_base_url" class="form-control"
                                                value="{{ $emailFields['mail_http_base_url']['form_value'] ?? '' }}"
                                                placeholder="{{ \App\Support\EmailConfig::httpBaseUrlDefault() }}">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
+                </div>
+                        </div>
+                        <div class="col-md-6">
+                <div class="form-group">
                                         <label>Client ID
                                             @if($emailFields['mail_http_client_id']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="mail_http_client_id" class="form-control"
                                                value="{{ $emailFields['mail_http_client_id']['form_value'] ?? '' }}">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
+                </div>
+                        </div>
+                        <div class="col-md-6">
                                     <div class="form-group mb-0">
                                         <label>Client secret
                                             @if($emailFields['mail_http_client_secret']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
@@ -1247,11 +1247,11 @@
                                         <input type="password" name="mail_http_client_secret" class="form-control" autocomplete="new-password"
                                                placeholder="{{ !empty($emailFields['mail_http_client_secret']['db_value']) ? '•••••••• (leave blank to keep)' : 'Enter client secret' }}"
                                                {{ ($emailFields['mail_http_client_secret']['env_locked'] ?? false) ? 'readonly' : '' }}>
-                                    </div>
                                 </div>
-                            </div>
+                </div>
                         </div>
-                        @endif
+                                </div>
+                                @endif
 
                         <div class="email-config-panel js-email-driver-panel" id="email-panel-exchange" style="{{ $showExchange ? '' : 'display:none;' }}">
                             <h4 class="email-config-panel__title"><i class="fa fa-windows"></i>Microsoft Exchange / Graph API</h4>
@@ -1272,8 +1272,8 @@
                                         </label>
                                         <input type="text" name="exchange_client_id" class="form-control"
                                                value="{{ $emailFields['exchange_client_id']['form_value'] ?? '' }}">
-                                    </div>
-                                </div>
+                            </div>
+                        </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                         <label>Client secret
@@ -1282,7 +1282,7 @@
                                         <input type="password" name="exchange_client_secret" class="form-control" autocomplete="new-password"
                                                placeholder="{{ !empty($emailFields['exchange_client_secret']['db_value']) ? '•••••••• (leave blank to keep)' : 'Enter client secret' }}"
                                                {{ ($emailFields['exchange_client_secret']['env_locked'] ?? false) ? 'readonly' : '' }}>
-                </div>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
@@ -1291,9 +1291,9 @@
                                         <select name="exchange_auth_method" class="form-control">
                                             <option value="client_credentials" {{ $exchangeAuth === 'client_credentials' ? 'selected' : '' }}>Client credentials</option>
                                             <option value="authorization_code" {{ $exchangeAuth === 'authorization_code' ? 'selected' : '' }}>Authorization code</option>
-                        </select>
+                                </select>
                             </div>
-                    </div>
+                        </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                         <label>Redirect URI
@@ -1314,8 +1314,8 @@
                                                placeholder="https://graph.microsoft.com/.default">
                                     </div>
                             </div>
+                        </div>
                     </div>
-                </div>
 
                         <div class="email-config-panel js-email-driver-panel" id="email-panel-smtp" style="{{ $showSmtp ? '' : 'display:none;' }}">
                             <h4 class="email-config-panel__title"><i class="fa fa-server"></i><span id="smtp-panel-title">SMTP server</span></h4>
@@ -1331,8 +1331,8 @@
                                         <input type="text" name="mail_host" id="mail_host" class="form-control"
                                                value="{{ $emailFields['mail_host']['form_value'] ?? '' }}"
                                                placeholder="{{ $emailDriverForm === 'zoho' ? 'smtp.zoho.com' : ($emailFields['mail_host']['value'] ?? 'smtp.office365.com') }}">
-                            </div>
                         </div>
+                                </div>
                         <div class="col-md-4">
                             <div class="form-group">
                                         <label>Port
@@ -1341,8 +1341,8 @@
                                         <input type="text" name="mail_port" class="form-control"
                                                value="{{ $emailFields['mail_port']['form_value'] ?? '' }}"
                                                placeholder="{{ $emailFields['mail_port']['value'] ?? '587' }}">
+                                    </div>
                                 </div>
-                            </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                         <label>Username
@@ -1350,7 +1350,7 @@
                                         </label>
                                         <input type="text" name="mail_username" class="form-control"
                                                value="{{ $emailFields['mail_username']['form_value'] ?? '' }}">
-                            </div>
+                </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
@@ -1360,8 +1360,8 @@
                                         <input type="password" name="mail_password" class="form-control" autocomplete="new-password"
                                                placeholder="{{ !empty($emailFields['mail_password']['db_value']) ? '•••••••• (leave blank to keep)' : 'Enter SMTP password' }}"
                                                {{ ($emailFields['mail_password']['env_locked'] ?? false) ? 'readonly' : '' }}>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
                         <div class="col-md-6">
                                     <div class="form-group mb-0">
                                         <label>Encryption
@@ -1372,28 +1372,28 @@
                                             <option value="tls" {{ $encForm === 'tls' ? 'selected' : '' }}>TLS</option>
                                             <option value="ssl" {{ $encForm === 'ssl' ? 'selected' : '' }}>SSL</option>
                                             <option value="none" {{ in_array($encForm, ['none', ''], true) ? 'selected' : '' }}>None</option>
-                                        </select>
+                        </select>
                             </div>
-                        </div>
-                            </div>
+                    </div>
+                </div>
                     </div>
 
                         @if($apiFieldsReady)
                         <div class="email-config-panel js-email-driver-panel" id="email-panel-api" style="{{ $showApi ? '' : 'display:none;' }}">
                             <h4 class="email-config-panel__title"><i class="fa fa-key"></i><span id="api-panel-title">API provider</span></h4>
                             <p class="text-muted small mb-3" id="api-panel-hint">Enter credentials for the selected transactional provider.</p>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
                                         <label id="mail-api-key-label">API key / token
                                             @if($emailFields['mail_api_key']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="password" name="mail_api_key" class="form-control" autocomplete="new-password"
                                                placeholder="{{ !empty($emailFields['mail_api_key']['db_value']) ? '•••••••• (leave blank to keep)' : 'Enter API key' }}">
-                                    </div>
                                 </div>
+                            </div>
                                 <div class="col-md-6 js-api-field-secret">
-                                    <div class="form-group">
+                            <div class="form-group">
                                         <label>API secret (Mailjet)
                                             @if($emailFields['mail_api_secret']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
@@ -1402,27 +1402,27 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6 js-api-field-domain">
-                                    <div class="form-group">
+                            <div class="form-group">
                                         <label>Sending domain (Mailgun)
                                             @if($emailFields['mail_api_domain']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="mail_api_domain" class="form-control"
                                                value="{{ $emailFields['mail_api_domain']['form_value'] ?? '' }}"
                                                placeholder="mg.example.com">
-                                    </div>
-                                </div>
+                            </div>
+                        </div>
                                 <div class="col-md-6 js-api-field-region">
-                                    <div class="form-group">
+                            <div class="form-group">
                                         <label>Region (Mailgun)</label>
                                         @php $apiRegion = $emailFields['mail_api_region']['form_value'] ?? 'us'; @endphp
                                         <select name="mail_api_region" class="form-control">
                                             <option value="us" {{ $apiRegion === 'us' ? 'selected' : '' }}>US</option>
                                             <option value="eu" {{ $apiRegion === 'eu' ? 'selected' : '' }}>EU</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                </select>
+                            </div>
+                        </div>
                                 <div class="col-md-6 js-api-field-base-url">
-                                    <div class="form-group">
+                            <div class="form-group">
                                         <label>API base URL (SendGrid, optional)
                                             @if($emailFields['mail_api_base_url']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
@@ -1439,11 +1439,11 @@
                                         <input type="text" name="mail_api_message_stream" class="form-control"
                                                value="{{ $emailFields['mail_api_message_stream']['form_value'] ?? '' }}"
                                                placeholder="outbound">
-                                    </div>
-                                </div>
                             </div>
                         </div>
-                        @endif
+                    </div>
+                    </div>
+                    @endif
 
                         <div class="email-config-panel js-email-driver-panel" id="email-panel-log" style="{{ $emailPanel === 'log' ? '' : 'display:none;' }}">
                             <h4 class="email-config-panel__title"><i class="fa fa-file-alt"></i>Log only</h4>
@@ -1451,7 +1451,7 @@
                                 Messages are written to the application log and are <strong>not</strong> delivered to recipients.
                                 Use this for local development and testing.
                             </p>
-                        </div>
+                    </div>
 
                         <div class="email-config-panel" id="email-panel-test">
                             <h4 class="email-config-panel__title"><i class="fa fa-vial"></i>Test mail</h4>
@@ -1460,23 +1460,23 @@
                                 Optionally send a real test message.
                             </p>
                             <div class="row align-items-end">
-                                <div class="col-md-6">
+                        <div class="col-md-6">
                                     <div class="form-group mb-md-0">
                                         <label for="admin_test_email">Send test email to</label>
                                         <input type="email" name="test_email" id="admin_test_email" class="form-control"
                                                value="{{ old('test_email', auth()->user()->email ?? '') }}"
                                                placeholder="you@example.com" autocomplete="email">
                                         <div class="email-effective-hint">Leave blank to use your account email. Connection is checked even if send is skipped for Log.</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
                                     <button type="button" class="btn btn-outline-secondary" id="admin-test-mail-btn">
                                         <i class="fa fa-paper-plane me-1"></i> Test mail configuration
                                     </button>
                                     <div id="admin-test-mail-result" class="small mt-2 text-muted" role="status" aria-live="polite"></div>
-                                </div>
                             </div>
                         </div>
+                    </div>
                     @endif
                 </div>
 

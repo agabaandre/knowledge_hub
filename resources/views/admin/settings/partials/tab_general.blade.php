@@ -19,8 +19,28 @@
         </div>
         <div class="col-md-4">
             <div class="form-group">
-                <label>Language</label>
-                <input type="text" name="language" value="{{ $settings->language }}" class="form-control" placeholder="en">
+                @php
+                    $siteLanguageOptions = $siteLanguageOptions ?? \App\Models\SiteLanguage::selectorMap();
+                    $systemDefaultLocale = \App\Models\SiteLanguage::systemDefaultLocale();
+                    $selectedLanguage = old('language', $settings->language ?? $systemDefaultLocale);
+                    $selectedLanguage = \App\Models\SiteLanguage::normalizeLocaleCode(is_string($selectedLanguage) ? $selectedLanguage : null)
+                        ?? $systemDefaultLocale;
+                @endphp
+                <label for="setting_language">Default language</label>
+                <select name="language" id="setting_language" class="form-control no-select2">
+                    @forelse($siteLanguageOptions as $code => $meta)
+                        <option value="{{ $code }}" @selected($selectedLanguage === $code)>
+                            {{ ($meta['flag'] ?? '') ? $meta['flag'].' ' : '' }}{{ $meta['name'] ?? $code }} ({{ strtoupper($code) }})
+                        </option>
+                    @empty
+                        <option value="en" @selected($selectedLanguage === 'en')>English (EN)</option>
+                    @endforelse
+                </select>
+                <small class="info-text d-block">
+                    Site-wide default for UI translations and the frontend language icon when visitors have not chosen a language.
+                    Manage available locales under
+                    <a href="{{ route('admin.site-languages.index') }}">Site languages</a>.
+                </small>
             </div>
         </div>
     </div>
