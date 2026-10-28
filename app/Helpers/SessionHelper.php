@@ -216,6 +216,10 @@ if(!function_exists('settings')){
 			});
 			$settings = clone $base;
 			foreach ($overlay as $key => $value) {
+				// Language is site-wide (Configure → General); never let a theme overlay override it.
+				if ($key === 'language') {
+					continue;
+				}
 				if (in_array($key, ['logo', 'favicon', 'spotlight_banner'], true) && ($value === null || $value === '')) {
 					continue;
 				}

@@ -370,7 +370,14 @@
                 @php
                     use App\Support\SsoConfig;
 
-                    $hasSocialLogin = SsoConfig::microsoftEnabled()
+                    // Member-state / country hubs (STATES_ENABLED=false or ADMIN_UNITS_ENABLED=true)
+                    // should not push Africa CDC Staff Microsoft login.
+                    $isCountryHub = function_exists('hub_admin_units_enabled')
+                        ? hub_admin_units_enabled()
+                        : ((function_exists('states_enabled') && ! states_enabled())
+                            || (bool) config('deployment.admin_units_enabled', false));
+                    $showMicrosoftLogin = SsoConfig::microsoftEnabled() && ! $isCountryHub;
+                    $hasSocialLogin = $showMicrosoftLogin
                         || SsoConfig::googleEnabled()
                         || SsoConfig::linkedinEnabled();
                 @endphp
@@ -380,7 +387,7 @@
                     <span>or continue with</span>
                         </div>
 
-                @if(SsoConfig::microsoftEnabled())
+                @if($showMicrosoftLogin)
                 <div class="staff-notice" style="background: #e8f5e9; border-left: 4px solid #119A48; padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 1rem;">
                     <p style="margin: 0; font-size: 0.875rem; color: #2d3748; line-height: 1.5;">
                         <i class="fa fa-info-circle" style="color: #119A48; margin-right: 0.5rem;"></i>
@@ -390,7 +397,7 @@
                 @endif
 
                 <div class="social-btn-group">
-                    @if(SsoConfig::microsoftEnabled())
+                    @if($showMicrosoftLogin)
                     <a href="{{ url('auth/microsoft') }}" class="btn-social btn-microsoft">
                         <i class="lni lni-microsoft"></i>
                         <span>Microsoft</span>

@@ -27,7 +27,8 @@
                         ?? $systemDefaultLocale;
                 @endphp
                 <label for="setting_language">Default language</label>
-                <select name="language" id="setting_language" class="form-control no-select2">
+                {{-- form= associates explicitly: #settings-main-form uses display:contents --}}
+                <select name="language" id="setting_language" class="form-control no-select2" form="settings-main-form">
                     @forelse($siteLanguageOptions as $code => $meta)
                         <option value="{{ $code }}" @selected($selectedLanguage === $code)>
                             {{ ($meta['flag'] ?? '') ? $meta['flag'].' ' : '' }}{{ $meta['name'] ?? $code }} ({{ strtoupper($code) }})
