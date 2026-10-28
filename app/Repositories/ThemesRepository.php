@@ -212,7 +212,8 @@ class ThemesRepository
         $theme->detailed_description = $request->filled('detailed_description')
             ? (string) $request->detailed_description
             : null;
-        $theme->icon = $request->icon;
+        $icon = trim((string) $request->input('icon', ''));
+        $theme->icon = $icon !== '' ? $icon : 'fa-check-circle';
         $theme->thematic_area_id = $request->thematic_area_id;
         if (Schema::hasColumn('sub_thematic_area', 'slug')) {
             SeoSlugSync::apply($theme, 'subthemes');

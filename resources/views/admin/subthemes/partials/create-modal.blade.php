@@ -22,10 +22,11 @@
 
                     <div class="form-group">
                         <label for="icon">Icon</label>
+                        @php $defaultSubthemeIcon = 'fa-check-circle'; @endphp
                         <select class="form-control select2-fa-icons" id="new_subtheme_icon" name="icon" required>
                             <option value="">Select icon class</option>
                             @foreach(($faIconOptions ?? []) as $iconClass)
-                                <option value="{{ $iconClass }}">{{ $iconClass }}</option>
+                                <option value="{{ $iconClass }}" @if($iconClass === $defaultSubthemeIcon) selected @endif>{{ $iconClass }}</option>
                             @endforeach
                         </select>
                         <small class="text-muted d-block mt-1">
@@ -55,6 +56,8 @@
 @push('modal-scripts')
     <script>
         // JavaScript for specific modal
+        var defaultSubthemeIcon = 'fa-check-circle';
+
         $('#create-subtheme-modal').on('show.bs.modal', function(event) {
             // Initialize Select2 for thematic area select field
             $('.select2').select2({
@@ -67,13 +70,18 @@
                 width: '100%',
                 dir: 'ltr',
             });
+            var iconSelect = $('#new_subtheme_icon');
+            if (iconSelect.find('option[value="' + defaultSubthemeIcon + '"]').length === 0) {
+                iconSelect.append(new Option(defaultSubthemeIcon, defaultSubthemeIcon, true, true));
+            }
+            iconSelect.val(defaultSubthemeIcon).trigger('change');
         });
 
         // Optional: If you want to reset the form fields when the modal is closed
         $('#create-subtheme-modal').on('hidden.bs.modal', function() {
             $('#new_subtheme_description').val('');
             $('#new_subtheme_detailed_description').val('');
-            $('#new_subtheme_icon').val('').trigger('change');
+            $('#new_subtheme_icon').val(defaultSubthemeIcon).trigger('change');
             @if(($selectedThemeId ?? 0) > 0)
             $('#new_thematic_area_id').val('{{ (int) $selectedThemeId }}').trigger('change');
             @else
