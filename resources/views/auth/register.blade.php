@@ -21,8 +21,15 @@
                     <form class="border p-3 rounded bg-white" method="POST" action="{{ route('registration') }}">
                         <h3 class="py-3 text-success">Register for an account</h3>
                         <div class="row justify-content-center mb-3">
+                            @php
+                                $isCountryHub = function_exists('hub_admin_units_enabled')
+                                    ? hub_admin_units_enabled()
+                                    : ((function_exists('states_enabled') && ! states_enabled())
+                                        || (bool) config('deployment.admin_units_enabled', false));
+                                $showMicrosoftLogin = \App\Support\SsoConfig::microsoftEnabled() && ! $isCountryHub;
+                            @endphp
                             <div class="btn-group" role="group" aria-label="Login with social media">
-                                @if(\App\Support\SsoConfig::microsoftEnabled())
+                                @if($showMicrosoftLogin)
                                 <a href="{{ url('auth/microsoft') }}" class="btn btn-outline-primary"><i
                                         class="lni lni-microsoft"></i>
                                     Join with Microsoft</a>
