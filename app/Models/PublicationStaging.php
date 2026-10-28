@@ -2,12 +2,25 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\NormalizesMultilingualTitles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PublicationStaging extends Model
 {
+    use NormalizesMultilingualTitles;
+
     protected $table = 'publications_staging';
+
+    protected function multilingualTitleAttributes(): array
+    {
+        return [
+            'title' => true,
+            'associated_authors' => true,
+            'author_affiliation' => true,
+            'publisher' => true,
+        ];
+    }
 
     const STATUS_PENDING = 'pending';
     const STATUS_APPROVED = 'approved';

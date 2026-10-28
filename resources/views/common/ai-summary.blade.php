@@ -73,17 +73,17 @@
       </div>
       <div class="modal-body">
         <div class="ai-summary-options">
-          @php $user = current_user(); @endphp
+          @php
+            $aiLocales = ai_locale_options();
+            $aiDefaultLocale = resolve_ai_locale();
+          @endphp
           <div class="row align-items-end">
             <div class="col-md-4 form-group mb-0">
-              <label class="mb-1">Language</label>
-              <select class="form-control form-control-sm language">
-                <option {{ ($user && $user->langauge == 'en') ? 'selected' : '' }}>English</option>
-                <option {{ ($user && $user->langauge == 'ar') ? 'selected' : '' }}>Arabic</option>
-                <option {{ ($user && $user->langauge == 'fr') ? 'selected' : '' }}>French</option>
-                <option {{ ($user && $user->langauge == 'pt') ? 'selected' : '' }}>Portuguese</option>
-                <option {{ ($user && $user->langauge == 'es') ? 'selected' : '' }}>Spanish</option>
-                <option {{ ($user && $user->langauge == 'sw') ? 'selected' : '' }}>Swahili</option>
+              <label class="mb-1">{{ ui_t('general.language', 'Language') }}</label>
+              <select class="form-control form-control-sm language" id="ai-summary-language">
+                @foreach($aiLocales as $code => $label)
+                  <option value="{{ $code }}" {{ $code === $aiDefaultLocale ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
               </select>
             </div>
             <div class="col-md-6 form-group mb-0">

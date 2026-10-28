@@ -44,7 +44,9 @@ class AIApiController extends Controller
      */
     public function summarise(Request $request)
     {
-        return $this->aiService->summarise($request->resource_id, $request->type, $request->language, $request->prompt);
+        $language = publication_language_label(resolve_ai_locale($request->input('language')));
+
+        return $this->aiService->summarise($request->resource_id, $request->type, $language, $request->prompt);
     }
 
     /**
@@ -82,7 +84,10 @@ class AIApiController extends Controller
 
         try {
             $file = $request->file('file');
-            $language = $request->input('language', 'en');
+            $rawLanguage = $request->input('language');
+            $language = (is_string($rawLanguage) && strtolower(trim($rawLanguage)) === 'document')
+                ? 'document'
+                : resolve_ai_locale(is_string($rawLanguage) ? $rawLanguage : null);
             $tempPath = $file->storeAs('temp', uniqid().'_'.$file->getClientOriginalName(), 'public');
             $fullPath = storage_path('app/public/'.$tempPath);
 

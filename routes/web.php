@@ -524,6 +524,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web', 'admin.access
         Route::post('/ai-describe', [TagsController::class, 'aiDescribe'])->name('ai-describe');
         Route::post('/ai-apply-overviews', [TagsController::class, 'aiApplyOverviews'])->name('ai-apply-overviews');
         Route::post('/deduplicate', [TagsController::class, 'deduplicate'])->name('deduplicate');
+        Route::get('/export-translations', [TagsController::class, 'exportTranslations'])->name('export-translations');
+        Route::post('/import-translations', [TagsController::class, 'importTranslations'])->name('import-translations');
     });
 
     //licenses

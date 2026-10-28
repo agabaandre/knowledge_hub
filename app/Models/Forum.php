@@ -82,6 +82,16 @@ class Forum extends Model
         );
     }
 
+    public function getForumTitleAttribute($value)
+    {
+        return normalize_multilingual_text(is_string($value) ? $value : (string) $value);
+    }
+
+    public function setForumTitleAttribute($value): void
+    {
+        $this->attributes['forum_title'] = normalize_multilingual_text(is_string($value) ? $value : (string) $value);
+    }
+
     public function getForumImageAttribute($image){
         return storage_link('uploads/forums/'.$image);
     }

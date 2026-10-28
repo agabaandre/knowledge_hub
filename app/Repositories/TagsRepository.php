@@ -52,7 +52,7 @@ class TagsRepository{
 
     public function save(Request $request){
         $tag = new Tag();
-        $tag->tag_text = $request->name;
+        $tag->tag_text = normalize_multilingual_text((string) $request->name);
         if ($request->has('is_health_topic')) {
             $tag->is_health_topic = $request->is_health_topic ? 1 : 0;
         } else {
@@ -88,7 +88,7 @@ class TagsRepository{
             return null; // Or handle the case where tag is not found
         }
 
-        $tag->tag_text = $request->tag_text;
+        $tag->tag_text = normalize_multilingual_text((string) $request->tag_text);
         if ($request->has('is_health_topic')) {
             $tag->is_health_topic = $request->is_health_topic ? 1 : 0;
         }
@@ -96,7 +96,7 @@ class TagsRepository{
             $tag->is_health_emergency = $request->is_health_emergency ? 1 : 0;
         }
         if ($request->has('overview')) {
-            $tag->overview = $request->overview;
+            $tag->overview = normalize_multilingual_text((string) $request->overview, false);
         }
         if (Schema::hasColumn('tags', 'slug')) {
             SeoSlugSync::apply($tag, 'tags');
@@ -489,5 +489,218 @@ class TagsRepository{
         }
 
         return $out;
+    }
+
+    /**
+     * Import translated health topics / tags from CSV or XLSX rows.
+     * Expected headers (flexible): id, tag_text, tag_text_translated, overview, overview_translated,
+     * is_health_topic, is_health_emergency.
+     *
+     * @param  list<array<int|string, mixed>>  $rows
+     * @return array{updated: int, created: int, skipped: int, errors: list<string>}
+     */
+    public function importTranslationRows(array $rows): array
+    {
+        $updated = 0;
+        $created = 0;
+        $skipped = 0;
+        $errors = [];
+
+        if ($rows === []) {
+            return compact('updated', 'created', 'skipped', 'errors');
+        }
+
+        $header = array_shift($rows);
+        if (! is_array($header)) {
+            return [
+                'updated' => 0,
+                'created' => 0,
+                'skipped' => 0,
+                'errors' => ['Missing header row.'],
+            ];
+        }
+
+        $map = $this->normalizeTranslationHeaderMap($header);
+        if (! isset($map['tag_text']) && ! isset($map['tag_text_translated']) && ! isset($map['id'])) {
+            return [
+                'updated' => 0,
+                'created' => 0,
+                'skipped' => 0,
+                'errors' => ['Header must include id and/or tag_text / tag_text_translated.'],
+            ];
+        }
+
+        foreach ($rows as $index => $row) {
+            if (! is_array($row)) {
+                $skipped++;
+                continue;
+            }
+
+            $line = (int) $index + 2; // 1-based + header
+            $id = isset($map['id']) ? (int) trim((string) ($row[$map['id']] ?? '')) : 0;
+
+            $sourceName = isset($map['tag_text'])
+                ? normalize_multilingual_text((string) ($row[$map['tag_text']] ?? ''))
+                : '';
+            $translatedName = isset($map['tag_text_translated'])
+                ? normalize_multilingual_text((string) ($row[$map['tag_text_translated']] ?? ''))
+                : '';
+            $tagText = $translatedName !== '' ? $translatedName : $sourceName;
+
+            $sourceOverview = isset($map['overview'])
+                ? normalize_multilingual_text((string) ($row[$map['overview']] ?? ''), false)
+                : '';
+            $translatedOverview = isset($map['overview_translated'])
+                ? normalize_multilingual_text((string) ($row[$map['overview_translated']] ?? ''), false)
+                : '';
+            $overview = $translatedOverview !== '' ? $translatedOverview : $sourceOverview;
+
+            $isHealthTopic = isset($map['is_health_topic'])
+                ? $this->parseBoolish($row[$map['is_health_topic']] ?? 1, 1)
+                : 1;
+            $isHealthEmergency = isset($map['is_health_emergency'])
+                ? $this->parseBoolish($row[$map['is_health_emergency']] ?? 0, 0)
+                : 0;
+
+            if ($tagText === '' && $id <= 0) {
+                $skipped++;
+                continue;
+            }
+
+            try {
+                if ($id > 0) {
+                    $tag = Tag::find($id);
+                    if (! $tag) {
+                        $errors[] = "Line {$line}: tag id {$id} not found.";
+                        $skipped++;
+                        continue;
+                    }
+                    if ($tagText !== '') {
+                        $tag->tag_text = $tagText;
+                    }
+                    if ($translatedOverview !== '' || (isset($map['overview']) && array_key_exists($map['overview'], $row))) {
+                        // Only overwrite overview when a translated or source overview cell is present.
+                        if ($translatedOverview !== '' || $sourceOverview !== '' || $overview === '') {
+                            $tag->overview = $overview;
+                        }
+                    }
+                    if (isset($map['is_health_topic'])) {
+                        $tag->is_health_topic = $isHealthTopic;
+                    }
+                    if (isset($map['is_health_emergency'])) {
+                        $tag->is_health_emergency = $isHealthEmergency;
+                    }
+                    if (Schema::hasColumn('tags', 'slug')) {
+                        SeoSlugSync::apply($tag, 'tags');
+                    }
+                    $tag->save();
+                    $updated++;
+                    continue;
+                }
+
+                // Create new topic when no id is provided.
+                $normalized = HealthTopicSourceCatalog::normalizeTopicName($tagText);
+                if ($normalized === '') {
+                    $skipped++;
+                    continue;
+                }
+                $key = HealthTopicSourceCatalog::normalizeTagKey($normalized);
+                $exists = false;
+                foreach (Tag::query()->pluck('tag_text') as $existingName) {
+                    if (HealthTopicSourceCatalog::normalizeTagKey((string) $existingName) === $key) {
+                        $exists = true;
+                        break;
+                    }
+                }
+                if ($exists) {
+                    $skipped++;
+                    continue;
+                }
+
+                $tag = new Tag();
+                $tag->tag_text = $normalized;
+                $tag->overview = $overview;
+                $tag->is_health_topic = $isHealthTopic;
+                $tag->is_health_emergency = $isHealthEmergency;
+                if (Schema::hasColumn('tags', 'slug')) {
+                    SeoSlugSync::apply($tag, 'tags');
+                }
+                $tag->save();
+                $created++;
+            } catch (\Throwable $e) {
+                $errors[] = "Line {$line}: ".$e->getMessage();
+                $skipped++;
+            }
+        }
+
+        if ($updated > 0 || $created > 0) {
+            TagsViewComposer::forgetTagListCache();
+        }
+
+        return compact('updated', 'created', 'skipped', 'errors');
+    }
+
+    /**
+     * @param  array<int|string, mixed>  $header
+     * @return array<string, int|string>
+     */
+    private function normalizeTranslationHeaderMap(array $header): array
+    {
+        $aliases = [
+            'id' => ['id', 'tag_id', 'tag id'],
+            'tag_text' => ['tag_text', 'tag', 'name', 'topic', 'tag text', 'topic_name', 'topic name'],
+            'tag_text_translated' => [
+                'tag_text_translated', 'tag_translated', 'translated_tag', 'translated name',
+                'name_translated', 'topic_translated', 'translation', 'fr', 'french',
+            ],
+            'overview' => ['overview', 'description', 'summary'],
+            'overview_translated' => [
+                'overview_translated', 'description_translated', 'translated_overview',
+                'translated description', 'overview_fr', 'description_fr',
+            ],
+            'is_health_topic' => ['is_health_topic', 'health_topic', 'health topic'],
+            'is_health_emergency' => ['is_health_emergency', 'health_emergency', 'health emergency'],
+        ];
+
+        $map = [];
+        foreach ($header as $index => $label) {
+            $key = strtolower(trim(preg_replace('/\s+/u', ' ', (string) $label)));
+            $key = str_replace(['-', ' '], ['_', '_'], $key);
+            $key = preg_replace('/_+/', '_', $key);
+            foreach ($aliases as $canonical => $names) {
+                $normalizedNames = array_map(static function ($n) {
+                    $n = strtolower(trim(preg_replace('/\s+/u', ' ', (string) $n)));
+
+                    return str_replace(['-', ' '], ['_', '_'], $n);
+                }, $names);
+                if (in_array($key, $normalizedNames, true) && ! isset($map[$canonical])) {
+                    $map[$canonical] = $index;
+                }
+            }
+        }
+
+        return $map;
+    }
+
+    /**
+     * @param  mixed  $value
+     */
+    private function parseBoolish($value, int $default = 0): int
+    {
+        if ($value === null || $value === '') {
+            return $default;
+        }
+        if (is_bool($value)) {
+            return $value ? 1 : 0;
+        }
+        $v = strtolower(trim((string) $value));
+        if (in_array($v, ['1', 'true', 'yes', 'y', 'oui'], true)) {
+            return 1;
+        }
+        if (in_array($v, ['0', 'false', 'no', 'n', 'non'], true)) {
+            return 0;
+        }
+
+        return is_numeric($v) ? ((int) $v ? 1 : 0) : $default;
     }
 }

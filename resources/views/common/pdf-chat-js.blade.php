@@ -888,12 +888,15 @@
     var contentEl = appendMessage('assistant', '', true);
 
     var url = '{{ url("ai/pdf-chat/message") }}';
+    var langEl = document.getElementById('pdf-chat-language');
+    var language = langEl && langEl.value ? langEl.value : '';
     var body = chatType === 'forums_index'
       ? {
           assistant_mode: 'forums_index',
           forum_ids: forumsIndexForumIds,
           session_id: sessionId,
           message: text,
+          language: language,
           stream: true
         }
       : (chatType === 'forum'
@@ -901,6 +904,7 @@
             forum_id: forumId,
             session_id: sessionId,
             message: text,
+            language: language,
             stream: true
           }
         : {
@@ -910,6 +914,7 @@
             pdf_source_keys: selectedPdfSourceKeys.length ? selectedPdfSourceKeys : defaultSelectedPdfSourceKeys(),
             assistant_mode: pdfChatAssistantMode || 'auto',
             message: text,
+            language: language,
             stream: true
           });
 

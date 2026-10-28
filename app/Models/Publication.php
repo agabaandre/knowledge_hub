@@ -166,12 +166,12 @@ class Publication extends Model
     }
 
     public function getLabelAttribute(){
-        return substr(cleanUTF8($this->title),0,100);
+        return mb_substr(normalize_multilingual_text((string) ($this->attributes['title'] ?? $this->title ?? '')), 0, 100);
     }
 
 
     public function getValueAttribute(){
-        return substr(cleanUTF8($this->title),0,100);
+        return mb_substr(normalize_multilingual_text((string) ($this->attributes['title'] ?? $this->title ?? '')), 0, 100);
     }
 
     public function comments(){
@@ -403,15 +403,16 @@ class Publication extends Model
         ];
     }
 
-    // Ensure the content is UTF-8 encoded
-    public function getDescriptionAttribute($value)
-    {
-        return  $value;
-    }
-
+    // Plain titles: decode entities (d&#39; → d') and keep UTF-8 accents. Rich description
+    // is handled by sanitize_rich_text_for_display() / forum_body_for_wysiwyg_editor().
     public function getTitleAttribute($value)
     {
-        return cleanUTF8($value);
+        return normalize_multilingual_text(is_string($value) ? $value : (string) $value);
+    }
+
+    public function setTitleAttribute($value): void
+    {
+        $this->attributes['title'] = normalize_multilingual_text(is_string($value) ? $value : (string) $value);
     }
 
     public function countries()

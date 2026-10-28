@@ -138,8 +138,24 @@ if(!function_exists('clean_unicode')){
 	 * This includes zero-width spaces, directional marks, and other invisible characters
 	 */
 	function clean_unicode($text){
-		if (empty($text)) {
+		if ($text === null || $text === '') {
 			return $text;
+		}
+
+		$text = (string) $text;
+
+		// Decode HTML entities so French/other text stores real characters (d&#39; → d', &eacute; → é).
+		// Safe for rich HTML too: tags become real markup before sanitizers run.
+		for ($i = 0; $i < 3; $i++) {
+			$prev = $text;
+			$text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+			if ($text === $prev) {
+				break;
+			}
+		}
+
+		if (! mb_check_encoding($text, 'UTF-8')) {
+			$text = mb_convert_encoding($text, 'UTF-8', 'UTF-8');
 		}
 		
 		// Remove zero-width characters
@@ -152,7 +168,8 @@ if(!function_exists('clean_unicode')){
 		$text = preg_replace('/[\x{200C}\x{200D}]/u', '', $text);
 		
 		// Remove other invisible Unicode characters (control characters)
-		$text = preg_replace('/[\x{0000}-\x{001F}\x{007F}-\x{009F}]/u', '', $text);
+		// Keep TAB (09) and LF/CR (0A/0D) so multilingual plain text / preformatted content survives.
+		$text = preg_replace('/[\x{0000}-\x{0008}\x{000B}\x{000C}\x{000E}-\x{001F}\x{007F}-\x{009F}]/u', '', $text);
 		
 		// Remove other problematic Unicode ranges
 		$text = preg_replace('/[\x{2060}-\x{206F}]/u', '', $text); // Word joiner, invisible plus, etc.
@@ -168,19 +185,25 @@ if(!function_exists('clean_unicode')){
 
 if (!function_exists('normalize_title_case_local')) {
     /**
-     * Deterministic title-case formatter with common minor-word rules.
+     * Deterministic title-case formatter with EN + FR minor-word rules.
+     * Preserves UTF-8 accents and French elisions (d'Ivoire, l'Afrique).
      */
     function normalize_title_case_local($title) {
-        $title = clean_unicode(strip_tags((string) $title));
+        $title = normalize_multilingual_text(strip_tags((string) $title));
         if ($title === '') {
             return $title;
         }
 
         $title = preg_replace('/\s+/u', ' ', trim($title));
         $minorWords = [
+            // English
             'a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'in', 'into',
             'nor', 'of', 'on', 'onto', 'or', 'per', 'so', 'the', 'to', 'up', 'via',
             'with', 'yet', 'vs', 'v',
+            // French
+            'à', 'au', 'aux', 'avec', 'chez', 'dans', 'de', 'des', 'du', 'en', 'et',
+            'la', 'le', 'les', 'ou', 'par', 'pour', 'sans', 'sous', 'sur', 'un', 'une',
+            "d'", "l'", "n'", "m'", "t'", "s'", "c'", "j'", "qu'",
         ];
         $minorMap = array_fill_keys($minorWords, true);
 
@@ -199,8 +222,14 @@ if (!function_exists('normalize_title_case_local')) {
         $lastWordIndex = $wordTokenIndexes[count($wordTokenIndexes) - 1];
 
         foreach ($wordTokenIndexes as $tokenIndex) {
-            $isEdgeWord = ($tokenIndex === $firstWordIndex || $tokenIndex === $lastWordIndex);
-            $tokens[$tokenIndex] = _normalize_title_case_word($tokens[$tokenIndex], $minorMap, $isEdgeWord);
+            $isFirstWord = ($tokenIndex === $firstWordIndex);
+            $isLastWord = ($tokenIndex === $lastWordIndex);
+            $tokens[$tokenIndex] = _normalize_title_case_word(
+                $tokens[$tokenIndex],
+                $minorMap,
+                $isFirstWord || $isLastWord,
+                $isFirstWord
+            );
         }
 
         return implode('', $tokens);
@@ -208,12 +237,13 @@ if (!function_exists('normalize_title_case_local')) {
 }
 
 if (!function_exists('_normalize_title_case_word')) {
-    function _normalize_title_case_word($word, $minorMap, $isEdgeWord) {
+    function _normalize_title_case_word($word, $minorMap, $isEdgeWord, $isFirstWord = false) {
         if ($word === '') {
             return $word;
         }
 
-        if (!preg_match('/^([("“\'\[]*)(.*?)([)\]"”\',.!?:;]*)$/u', $word, $m)) {
+        // Keep curly/straight apostrophes inside the core (d'Ivoire); only strip edge quotes/brackets.
+        if (!preg_match('/^([("“\[]*)(.*?)([)\]"”.!?:;]*)$/u', $word, $m)) {
             return $word;
         }
 
@@ -225,9 +255,12 @@ if (!function_exists('_normalize_title_case_word')) {
             return $word;
         }
 
-        $parts = preg_split('/([\-\/])/u', $core, -1, PREG_SPLIT_DELIM_CAPTURE);
-        foreach ($parts as $i => $part) {
-            if ($part === '-' || $part === '/') {
+        // Split on hyphen/slash and on apostrophe so "d'Ivoire" → d' + Ivoire.
+        $parts = preg_split("/([\-\/’'])/u", $core, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $partCount = count($parts);
+        for ($i = 0; $i < $partCount; $i++) {
+            $part = $parts[$i];
+            if ($part === '-' || $part === '/' || $part === "'" || $part === '’') {
                 continue;
             }
 
@@ -246,24 +279,38 @@ if (!function_exists('_normalize_title_case_word')) {
                 continue;
             }
 
-            if (!$isEdgeWord && isset($minorMap[$lower])) {
+            // French elision particle before apostrophe: d' / l' / qu' …
+            // Capitalize only when the elision starts the title (L'Épidémiologie); otherwise d'/l'.
+            $next = $parts[$i + 1] ?? null;
+            $isElisionParticle = ($next === "'" || $next === '’')
+                && (isset($minorMap[$lower."'"]) || isset($minorMap[$lower.'’']) || mb_strlen($lower) <= 2);
+
+            if ($isElisionParticle) {
+                $parts[$i] = $isFirstWord
+                    ? mb_strtoupper(mb_substr($lower, 0, 1)).mb_substr($lower, 1)
+                    : $lower;
+                continue;
+            }
+
+            if (! $isEdgeWord && isset($minorMap[$lower])) {
                 $parts[$i] = $lower;
                 continue;
             }
 
-            $parts[$i] = mb_strtoupper(mb_substr($lower, 0, 1)) . mb_substr($lower, 1);
+            $parts[$i] = mb_strtoupper(mb_substr($lower, 0, 1)).mb_substr($lower, 1);
         }
 
-        return $prefix . implode('', $parts) . $suffix;
+        return $prefix.implode('', $parts).$suffix;
     }
 }
 
 if (!function_exists('format_title_with_ai_fallback')) {
     /**
      * Try AI title normalization first (when enabled), fallback to local deterministic formatter.
+     * Always decodes HTML entities and preserves multilingual characters first.
      */
     function format_title_with_ai_fallback($title) {
-        $source = clean_unicode(strip_tags((string) $title));
+        $source = normalize_multilingual_text(strip_tags((string) $title));
         if ($source === '') {
             return $source;
         }
@@ -1359,9 +1406,6 @@ function clear_cache(){
 }
 
 /**
- * Two-letter initials for avatar fallback on community cards, etc.
- */
-/**
  * Resolve a human-readable label for a publication language locale code.
  */
 function publication_language_label(?string $localeCode): string
@@ -1377,21 +1421,133 @@ function publication_language_label(?string $localeCode): string
 }
 
 /**
- * Instruction for AI file summary based on locale code (en, fr, document, etc.).
+ * Map common AI language form labels (English, French, …) to locale codes.
+ */
+function ai_language_name_to_locale(?string $nameOrCode): ?string
+{
+    $raw = strtolower(trim((string) $nameOrCode));
+    if ($raw === '') {
+        return null;
+    }
+
+    $normalized = \App\Models\SiteLanguage::normalizeLocaleCode($raw);
+    if ($normalized !== null) {
+        return $normalized;
+    }
+
+    static $aliases = [
+        'english' => 'en',
+        'french' => 'fr',
+        'français' => 'fr',
+        'francais' => 'fr',
+        'arabic' => 'ar',
+        'العربية' => 'ar',
+        'portuguese' => 'pt',
+        'português' => 'pt',
+        'portugues' => 'pt',
+        'spanish' => 'es',
+        'español' => 'es',
+        'espanol' => 'es',
+        'swahili' => 'sw',
+        'kiswahili' => 'sw',
+    ];
+
+    return $aliases[$raw] ?? null;
+}
+
+/**
+ * AI response locale priority:
+ * 1) Explicit modal/form choice (Khub AI language select)
+ * 2) Authenticated user profile language (users.langauge)
+ * 3) Configure → default site language
+ *
+ * @param  string|null  $explicit  Locale code or language name from the AI modal
+ */
+function resolve_ai_locale(?string $explicit = null): string
+{
+    $fromForm = ai_language_name_to_locale($explicit);
+    if ($fromForm !== null) {
+        return $fromForm;
+    }
+
+    try {
+        $user = auth()->user();
+        $profile = \App\Models\SiteLanguage::normalizeLocaleCode(
+            is_object($user) ? ($user->langauge ?? null) : null
+        );
+        if ($profile !== null) {
+            $active = \App\Models\SiteLanguage::activeLocaleCodes();
+            if ($active === [] || in_array($profile, $active, true)) {
+                return $profile;
+            }
+        }
+    } catch (\Throwable $e) {
+        // ignore
+    }
+
+    return \App\Models\SiteLanguage::systemDefaultLocale();
+}
+
+/**
+ * Options for Khub AI language selects: [locale => label], active site languages first.
+ *
+ * @return array<string, string>
+ */
+function ai_locale_options(): array
+{
+    $map = \App\Models\SiteLanguage::selectorMap();
+    $codes = \App\Models\SiteLanguage::activeLocaleCodes();
+    if ($codes === []) {
+        $codes = array_keys($map);
+    }
+
+    $out = [];
+    foreach ($codes as $code) {
+        $out[$code] = $map[$code]['name'] ?? strtoupper($code);
+    }
+
+    // Ensure common AI languages exist even if inactive in Configure.
+    foreach (['en' => 'English', 'fr' => 'French', 'ar' => 'Arabic', 'pt' => 'Portuguese', 'es' => 'Spanish', 'sw' => 'Swahili'] as $code => $label) {
+        if (! isset($out[$code])) {
+            $out[$code] = $map[$code]['name'] ?? $label;
+        }
+    }
+
+    return $out;
+}
+
+/**
+ * Instruction for AI file summary / chat based on locale code (en, fr, document, etc.).
+ * Pass "document" to keep the source document language; empty uses profile → Configure default.
  */
 function publication_ai_summary_language_instruction(?string $localeCode): string
 {
-    $localeCode = strtolower(trim((string) $localeCode));
+    $raw = strtolower(trim((string) $localeCode));
 
-    if ($localeCode === '' || $localeCode === 'document') {
+    if ($raw === 'document') {
         return 'Write the summary in the same language as the source document.';
     }
 
-    if ($localeCode === 'en' || $localeCode === 'english') {
+    $locale = resolve_ai_locale($raw === '' ? null : $localeCode);
+
+    if ($locale === 'en') {
         return 'Write the summary in English.';
     }
 
-    return 'Write the summary in ' . publication_language_label($localeCode) . '.';
+    return 'Write the summary in '.publication_language_label($locale).'.';
+}
+
+/**
+ * System-prompt line forcing Khub AI chat replies into the resolved locale.
+ */
+function ai_chat_language_instruction(?string $explicit = null): string
+{
+    $locale = resolve_ai_locale($explicit);
+    $label = publication_language_label($locale);
+
+    return 'Always reply in '.$label.' (locale: '.$locale.'). '
+        .'If the user writes in another language, still answer in '.$label
+        .' unless they explicitly ask to switch language.';
 }
 
 /**
@@ -2205,6 +2361,51 @@ function cleanUTF8($value){
     $value = preg_replace('/[\x{0000}-\x{0008}\x{000B}\x{000C}\x{000E}-\x{001F}\x{007F}]/u', '', $value);
 
     return trim($value);
+}
+
+if (! function_exists('normalize_multilingual_text')) {
+    /**
+     * Normalize plain text for FR/AR/etc.: decode HTML entities (d&#39; → d'),
+     * keep real apostrophes/accents, and ensure UTF-8. Do not re-encode for JSON/HTML here —
+     * Blade {{ }}, e(), and @json() handle escaping at the view boundary.
+     */
+    function normalize_multilingual_text(?string $value, bool $trim = true): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+
+        $decoded = (string) $value;
+        for ($i = 0; $i < 3; $i++) {
+            $prev = $decoded;
+            $decoded = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            if ($decoded === $prev) {
+                break;
+            }
+        }
+
+        $decoded = cleanUTF8($decoded);
+        if (function_exists('fix_text_encoding')) {
+            $decoded = fix_text_encoding($decoded);
+        }
+
+        return $trim ? trim($decoded) : $decoded;
+    }
+}
+
+if (! function_exists('normalize_multiline_display_text')) {
+    /**
+     * Like normalize_multilingual_text, but turns newlines into <br> for legacy HTML display fields.
+     */
+    function normalize_multiline_display_text(?string $value): string
+    {
+        $text = normalize_multilingual_text($value, false);
+        if ($text === '') {
+            return '';
+        }
+
+        return str_replace(["\r\n", "\r", "\n"], '<br>', $text);
+    }
 }
 
 

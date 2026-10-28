@@ -19,10 +19,7 @@ class Answer extends Model
 
     public function getAnswerExplanationAttribute($value)
     {
-        $escapers = array("\\", "/", "\"", "\n", "\r", "\t", "\x08", "\x0c","'",'"');
-        $replacements = array("", "", "", "<br>", "<br>", "\\t", "\\f", "\\b","&#39;","&#34;");
-        $result = str_replace($escapers, $replacements, $value);
-        return $result;
+        return normalize_multiline_display_text(is_string($value) ? $value : (string) $value);
     }
 
 }

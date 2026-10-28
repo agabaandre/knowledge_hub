@@ -41,8 +41,16 @@
                         <div class="col-md-12 text-right">
                             <button type="submit" id="filterButton" class="btn btn-primary btn-sm">{{ ui_t('general.filter_data', 'Filter Data') }}</button>
                             <button type="button" id="reset" class="btn btn-secondary btn-sm">{{ ui_t('general.reset', 'Reset') }}</button>
-                            <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
-
+                            <button type="button" id="exportButton" class="btn btn-success btn-sm">{{ ui_t('general.export', 'Export') }} table</button>
+                            <a href="{{ route('tags.export-translations', ['format' => 'xlsx']) }}" class="btn btn-outline-success btn-sm">
+                                <i class="fa fa-file-excel"></i> Export for translation (XLSX)
+                            </a>
+                            <a href="{{ route('tags.export-translations', ['format' => 'csv']) }}" class="btn btn-outline-secondary btn-sm">
+                                Export for translation (CSV)
+                            </a>
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#import-translations-modal">
+                                <i class="fa fa-upload"></i> Import translations
+                            </button>
                         </div>
 
 
@@ -131,6 +139,7 @@
         @include('admin.tags.partials.create-modal')
         @include('admin.tags.partials.edit-modal')
         @include('admin.tags.partials.delete-modal')
+        @include('admin.tags.partials.import-translations-modal')
         @include('partials.general.summernote')
 
 

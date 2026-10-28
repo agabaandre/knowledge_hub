@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\TagsTranslationExport;
 use App\Services\ChatGPTService;
 use App\Services\HealthTopicSourceFetcher;
 use App\Services\WhoFactsheetFetcher;
@@ -9,6 +10,8 @@ use App\Support\HealthTopicSourceCatalog;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\TagsRepository;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class TagsController extends Controller
 {
@@ -271,5 +274,61 @@ class TagsController extends Controller
             'message' => "Updated {$result['updated']} tag description(s). Skipped {$result['skipped']}.",
             'data' => $result,
         ]);
+    }
+
+    /**
+     * Export tags/health topics for offline translation (CSV or XLSX).
+     */
+    public function exportTranslations(Request $request): BinaryFileResponse
+    {
+        $format = strtolower((string) $request->query('format', 'xlsx'));
+        if (! in_array($format, ['xlsx', 'csv', 'xls'], true)) {
+            $format = 'xlsx';
+        }
+
+        $filename = 'health-topics-translation-'.date('Y-m-d').'.'.$format;
+
+        return Excel::download(new TagsTranslationExport(), $filename);
+    }
+
+    /**
+     * Import translated topics from CSV / XLSX (fill tag_text_translated / overview_translated, or edit in place).
+     */
+    public function importTranslations(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv,txt|max:10240',
+        ]);
+
+        try {
+            $sheets = Excel::toArray([], $request->file('file'));
+            $rows = $sheets[0] ?? [];
+            $result = $this->tagsRepo->importTranslationRows(is_array($rows) ? $rows : []);
+
+            $message = "Updated {$result['updated']}, created {$result['created']}, skipped {$result['skipped']}.";
+            if ($result['errors'] !== []) {
+                $message .= ' Issues: '.implode(' ', array_slice($result['errors'], 0, 5));
+            }
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => ($result['updated'] + $result['created']) > 0 ? 'success' : 'failure',
+                    'message' => $message,
+                    'data' => $result,
+                ]);
+            }
+
+            return back()
+                ->with('message', $message)
+                ->with('status', ($result['updated'] + $result['created']) > 0 ? 'success' : 'failure');
+        } catch (\Throwable $e) {
+            report($e);
+            $msg = 'Import failed: '.$e->getMessage();
+            if ($request->ajax()) {
+                return response()->json(['status' => 'failure', 'message' => $msg], 422);
+            }
+
+            return back()->with('message', $msg)->with('status', 'failure');
+        }
     }
 }

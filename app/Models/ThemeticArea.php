@@ -16,9 +16,31 @@ class ThemeticArea extends Model
 
     public function getDescriptionAttribute($value)
     {
-        $escapers = array("\\", "/", "\"", "\n", "\r", "\t", "\x08", "\x0c","'",'"');
-        $replacements = array("", "", "", " ", " ", "\\t", "\\f", "\\b","&#39;","&#34;");
-        $result = str_replace($escapers, $replacements, $value);
-        return $result;
+        return normalize_multilingual_text(is_string($value) ? $value : (string) $value);
+    }
+
+    public function setDescriptionAttribute($value): void
+    {
+        $this->attributes['description'] = normalize_multilingual_text(is_string($value) ? $value : (string) $value);
+    }
+
+    public function getDetailedDescriptionAttribute($value)
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        return normalize_multilingual_text(is_string($value) ? $value : (string) $value);
+    }
+
+    public function setDetailedDescriptionAttribute($value): void
+    {
+        if ($value === null || $value === '') {
+            $this->attributes['detailed_description'] = null;
+
+            return;
+        }
+
+        $this->attributes['detailed_description'] = normalize_multilingual_text(is_string($value) ? $value : (string) $value);
     }
 }

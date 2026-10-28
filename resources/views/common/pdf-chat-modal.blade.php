@@ -199,6 +199,16 @@
   flex-wrap: wrap;
   margin-left: auto;
 }
+#pdf-chat-modal .khub-ai-lang-select {
+  max-width: 9.5rem;
+  height: calc(1.5em + 0.5rem + 2px);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8125rem;
+  border-radius: 0.35rem;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  background: #fff;
+}
 #pdf-chat-modal .khub-ai-toolbar .btn {
   font-size: 0.78rem;
   padding: 0.38rem 0.7rem;
@@ -570,6 +580,16 @@
               </div>
             </div>
             <div class="khub-ai-toolbar">
+              @php
+                $pdfChatLocales = ai_locale_options();
+                $pdfChatDefaultLocale = resolve_ai_locale();
+              @endphp
+              <label class="sr-only" for="pdf-chat-language">{{ ui_t('general.language', 'Language') }}</label>
+              <select id="pdf-chat-language" class="form-control form-control-sm khub-ai-lang-select" aria-label="{{ ui_t('general.language', 'Language') }}" title="{{ ui_t('general.language', 'Language') }}">
+                @foreach($pdfChatLocales as $code => $label)
+                  <option value="{{ $code }}" {{ $code === $pdfChatDefaultLocale ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+              </select>
               <button type="button" class="btn btn-outline-secondary btn-sm" id="pdf-chat-export-all-pdf" title="Export full conversation as PDF">
                 <i class="fa fa-file-pdf"></i> Export PDF
               </button>

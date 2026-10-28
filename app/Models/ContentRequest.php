@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\NormalizesMultilingualTitles;
 use App\Services\ContentRequestReferralForumService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,7 @@ use Illuminate\Support\Collection;
 class ContentRequest extends Model
 {
     use HasFactory;
+    use NormalizesMultilingualTitles;
 
     protected $fillable = [
         'subject',
@@ -31,6 +33,11 @@ class ContentRequest extends Model
         'requestor_track_token',
         'referral_forum_id',
     ];
+
+    protected function multilingualTitleAttributes(): array
+    {
+        return ['subject' => true];
+    }
 
     protected $casts = [
         'processed_at' => 'datetime',

@@ -484,8 +484,8 @@ class ChatGPTService implements AIModel{
         }
 
         $merged = [];
-        // Smaller chunks + same transport as forum summaries reduces truncation / invalid JSON
-        $chunks = array_chunk($englishKeyed, 12, true);
+        // Small chunks reduce truncation; short keys like "home" are often dropped by models in large JSON.
+        $chunks = array_chunk($englishKeyed, 8, true);
 
         foreach ($chunks as $index => $chunk) {
             $part = $this->translateUiStringChunk($targetLanguageLabel, $chunk);
@@ -505,12 +505,15 @@ class ChatGPTService implements AIModel{
                 }
             }
 
-            foreach (array_keys($chunk) as $key) {
-                if (! array_key_exists($key, $part)) {
-                    return [
-                        'ok' => false,
-                        'error' => 'OpenAI did not return usable translations for batch '.((int) $index + 1).' (missing key: '.$key.'). Check model output length (OPENAI_MODEL) and logs.',
-                    ];
+            // Last resort: keep English so Language Management can still review/edit instead of failing the whole batch.
+            foreach ($chunk as $key => $englishSource) {
+                if (! array_key_exists($key, $part) || trim((string) $part[$key]) === '') {
+                    Log::warning('translateUiStringBatch: falling back to English for key', [
+                        'batch' => (int) $index + 1,
+                        'key' => $key,
+                        'target' => $targetLanguageLabel,
+                    ]);
+                    $part[$key] = (string) $englishSource;
                 }
             }
 
@@ -557,16 +560,17 @@ class ChatGPTService implements AIModel{
             ."\n\nRequired keys (exact spelling, all of them): ".$requiredKeys
             ."\n\n".json_encode($chunk, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
-        $result = app(AiCompletionService::class)->completeForFeature('translation', [
-            ['role' => 'user', 'content' => $guide],
+        $result = app(AiCompletionService::class)->completeForFeatureWithFallback('translation', [
+            ['role' => 'system', 'content' => $guide],
             ['role' => 'user', 'content' => $userTask],
-        ], 4096);
+        ], 4096, null, true);
 
         $content = ($result['ok'] ?? false) ? ($result['content'] ?? '') : null;
         if ($content === null || $content === '') {
             Log::warning('translateUiStringChunk: empty OpenAI content', [
                 'retry' => $retryPass,
                 'keys' => array_keys($chunk),
+                'error' => $result['error'] ?? null,
             ]);
 
             return [];
@@ -595,15 +599,20 @@ class ChatGPTService implements AIModel{
             .'Target language: '.$targetLanguageLabel.'. '
             .'Output ONLY the translated label text on one line. No quotes, no JSON, no key name, no explanation.';
 
-        $userTask = 'Context key (do not translate this word, it is only context): '.$key."\n"
-            .'English label to translate: '.$englishSource;
+        $userTask = 'Translate this English UI label into '.$targetLanguageLabel.".\n"
+            .'Label: '.$englishSource;
 
-        $result = app(AiCompletionService::class)->completeForFeature('translation', [
-            ['role' => 'user', 'content' => $guide],
+        $result = app(AiCompletionService::class)->completeForFeatureWithFallback('translation', [
+            ['role' => 'system', 'content' => $guide],
             ['role' => 'user', 'content' => $userTask],
         ], 256);
 
         if (! ($result['ok'] ?? false)) {
+            Log::warning('translateSingleUiLabel failed', [
+                'key' => $key,
+                'error' => $result['error'] ?? null,
+            ]);
+
             return null;
         }
 
@@ -615,6 +624,21 @@ class ChatGPTService implements AIModel{
         $parts = preg_split("/\R/u", trim($content), 2);
         $line = isset($parts[0]) ? trim($parts[0]) : '';
         $line = trim($line, " \t\"'");
+        // Strip accidental "key: value" / JSON wrappers from single-label replies.
+        if (preg_match('/^'.preg_quote($key, '/').'\s*[:=]\s*(.+)$/iu', $line, $m)) {
+            $line = trim($m[1], " \t\"'");
+        }
+        if ($line !== '' && ($line[0] ?? '') === '{') {
+            $decoded = json_decode($line, true);
+            if (is_array($decoded)) {
+                foreach ([$key, 'translation', 'text', 'value'] as $candidate) {
+                    if (isset($decoded[$candidate]) && is_string($decoded[$candidate]) && trim($decoded[$candidate]) !== '') {
+                        $line = trim($decoded[$candidate]);
+                        break;
+                    }
+                }
+            }
+        }
 
         return $line !== '' ? $line : null;
     }
@@ -661,7 +685,9 @@ class ChatGPTService implements AIModel{
      */
     private function parseTranslationMap(string $raw, array $expectedKeys): array
     {
-        $text = function_exists('clean_unicode') ? clean_unicode($raw) : $raw;
+        // Do NOT run clean_unicode() here — it strips TAB/LF (C0 controls), which destroys
+        // KEY<TAB>value replies and pretty-printed JSON, often dropping short keys like "home".
+        $text = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}\x{200E}\x{200F}\x{2060}-\x{206F}\x{202A}-\x{202E}\x{2066}-\x{2069}\x{00AD}]/u', '', $raw);
         $text = preg_replace('/```json\s*/i', '', (string) $text);
         $text = preg_replace('/```\s*/', '', $text);
         $text = trim($text);
@@ -703,21 +729,28 @@ class ChatGPTService implements AIModel{
             }
         }
 
-        // TAB lines: KEY<TAB>value (case-insensitive key match)
+        // Line formats: KEY<TAB>value or KEY: value / KEY = value (case-insensitive key match)
         $lowerToCanonical = $this->expectedKeyLowerMap($expectedKeys);
         foreach (preg_split("/\R/u", $text) as $line) {
             $line = trim($line);
             if ($line === '' || (strpos($line, '#') === 0)) {
                 continue;
             }
-            if (strpos($line, "\t") === false) {
+            $k = null;
+            $v = null;
+            if (strpos($line, "\t") !== false) {
+                [$k, $v] = explode("\t", $line, 2);
+            } elseif (preg_match('/^([A-Za-z0-9_.-]+)\s*[:=]\s*(.+)$/u', $line, $m)) {
+                $k = $m[1];
+                $v = $m[2];
+            }
+            if ($k === null) {
                 continue;
             }
-            [$k, $v] = explode("\t", $line, 2);
-            $k = trim($k);
+            $k = trim($k, " \t\"'");
             $canonical = $lowerToCanonical[strtolower($k)] ?? null;
             if ($canonical !== null) {
-                $merged[$canonical] = trim($v);
+                $merged[$canonical] = trim($v, " \t\"'");
             }
         }
 

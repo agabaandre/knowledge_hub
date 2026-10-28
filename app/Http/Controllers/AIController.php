@@ -17,7 +17,14 @@ class AIController extends Controller
 
     public function summarise(Request $request)
     {
-        return $this->aiService->summarise($request->resource_id, $request->type, $request->language, $request->input('prompt'));
+        $language = resolve_ai_locale($request->input('language'));
+
+        return $this->aiService->summarise(
+            $request->resource_id,
+            $request->type,
+            publication_language_label($language),
+            $request->input('prompt')
+        );
     }
 
     /**
@@ -32,11 +39,13 @@ class AIController extends Controller
             'prompt' => 'nullable|string|max:1000',
         ]);
 
-        return new StreamedResponse(function () use ($request) {
+        $language = publication_language_label(resolve_ai_locale($request->input('language')));
+
+        return new StreamedResponse(function () use ($request, $language) {
             $this->aiService->summariseStream(
                 $request->resource_id,
                 $request->type,
-                $request->input('language', 'en'),
+                $language,
                 $request->input('prompt'),
                 function ($chunk) {
                     echo $chunk;
@@ -65,8 +74,11 @@ class AIController extends Controller
 
         try {
             $file = $request->file('file');
-            $language = $request->input('language', 'document');
-            
+            $rawLanguage = $request->input('language');
+            $language = (is_string($rawLanguage) && strtolower(trim($rawLanguage)) === 'document')
+                ? 'document'
+                : resolve_ai_locale(is_string($rawLanguage) ? $rawLanguage : null);
+
             // Store file temporarily
             $temp_path = $file->storeAs('temp', uniqid() . '_' . $file->getClientOriginalName(), 'public');
             $full_path = storage_path('app/public/' . $temp_path);

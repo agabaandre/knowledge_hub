@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\NormalizesMultilingualTitles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Region;
@@ -10,6 +11,7 @@ use App\Models\Country;
 class CommunityOfPractice extends Model
 {
     use HasFactory;
+    use NormalizesMultilingualTitles;
 
     protected $fillable = [
         'community_name',
@@ -22,6 +24,15 @@ class CommunityOfPractice extends Model
         'department',
         'is_public'
     ];
+
+    protected function multilingualTitleAttributes(): array
+    {
+        return [
+            'community_name' => true,
+            'organisation' => true,
+            'department' => true,
+        ];
+    }
 
     // Specify the attributes to append
     protected $appends = [

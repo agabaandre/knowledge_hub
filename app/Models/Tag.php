@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\NormalizesMultilingualTitles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -10,7 +11,18 @@ use Illuminate\Support\Facades\Schema;
 class Tag extends Model
 {
     use HasFactory;
+    use NormalizesMultilingualTitles;
+
     public $timestamps = false;
+
+    protected function multilingualTitleAttributes(): array
+    {
+        return [
+            'tag_text' => true,
+            // Overview may be plain or light HTML; decode entities for FR display.
+            'overview' => true,
+        ];
+    }
 
     /**
      * Tags that have approved publications, ordered by engagement (views + likes).

@@ -345,7 +345,7 @@ class PdfChatController extends Controller
         ], 503);
     }
 
-    private function sendForumsIndexMessage(?int $sessionId, ?int $userId, string $userMessage, bool $stream, array $forumIds)
+    private function sendForumsIndexMessage(?int $sessionId, ?int $userId, string $userMessage, bool $stream, array $forumIds, ?string $language = null)
     {
         if ($response = $this->forumAssistantUnavailableResponse()) {
             return $response;
@@ -382,7 +382,7 @@ class PdfChatController extends Controller
 
         $systemContent = ForumsListingAssistantContext::buildForMessage($userMessage, $forumIds);
         $history = $this->buildMessagesForApi($session, $userId, $userMessage);
-        $openAiMessages = $this->mergeSystemAndHistory($systemContent, $history);
+        $openAiMessages = $this->mergeSystemAndHistory($systemContent, $history, $language);
 
         if ($stream) {
             return $this->streamPublicationResponse($session, $userId, $userMessage, $openAiMessages, 'forums');
@@ -728,6 +728,7 @@ class PdfChatController extends Controller
                 'session_id' => 'nullable|integer',
                 'attachment_id' => 'nullable|integer',
                 'message' => 'required|string|max:4000',
+                'language' => 'nullable|string|max:32',
                 'stream' => 'nullable|boolean',
                 'assistant_mode' => 'nullable|string|in:chatpdf,publication,auto,forum,forums_index',
             ]);
@@ -739,6 +740,7 @@ class PdfChatController extends Controller
             $sessionId = $request->session_id ? (int) $request->session_id : null;
             $userMessage = $request->message;
             $stream = (bool) $request->get('stream', true);
+            $language = $request->input('language');
 
             $userId = $this->resolveUserId($request);
 
@@ -748,12 +750,20 @@ class PdfChatController extends Controller
                     $userId,
                     $userMessage,
                     $stream,
-                    $this->normalizeForumIds($request->input('forum_ids', []))
+                    $this->normalizeForumIds($request->input('forum_ids', [])),
+                    is_string($language) ? $language : null
                 );
             }
 
             if ($request->filled('forum_id')) {
-                return $this->sendForumMessage((int) $request->forum_id, $sessionId, $userId, $userMessage, $stream);
+                return $this->sendForumMessage(
+                    (int) $request->forum_id,
+                    $sessionId,
+                    $userId,
+                    $userMessage,
+                    $stream,
+                    is_string($language) ? $language : null
+                );
             }
 
             if (! $request->filled('publication_id')) {
@@ -775,7 +785,11 @@ class PdfChatController extends Controller
                 }
                 $systemContent = PublicationAssistantContext::build($publication);
                 $history = $this->buildMessagesForApi($session, $userId, $userMessage);
-                $openAiMessages = $this->mergeSystemAndHistory($systemContent, $history);
+                $openAiMessages = $this->mergeSystemAndHistory(
+                    $systemContent,
+                    $history,
+                    is_string($language) ? $language : null
+                );
 
                 if ($stream) {
                     return $this->streamPublicationResponse($session, $userId, $userMessage, $openAiMessages);
@@ -792,7 +806,10 @@ class PdfChatController extends Controller
                 ]);
             }
 
-            $messages = $this->buildMessagesForApi($session, $userId, $userMessage);
+            $messages = $this->withChatLanguageInstruction(
+                $this->buildMessagesForApi($session, $userId, $userMessage),
+                is_string($language) ? $language : null
+            );
             $chatPdfSources = $this->chatPdfSourcesForSession($session);
             $labelsByKey = is_array($session->chatpdf_meta['labels'] ?? null) ? $session->chatpdf_meta['labels'] : [];
 
@@ -825,7 +842,7 @@ class PdfChatController extends Controller
         }
     }
 
-    private function sendForumMessage(int $forumId, ?int $sessionId, ?int $userId, string $userMessage, bool $stream)
+    private function sendForumMessage(int $forumId, ?int $sessionId, ?int $userId, string $userMessage, bool $stream, ?string $language = null)
     {
         if ($response = $this->forumAssistantUnavailableResponse()) {
             return $response;
@@ -855,7 +872,7 @@ class PdfChatController extends Controller
 
         $systemContent = ForumAssistantContext::build($forum);
         $history = $this->buildMessagesForApi($session, $userId, $userMessage);
-        $openAiMessages = $this->mergeSystemAndHistory($systemContent, $history);
+        $openAiMessages = $this->mergeSystemAndHistory($systemContent, $history, $language);
 
         if ($stream) {
             return $this->streamPublicationResponse($session, $userId, $userMessage, $openAiMessages, 'forums');
@@ -953,12 +970,36 @@ class PdfChatController extends Controller
      * @param  array<int, array{role: string, content: string}>  $historyEndsWithNewUser
      * @return array<int, array{role: string, content: string}>
      */
-    private function mergeSystemAndHistory(string $systemContent, array $historyEndsWithNewUser): array
+    private function mergeSystemAndHistory(string $systemContent, array $historyEndsWithNewUser, ?string $language = null): array
     {
+        $systemContent = trim($systemContent."\n\n".ai_chat_language_instruction($language));
         $out = [['role' => 'system', 'content' => $systemContent]];
         $tail = array_slice($historyEndsWithNewUser, -12);
 
         return array_merge($out, $tail);
+    }
+
+    /**
+     * ChatPDF message APIs often ignore system roles — pin language on the latest user turn.
+     *
+     * @param  array<int, array{role: string, content: string}>  $messages
+     * @return array<int, array{role: string, content: string}>
+     */
+    private function withChatLanguageInstruction(array $messages, ?string $language = null): array
+    {
+        $instruction = ai_chat_language_instruction($language);
+        if ($messages === []) {
+            return [['role' => 'user', 'content' => $instruction]];
+        }
+
+        for ($i = count($messages) - 1; $i >= 0; $i--) {
+            if (($messages[$i]['role'] ?? '') === 'user') {
+                $messages[$i]['content'] = $instruction."\n\n".$messages[$i]['content'];
+                break;
+            }
+        }
+
+        return $messages;
     }
 
     private function streamPublicationResponse(PdfChatSession $session, ?int $userId, string $userMessage, array $openAiMessages, string $feature = 'chat'): StreamedResponse
