@@ -1,31 +1,31 @@
 <div class="tab-pane fade" id="colors" role="tabpanel">
     <div class="form-section-title">
         <i class="fa fa-palette"></i>
-        Colors &amp; Typography
+        {{ __('admin_configure.tab_colors') }}
     </div>
-    <small class="info-text mb-3 d-block">Brand palette, AU official colors, fonts, and text sizing. Type any hex value (e.g. <code>#119A48</code>) or use the color swatch. Saved per theme.</small>
+    <small class="info-text mb-3 d-block">{{ __('admin_configure.colors_intro') }}</small>
 
-    <div class="form-section-subtitle mb-2">Brand colors</div>
+    <div class="form-section-subtitle mb-2">{{ __('admin_configure.brand_colors') }}</div>
 
     <div class="row settings-grid-row">
         <div class="col-md-4">
             @include('admin.settings.partials.color_field', [
                 'name' => 'primary_color',
-                'label' => 'Primary color',
+                'label' => __('admin_configure.primary_color'),
                 'value' => $settings->primary_color ?? '#119A48',
             ])
         </div>
         <div class="col-md-4">
             @include('admin.settings.partials.color_field', [
                 'name' => 'secondary_color',
-                'label' => 'Secondary color',
+                'label' => __('admin_configure.secondary_color'),
                 'value' => $settings->secondary_color,
             ])
         </div>
         <div class="col-md-4">
             @include('admin.settings.partials.color_field', [
                 'name' => 'primary_text_color',
-                'label' => 'Primary text color',
+                'label' => __('admin_configure.primary_text_color'),
                 'value' => $settings->primary_text_color,
             ])
         </div>
@@ -35,7 +35,7 @@
         <div class="col-md-4">
             @include('admin.settings.partials.color_field', [
                 'name' => 'links_active_color',
-                'label' => 'Links active color',
+                'label' => __('admin_configure.links_active_color'),
                 'value' => $settings->links_active_color,
             ])
         </div>
@@ -60,7 +60,7 @@
         <i class="fa fa-flag"></i>
         AU Official Colors
     </div>
-    <small class="info-text mb-3 d-block">African Union brand palette (PANTONE references).</small>
+    <small class="info-text mb-3 d-block">{{ __('admin_configure.au_colors_intro') }}</small>
 
     <div class="row settings-grid-row">
         <div class="col-md-4">
@@ -124,12 +124,12 @@
         <i class="fa fa-font"></i>
         Typography
     </div>
-    <small class="info-text mb-3 d-block">Primary font and text sizing. Saved per theme.</small>
+    <small class="info-text mb-3 d-block">{{ __('admin_configure.typography_intro') }}</small>
 
     <div class="row settings-grid-row">
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
-                <label>Primary font</label>
+                <label>{{ __('admin_configure.primary_font') }}</label>
                 <select name="primary_font" id="primary_font" class="form-control">
                     <option value="">— Default (system) —</option>
                     <option value="univers_45_light" @if((settings()->primary_font ?? '') === 'univers_45_light') selected @endif>Univers 45 Light</option>
@@ -138,7 +138,7 @@
                     <option value="montserrat" @if((settings()->primary_font ?? '') === 'montserrat') selected @endif>Montserrat</option>
                     <option value="brandon_text" @if((settings()->primary_font ?? '') === 'brandon_text') selected @endif>Brandon Text</option>
                     @if(isset($customFonts) && $customFonts->count() > 0)
-                        <option disabled>— Custom fonts —</option>
+                        <option disabled>— {{ __('admin_configure.custom_fonts') }} —</option>
                         @foreach($customFonts as $cf)
                             <option value="custom_{{ $cf->id }}" @if((settings()->primary_font ?? '') === 'custom_' . $cf->id) selected @endif>{{ $cf->name }}</option>
                         @endforeach
@@ -156,7 +156,7 @@
         </div>
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
-                <label>Main navigation font size (px)</label>
+                <label>{{ __('admin_configure.nav_font_size') }}</label>
                 <input type="number" name="nav_font_size" value="{{ $settings->nav_font_size ?? '11' }}" class="form-control" min="9" max="16" step="1" placeholder="11">
             </div>
         </div>
@@ -165,13 +165,13 @@
     <div class="row settings-grid-row mt-2">
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
-                <label>Front-end body font size (px)</label>
+                <label>{{ __('admin_configure.front_body_font_size') }}</label>
                 <input type="number" name="front_body_font_size" value="{{ $settings->front_body_font_size ?? '14' }}" class="form-control" min="10" max="24" step="1" placeholder="14">
             </div>
         </div>
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
-                <label>Admin body font size (px)</label>
+                <label>{{ __('admin_configure.admin_body_font_size') }}</label>
                 <input type="number" name="admin_body_font_size" value="{{ $settings->admin_body_font_size ?? '14' }}" class="form-control" min="10" max="24" step="1" placeholder="14">
             </div>
         </div>
@@ -187,15 +187,15 @@
         <div class="branding-asset-card__body">
             <div class="row settings-grid-row align-items-end">
                 <div class="col-md-3">
-                    <label class="branding-field-label" for="font_name">Display name</label>
-                    <input type="text" name="font_name" id="font_name" class="form-control" placeholder="Optional" form="settings-custom-font-upload-form">
+                    <label class="branding-field-label" for="font_name">{{ __('admin_configure.display_name') }}</label>
+                    <input type="text" name="font_name" id="font_name" class="form-control" placeholder="{{ __('admin_configure.optional') }}" form="settings-custom-font-upload-form">
                 </div>
                 <div class="col-md-3">
-                    <label class="branding-field-label" for="font_family">CSS family name</label>
-                    <input type="text" name="font_family" id="font_family" class="form-control" placeholder="Optional" form="settings-custom-font-upload-form">
+                    <label class="branding-field-label" for="font_family">{{ __('admin_configure.css_family_name') }}</label>
+                    <input type="text" name="font_family" id="font_family" class="form-control" placeholder="{{ __('admin_configure.optional') }}" form="settings-custom-font-upload-form">
                 </div>
                 <div class="col-md-4">
-                    <label class="branding-field-label" for="font_files">Font files</label>
+                    <label class="branding-field-label" for="font_files">{{ __('admin_configure.font_files') }}</label>
                     <div class="branding-upload-row">
                         <input type="file" name="font_files[]" id="font_files" accept=".woff,.woff2,.ttf,.otf" form="settings-custom-font-upload-form">
                         <button type="button" class="branding-upload-btn js-branding-upload-trigger" data-target="font_files">

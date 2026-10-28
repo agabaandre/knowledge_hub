@@ -33,7 +33,7 @@
         </span>
         <div>
             <h2 class="records-sidebar-card__title">{{ __('ui_body.footer_popular_tags') }}</h2>
-            <p class="records-sidebar-card__hint">Browse resources by popular health topics.</p>
+            <p class="records-sidebar-card__hint">{{ __('publications.search.browse_by_popular_topics', 'Browse resources by popular health topics.') }}</p>
         </div>
     </div>
     <div class="records-sidebar-tags">

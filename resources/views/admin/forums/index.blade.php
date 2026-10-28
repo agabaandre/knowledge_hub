@@ -56,7 +56,7 @@
     <div class="col-md-4 col-sm-6 mb-2">
         <a href="{{ url('admin/forums/approved') }}" class="card forum-stat-card h-100 shadow-sm text-decoration-none">
             <div class="card-body py-3">
-                <div class="forum-stat-card__label">Approved Forums</div>
+                <div class="forum-stat-card__label">{{ __('admin_nav.approved_forums_stat') }}</div>
                 <div class="forum-stat-card__value">{{ number_format((int) ($forumStats['approved'] ?? 0)) }}</div>
             </div>
         </a>
@@ -64,7 +64,7 @@
     <div class="col-md-4 col-sm-6 mb-2">
         <a href="{{ url('admin/forums') }}" class="card forum-stat-card forum-stat-card--pending h-100 shadow-sm text-decoration-none">
             <div class="card-body py-3">
-                <div class="forum-stat-card__label">Pending Review</div>
+                <div class="forum-stat-card__label">{{ __('admin_nav.pending_review') }}</div>
                 <div class="forum-stat-card__value">{{ number_format((int) ($forumStats['pending'] ?? 0)) }}</div>
             </div>
         </a>
@@ -72,7 +72,7 @@
     <div class="col-md-4 col-sm-6 mb-2">
         <a href="{{ url('admin/forums/rejected') }}" class="card forum-stat-card forum-stat-card--rejected h-100 shadow-sm text-decoration-none">
             <div class="card-body py-3">
-                <div class="forum-stat-card__label">Rejected</div>
+                <div class="forum-stat-card__label">{{ __('admin_nav.rejected_stat') }}</div>
                 <div class="forum-stat-card__value">{{ number_format((int) ($forumStats['rejected'] ?? 0)) }}</div>
             </div>
         </a>
@@ -86,7 +86,7 @@
                 <div class="pub-filters-card__heading">
                     <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
                     <div>
-                        <h3 class="pub-filters-card__title">{{ $title ?? 'Forums' }}</h3>
+                        <h3 class="pub-filters-card__title">{{ $title ?? __('admin_nav.forums') }}</h3>
                         <p class="pub-filters-card__subtitle">{{ $forum_list_subtitle ?? 'Search and manage discussion threads' }}</p>
                     </div>
                 </div>
@@ -97,7 +97,7 @@
                         <a href="{{ url('admin/forums/rejected') }}" class="btn {{ $queue === 'rejected' ? 'btn-dark' : 'btn-outline-secondary' }}">Rejected</a>
                     </div>
                     @if(isset($pending_forums_count) && $pending_forums_count > 0)
-                        <a class="nav-link position-relative d-inline-flex p-0" href="{{ url('admin/forums/moderate') }}" title="Pending Forums">
+                        <a class="nav-link position-relative d-inline-flex p-0" href="{{ url('admin/forums/moderate') }}" title="{{ __('admin_nav.pending_forums') }}">
                             <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;">
                                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -126,7 +126,7 @@
 
         <div class="card pub-list-card">
             <div class="card-header">
-                <h3 class="card-title mb-0">{{ $title ?? 'Forums' }}</h3>
+                <h3 class="card-title mb-0">{{ $title ?? __('admin_nav.forums') }}</h3>
             </div>
             <div class="card-body text-left">
                 @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif

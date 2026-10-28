@@ -7,11 +7,11 @@
 @section('content')
     <!-- PAGE-HEADER -->
     <div class="page-header">
-        <h1 class="page-title">Communities of Practice</h1>
+        <h1 class="page-title">{{ __('admin_nav.communities_of_practice') }}</h1>
         <div>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="javascript:void(0)">Dropdown Lists</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Communities of Practice</li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('admin_nav.dropdown_lists') }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.communities_of_practice') }}</li>
             </ol>
         </div>
     </div>

@@ -279,8 +279,8 @@
     <div class="login-wrapper">
         <div class="login-card">
             <div class="login-header">
-                <h2>Welcome Back</h2>
-                <p>Sign in to continue to your account</p>
+                <h2>{{ ui_t('auth.welcome_back', 'Welcome Back') }}</h2>
+                <p>{{ ui_t('auth.sign_in_subtitle', 'Sign in to continue to your account') }}</p>
             </div>
 
             <div class="login-body">
@@ -295,12 +295,12 @@
                         @csrf
 
                     <div class="form-group">
-                        <label class="form-label" for="email">Email Address</label>
+                        <label class="form-label" for="email">{{ ui_t('auth.email_address', 'Email Address') }}</label>
                         <input type="email" 
                                id="email" 
                                name="email" 
                                class="form-control @error('email') is-invalid @enderror"
-                               placeholder="Enter your email address" 
+                               placeholder="{{ ui_t('auth.email_placeholder', 'Enter your email address') }}" 
                                value="{{ old('email') }}" 
                                required 
                                autocomplete="email" 
@@ -313,12 +313,12 @@
                         </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="password">Password</label>
+                        <label class="form-label" for="password">{{ ui_t('auth.password_label', 'Password') }}</label>
                         <input type="password" 
                                id="password" 
                                name="password" 
                                class="form-control @error('password') is-invalid @enderror"
-                               placeholder="Enter your password" 
+                               placeholder="{{ ui_t('auth.password_placeholder', 'Enter your password') }}" 
                                required 
                                autocomplete="current-password">
                             @error('password')
@@ -384,14 +384,14 @@
 
                 @if($hasSocialLogin)
                 <div class="divider">
-                    <span>or continue with</span>
+                    <span>{{ ui_t('auth.or_continue_with', 'or continue with') }}</span>
                         </div>
 
                 @if($showMicrosoftLogin)
                 <div class="staff-notice" style="background: #e8f5e9; border-left: 4px solid #119A48; padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 1rem;">
                     <p style="margin: 0; font-size: 0.875rem; color: #2d3748; line-height: 1.5;">
                         <i class="fa fa-info-circle" style="color: #119A48; margin-right: 0.5rem;"></i>
-                        <strong>Africa CDC Staff:</strong> We recommend using Outlook/Microsoft login for seamless access.
+                        {{ ui_t('auth.staff_recommend_microsoft', 'Africa CDC Staff: We recommend using Outlook/Microsoft login for seamless access.') }}
                     </p>
                 </div>
                 @endif
@@ -420,7 +420,7 @@
 
                 <div class="register-link">
                     <p>
-                        Don't have an account?
+                        {{ ui_t('auth.dont_have_account', "Don't have an account?") }}
                         <a href="{{ route('register') }}">{{ ui_t('general.register_now', 'Register Now') }}</a>
                     </p>
                 </div>

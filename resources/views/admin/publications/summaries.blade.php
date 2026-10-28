@@ -7,11 +7,11 @@
 
 @section('content')
 <div class="page-header">
-    <h1 class="page-title">Publication Summaries</h1>
+    <h1 class="page-title">{{ __('admin_nav.publication_summaries') }}</h1>
     <div>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="javascript:void(0)">{{ ui_t('general.publish', 'Publish') }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Publication Summaries</li>
+            <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.publication_summaries') }}</li>
         </ol>
     </div>
 </div>
@@ -23,7 +23,7 @@
                 <div class="pub-filters-card__heading">
                     <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
                     <div>
-                        <h3 class="pub-filters-card__title">Filter Summaries</h3>
+                        <h3 class="pub-filters-card__title">{{ __('admin_nav.filter_summaries') }}</h3>
                         <p class="pub-filters-card__subtitle">Filters apply automatically as you type or change selections</p>
                     </div>
                 </div>

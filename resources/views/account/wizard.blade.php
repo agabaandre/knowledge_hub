@@ -73,6 +73,7 @@
     $publicationMinWords = (int) (settings()->publication_min_words ?? 150);
     $publicationMinChars = $publicationMinWords * 5;
     $adminMustSelectAuthor = is_admin() && ! optional(current_user())->author_id;
+    // Active site languages in Configure → Site languages order (sort_order, then name).
     $publicationLanguageOptions = \App\Models\SiteLanguage::selectorMap();
     $defaultPublicationLanguage = old(
         'publication_language',
@@ -80,6 +81,12 @@
             ?? optional(auth()->user())->langauge
             ?? (settings()->language ?? 'en')
     );
+    $defaultPublicationLanguage = \App\Models\SiteLanguage::normalizeLocaleCode(
+        is_string($defaultPublicationLanguage) ? $defaultPublicationLanguage : null
+    ) ?? array_key_first($publicationLanguageOptions) ?? 'en';
+    if ($publicationLanguageOptions !== [] && ! isset($publicationLanguageOptions[$defaultPublicationLanguage])) {
+        $defaultPublicationLanguage = array_key_first($publicationLanguageOptions) ?: 'en';
+    }
 
     // Country hubs: default Member States / Region to Configure → Advanced owner country.
     $isCountryHub = function_exists('hub_is_country_portal')
@@ -240,12 +247,12 @@
     </style>
     <ul class="nav">
         <li>
-            <a class="nav-link" href="#step-1"> <strong>Step 1</strong>
-                <br>Start Here</a>
+            <a class="nav-link" href="#step-1"> <strong>{{ ui_t('account_publish.step_1', 'Step 1') }}</strong>
+                <br>{{ ui_t('account_publish.step_1_label', 'Start Here') }}</a>
         </li>
         <li>
-            <a class="nav-link" href="#step-2"> <strong>Step 2</strong>
-                <br>Details & Attachments</a>
+            <a class="nav-link" href="#step-2"> <strong>{{ ui_t('account_publish.step_2', 'Step 2') }}</strong>
+                <br>{{ ui_t('account_publish.step_2_label', 'Details & Attachments') }}</a>
         </li>
 
     </ul>
@@ -256,24 +263,36 @@
             <!-- Required Fields Reminder -->
             <div class="alert alert-info mb-3" style="background-color: #e7f3ff; border-left: 4px solid #119A48; padding: 12px 16px; border-radius: 4px;">
                 <i class="fa fa-info-circle mr-2" style="color: #119A48;"></i>
-                <strong>Please Note:</strong> All fields marked with a <span class="text-danger">*</span> (red asterisk) are <strong>required</strong>. Please ensure you fill in all required fields before proceeding to Step 2.
+                <strong>{{ ui_t('account_publish.required_note_lead', 'Please Note:') }}</strong>
+                {!! ui_t('account_publish.required_note_body', 'All fields marked with a :asterisk (red asterisk) are :required. Please ensure you fill in all required fields before proceeding to Step 2.', [
+                    'asterisk' => '<span class="text-danger">*</span>',
+                    'required' => '<strong>'.e(ui_t('account_publish.required', 'required')).'</strong>',
+                ]) !!}
                 </div>
             <div id="wizard-step-1-errors" class="alert alert-danger wizard-step-error-summary mb-3" role="alert"></div>
 
             <div class="alert mb-3" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #119A48; padding: 14px 18px; border-radius: 4px;">
                 <div class="mb-3">
-                    <strong class="d-block mb-1" style="color: #0f172a;"><i class="fa fa-file-pdf-o text-danger mr-1"></i>Documents</strong>
+                    <strong class="d-block mb-1" style="color: #0f172a;"><i class="fa fa-file-pdf-o text-danger mr-1"></i>{{ ui_t('account_publish.documents', 'Documents') }}</strong>
                     <p class="mb-0 text-muted small" style="line-height: 1.55;">
-                        <strong class="text-body">PDF is the recommended format</strong> for reports, strategies, manuals, and similar materials. It gives the most reliable in-browser preview, downloads, accessibility, and text tools on the Hub. You can still upload Word, Excel, PowerPoint, or images when needed.
+                        {{ ui_t('account_publish.documents_help', 'PDF is the recommended format for reports, strategies, manuals, and similar materials. It gives the most reliable in-browser preview, downloads, accessibility, and text tools on the Hub. You can still upload Word, Excel, PowerPoint, or images when needed.') }}
                     </p>
                 </div>
                 <div class="mb-0">
-                    <strong class="d-block mb-1" style="color: #0f172a;"><i class="fa fa-youtube-play text-danger mr-1"></i>Videos (e.g. YouTube, Vimeo)</strong>
+                    <strong class="d-block mb-1" style="color: #0f172a;"><i class="fa fa-youtube-play text-danger mr-1"></i>{{ ui_t('account_publish.videos', 'Videos (e.g. YouTube, Vimeo)') }}</strong>
                     <ol class="mb-0 text-muted small pl-3" style="line-height: 1.55;">
-                        <li class="mb-1">Choose <strong class="text-body">External Link</strong> — do not use Attachment for a video that is already hosted online.</li>
-                        <li class="mb-1">Paste the <strong class="text-body">full video URL</strong> from your browser’s address bar, for example <code class="small">https://www.youtube.com/watch?v=…</code> or a <code class="small">youtu.be/…</code> short link.</li>
-                        <li class="mb-1">Turn on <strong class="text-body">Embedded On Page</strong> so visitors can play the video on the resource page.</li>
-                        <li class="mb-0">Add a clear title and description (and the rest of the metadata) so the resource is easy to find and understand.</li>
+                        <li class="mb-1">{!! ui_t('account_publish.videos_step_1', 'Choose :external — do not use Attachment for a video that is already hosted online.', [
+                            'external' => '<strong class="text-body">'.e(ui_t('account_publish.external_link', 'External Link')).'</strong>',
+                        ]) !!}</li>
+                        <li class="mb-1">{!! ui_t('account_publish.videos_step_2', 'Paste the :url from your browser’s address bar, for example :yt or a :short short link.', [
+                            'url' => '<strong class="text-body">'.e(ui_t('account_publish.full_video_url', 'full video URL')).'</strong>',
+                            'yt' => '<code class="small">https://www.youtube.com/watch?v=…</code>',
+                            'short' => '<code class="small">youtu.be/…</code>',
+                        ]) !!}</li>
+                        <li class="mb-1">{!! ui_t('account_publish.videos_step_3', 'Turn on :embedded so visitors can play the video on the resource page.', [
+                            'embedded' => '<strong class="text-body">'.e(ui_t('account_publish.embedded_on_page', 'Embedded On Page')).'</strong>',
+                        ]) !!}</li>
+                        <li class="mb-0">{{ ui_t('account_publish.videos_step_4', 'Add a clear title and description (and the rest of the metadata) so the resource is easy to find and understand.') }}</li>
                     </ol>
                 </div>
             </div>
@@ -282,38 +301,38 @@
                 <div class="col-lg-12 mb-2" style="margin-left:12px !important;">
                     <div class="d-flex flex-wrap align-items-center" style="gap:20px;">
                         <label class="form-check-inline mb-0">
-                            <input type="radio" name="upload_type" value="upload" checked class="form-check-input"> Attachment
+                            <input type="radio" name="upload_type" value="upload" checked class="form-check-input"> {{ ui_t('account_publish.attachment', 'Attachment') }}
                     </label>
                         <label class="form-check-inline mb-0">
-                            <input type="radio" name="upload_type" value="link" class="form-check-input"> External Link
+                            <input type="radio" name="upload_type" value="link" class="form-check-input"> {{ ui_t('account_publish.external_link', 'External Link') }}
                     </label>
                         <label class="form-check-inline mb-0">
-                            <input type="checkbox" name="is_embedded" value="1" class="form-check-input" {{ @$row->is_embedded ? ' checked' : '' }}> Embedded On Page
+                            <input type="checkbox" name="is_embedded" value="1" class="form-check-input" {{ @$row->is_embedded ? ' checked' : '' }}> {{ ui_t('account_publish.embedded_on_page', 'Embedded On Page') }}
                     </label>
                     @if (is_admin())
                         <label class="form-check-inline mb-0">
-                            <input type="checkbox" name="is_default" value="1" class="form-check-input" {{ @$row->is_default_in_category ? ' checked' : '' }}> Default in Category
+                            <input type="checkbox" name="is_default" value="1" class="form-check-input" {{ @$row->is_default_in_category ? ' checked' : '' }}> {{ ui_t('account_publish.default_in_category', 'Default in Category') }}
                         </label>
                         <label class="form-check-inline mb-0">
-                            <input type="checkbox" name="admin_only" value="1" class="form-check-input" {{ @$row->is_admin_only_access ? ' checked' : '' }}> Admin Only Access
+                            <input type="checkbox" name="admin_only" value="1" class="form-check-input" {{ @$row->is_admin_only_access ? ' checked' : '' }}> {{ ui_t('account_publish.admin_only_access', 'Admin Only Access') }}
                         </label>
                         <label class="form-check-inline mb-0">
-                            <input type="checkbox" name="show_disclaimer" value="1" class="form-check-input" {{ isset($row) ? ($row->show_disclaimer ? ' checked' : '') : 'checked' }}> Shows Disclaimer
+                            <input type="checkbox" name="show_disclaimer" value="1" class="form-check-input" {{ isset($row) ? ($row->show_disclaimer ? ' checked' : '') : 'checked' }}> {{ ui_t('account_publish.shows_disclaimer', 'Shows Disclaimer') }}
                         </label>
                     @endif
                         <div class="w-100"></div>
                         <div class="container-fluid mt-1" style="line-height:1.3; padding-left:0; padding-right:0;">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <small class="text-muted d-block"><strong>Attachment</strong>: Upload a file from your device. <strong>PDF is recommended</strong> for documents; Word, Excel, PowerPoint, images, audio, and video are supported. Scripts and executables (e.g. .php, .js, .exe) are not allowed.</small>
-                                    <small class="text-muted d-block"><strong>External Link</strong>: Paste a URL to content hosted elsewhere (e.g. a YouTube or Vimeo page). Required when you are not uploading a file.</small>
-                                    <small class="text-muted d-block"><strong>Embedded On Page</strong>: Show the linked content inside the resource page — use this for videos and other embeddable content so users can view it without leaving the Hub.</small>
+                                    <small class="text-muted d-block">{{ ui_t('account_publish.help_attachment', 'Attachment: Upload a file from your device. PDF is recommended for documents; Word, Excel, PowerPoint, images, audio, and video are supported. Scripts and executables (e.g. .php, .js, .exe) are not allowed.') }}</small>
+                                    <small class="text-muted d-block">{{ ui_t('account_publish.help_external_link', 'External Link: Paste a URL to content hosted elsewhere (e.g. a YouTube or Vimeo page). Required when you are not uploading a file.') }}</small>
+                                    <small class="text-muted d-block">{{ ui_t('account_publish.help_embedded', 'Embedded On Page: Show the linked content inside the resource page — use this for videos and other embeddable content so users can view it without leaving the Hub.') }}</small>
                                 </div>
                                 <div class="col-md-6">
                                     @if (is_admin())
-                                    <small class="text-muted d-block"><strong>Default in Category</strong>: Feature this resource as the primary/default item in its category so it appears prominently in listings.</small>
-                                    <small class="text-muted d-block"><strong>Admin Only Access</strong>: Limit visibility to administrators only.</small>
-                                    <small class="text-muted d-block"><strong>Shows Disclaimer</strong>: Include the standard disclaimer on the resource details page.</small>
+                                    <small class="text-muted d-block">{{ ui_t('account_publish.help_default_category', 'Default in Category: Feature this resource as the primary/default item in its category so it appears prominently in listings.') }}</small>
+                                    <small class="text-muted d-block">{{ ui_t('account_publish.help_admin_only', 'Admin Only Access: Limit visibility to administrators only.') }}</small>
+                                    <small class="text-muted d-block">{{ ui_t('account_publish.help_disclaimer', 'Shows Disclaimer: Include the standard disclaimer on the resource details page.') }}</small>
                                     @endif
                                 </div>
                             </div>
@@ -323,29 +342,29 @@
 
                 <!-- Title & URL moved from Step 2 -->
                 <div class="col-md-12 mt-2">
-                    <h3>What is the title of the resource you want to publish?</h3>
+                    <h3>{{ ui_t('account_publish.title_question', 'What is the title of the resource you want to publish?') }}</h3>
                     <div class="mb-3">
-                        <label class="form-label" for="title">Resource Title
+                        <label class="form-label" for="title">{{ ui_t('account_publish.resource_title', 'Resource Title') }}
                             @if(($requiredFields['title'] ?? true) == true)
                                 <span class="text-danger">*</span>
                             @endif
                         </label>
-                        <input placeholder="Resource Title" class="form-control newform js-format-title-case" id="title" name="title"
+                        <input placeholder="{{ ui_t('account_publish.resource_title', 'Resource Title') }}" class="form-control newform js-format-title-case" id="title" name="title"
                             value="{{ @$publication->title ?? old('title') }}" {{ ($requiredFields['title'] ?? true) ? 'required=""' : '' }}>
-                        <small class="text-muted d-block mt-1">Title is formatted automatically to title case when you leave this field.</small>
+                        <small class="text-muted d-block mt-1">{{ ui_t('account_publish.title_case_help', 'Title is formatted automatically to title case when you leave this field.') }}</small>
                     </div>
                 </div>
 
                 <div class="col-md-12 mb-2">
                     <div class="wizard-inline-80-20">
                         <div class="mb-0 url_wrapper">
-                        <label class="form-label" for="publication">Publication URL Link <span class="text-danger link-required-asterisk" style="display: none;">*</span></label>
-                        <input type="text" placeholder="URL Link" class="form-control url" id="publication"
+                        <label class="form-label" for="publication">{{ ui_t('account_publish.publication_url', 'Publication URL Link') }} <span class="text-danger link-required-asterisk" style="display: none;">*</span></label>
+                        <input type="text" placeholder="{{ ui_t('account_publish.url_placeholder', 'URL Link') }}" class="form-control url" id="publication"
                             name="link" value="{{ @$row->publication ?? old('publication') }}">
-                        <small class="text-muted link-required-text" style="display: none;">Required when selecting External Link</small>
+                        <small class="text-muted link-required-text" style="display: none;">{{ ui_t('account_publish.url_required_external', 'Required when selecting External Link') }}</small>
                     </div>
                         <div class="mb-0 wizard-field-year">
-                    <label class="form-label" for="year_published">Year of Publication
+                    <label class="form-label" for="year_published">{{ ui_t('account_publish.year_of_publication', 'Year of Publication') }}
                         @if(($requiredFields['year_published'] ?? false) == true)
                             <span class="text-danger">*</span>
                     @endif
@@ -356,27 +375,27 @@
                             <option value="{{ $y }}" {{ ( (old('year_published') == $y) || (@$row->year_published == $y) || (!@$row->year_published && !old('year_published') && $y == $currentYear) ) ? 'selected' : '' }}>{{ $y }}</option>
                         @endfor
                     </select>
-                            <small class="text-muted d-block">Year published</small>
+                            <small class="text-muted d-block">{{ ui_t('account_publish.year_published', 'Year published') }}</small>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication_language">Publication language <span class="text-danger">*</span></label>
-                    <select class="form-control select2" name="publication_language" id="publication_language" required>
+                    <label class="form-label" for="publication_language">{{ ui_t('account_publish.publication_language', 'Publication language') }} <span class="text-danger">*</span></label>
+                    <select class="form-control select2 notranslate" name="publication_language" id="publication_language" required data-sorter="false">
                         @foreach($publicationLanguageOptions as $code => $langRow)
                             <option value="{{ $code }}" {{ (string) $defaultPublicationLanguage === (string) $code ? 'selected' : '' }}>
-                                {{ $langRow['name'] ?? $code }}
+                                {{ trim(($langRow['flag'] ?? '').' '.($langRow['name'] ?? $code)) }}
                             </option>
                         @endforeach
                     </select>
-                    <small class="text-muted d-block">Primary language of this resource. AI summary extraction uses this language by default.</small>
+                    <small class="text-muted d-block">{{ ui_t('account_publish.publication_language_help', 'Primary language of this resource. AI summary extraction uses this language by default.') }}</small>
                 </div>
 
                 <div class="col-md-12 mb-2">
                     <div class="wizard-inline-50-50">
                         <div class="mb-0 wizard-field-wrap" data-wizard-field="data_category_id">
-                            <label class="form-label">Category
+                            <label class="form-label">{{ ui_t('account_publish.category', 'Category') }}
                         @if(($requiredFields['data_category_id'] ?? true) == true)
                             <span class="text-danger">*</span>
                         @endif
@@ -389,7 +408,7 @@
                         ])
                     </div>
                         <div class="mb-0 wizard-field-wrap" data-wizard-field="category_id">
-                            <label class="form-label" for="category_id">Sub Category <span class="text-danger">*</span></label>
+                            <label class="form-label" for="category_id">{{ ui_t('account_publish.sub_category', 'Sub Category') }} <span class="text-danger">*</span></label>
                         @include('partials.publications.filecategory_dropdown', [
                             'field' => 'category_id',
                                 'required' => 'required',
@@ -400,7 +419,7 @@
             </div>
 
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Thematic Area
+                    <label class="form-label" for="publication">{{ ui_t('account_publish.thematic_area', 'Thematic Area') }}
                         @if(($requiredFields['theme'] ?? true) == true)
                             <span class="text-danger">*</span>
                         @endif
@@ -413,7 +432,7 @@
                         ])
                     </div>
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Sub Theme
+                    <label class="form-label" for="publication">{{ ui_t('account_publish.sub_theme', 'Sub Theme') }}
                         @if(($requiredFields['sub_theme'] ?? true) == true)
                             <span class="text-danger">*</span>
                         @endif
@@ -427,19 +446,21 @@
                 </div>
 
                 <div class="col-md-6 mb-2 wizard-field-wrap" data-wizard-field="rccs">
-                    <label class="form-label" for="publication">Region <span class="text-danger">*</span></label>
+                    <label class="form-label" for="publication">{{ ui_t('account_publish.region', 'Region') }} <span class="text-danger">*</span></label>
                         @include('partials.regions.dropdown', [
                             'field' => 'rccs[]',
                             'required' => 'required',
                             'class' => 'rcc select2',
                             'selected' => $selectedRegionIds,
                             'multiple' => 'multiple',
-                            'allfield' => 'All',
+                            'allfield' => ui_t('account_publish.all', 'All'),
                         ])
-                        <small class="text-muted d-block mt-1">Tip: If this resource applies to every member state, choose <strong>All</strong>.</small>
+                        <small class="text-muted d-block mt-1">{!! ui_t('account_publish.region_tip', 'Tip: If this resource applies to every member state, choose :all.', [
+                            'all' => '<strong>'.e(ui_t('account_publish.all', 'All')).'</strong>',
+                        ]) !!}</small>
                     </div>
                 <div class="col-md-6 mb-2 wizard-field-wrap" data-wizard-field="countries">
-                    <label class="form-label" for="publication">Member States <span class="text-danger">*</span></label>
+                    <label class="form-label" for="publication">{{ ui_t('account_publish.member_states', 'Member States') }} <span class="text-danger">*</span></label>
                         @include('partials.countries.dropdown', [
                             'field' => 'countries[]',
                             'required' => 'required',
@@ -447,13 +468,17 @@
                             'selected' => $selectedCountryIds,
                             'multiple' => 'multiple',
                             'all_option' => ! $isCountryHub,
-                            'allfield' => $isCountryHub ? 'Select member state' : 'All',
+                            'allfield' => $isCountryHub
+                                ? ui_t('account_publish.select_member_state', 'Select member state')
+                                : ui_t('account_publish.all', 'All'),
                         ])
                         <small class="text-muted d-block mt-1">
                             @if($isCountryHub)
-                                This country hub defaults to the configured owner member state.
+                                {{ ui_t('account_publish.countries_help_hub', 'This country hub defaults to the configured owner member state.') }}
                             @else
-                                After choosing region(s), pick <strong>All</strong> or select specific member states from those regions only.
+                                {!! ui_t('account_publish.countries_help', 'After choosing region(s), pick :all or select specific member states from those regions only.', [
+                                    'all' => '<strong>'.e(ui_t('account_publish.all', 'All')).'</strong>',
+                                ]) !!}
                             @endif
                         </small>
             </div>
@@ -462,17 +487,17 @@
 
             @if (is_admin())
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Corporate Source or Member State
+                    <label class="form-label" for="publication">{{ ui_t('account_publish.author_label', 'Corporate Source or Member State') }}
                         @if(($requiredFields['author'] ?? false) == true || $adminMustSelectAuthor)
                             <span class="text-danger">*</span>
                         @endif
-                        <small class="text-muted">(If your source is missing, please contact the system admin)</small>
+                        <small class="text-muted">{{ ui_t('account_publish.author_missing_hint', '(If your source is missing, please contact the system admin)') }}</small>
                     </label>
                             @include('partials.authors.dropdown', [
                                 'field' => 'author',
                         'required' => (($requiredFields['author'] ?? false) || $adminMustSelectAuthor) ? 'required' : '',
                                 'selected' => @$row->author_id ?? null,
-                        'allfield' => 'Select Corporate Source or Member State',
+                        'allfield' => ui_t('account_publish.author_placeholder', 'Select Corporate Source or Member State'),
                             ])
                         </div>
             @else
@@ -485,7 +510,7 @@
         <div id="step-2" class="tab-pane" role="tabpanel" aria-labelledby="step-2">
             <div id="wizard-step-2-errors" class="alert alert-danger wizard-step-error-summary mb-3" role="alert"></div>
             <input type="hidden" name="id" id="id" class="newform" value="{{ @$row->id ?? old('id') }}">
-            <h3 class="mb-2 mt-2" style="font-weight:600;">Attachments & Additional Details</h3>
+            <h3 class="mb-2 mt-2" style="font-weight:600;">{{ ui_t('account_publish.step_2_heading', 'Attachments & Additional Details') }}</h3>
             <div class="row" style="min-height: 0;">
 
 
@@ -557,18 +582,20 @@
             <h3 class="mb-2 mt-3" style="font-weight:600;">Publication Details</h3>
 
             <div class="mb-3 p-2" style="background:#ffffff; border:1px solid #e8edf2; border-radius:4px;" id="ai-summary-language-choice">
-                <label class="form-label d-block mb-2">AI summary language</label>
+                <label class="form-label d-block mb-2">{{ ui_t('account_publish.ai_summary_language', 'AI summary language') }}</label>
                 <div class="d-flex flex-wrap align-items-center" style="gap: 1rem;">
                     <label class="form-check-inline mb-0">
                         <input type="radio" class="form-check-input" name="ai_summary_language_mode" value="publication" checked>
-                        Use publication language (<span id="ai-summary-pub-lang-label">{{ publication_language_label($defaultPublicationLanguage) }}</span>)
+                        {!! ui_t('account_publish.ai_use_publication_language', 'Use publication language (:lang)', [
+                            'lang' => '<span id="ai-summary-pub-lang-label">'.e(publication_language_label($defaultPublicationLanguage)).'</span>',
+                        ]) !!}
                     </label>
                     <label class="form-check-inline mb-0">
                         <input type="radio" class="form-check-input" name="ai_summary_language_mode" value="english">
-                        Extract in English
+                        {{ ui_t('account_publish.ai_extract_english', 'Extract in English') }}
                     </label>
                 </div>
-                <small class="text-muted d-block mt-1">When you upload an attachment, the AI draft description follows this choice. Default matches the publication language from Step 1.</small>
+                <small class="text-muted d-block mt-1">{{ ui_t('account_publish.ai_summary_language_help', 'When you upload an attachment, the AI draft description follows this choice. Default matches the publication language from Step 1.') }}</small>
             </div>
             
             <!-- AI Description Loader -->

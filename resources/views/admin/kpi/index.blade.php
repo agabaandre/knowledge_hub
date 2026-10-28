@@ -27,11 +27,11 @@
 
 @section('content')
     <div class="page-header">
-        <h1 class="page-title">KPI Indicators</h1>
+        <h1 class="page-title">{{ __('admin_nav.kpi_indicators') }}</h1>
         <div>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">KPI Indicators</li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('admin_nav.home') }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.kpi_indicators') }}</li>
             </ol>
         </div>
     </div>
@@ -45,7 +45,7 @@
                     <div class="pub-filters-card__heading">
                         <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
                         <div>
-                            <h3 class="pub-filters-card__title">Filter indicators</h3>
+                            <h3 class="pub-filters-card__title">{{ __('admin_nav.filter_indicators') }}</h3>
                             <p class="pub-filters-card__subtitle">Filters apply automatically as you type or change selections</p>
                         </div>
                     </div>

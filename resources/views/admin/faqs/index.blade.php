@@ -13,11 +13,11 @@
 
 @section('content')
     <div class="page-header">
-        <h1 class="page-title">FAQs Management</h1>
+        <h1 class="page-title">{{ __('admin_nav.faqs_management') }}</h1>
         <div>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">FAQs</li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('admin_nav.home') }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.faqs') }}</li>
             </ol>
 		</div>
 					</div>
@@ -28,7 +28,7 @@
             <div class="card">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <div>
-                        <h3 class="card-title mb-0">Filter FAQs</h3>
+                        <h3 class="card-title mb-0">{{ __('admin_nav.filter_faqs') }}</h3>
                         <small class="text-muted">Search and filter FAQs</small>
                     </div>
                     <div>

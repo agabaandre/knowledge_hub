@@ -1,7 +1,7 @@
 <div class="tab-pane fade" id="search" role="tabpanel">
     <div class="form-section-title">
         <i class="fa fa-search"></i>
-        Search &amp; Listings
+        {{ __('admin_configure.search_listings') }}
     </div>
 
     <div class="row settings-grid-row">
@@ -9,34 +9,34 @@
             <div class="form-group settings-field--compact mb-0">
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="enable_ai_search" name="enable_ai_search" value="1" @if($settings->enable_ai_search ?? 1) checked @endif>
-                    <label class="form-check-label" for="enable_ai_search">Enable AI Search</label>
+                    <label class="form-check-label" for="enable_ai_search">{{ __('admin_configure.enable_ai_search') }}</label>
                 </div>
-                <small class="info-text">Show AI Search in the search bar.</small>
+                <small class="info-text">{{ __('admin_configure.enable_ai_search_help') }}</small>
             </div>
         </div>
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="auto_approve_comments" name="auto_approve_comments" value="1" @if($settings->auto_approve_comments ?? 1) checked @endif>
-                    <label class="form-check-label" for="auto_approve_comments">Auto-approve comments</label>
+                    <label class="form-check-label" for="auto_approve_comments">{{ __('admin_configure.auto_approve_comments') }}</label>
                 </div>
-                <small class="info-text">Forum and publication comments.</small>
+                <small class="info-text">{{ __('admin_configure.auto_approve_comments_help') }}</small>
             </div>
         </div>
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="auto_approve_publications" name="auto_approve_publications" value="1" @if($settings->auto_approve_publications ?? 0) checked @endif>
-                    <label class="form-check-label" for="auto_approve_publications">Auto-approve publications</label>
+                    <label class="form-check-label" for="auto_approve_publications">{{ __('admin_configure.auto_approve_publications') }}</label>
                 </div>
-                <small class="info-text">When enabled, admin and configured roles publish without moderation.</small>
+                <small class="info-text">{{ __('admin_configure.auto_approve_publications_help') }}</small>
             </div>
         </div>
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="enable_ai_chat_prune" name="enable_ai_chat_prune" value="1" @if($settings->enable_ai_chat_prune ?? 1) checked @endif>
-                    <label class="form-check-label" for="enable_ai_chat_prune">Scheduled AI chat cleanup</label>
+                    <label class="form-check-label" for="enable_ai_chat_prune">{{ __('admin_configure.ai_chat_cleanup') }}</label>
                 </div>
             </div>
         </div>
@@ -52,7 +52,7 @@
             <div class="form-group settings-field--compact mb-0">
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="search_show_forums" name="search_show_forums" value="1" @if($settings->search_show_forums ?? true) checked @endif>
-                    <label class="form-check-label" for="search_show_forums">Show forums in search</label>
+                    <label class="form-check-label" for="search_show_forums">{{ __('admin_configure.show_forums_in_search') }}</label>
                 </div>
             </div>
         </div>
@@ -60,7 +60,7 @@
             <div class="form-group settings-field--compact mb-0">
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="search_show_communities" name="search_show_communities" value="1" @if($settings->search_show_communities ?? true) checked @endif>
-                    <label class="form-check-label" for="search_show_communities">Show communities in search</label>
+                    <label class="form-check-label" for="search_show_communities">{{ __('admin_configure.show_communities_in_search') }}</label>
                 </div>
             </div>
         </div>
@@ -70,7 +70,7 @@
                 <input type="hidden" name="show_publication_card_file_type_badge" value="0">
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="show_publication_card_file_type_badge" name="show_publication_card_file_type_badge" value="1" @if($settings->show_publication_card_file_type_badge ?? true) checked @endif>
-                    <label class="form-check-label" for="show_publication_card_file_type_badge">File type icon on cards</label>
+                    <label class="form-check-label" for="show_publication_card_file_type_badge">{{ __('admin_configure.file_type_icon_on_cards') }}</label>
                 </div>
             </div>
         </div>
@@ -89,7 +89,7 @@
                 <input type="hidden" name="communities_listing_show_participants" value="0">
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="communities_listing_show_participants" name="communities_listing_show_participants" value="1" @if($settings->communities_listing_show_participants ?? true) checked @endif>
-                    <label class="form-check-label" for="communities_listing_show_participants">Show participants on cards</label>
+                    <label class="form-check-label" for="communities_listing_show_participants">{{ __('admin_configure.show_participants_on_cards') }}</label>
                 </div>
             </div>
         </div>
@@ -97,7 +97,7 @@
         @if(Schema::hasColumn('setting', 'communities_listing_max_faces'))
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
-                <label for="communities_listing_max_faces">Max participant faces</label>
+                <label for="communities_listing_max_faces">{{ __('admin_configure.max_participant_faces') }}</label>
                 <input type="number" class="form-control" id="communities_listing_max_faces" name="communities_listing_max_faces" min="1" max="24" value="{{ (int) ($settings->communities_listing_max_faces ?? 8) }}">
             </div>
         </div>
@@ -105,7 +105,7 @@
         @if(Schema::hasColumn('setting', 'communities_listing_cards_per_row'))
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
-                <label for="communities_listing_cards_per_row">Cards per row (desktop)</label>
+                <label for="communities_listing_cards_per_row">{{ __('admin_configure.cards_per_row_desktop') }}</label>
                 <select class="form-control" id="communities_listing_cards_per_row" name="communities_listing_cards_per_row">
                     @foreach([1 => '1 per row', 2 => '2 per row (default)', 3 => '3 per row'] as $val => $label)
                         <option value="{{ $val }}" @if((int) ($settings->communities_listing_cards_per_row ?? 2) === $val) selected @endif>{{ $label }}</option>
@@ -121,12 +121,12 @@
         <i class="fa fa-arrows-alt"></i>
         Pagination &amp; Infinite Scroll
     </div>
-    <small class="info-text mb-3 d-block">How listings load more content across the site.</small>
+    <small class="info-text mb-3 d-block">{{ __('admin_configure.pagination_modes_intro') }}</small>
 
     <div class="row settings-grid-row">
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
-                <label for="search_pagination_mode">Records search</label>
+                <label for="search_pagination_mode">{{ __('admin_configure.records_search') }}</label>
                 <select class="form-control" id="search_pagination_mode" name="search_pagination_mode">
                     <option value="pagination" @if(($settings->search_pagination_mode ?? 'pagination') === 'pagination') selected @endif>Pagination</option>
                     <option value="infinite_scroll" @if(($settings->search_pagination_mode ?? 'pagination') === 'infinite_scroll') selected @endif>Infinite scroll</option>
@@ -135,7 +135,7 @@
         </div>
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
-                <label for="forums_pagination_mode">Forums</label>
+                <label for="forums_pagination_mode">{{ __('admin_configure.forums') }}</label>
                 <select class="form-control" id="forums_pagination_mode" name="forums_pagination_mode">
                     <option value="pagination" @if(($settings->forums_pagination_mode ?? 'pagination') === 'pagination') selected @endif>Pagination</option>
                     <option value="infinite_scroll" @if(($settings->forums_pagination_mode ?? 'pagination') === 'infinite_scroll') selected @endif>Infinite scroll</option>
@@ -144,7 +144,7 @@
         </div>
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
-                <label for="communities_pagination_mode">Communities</label>
+                <label for="communities_pagination_mode">{{ __('admin_configure.communities') }}</label>
                 <select class="form-control" id="communities_pagination_mode" name="communities_pagination_mode">
                     <option value="pagination" @if(($settings->communities_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Pagination</option>
                     <option value="infinite_scroll" @if(($settings->communities_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll</option>
@@ -156,7 +156,7 @@
     <div class="row settings-grid-row mt-2">
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
-                <label for="courses_pagination_mode">Courses</label>
+                <label for="courses_pagination_mode">{{ __('admin_configure.courses') }}</label>
                 <select class="form-control" id="courses_pagination_mode" name="courses_pagination_mode">
                     <option value="pagination" @if(($settings->courses_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Pagination</option>
                     <option value="infinite_scroll" @if(($settings->courses_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll</option>
@@ -165,7 +165,7 @@
         </div>
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
-                <label for="faqs_pagination_mode">FAQs</label>
+                <label for="faqs_pagination_mode">{{ __('admin_configure.faqs') }}</label>
                 <select class="form-control" id="faqs_pagination_mode" name="faqs_pagination_mode">
                     <option value="pagination" @if(($settings->faqs_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Pagination</option>
                     <option value="infinite_scroll" @if(($settings->faqs_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll</option>
@@ -174,7 +174,7 @@
         </div>
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
-                <label for="health_topics_pagination_mode">Health topics</label>
+                <label for="health_topics_pagination_mode">{{ __('admin_configure.health_topics') }}</label>
                 <select class="form-control" id="health_topics_pagination_mode" name="health_topics_pagination_mode">
                     <option value="pagination" @if(($settings->health_topics_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Pagination</option>
                     <option value="infinite_scroll" @if(($settings->health_topics_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll</option>
@@ -186,7 +186,7 @@
     <div class="row settings-grid-row mt-2">
         <div class="col-md-4">
             <div class="form-group settings-field--compact mb-0">
-                <label for="home_events_pagination_mode">Homepage events</label>
+                <label for="home_events_pagination_mode">{{ __('admin_configure.homepage_events') }}</label>
                 <select class="form-control" id="home_events_pagination_mode" name="home_events_pagination_mode">
                     <option value="pagination" @if(($settings->home_events_pagination_mode ?? 'infinite_scroll') === 'pagination') selected @endif>Fixed batch (12)</option>
                     <option value="infinite_scroll" @if(($settings->home_events_pagination_mode ?? 'infinite_scroll') === 'infinite_scroll') selected @endif>Infinite scroll</option>

@@ -53,8 +53,8 @@
     @endif
 >
     @if($pinned)
-        <span class="community-room-card__recommended" title="Recommended for you">
-            <i class="fa fa-thumb-tack" aria-hidden="true"></i> Recommended
+        <span class="community-room-card__recommended" title="{{ ui_t('frontend_pages.recommended_for_you', 'Recommended for you') }}">
+            <i class="fa fa-thumb-tack" aria-hidden="true"></i> {{ ui_t('frontend_pages.recommended', 'Recommended') }}
         </span>
     @endif
 
@@ -70,11 +70,11 @@
         <div class="community-room-card__badges">
             @if(isset($community->is_public) && $community->is_public)
                 <span class="community-room-card__badge community-room-card__badge--access">
-                    <i class="fa fa-unlock-alt" aria-hidden="true"></i> Open to all
+                    <i class="fa fa-unlock-alt" aria-hidden="true"></i> {{ ui_t('frontend_pages.open_to_all', 'Open to all') }}
                 </span>
             @else
                 <span class="community-room-card__badge community-room-card__badge--private">
-                    <i class="fa fa-lock" aria-hidden="true"></i> Members only
+                    <i class="fa fa-lock" aria-hidden="true"></i> {{ ui_t('frontend_pages.members_only', 'Members only') }}
                 </span>
             @endif
             @if($lastAt)
@@ -97,7 +97,7 @@
     @if($chairsShown->isNotEmpty())
     <section class="community-room-card__chairs" aria-label="Community leadership" onclick="event.stopPropagation();">
         <span class="community-room-card__chairs-label">
-            <i class="fa fa-star" aria-hidden="true"></i> Chaired by
+            <i class="fa fa-star" aria-hidden="true"></i> {{ ui_t('frontend_pages.chaired_by', 'Chaired by') }}
         </span>
         <ul class="community-room-card__chairs-list list-unstyled mb-0">
             @foreach($chairsShown as $chair)
@@ -158,7 +158,7 @@
 
     @if($faces->isNotEmpty() || $moreMembers > 0)
     <div class="community-room-card__members" onclick="event.stopPropagation();">
-        <span class="community-room-card__members-label">Members</span>
+        <span class="community-room-card__members-label">{{ ui_t('frontend_pages.members', 'Members') }}</span>
         <div class="community-room-card__avatar-carousel" role="region" aria-label="Contributors and members">
             <button type="button" class="community-room-card__avatar-nav community-room-card__avatar-nav--prev" aria-label="Scroll contributors left">
                 <i class="fa fa-chevron-left" aria-hidden="true"></i>
@@ -210,42 +210,42 @@
         <span class="community-room-card__metric" title="Forum discussions">
             <i class="fa fa-comments" aria-hidden="true"></i>
             <strong>{{ number_format((int) ($community->forums_count ?? 0)) }}</strong>
-            <span>Forums</span>
+            <span>{{ ui_t('frontend_pages.forums', 'Forums') }}</span>
         </span>
         <span class="community-room-card__metric" title="Publications">
             <i class="fa fa-book" aria-hidden="true"></i>
             <strong>{{ number_format((int) ($community->publications_count ?? 0)) }}</strong>
-            <span>Resources</span>
+            <span>{{ ui_t('frontend_pages.resources', 'Resources') }}</span>
         </span>
         <span class="community-room-card__metric" title="Members">
             <i class="fa fa-users" aria-hidden="true"></i>
             <strong>{{ number_format((int) ($community->members_count ?? 0)) }}</strong>
-            <span>Members</span>
+            <span>{{ ui_t('frontend_pages.members', 'Members') }}</span>
         </span>
     </div>
 
     <footer class="community-room-card__footer">
         <a href="{{ $detailUrl }}" class="community-room-card__more-link" onclick="event.stopPropagation();">
-            View details <i class="fa fa-arrow-right" aria-hidden="true"></i>
+            {{ ui_t('frontend_pages.view_details', 'View details') }} <i class="fa fa-arrow-right" aria-hidden="true"></i>
         </a>
         <div class="community-room-card__actions" onclick="event.stopPropagation();">
             @if (Auth::check())
                 @if (!$community->user_joined && !$community->user_pending_approval)
                     <button type="button" class="btn btn-sm community-room-card__btn-join join-btn" data-community-id="{{ $community->id }}" data-detail-url="{{ $detailUrl }}">Join</button>
                 @elseif ($community->user_pending_approval)
-                    <button type="button" class="btn btn-sm btn-warning community-room-card__btn-pending" disabled>Pending</button>
+                    <button type="button" class="btn btn-sm btn-warning community-room-card__btn-pending" disabled>{{ ui_t('frontend_pages.pending', 'pending') }}</button>
                 @else
                     <a href="{{ $detailUrl }}" class="btn btn-sm community-room-card__btn-primary">Visit</a>
                     @if(request()->routeIs('account.my-communities'))
-                        <a href="{{ url('/records') }}?community_id={{ $community->id }}" class="btn btn-sm community-room-card__btn-secondary">Resources</a>
-                        <a href="{{ url('/forums') }}?community_id={{ $community->id }}" class="btn btn-sm community-room-card__btn-secondary">Forums</a>
+                        <a href="{{ url('/records') }}?community_id={{ $community->id }}" class="btn btn-sm community-room-card__btn-secondary">{{ ui_t('frontend_pages.resources', 'Resources') }}</a>
+                        <a href="{{ url('/forums') }}?community_id={{ $community->id }}" class="btn btn-sm community-room-card__btn-secondary">{{ ui_t('frontend_pages.forums', 'Forums') }}</a>
                         <button type="button" class="btn btn-sm community-room-card__btn-leave leave-btn" data-community-id="{{ $community->id }}">Leave</button>
                     @else
                         <button type="button" class="btn btn-sm community-room-card__btn-leave leave-btn" data-community-id="{{ $community->id }}">Leave</button>
                     @endif
                 @endif
             @else
-                <a href="{{ route('login') }}" class="btn btn-sm community-room-card__btn-join">Log in to join</a>
+                <a href="{{ route('login') }}" class="btn btn-sm community-room-card__btn-join">{{ ui_t('frontend_pages.log_in_to_join', 'Log in to join') }}</a>
             @endif
         </div>
     </footer>

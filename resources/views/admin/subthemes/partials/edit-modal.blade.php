@@ -37,7 +37,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="thematic_area_id">Thematic Area</label>
+                        <label for="thematic_area_id">{{ __('admin_nav.thematic_area') }}</label>
                         <select class="form-control select2" id="thematic_area_id" name="thematic_area_id">
                             @foreach ($themes as $theme)
                                 <option value="{{ $theme['id'] }}">{{ $theme['description'] }}</option>

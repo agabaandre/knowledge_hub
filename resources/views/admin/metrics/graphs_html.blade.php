@@ -178,16 +178,16 @@
     <div class="metrics-panel">
         <div class="metrics-panel__header">
             <div>
-                <h3 class="metrics-panel__title"><i class="fa fa-chart-area mr-1"></i> Analytics &amp; Insights</h3>
-                <p class="metrics-panel__subtitle">Portal traffic, registrations, and member-state indicators</p>
+                <h3 class="metrics-panel__title"><i class="fa fa-chart-area mr-1"></i> {{ __('admin_dashboard.analytics_insights') }}</h3>
+                <p class="metrics-panel__subtitle">{{ __('admin_dashboard.analytics_subtitle') }}</p>
             </div>
             <div class="filters-toolbar">
                 <div class="filter-item metrics-period-presets">
-                    <button type="button" class="btn btn-sm btn-outline-secondary metrics-preset" data-preset="7">7 days</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary metrics-preset" data-preset="30">30 days</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary metrics-preset" data-preset="90">90 days</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary metrics-preset" data-preset="ytd">YTD</button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary metrics-preset" data-preset="all">All time</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary metrics-preset" data-preset="7">{{ __('admin_dashboard.days_7') }}</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary metrics-preset" data-preset="30">{{ __('admin_dashboard.days_30') }}</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary metrics-preset" data-preset="90">{{ __('admin_dashboard.days_90') }}</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary metrics-preset" data-preset="ytd">{{ __('admin_dashboard.ytd') }}</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary metrics-preset" data-preset="all">{{ __('admin_dashboard.all_time') }}</button>
                 </div>
                 <div class="filter-item">
                     <i class="fa fa-calendar filter-icon"></i>
@@ -200,7 +200,7 @@
                 <div class="filter-item">
                     <i class="fa fa-globe filter-icon"></i>
                     <select id="countryFilter" class="filter-control" style="min-width:200px;">
-                        <option value="">All Countries</option>
+                        <option value="">{{ __('admin_dashboard.all_countries') }}</option>
                     </select>
                 </div>
                 <button id="applyFilters" class="btn btn-apply"><i class="fa fa-filter mr-1"></i>{{ ui_t('general.apply', 'Apply') }}</button>
@@ -209,18 +209,18 @@
 
         <div class="metrics-panel__body">
             <div id="metricsKpiGrid" class="metrics-kpi-grid">
-                <div class="metrics-kpi"><div class="metrics-kpi__value" id="kpiTotalVisits">—</div><div class="metrics-kpi__label">Visits (period)</div></div>
-                <div class="metrics-kpi"><div class="metrics-kpi__value" id="kpiTotalSignups" style="color:{{ $red }}">—</div><div class="metrics-kpi__label">Signups (period)</div></div>
-                <div class="metrics-kpi"><div class="metrics-kpi__value" id="kpiVisitCountries">—</div><div class="metrics-kpi__label">Countries (visits)</div></div>
-                <div class="metrics-kpi"><div class="metrics-kpi__value" id="kpiSignupCountries" style="color:{{ $red }}">—</div><div class="metrics-kpi__label">Countries (signups)</div></div>
+                <div class="metrics-kpi"><div class="metrics-kpi__value" id="kpiTotalVisits">—</div><div class="metrics-kpi__label">{{ __('admin_dashboard.visits_period') }}</div></div>
+                <div class="metrics-kpi"><div class="metrics-kpi__value" id="kpiTotalSignups" style="color:{{ $red }}">—</div><div class="metrics-kpi__label">{{ __('admin_dashboard.signups_period') }}</div></div>
+                <div class="metrics-kpi"><div class="metrics-kpi__value" id="kpiVisitCountries">—</div><div class="metrics-kpi__label">{{ __('admin_dashboard.countries_visits') }}</div></div>
+                <div class="metrics-kpi"><div class="metrics-kpi__value" id="kpiSignupCountries" style="color:{{ $red }}">—</div><div class="metrics-kpi__label">{{ __('admin_dashboard.countries_signups') }}</div></div>
             </div>
 
             <div class="row metrics-live-row">
                 <div class="col-lg-6 mb-3 mb-lg-0">
                     <div class="metrics-live-card">
                         <div class="metrics-live-card__head">
-                            <h4><i class="fa fa-chart-line mr-1"></i> Visits over time</h4>
-                            <span class="metrics-live-badge"><span class="metrics-live-badge__dot"></span> Live</span>
+                            <h4><i class="fa fa-chart-line mr-1"></i> {{ __('admin_dashboard.visits_over_time') }}</h4>
+                            <span class="metrics-live-badge"><span class="metrics-live-badge__dot"></span> {{ __('admin_dashboard.live') }}</span>
                         </div>
                         <div class="metrics-live-card__body">
                             <div id="visits-over-time-chart" style="width:100%;height:240px;"></div>
@@ -230,8 +230,8 @@
                 <div class="col-lg-6">
                     <div class="metrics-live-card">
                         <div class="metrics-live-card__head">
-                            <h4><i class="fa fa-user-plus mr-1"></i> Signups over time</h4>
-                            <span class="metrics-live-badge"><span class="metrics-live-badge__dot"></span> Live</span>
+                            <h4><i class="fa fa-user-plus mr-1"></i> {{ __('admin_dashboard.signups_over_time') }}</h4>
+                            <span class="metrics-live-badge"><span class="metrics-live-badge__dot"></span> {{ __('admin_dashboard.live') }}</span>
                         </div>
                         <div class="metrics-live-card__body">
                             <div id="signups-over-time-chart" style="width:100%;height:240px;"></div>
@@ -242,19 +242,19 @@
 
             <div class="metrics-map-card">
                 <div class="metrics-map-card__head">
-                    <h3><i class="fa fa-globe mr-1"></i> Geographic map</h3>
-                    <p class="text-muted mb-0 small">Worldwide portal traffic and Africa member-state indicators</p>
+                    <h3><i class="fa fa-globe mr-1"></i> {{ __('admin_dashboard.geographic_map') }}</h3>
+                    <p class="text-muted mb-0 small">{{ __('admin_dashboard.geographic_map_subtitle') }}</p>
                 </div>
                 <div style="padding: 1.25rem 1.5rem;">
                     <ul class="nav admin-africa-map-tabs" id="adminAfricaMapTabs" role="tablist">
                         <li class="nav-item">
                             <button type="button" class="nav-link active" data-map-mode="visits" id="adminMapTabVisits">
-                                <i class="fa fa-chart-line mr-1"></i> Worldwide traffic
+                                <i class="fa fa-chart-line mr-1"></i> {{ __('admin_dashboard.worldwide_traffic') }}
                             </button>
                         </li>
                         <li class="nav-item">
                             <button type="button" class="nav-link" data-map-mode="indicators" id="adminMapTabIndicators">
-                                <i class="fa fa-chart-bar mr-1"></i> Member state indicators
+                                <i class="fa fa-chart-bar mr-1"></i> {{ __('admin_dashboard.member_state_indicators') }}
                             </button>
                         </li>
                     </ul>
@@ -264,18 +264,18 @@
 
                     <div id="adminKpiMapControls" class="admin-map-controls" style="display:none;">
                         <div>
-                            <label for="adminMapIndicatorSelect">Indicator</label>
+                            <label for="adminMapIndicatorSelect">{{ __('admin_dashboard.indicator') }}</label>
                             <select id="adminMapIndicatorSelect">
-                                <option value="0" @if(($initialKpiMap['kpi_id'] ?? 0) == 0) selected @endif>Publications by country</option>
+                                <option value="0" @if(($initialKpiMap['kpi_id'] ?? 0) == 0) selected @endif>{{ __('admin_dashboard.publications_by_country') }}</option>
                                 @foreach($mapIndicators as $indicator)
                                     <option value="{{ $indicator->id }}" @if(($initialKpiMap['kpi_id'] ?? null) == $indicator->id) selected @endif>{{ $indicator->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div>
-                            <label for="adminMapRegionSelect">Region scope</label>
+                            <label for="adminMapRegionSelect">{{ __('admin_dashboard.region_scope') }}</label>
                             <select id="adminMapRegionSelect">
-                                <option value="">All Africa (member states)</option>
+                                <option value="">{{ __('admin_dashboard.all_africa_member_states') }}</option>
                                 @foreach($mapRegions as $region)
                                     <option value="{{ $region->id }}">{{ $region->region_name }}</option>
                                 @endforeach
@@ -286,18 +286,18 @@
                     <div id="admin-africa-map"></div>
 
                     <div class="admin-map-legend">
-                        <div class="admin-map-legend__title" id="adminMapLegendTitle">Map scale</div>
+                        <div class="admin-map-legend__title" id="adminMapLegendTitle">{{ __('admin_dashboard.map_scale') }}</div>
                         <div class="admin-map-legend__bar" id="adminMapLegendBar"></div>
                         <div class="admin-map-legend__labels">
                             <span id="adminMapLegendMin">—</span>
-                            <span>Low → High</span>
+                            <span>{{ __('admin_dashboard.low_to_high') }}</span>
                             <span id="adminMapLegendMax">—</span>
                         </div>
                     </div>
 
                     @if(count($continentalIndicators) > 0)
                     <div id="adminContinentalChips" style="display:none;">
-                        <p class="small text-muted mb-2 mt-3 mb-2">Continental aggregates — click to load on map:</p>
+                        <p class="small text-muted mb-2 mt-3 mb-2">{{ __('admin_dashboard.continental_aggregates') }}</p>
                         <div class="admin-continental-chips">
                             @foreach(array_slice($continentalIndicators, 0, 12) as $indicator)
                                 @php $d = $indicator['display'] ?? []; @endphp
@@ -311,7 +311,7 @@
                     </div>
                     @endif
 
-                    <p id="visitsMapPeriodLabel" class="text-muted mb-0 small mt-3">Showing all recorded visits</p>
+                    <p id="visitsMapPeriodLabel" class="text-muted mb-0 small mt-3">{{ __('admin_dashboard.showing_all_recorded_visits') }}</p>
                 </div>
             </div>
 

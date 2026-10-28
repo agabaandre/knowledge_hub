@@ -38,7 +38,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title mb-3">
-                        <i class="fa fa-file-alt mr-2"></i>Content Requests
+                        <i class="fa fa-file-alt mr-2"></i>{{ __('admin_nav.content_requests') }}
                     </h3>
                     
                     <!-- Filters (auto-apply) -->

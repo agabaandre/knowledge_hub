@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SiteLanguage;
 use App\Services\ChatGPTService;
 use App\Services\UiTranslationService;
+use App\Support\AiConfig;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
@@ -79,6 +80,11 @@ class LanguageManagementController extends Controller
             'translations.*' => 'nullable|string|max:5000',
         ]);
 
+        $wantsJson = $request->ajax()
+            || $request->wantsJson()
+            || $request->expectsJson()
+            || $request->header('X-Requested-With') === 'XMLHttpRequest';
+
         try {
             $this->uiTranslations->saveGroup(
                 $validated['locale'],
@@ -88,9 +94,26 @@ class LanguageManagementController extends Controller
         } catch (\Throwable $e) {
             report($e);
 
+            if ($wantsJson) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => __('admin_language_management.save_failed').' '.$e->getMessage(),
+                ], 500);
+            }
+
             return back()
                 ->withInput()
-                ->with('alert-danger', 'Could not save translations: '.$e->getMessage());
+                ->with('alert-danger', __('admin_language_management.save_failed').' '.$e->getMessage());
+        }
+
+        if ($wantsJson) {
+            return response()->json([
+                'ok' => true,
+                'message' => __('admin_language_management.saved'),
+                'locale' => $validated['locale'],
+                'group' => $validated['group'],
+                'saved' => count($validated['translations']),
+            ]);
         }
 
         return redirect()
@@ -98,20 +121,28 @@ class LanguageManagementController extends Controller
                 'locale' => $validated['locale'],
                 'group' => $validated['group'],
             ])
-            ->with('alert-success', 'Translations saved. Clear application cache if you use config/view caching.');
+            ->with('alert-success', __('admin_language_management.saved'));
     }
 
     /**
      * AI-assisted fill: translate English source strings into the selected locale (review then Save).
+     * Accepts optional `keys` so the browser can send small chunks (avoids PHP max_execution_time kills).
      */
     public function aiTranslate(Request $request, ChatGPTService $chatGpt)
     {
+        // Web SAPI defaults to 30s; a full nav group needs multiple OpenAI round-trips.
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(180);
+        }
+
         $groups = array_keys($this->uiTranslations->groups());
         $locales = $this->uiTranslations->supportedLocales();
 
         $validated = $request->validate([
             'locale' => ['required', 'string', Rule::in($locales)],
             'group' => ['required', 'string', Rule::in($groups)],
+            'keys' => ['sometimes', 'array', 'max:40'],
+            'keys.*' => ['string', 'max:190'],
         ]);
 
         if ($validated['locale'] === 'en') {
@@ -121,10 +152,10 @@ class LanguageManagementController extends Controller
             ], 422);
         }
 
-        if (trim((string) config('ai.open_api_key')) === '') {
+        if (AiConfig::resolveChatProviderForFeature('translation') === null) {
             return response()->json([
                 'ok' => false,
-                'message' => 'OpenAI API key is not configured. Set OPEN_API_KEY in your environment.',
+                'message' => 'No AI provider is configured for UI translation. Set an API key under Admin → Settings → AI integrations (or OPEN_API_KEY).',
             ], 503);
         }
 
@@ -133,6 +164,24 @@ class LanguageManagementController extends Controller
             return response()->json([
                 'ok' => false,
                 'message' => 'No English strings found for this section.',
+            ], 404);
+        }
+
+        $requestedKeys = $validated['keys'] ?? null;
+        if (is_array($requestedKeys) && $requestedKeys !== []) {
+            $subset = [];
+            foreach ($requestedKeys as $key) {
+                if (array_key_exists($key, $english)) {
+                    $subset[$key] = $english[$key];
+                }
+            }
+            $english = $subset;
+        }
+
+        if ($english === []) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'None of the requested keys exist in this section.',
             ], 404);
         }
 
@@ -149,6 +198,8 @@ class LanguageManagementController extends Controller
         return response()->json([
             'ok' => true,
             'translations' => $result['translations'] ?? [],
+            'translated' => count($result['translations'] ?? []),
+            'requested' => count($english),
         ]);
     }
 

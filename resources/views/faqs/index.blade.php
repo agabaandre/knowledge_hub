@@ -205,10 +205,10 @@
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                 <div style="text-align: center; padding: 2rem 0;">
                     <h1 style="font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: white;">
-                        <i class="fa fa-question-circle me-2"></i>Frequently Asked Questions
+                        <i class="fa fa-question-circle me-2"></i>{{ ui_t('frontend_pages.faqs_title', 'Frequently Asked Questions') }}
                     </h1>
                     <p style="margin: 0; color: rgba(255, 255, 255, 0.95); font-size: 1rem;">
-                        Find answers to common questions about the Africa CDC Knowledge Hub
+                        {{ ui_t('frontend_pages.faqs_intro', 'Find answers to common questions about the Africa CDC Knowledge Hub') }}
                     </p>
                 </div>
             </div>
@@ -227,13 +227,13 @@
             <input type="text" 
                    id="faqSearch" 
                    class="faq-search-input" 
-                   placeholder="Search FAQs... (e.g., registration, publications, download)"
+                   placeholder="{{ ui_t('frontend_pages.search_faqs_placeholder', 'Search FAQs... (e.g., registration, publications, download)') }}"
                    autocomplete="off">
         </div>
 
         <!-- FAQs Stats -->
         <div class="faqs-stats">
-            <span id="faqCount">{{ $faqs->total() }}</span> Frequently Asked Questions
+            <span id="faqCount">{{ $faqs->total() }}</span> {{ ui_t('frontend_pages.faqs_title', 'Frequently Asked Questions') }}
         </div>
 
         <!-- FAQs List -->
@@ -256,8 +256,8 @@
             @else
                 <div class="no-results">
                     <i class="fa fa-inbox"></i>
-                    <h3>No FAQs Found</h3>
-                    <p>There are currently no frequently asked questions available.</p>
+                    <h3>{{ ui_t('frontend_pages.no_faqs_found', 'No FAQs Found') }}</h3>
+                    <p>{{ ui_t('frontend_pages.no_faqs_available', 'There are currently no frequently asked questions available.') }}</p>
                 </div>
             @endif
         </div>
@@ -266,15 +266,15 @@
             @php $loadedFaqCount = (($faqs->currentPage() - 1) * $faqs->perPage()) + $faqs->count(); @endphp
             <div class="faqs-infinite-footer py-3 text-center" id="faqs-infinite-footer">
                 <p class="text-muted small mb-2" id="faqs-infinite-status">
-                    Showing {{ number_format($loadedFaqCount) }} of {{ number_format($faqs->total()) }} FAQs
+                    {{ ui_t('frontend_pages.showing_of_faqs', 'Showing :loaded of :total FAQs', ['loaded' => number_format($loadedFaqCount), 'total' => number_format($faqs->total())]) }}
                 </p>
                 @if($faqs->hasMorePages())
                     <div id="faqs-infinite-sentinel" class="faqs-infinite-sentinel" aria-hidden="true"></div>
                     <div id="faqs-infinite-loader" class="faqs-infinite-loader d-none" aria-live="polite">
-                        <i class="fa fa-spinner fa-spin me-1"></i>Loading more FAQs…
+                        <i class="fa fa-spinner fa-spin me-1"></i>{{ ui_t('frontend_pages.loading_more_faqs', 'Loading more FAQs…') }}
                     </div>
                 @else
-                    <p class="text-muted small mb-0" id="faqs-infinite-complete">All FAQs loaded</p>
+                    <p class="text-muted small mb-0" id="faqs-infinite-complete">{{ ui_t('frontend_pages.all_faqs_loaded', 'All FAQs loaded') }}</p>
                 @endif
             </div>
         @elseif($faqs instanceof \Illuminate\Pagination\AbstractPaginator && $faqs->hasPages())
@@ -287,8 +287,8 @@
         <!-- No Results Message -->
         <div id="noResults" class="no-results" style="display: none;">
             <i class="fa fa-search"></i>
-            <h3>No Results Found</h3>
-            <p>Try adjusting your search terms or browse all FAQs.</p>
+            <h3>{{ ui_t('frontend_pages.no_results_found', 'No Results Found') }}</h3>
+            <p>{{ ui_t('frontend_pages.try_adjusting_search', 'Try adjusting your search terms or browse all FAQs.') }}</p>
         </div>
 
     </div>
@@ -302,8 +302,8 @@
         enabled: @json((bool) ($faqsInfiniteScroll ?? false)),
         pageUrl: @json(route('faqs.page'))
     };
-    window.FAQS_INFINITE_STATUS_COMPLETE = 'All FAQs loaded';
-    window.FAQS_INFINITE_STATUS_ERROR = 'Could not load more FAQs. Tap to retry.';
+    window.FAQS_INFINITE_STATUS_COMPLETE = @json(ui_t('frontend_pages.all_faqs_loaded', 'All FAQs loaded'));
+    window.FAQS_INFINITE_STATUS_ERROR = @json(ui_t('frontend_pages.faqs_load_error', 'Could not load more FAQs. Tap to retry.'));
 </script>
 <script src="{{ asset('js/faqs-index-infinite.js') }}?v={{ @filemtime(public_path('js/faqs-index-infinite.js')) }}"></script>
 <script>

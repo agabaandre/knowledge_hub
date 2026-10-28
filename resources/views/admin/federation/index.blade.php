@@ -21,7 +21,7 @@
 <div class="page-header mb-3">
     <div>
         <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="{{ url('admin') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url('admin') }}">{{ __('admin_nav.dashboard') }}</a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.configure') }}">{{ __('admin_nav.settings') }}</a></li>
             <li class="breadcrumb-item active">{{ __('admin_nav.federated_hubs') }}</li>
         </ol>

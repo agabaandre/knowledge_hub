@@ -47,7 +47,7 @@
                 <div class="course-button mt-2">
                     @if ($row->isExternalCourse() && $row->external_course_url)
                         <a href="{{ $row->external_course_url }}" target="_blank" rel="noopener noreferrer" class="btn theme-primary btn-sm">
-                            Open on eLearning Platform
+                            {{ ui_t('frontend_pages.open_on_elearning', 'Open on eLearning Platform') }}
                         </a>
                     @elseif ($row->content)
                         <a href="{{ url('courses/details/'.$row->id) }}" class="btn theme-secondary btn-sm">
@@ -55,7 +55,7 @@
                         </a>
                     @elseif ($row->course_url)
                         <a href="{{ $row->course_url }}" target="_blank" rel="noopener noreferrer" class="btn theme-primary btn-sm">
-                            View Course
+                            {{ ui_t('frontend_pages.view_course', 'View Course') }}
                         </a>
                     @endif
                 </div>

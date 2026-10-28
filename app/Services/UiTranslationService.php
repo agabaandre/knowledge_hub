@@ -6,6 +6,7 @@ use App\Models\DataCategory;
 use App\Models\SiteLanguage;
 use App\Models\StaticLink;
 use App\Support\UiLocaleLabels;
+use App\Support\UiTranslationCache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 
@@ -78,6 +79,7 @@ class UiTranslationService
     {
         return match ($group) {
             'frontend_nav' => $this->dynamicFrontendNavKeys(),
+            'admin_nav' => $this->dynamicAdminNavKeys(),
             'ui_body' => $this->dynamicSiteBrandingKeys(),
             default => [],
         };
@@ -105,6 +107,43 @@ class UiTranslationService
                 foreach (StaticLink::query()->orderBy('order')->get(['id', 'title']) as $link) {
                     $out[UiLocaleLabels::navStaticLinkTranslationKey((int) $link->id)] = (string) ($link->title ?? '');
                 }
+            }
+        } catch (\Throwable $e) {
+            // Database may be unavailable during install or early bootstrap.
+        }
+
+        return $out;
+    }
+
+    /**
+     * Admin-nav dashboard publication titles (same set as DashboardsViewComposer).
+     *
+     * @return array<string, string>
+     */
+    private function dynamicAdminNavKeys(): array
+    {
+        $out = [];
+
+        try {
+            if (! Schema::hasTable('publications')) {
+                return $out;
+            }
+
+            $query = \App\Models\Publication::query()
+                ->where(function ($q) {
+                    $q->whereHas('data_category', function ($dq) {
+                        $dq->where('is_dashboard', 1);
+                    })->orWhere('is_admin_only_access', 1);
+                })
+                ->orderBy('id')
+                ->get(['id', 'title']);
+
+            foreach ($query as $dashboard) {
+                $id = (int) $dashboard->id;
+                if ($id <= 0) {
+                    continue;
+                }
+                $out[UiLocaleLabels::adminDashboardPublicationTranslationKey($id)] = strip_tags((string) ($dashboard->title ?? ''));
             }
         } catch (\Throwable $e) {
             // Database may be unavailable during install or early bootstrap.
@@ -143,6 +182,12 @@ class UiTranslationService
      */
     public function loadMergedGroup(string $locale, string $group): array
     {
+        $cacheKeyLocale = $locale.'#merged';
+        $cached = UiTranslationCache::getGroup($cacheKeyLocale, $group);
+        if ($cached !== null) {
+            return $cached;
+        }
+
         $en = $this->loadEnglishGroup($group);
         if ($en === []) {
             return [];
@@ -181,6 +226,8 @@ class UiTranslationService
 
             $out[$key] = $default;
         }
+
+        UiTranslationCache::putGroup($cacheKeyLocale, $group, $out);
 
         return $out;
     }
@@ -226,6 +273,8 @@ class UiTranslationService
         if (function_exists('opcache_invalidate')) {
             @opcache_invalidate($path, true);
         }
+        // Bust Redis (or file-cache) entries for runtime __()/ui_t() and Language Management grids.
+        UiTranslationCache::invalidateAfterSave($locale, $group);
         try {
             app('translator')->setLoaded([]);
         } catch (\Throwable $e) {

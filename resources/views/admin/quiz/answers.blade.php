@@ -13,11 +13,11 @@
 
 @section('content')
 <div class="page-header">
-    <h1 class="page-title">Question Answers</h1>
+    <h1 class="page-title">{{ __('admin_nav.question_answers') }}</h1>
     <div>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url('admin/quiz') }}">Quiz Questions</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Answers</li>
+            <li class="breadcrumb-item"><a href="{{ url('admin/quiz') }}">{{ __('admin_nav.quiz_questions') }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.answers') }}</li>
         </ol>
     </div>
 </div>

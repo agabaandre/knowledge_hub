@@ -26,7 +26,7 @@ class CountriesViewComposer{
         // Member-state hubs only expose the configured owner country in country pickers.
         if ($isCountryHub && $ownerCountryId) {
             $cacheKey = 'countries_hub_owner_'.$ownerCountryId;
-            $countries = cache()->remember($cacheKey, $minutes, function () use ($ownerCountryId) {
+            $countries = $this->rememberCountries($cacheKey, $minutes, function () use ($ownerCountryId) {
                 return Country::query()
                     ->where('id', (int) $ownerCountryId)
                     ->orderBy('name', 'asc')
@@ -39,7 +39,7 @@ class CountriesViewComposer{
             return;
         }
 
-        $countries = cache()->remember('countries', $minutes, function () {
+        $countries = $this->rememberCountries('countries', $minutes, function () {
             $query = Country::where('national', 'national');
             $this->sharedRepo->access_filter($query, true);
             return $query->orderBy('name', 'asc')->get();
@@ -47,6 +47,25 @@ class CountriesViewComposer{
 
         $view->with('countries', $countries);
         $view->with('hubCountriesScoped', false);
+    }
+
+    /**
+     * Cache country lists when possible; never fail the view if storage is not writable
+     * (common when CLI user and Apache/_www share the same file cache).
+     */
+    protected function rememberCountries(string $key, int $minutes, callable $loader)
+    {
+        try {
+            return cache()->remember($key, $minutes, $loader);
+        } catch (\Throwable $e) {
+            try {
+                cache()->forget($key);
+            } catch (\Throwable $ignored) {
+                // ignore
+            }
+
+            return $loader();
+        }
     }
 
 

@@ -979,11 +979,11 @@
 
 @section('content')
     <div class="page-header">
-        <h1 class="page-title">System Configuration</h1>
+        <h1 class="page-title">{{ __('admin_nav.system_configuration') }}</h1>
         <div>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="javascript:void(0)">Dashboard</a></li>
-                <li class="breadcrumb-item active" aria-current="page">System Configuration</li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('admin_nav.dashboard') }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.system_configuration') }}</li>
             </ol>
         </div>
     </div>
@@ -996,7 +996,10 @@
     @endif
 
     <div class="alert alert-info d-flex flex-column flex-md-row align-items-md-center justify-content-between flex-wrap gap-2 mb-3">
-        <span><i class="fa fa-language me-2"></i><strong>Default language</strong> is set on the General tab (dropdown from active site languages). <strong>{{ __('admin_nav.site_languages') }}</strong> — add locales, display names, and Google Translate codes. <strong>{{ __('admin_nav.language_management') }}</strong> — edit UI strings per locale.</span>
+        <span><i class="fa fa-language me-2"></i>{!! __('admin_configure.language_banner', [
+            'site_languages' => '<strong>'.e(__('admin_nav.site_languages')).'</strong>',
+            'language_management' => '<strong>'.e(__('admin_nav.language_management')).'</strong>',
+        ]) !!}</span>
         <span class="d-flex gap-2 flex-shrink-0">
             <a href="{{ route('admin.site-languages.index') }}" class="btn btn-sm btn-outline-primary text-nowrap">{{ __('admin_nav.site_languages') }}</a>
             <a href="{{ route('admin.language-management.index') }}" class="btn btn-sm btn-outline-primary text-nowrap">{{ __('admin_nav.language_management') }}</a>
@@ -1005,71 +1008,71 @@
 
         <div class="settings-container {{ (settings()->site_theme ?? '') === 'theme1.' ? 'settings-theme1' : '' }}">
             <div class="settings-header">
-                <h2><i class="fa fa-cog me-2"></i>System Configuration</h2>
-                <p>Manage your site settings and preferences</p>
+                <h2><i class="fa fa-cog me-2"></i>{{ __('admin_configure.page_title') }}</h2>
+                <p>{{ __('admin_configure.page_subtitle') }}</p>
             </div>
 
             <ul class="nav nav-tabs settings-tabs" id="settingsTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="general-tab" data-tab="general" type="button" role="tab" aria-controls="general" aria-selected="true">
-                        <i class="fa fa-info-circle me-2"></i>General
+                        <i class="fa fa-info-circle me-2"></i>{{ __('admin_configure.tab_general') }}
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="branding-tab" data-tab="branding" type="button" role="tab" aria-controls="branding" aria-selected="false">
-                        <i class="fa fa-image me-2"></i>Branding
+                        <i class="fa fa-image me-2"></i>{{ __('admin_configure.tab_branding') }}
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="frontend-tab" data-tab="frontend" type="button" role="tab" aria-controls="frontend" aria-selected="false">
-                        <i class="fa fa-desktop me-2"></i>Frontend
+                        <i class="fa fa-desktop me-2"></i>{{ __('admin_configure.tab_frontend') }}
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="colors-tab" data-tab="colors" type="button" role="tab" aria-controls="colors" aria-selected="false">
-                        <i class="fa fa-palette me-2"></i>Colors &amp; Typography
+                        <i class="fa fa-palette me-2"></i>{{ __('admin_configure.tab_colors') }}
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="navigation-tab" data-tab="navigation" type="button" role="tab" aria-controls="navigation" aria-selected="false">
-                        <i class="fa fa-bars me-2"></i>Navigation
+                        <i class="fa fa-bars me-2"></i>{{ __('admin_configure.tab_navigation') }}
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="homepage-tab" data-tab="homepage" type="button" role="tab" aria-controls="homepage" aria-selected="false">
-                        <i class="fa fa-home me-2"></i>Homepage
+                        <i class="fa fa-home me-2"></i>{{ __('admin_configure.tab_homepage') }}
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="search-tab" data-tab="search" type="button" role="tab" aria-controls="search" aria-selected="false">
-                        <i class="fa fa-search me-2"></i>{{ ui_t('general.search', 'Search') }}
+                        <i class="fa fa-search me-2"></i>{{ __('admin_configure.tab_search') }}
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="contact-tab" data-tab="contact" type="button" role="tab" aria-controls="contact" aria-selected="false">
-                        <i class="fa fa-address-book me-2"></i>Contact
+                        <i class="fa fa-address-book me-2"></i>{{ __('admin_configure.tab_contact') }}
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="email-tab" data-tab="email" type="button" role="tab" aria-controls="email" aria-selected="false">
-                        <i class="fa fa-envelope me-2"></i>Email
+                        <i class="fa fa-envelope me-2"></i>{{ __('admin_configure.tab_email') }}
                     </button>
                 </li>
                 @if(!empty($ssoFields))
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="social-login-tab" data-tab="social-login" type="button" role="tab" aria-controls="social-login" aria-selected="false">
-                        <i class="fa fa-sign-in-alt me-2"></i>Social Login
+                        <i class="fa fa-sign-in-alt me-2"></i>{{ __('admin_configure.tab_social_login') }}
                     </button>
                 </li>
                 @endif
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="badges-tab" data-tab="badges" type="button" role="tab" aria-controls="badges" aria-selected="false">
-                        <i class="fa fa-trophy me-2"></i>Badges
+                        <i class="fa fa-trophy me-2"></i>{{ __('admin_configure.tab_badges') }}
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="advanced-tab" data-tab="advanced" type="button" role="tab" aria-controls="advanced" aria-selected="false">
-                        <i class="fa fa-sliders me-2"></i>Advanced
+                        <i class="fa fa-sliders me-2"></i>{{ __('admin_configure.tab_advanced') }}
                     </button>
                 </li>
             </ul>
@@ -1090,7 +1093,7 @@
                 <div class="tab-pane fade" id="contact" role="tabpanel">
                     <div class="form-section-title">
                         <i class="fa fa-envelope"></i>
-                        Contact Information
+                        {{ __('admin_configure.contact_information') }}
                 </div>
 
                     <div class="row settings-grid-row">
@@ -1490,7 +1493,7 @@
                     
                     <div class="alert alert-info">
                         <i class="fa fa-info-circle me-2"></i>
-                        <strong>Badge Configuration:</strong> Adjust the contribution thresholds required to earn each badge. Badges are awarded monthly based on the total contributions (publications + forum posts + forum comments) in a community. Changes will apply to future badge awards.
+                        <strong>{{ __('admin_configure.badge_configuration') }}:</strong> {{ __('admin_configure.badge_configuration_help') }}
                     </div>
 
                     @if(isset($badgeTypes) && $badgeTypes->count() > 0)
@@ -2024,31 +2027,31 @@
             <div class="settings-action-bar">
                 <div class="settings-action-bar__inner">
                     <div class="settings-action-bar__primary">
-                        <p class="settings-action-bar__primary-label">Save configuration</p>
+                        <p class="settings-action-bar__primary-label">{{ __('admin_configure.save_configuration') }}</p>
                         <button type="submit" class="btn btn-save" form="settings-main-form">
                             <i class="fa fa-save me-2"></i>{{ ui_t('general.save_all_changes', 'Save All Changes') }}
                         </button>
-                        <p class="settings-action-bar__primary-hint">Applies updates from all tabs above.</p>
+                        <p class="settings-action-bar__primary-hint">{{ __('admin_configure.save_bar_hint') }}</p>
                     </div>
 
                     <div class="settings-tools-panel">
                         <p class="settings-tools-panel__title">
-                            <i class="fa fa-wrench"></i>Backup &amp; maintenance
+                            <i class="fa fa-wrench"></i>{{ __('admin_configure.backup_maintenance') }}
                         </p>
                         <div class="settings-tools-panel__actions">
-                            <a href="{{ route('admin.config.export') }}" class="btn-tool" title="Download current configuration as XML (no images)">
-                                <i class="fa fa-download"></i>Export Config (XML)
+                            <a href="{{ route('admin.config.export') }}" class="btn-tool" title="{{ __('admin_configure.export_config_title') }}">
+                                <i class="fa fa-download"></i>{{ __('admin_configure.export_config_xml') }}
                             </a>
 
                             <form action="{{ route('admin.config.import') }}" method="post" enctype="multipart/form-data" class="settings-import-group" id="import-config-form">
                             @csrf
                                 <input type="file" name="config_file" id="import-config-file" accept=".xml,application/xml,text/xml" required>
-                                <button type="button" class="btn-tool" id="import-config-choose" title="Select a config XML file">
-                                    <i class="fa fa-folder-open"></i>Choose XML
+                                <button type="button" class="btn-tool" id="import-config-choose" title="{{ __('admin_configure.choose_xml_title') }}">
+                                    <i class="fa fa-folder-open"></i>{{ __('admin_configure.choose_xml') }}
                                 </button>
-                                <span class="settings-import-filename" id="import-config-filename">No file selected</span>
-                                <button type="submit" class="btn-tool btn-tool--accent" id="import-config-submit" disabled title="Import configuration from XML (overwrites current theme settings; images are not imported)">
-                                    <i class="fa fa-upload"></i>Import Config
+                                <span class="settings-import-filename" id="import-config-filename">{{ __('admin_configure.no_file_selected') }}</span>
+                                <button type="submit" class="btn-tool btn-tool--accent" id="import-config-submit" disabled title="{{ __('admin_configure.import_config_title') }}">
+                                    <i class="fa fa-upload"></i>{{ __('admin_configure.import_config') }}
                             </button>
     </form>
 
@@ -2056,7 +2059,7 @@
                                     class="btn-tool"
                            onclick="clearCache()"
                            id="clear-cache-btn"
-                           title="Clear all cached data including settings">
+                           title="{{ __('admin_configure.clear_cache_title') }}">
                                 <i class="fa fa-broom"></i>{{ ui_t('general.clear_cache', 'Clear Cache') }}
                         </button>
                     </div>
@@ -2065,9 +2068,9 @@
 
                 <p class="settings-action-footnote mb-0">
                     <i class="fa fa-info-circle"></i>
-                    Settings are cached for 24 hours for better performance — use <strong>{{ ui_t('general.clear_cache', 'Clear Cache') }}</strong> to apply changes immediately.
-                    <strong>Export</strong> saves the active theme as XML (images excluded).
-                    <strong>Import</strong> overwrites the active theme from XML (images are not changed).
+                    {!! __('admin_configure.settings_cache_footnote', ['clear_cache' => '<strong>'.e(ui_t('general.clear_cache', 'Clear Cache')).'</strong>']) !!}
+                    <strong>{{ __('admin_configure.export_label') }}</strong> {{ __('admin_configure.export_footnote') }}
+                    <strong>{{ __('admin_configure.import_label') }}</strong> {{ __('admin_configure.import_footnote') }}
                 </p>
         </div>
         </div>
@@ -2078,7 +2081,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="cacheOutputModalLabel">
-                        <i class="fa fa-terminal me-2"></i>Cache Clear Output
+                        <i class="fa fa-terminal me-2"></i>{{ __('admin_configure.cache_clear_output') }}
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"></button>
                 </div>
@@ -2086,14 +2089,14 @@
                     <div id="cache-output-terminal" class="terminal-output">
                         <div class="terminal-line">
                             <span class="terminal-prompt">$</span>
-                            <span class="terminal-text">Waiting for output...</span>
+                            <span class="terminal-text">{{ __('admin_configure.waiting_for_output') }}</span>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ ui_t('general.close', 'Close') }}</button>
                     <button type="button" class="btn btn-primary" onclick="copyCacheOutput()">
-                        <i class="fa fa-copy me-2"></i>Copy Output
+                        <i class="fa fa-copy me-2"></i>{{ __('admin_configure.copy_output') }}
                     </button>
                 </div>
             </div>
@@ -2128,6 +2131,8 @@
             const importFilename = document.getElementById('import-config-filename');
             const importSubmitBtn = document.getElementById('import-config-submit');
             const importForm = document.getElementById('import-config-form');
+            const noFileSelectedLabel = @json(__('admin_configure.no_file_selected'));
+            const importConfirmMessage = @json(__('admin_configure.import_config_confirm'));
 
             if (importChooseBtn && importFileInput) {
                 importChooseBtn.addEventListener('click', function () {
@@ -2143,7 +2148,7 @@
                         importFilename.classList.add('has-file');
                         importSubmitBtn.disabled = false;
                     } else {
-                        importFilename.textContent = 'No file selected';
+                        importFilename.textContent = noFileSelectedLabel;
                         importFilename.classList.remove('has-file');
                         importSubmitBtn.disabled = true;
                     }
@@ -2156,7 +2161,7 @@
                         e.preventDefault();
                         return;
                     }
-                    if (!confirm('Import configuration from this XML file? This will overwrite the current active theme settings (images are not changed).')) {
+                    if (!confirm(importConfirmMessage)) {
                         e.preventDefault();
                     }
                 });

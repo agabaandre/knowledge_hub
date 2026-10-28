@@ -1,0 +1,35 @@
+<?php
+
+return [
+
+  'ai_failed' => 'A tradução da IA falhou.',
+  'ai_none_updated' => 'Nenhum campo foi atualizado. Tente novamente ou verifique Admin → Configurações → Integrações AI.',
+  'ai_timeout' => 'O tempo de tradução da IA esgotou. Tente novamente — lotes menores são usados automaticamente.',
+  'ai_translate' => 'Traduzir com IA',
+  'ai_translate_title' => 'Usar IA para traduzir o inglês para este idioma. Revise e clique em Salvar.',
+  'ai_translating' => 'Traduzindo :done/:total…',
+  'breadcrumb_dashboard' => 'Painel',
+  'breadcrumb_settings' => 'Configurações',
+  'col_english' => 'Inglês (referência)',
+  'col_key' => 'Chave',
+  'col_translation' => 'Tradução :locale',
+  'confirm_ai' => 'Preencher todos os campos de tradução a partir do inglês usando AI? Os campos são atualizados em pequenos lotes e, em seguida, salvos automaticamente. Você ainda pode editar depois.',
+  'confirm_copy' => 'Preencher campos de tradução vazios a partir do inglês? As traduções existentes são mantidas. Você pode editar antes de salvar.',
+  'copy_failed' => 'Cópia do inglês falhou.',
+  'copy_from_english' => 'Copiar do inglês',
+  'copy_from_english_title' => 'Copiar padrões em inglês para campos vazios. Revise e clique em Salvar.',
+  'intro' => 'Você controla cada string de UI editável para o locale selecionado — incluindo navegação do Frontend e barra lateral do Admin. Prioridade: valores salvos aqui → arquivos de idioma empacotados → títulos de categoria/link no DB → Inglês. Deixe um campo vazio para manter o padrão empacotado (ou do DB). A navegação é nativa (não é Google Translate), então as edições aqui são o que os visitantes veem para esse idioma.',
+  'load_failed' => 'Não foi possível carregar as traduções para este local/seção. Por favor, atualize a página.',
+  'loading' => 'Carregando…',
+  'loading_translations' => 'Carregando traduções…',
+  'no_fields' => 'Nenhum campo de tradução encontrado nesta página.',
+  'save_failed' => 'Não foi possível salvar as traduções.',
+  'saved' => 'Traduções salvas.',
+  'saved_after_ai' => 'Traduções da IA aplicadas e salvas.',
+  'saving' => 'Salvando…',
+  'section' => 'Seção',
+  'select_locale' => 'Selecionar locale',
+  'select_non_english_ai' => 'Selecione um local não inglês para usar a tradução AI.',
+  'select_non_english_copy' => 'Selecione um local não inglês para copiar o inglês.',
+
+];

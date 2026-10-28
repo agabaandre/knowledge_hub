@@ -370,11 +370,10 @@
                 <div class="dropdown-menu animated fadeInUp">
 
                     <a class="dropdown-item" href="{{ route('home') }}" target="_blank"><i class="bx bx-link"></i>
-                        View Khub Website</a>
+                        {{ __('ui_body.view_khub_website') }}</a>
                     <a class="dropdown-item" href="{{ url('permissions/profile') }}"><i
-                            class="bx bx-user-circle"></i> My Profile</a>
-                    <a class="dropdown-item" href="{{ url('logout') }}"><i class="bx bx-log-out-circle"></i> Log
-                        Out</a>
+                            class="bx bx-user-circle"></i> {{ __('ui_body.my_profile') }}</a>
+                    <a class="dropdown-item" href="{{ url('logout') }}"><i class="bx bx-log-out-circle"></i> {{ __('ui_body.log_out') }}</a>
                 </div>
             </div><!-- Main-profile-menu closed -->
             <button class="navbar-toggler navresponsive-toggler" type="button" data-toggle="collapse"

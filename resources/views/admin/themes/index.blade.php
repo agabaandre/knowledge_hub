@@ -7,11 +7,11 @@
 
 @section('content')
 <div class="page-header">
-    <h1 class="page-title">{{ $description ?? 'Thematic Area' }}</h1>
+    <h1 class="page-title">{{ $description ?? __('admin_nav.thematic_area') }}</h1>
     <div>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="javascript:void(0)">Dropdown Lists</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Security Themes</li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('admin_nav.dropdown_lists') }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.security_themes_page') }}</li>
         </ol>
     </div>
 </div>

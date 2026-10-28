@@ -2,11 +2,11 @@
 
 @section('content')
 <div class="page-header">
-    <h1 class="page-title">KPI Subject Areas</h1>
+    <h1 class="page-title">{{ __('admin_nav.kpi_subject_areas') }}</h1>
     <div>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url('admin/kpi') }}">Indicators</a></li>
-            <li class="breadcrumb-item active">Subject Areas</li>
+            <li class="breadcrumb-item"><a href="{{ url('admin/kpi') }}">{{ __('admin_nav.indicators') }}</a></li>
+            <li class="breadcrumb-item active">{{ __('admin_nav.subject_areas') }}</li>
         </ol>
     </div>
 </div>

@@ -8,11 +8,11 @@
   
 @section('content')
 <div class="page-header">
-    <h1 class="page-title">New Public Health Resource</h1>
+    <h1 class="page-title">{{ __('admin_nav.new_public_health_resource') }}</h1>
     <div>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="javascript:void(0)">{{ ui_t('general.publish', 'Publish') }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">New Public Health Resource</li>
+            <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.new_public_health_resource') }}</li>
         </ol>
     </div>
 </div>

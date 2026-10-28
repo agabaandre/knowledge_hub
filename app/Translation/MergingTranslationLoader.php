@@ -3,6 +3,7 @@
 namespace App\Translation;
 
 use App\Services\UiTranslationService;
+use App\Support\UiTranslationCache;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Translation\FileLoader;
 
@@ -43,6 +44,11 @@ class MergingTranslationLoader extends FileLoader
             return parent::load($locale, $group, $namespace);
         }
 
+        $cached = UiTranslationCache::getGroup((string) $locale, (string) $group);
+        if ($cached !== null) {
+            return $cached;
+        }
+
         $english = $this->loadPath($this->path, 'en', $group);
         if (! is_array($english)) {
             $english = [];
@@ -70,26 +76,24 @@ class MergingTranslationLoader extends FileLoader
         $base = array_replace($english, $dynamic, $localePackaged);
 
         $overrideFile = $this->overrideBasePath.'/'.$locale.'/'.$group.'.php';
-        if (! $this->files->exists($overrideFile)) {
-            return $base;
-        }
+        if ($this->files->exists($overrideFile)) {
+            $extra = $this->files->getRequire($overrideFile);
+            if (is_array($extra)) {
+                foreach ($extra as $key => $value) {
+                    if (! is_string($key)) {
+                        continue;
+                    }
+                    // Non-empty Language Management values always override packaged + DB seeds.
+                    if (! is_string($value) || trim($value) === '') {
+                        continue;
+                    }
 
-        $extra = $this->files->getRequire($overrideFile);
-        if (! is_array($extra)) {
-            return $base;
-        }
-
-        foreach ($extra as $key => $value) {
-            if (! is_string($key)) {
-                continue;
+                    $base[$key] = $value;
+                }
             }
-            // Non-empty Language Management values always override packaged + DB seeds.
-            if (! is_string($value) || trim($value) === '') {
-                continue;
-            }
-
-            $base[$key] = $value;
         }
+
+        UiTranslationCache::putGroup((string) $locale, (string) $group, $base);
 
         return $base;
     }

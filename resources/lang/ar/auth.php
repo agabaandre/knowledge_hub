@@ -2,27 +2,24 @@
 
 return [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines are used during authentication for various
-    | messages that we need to display to the user. You are free to modify
-    | these language lines according to your application's requirements.
-    |
-    */
-
-    'failed'     => 'These credentials do not match our records.',
-    'password'   => 'The provided password is incorrect.',
-    'throttle'   => 'Too many login attempts. Please try again in :seconds seconds.',
-    'permissions'=>'Permissions',
-    'permission' =>'Permission',
-    'role'       =>'Role',
-    'roles'      =>'Roles',
-    'users'  => 'Users',
-    'user'   => 'User',
-    'login_status'=> " Account Status"
-    
+  'failed' => 'هذه البيانات لا تتطابق مع سجلاتنا.',
+  'password' => 'كلمة المرور المقدمة غير صحيحة.',
+  'throttle' => 'عدد محاولات تسجيل الدخول مرتفع جدًا. يرجى المحاولة مرة أخرى بعد :seconds ثوان.',
+  'permissions' => 'الأذونات',
+  'permission' => 'إذن',
+  'role' => 'دور',
+  'roles' => 'أدوار',
+  'users' => 'المستخدمون',
+  'user' => 'المستخدم',
+  'login_status' => ' Account Status',
+  'welcome_back' => 'مرحبًا بعودتك',
+  'sign_in_subtitle' => 'قم بتسجيل الدخول لمتابعة حسابك',
+  'email_address' => 'عنوان البريد الإلكتروني',
+  'email_placeholder' => 'أدخل عنوان بريدك الإلكتروني',
+  'password_label' => 'كلمة المرور',
+  'password_placeholder' => 'أدخل كلمة المرور الخاصة بك',
+  'or_continue_with' => 'أو تابع باستخدام',
+  'staff_recommend_microsoft' => 'موظفو مركز السيطرة على الأمراض في أفريقيا: نوصي باستخدام تسجيل الدخول عبر Outlook / Microsoft للوصول السلس.',
+  'dont_have_account' => 'لا تملك حسابًا؟',
 
 ];

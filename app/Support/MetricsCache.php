@@ -49,6 +49,8 @@ final class MetricsCache
             'rcc' => self::redisAvailable() ? 900 : 180,
             'rcc_meta' => self::redisAvailable() ? 3600 : 1800,
             'map_context' => self::redisAvailable() ? 3600 : 1800,
+            'ui_translations' => self::redisAvailable() ? 86400 : 1800,
+            'ui_translations_ai' => self::redisAvailable() ? 1209600 : 86400, // 14d / 1d
             'default' => self::redisAvailable() ? 21600 : 3600,
         };
     }

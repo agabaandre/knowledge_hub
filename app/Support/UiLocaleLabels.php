@@ -58,6 +58,27 @@ class UiLocaleLabels
         return 'static_link_'.$id;
     }
 
+    public static function adminDashboardPublicationTranslationKey(int $id): string
+    {
+        return 'dashboard_pub_'.$id;
+    }
+
+    /**
+     * Admin nav label for a dashboard publication (Language Management overrides DB title).
+     *
+     * @param  object{id?: int|null, title?: string|null}  $dashboard
+     */
+    public static function adminDashboardPublicationLabel(object $dashboard): string
+    {
+        $fallback = strip_tags((string) ($dashboard->title ?? ''));
+        $id = (int) ($dashboard->id ?? 0);
+        if ($id <= 0) {
+            return $fallback;
+        }
+
+        return ui_t('admin_nav.'.self::adminDashboardPublicationTranslationKey($id), $fallback);
+    }
+
     /**
      * @param  object{slug?: string|null, category_name?: string|null}  $category
      */

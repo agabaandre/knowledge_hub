@@ -8,8 +8,8 @@
     <div class="container mt-4">
         <div class="card">
             <div class="card-header">
-                <h1 class="h4 mb-0">Messaging</h1>
-                <p class="text-muted small mb-0">Send a push notification to the app, or email only with a rich HTML message.</p>
+                <h1 class="h4 mb-0">{{ __('admin_nav.messaging') }}</h1>
+                <p class="text-muted small mb-0">{{ __('admin_nav.messaging_intro') }}</p>
             </div>
             <div class="card-body">
                 <form id="sendMessageForm" method="POST" action="{{ route('admin.messaging.send') }}">

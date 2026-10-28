@@ -1,0 +1,35 @@
+<?php
+
+return [
+
+  'ai_failed' => 'Kutatua AI kumeshindwa.',
+  'ai_none_updated' => 'Hakuna maeneo yaliyosasishwa. Jaribu tena au angalia Admin → Mipangilio → Uunganisho wa AI.',
+  'ai_timeout' => 'Muda wa kutafsiri AI umekwisha. Jaribu tena — makundi madogo yanatumika kiotomatiki.',
+  'ai_translate' => 'Tafsiri na AI',
+  'ai_translate_title' => 'Tumia AI kutafsiri Kiingereza katika eneo hili. Kagua na bonyeza Hifadhi.',
+  'ai_translating' => 'Inatafsiri :done/:total…',
+  'breadcrumb_dashboard' => 'Dashibodi',
+  'breadcrumb_settings' => 'Mipangilio',
+  'col_english' => 'Kiingereza (rejea)',
+  'col_key' => 'Funguo',
+  'col_translation' => 'tafsiri ya :locale',
+  'confirm_ai' => 'Jaza maeneo yote ya tafsiri kutoka Kiingereza kwa kutumia AI? Maeneo yanapakiwa kwa makundi madogo, kisha kuhifadhi moja kwa moja. Unaweza kuhariri bado baadaye.',
+  'confirm_copy' => 'Jaza maeneo ya tafsiri yasiyo na maudhui kutoka Kiingereza? Tafsiri zilizopo zitaendelea. Unaweza kuhariri kabla ya kuhifadhi.',
+  'copy_failed' => 'Nakili kutoka Kiingereza kumeshindwa.',
+  'copy_from_english' => 'Nakili kutoka Kiingereza',
+  'copy_from_english_title' => 'Nakili mipangilio ya Kiingereza kwenye maeneo yasiyo na maudhui. Kagua na bonyeza Hifadhi.',
+  'intro' => 'Unadhibiti kila maandiko ya UI yanayoweza kubadilishwa kwa eneo lililochaguliwa — ikiwa ni pamoja na urambazaji wa Mbele na Upande wa Usimamizi. Kipaumbele: thamani zilizohifadhiwa hapa → faili za lugha zilizopakiwa → vichwa vya aina/kiungo vya DB → Kiingereza. Acha uwanja kuwa tupu ili kuweka chaguo la msingi (au DB). Nav ni asilia (sio Google Translate), hivyo mabadiliko hapa ndiyo yanayoonekana na wageni kwa lugha hiyo.',
+  'load_failed' => 'Haiwezekani kupakia tafsiri za eneo hili/sehemu hii. Tafadhali refresh ukurasa.',
+  'loading' => 'Inapakia…',
+  'loading_translations' => 'Inapakia tafsiri…',
+  'no_fields' => 'Hakuna maeneo ya tafsiri yaliyopatikana kwenye ukurasa huu.',
+  'save_failed' => 'Haiwezekani kuhifadhi tafsiri.',
+  'saved' => 'Tafsiri zimehifadhiwa.',
+  'saved_after_ai' => 'Tafsiri za AI zimewekwa na kuhifadhiwa.',
+  'saving' => 'Inahifadhi…',
+  'section' => 'Sehemu',
+  'select_locale' => 'Chagua eneo',
+  'select_non_english_ai' => 'Chagua eneo lisilo la Kiingereza kutumia tafsiri ya AI.',
+  'select_non_english_copy' => 'Chagua eneo lisilo la Kiingereza ili kunakili Kiingereza.',
+
+];

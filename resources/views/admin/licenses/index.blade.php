@@ -13,8 +13,8 @@
 <div class="row">
 	<div class="card col-lg-12 af-card">
 		<div class="af-card-header d-flex align-items-center justify-content-between">
-			<strong>{{ $title ?? 'Licenses' }}</strong>
-			<a href="{{ route('admin.licenses.create') }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Add License</a>
+			<strong>{{ $title ?? __('admin_nav.licenses') }}</strong>
+			<a href="{{ route('admin.licenses.create') }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> {{ __('admin_nav.add_license') }}</a>
 		</div>
 		<div class="af-card-body">
 			@include('layouts.partials.alerts')

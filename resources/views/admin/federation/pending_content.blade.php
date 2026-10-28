@@ -4,9 +4,9 @@
 <div class="page-header mb-3">
     <div>
         <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="{{ url('admin') }}">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.federation.index') }}">Federated Hubs</a></li>
-            <li class="breadcrumb-item active">Pending federated content</li>
+            <li class="breadcrumb-item"><a href="{{ url('admin') }}">{{ __('admin_nav.dashboard') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.federation.index') }}">{{ __('admin_nav.federated_hubs_short') }}</a></li>
+            <li class="breadcrumb-item active">{{ __('admin_nav.pending_federated_content') }}</li>
         </ol>
     </div>
 </div>

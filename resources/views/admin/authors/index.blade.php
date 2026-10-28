@@ -41,14 +41,14 @@
 <div class="row">
     <div class="card col-lg-12 af-card">
         <div class="af-card-header d-flex align-items-center justify-content-between">
-            <strong>Authors</strong>
+            <strong>{{ __('admin_nav.authors') }}</strong>
             <div class="d-flex align-items-center" style="gap:8px;">
                 <form class="form-inline" method="get" action="{{ url('admin/authors') }}">
                     <input type="text" name="term" value="{{ request('term') }}" class="form-control form-control-sm" placeholder="Search name...">
                     <button class="btn btn-outline-dark btn-sm ml-1" type="submit"><i class="fa fa-search"></i></button>
                 </form>
                 @canany(['delete_publication_metadata', 'update_sources', 'add_authors'])
-                <button class="btn btn-primary btn-sm" onclick="openCreate()"><i class="fa fa-plus mr-1"></i>Add Author</button>
+                <button class="btn btn-primary btn-sm" onclick="openCreate()"><i class="fa fa-plus mr-1"></i>{{ __('admin_nav.add_author') }}</button>
                 @endcanany
                 @can('delete_publication_metadata')
                 <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#mergeAuthorsModal"><i class="fa fa-compress mr-1"></i>Merge authors</button>

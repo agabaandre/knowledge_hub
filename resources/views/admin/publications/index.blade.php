@@ -87,10 +87,10 @@
 @section('content')
     <div class="page-header">
         <div class="d-flex align-items-center justify-content-between">
-            <h1 class="page-title">Manage Publications</h1>
+            <h1 class="page-title">{{ ui_t('admin_publications.manage_title', 'Manage Publications') }}</h1>
             @if(isset($pending_publications_count) && $pending_publications_count > 0)
                 <div class="dropdown nav-item">
-                    <a class="nav-link position-relative" href="{{ url('admin/publications/pending') }}" title="Pending Publications">
+                    <a class="nav-link position-relative" href="{{ url('admin/publications/pending') }}" title="{{ ui_t('admin_publications.pending_publications_title', 'Pending Publications') }}">
                         <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;">
                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -102,8 +102,8 @@
         </div>
         <div>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ ui_t('general.publish', 'Publish') }}</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Manage Publications</li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('admin_nav.publish') }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ ui_t('admin_publications.manage_title', 'Manage Publications') }}</li>
             </ol>
         </div>
     </div>
@@ -113,7 +113,7 @@
         <div class="col-md-2 col-sm-6 mb-2">
             <div class="card pub-stat-card h-100 shadow-sm">
                 <div class="card-body py-3">
-                    <div class="pub-stat-card__label">Approved Publications</div>
+                    <div class="pub-stat-card__label">{{ ui_t('admin_publications.stat_approved', 'Approved Publications') }}</div>
                     <div class="pub-stat-card__value">{{ number_format((int) ($pubStats['approved'] ?? 0)) }}</div>
                 </div>
             </div>
@@ -121,7 +121,7 @@
         <div class="col-md-2 col-sm-6 mb-2">
             <a href="{{ url('admin/publications/pending') }}" class="card pub-stat-card pub-stat-card--pending h-100 shadow-sm text-decoration-none">
                 <div class="card-body py-3">
-                    <div class="pub-stat-card__label">Pending Review</div>
+                    <div class="pub-stat-card__label">{{ ui_t('admin_publications.stat_pending', 'Pending Review') }}</div>
                     <div class="pub-stat-card__value">{{ number_format((int) ($pubStats['pending'] ?? 0)) }}</div>
                 </div>
             </a>
@@ -129,7 +129,7 @@
         <div class="col-md-2 col-sm-6 mb-2">
             <a href="{{ url('admin/publications/rejected') }}" class="card pub-stat-card pub-stat-card--rejected h-100 shadow-sm text-decoration-none">
                 <div class="card-body py-3">
-                    <div class="pub-stat-card__label">Rejected</div>
+                    <div class="pub-stat-card__label">{{ ui_t('admin_publications.stat_rejected', 'Rejected') }}</div>
                     <div class="pub-stat-card__value">{{ number_format((int) ($pubStats['rejected'] ?? 0)) }}</div>
                 </div>
             </a>
@@ -137,7 +137,7 @@
         <div class="col-md-3 col-sm-6 mb-2">
             <div class="card pub-stat-card pub-stat-card--featured h-100 shadow-sm">
                 <div class="card-body py-3">
-                    <div class="pub-stat-card__label">Featured</div>
+                    <div class="pub-stat-card__label">{{ ui_t('admin_publications.stat_featured', 'Featured') }}</div>
                     <div class="pub-stat-card__value">{{ number_format((int) ($pubStats['featured'] ?? 0)) }}</div>
                 </div>
             </div>
@@ -145,7 +145,7 @@
         <div class="col-md-3 col-sm-6 mb-2">
             <div class="card pub-stat-card pub-stat-card--inactive h-100 shadow-sm">
                 <div class="card-body py-3">
-                    <div class="pub-stat-card__label">Inactive / Unpublished</div>
+                    <div class="pub-stat-card__label">{{ ui_t('admin_publications.stat_inactive', 'Inactive / Unpublished') }}</div>
                     <div class="pub-stat-card__value">{{ number_format((int) ($pubStats['inactive'] ?? 0)) }}</div>
                 </div>
             </div>
@@ -159,12 +159,12 @@
                     <div class="pub-filters-card__heading">
                         <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
                         <div>
-                            <h3 class="pub-filters-card__title">Filter Publications</h3>
-                            <p class="pub-filters-card__subtitle">Filters apply automatically as you type or change selections</p>
+                            <h3 class="pub-filters-card__title">{{ ui_t('admin_publications.filter_publications', 'Filter Publications') }}</h3>
+                            <p class="pub-filters-card__subtitle">{{ ui_t('admin_publications.filter_subtitle', 'Filters apply automatically as you type or change selections') }}</p>
                         </div>
                     </div>
                     <button class="pub-filters-advanced-toggle" type="button" data-toggle="collapse" data-target="#advancedFilters" aria-expanded="false" aria-controls="advancedFilters">
-                        <i class="fa fa-sliders mr-1"></i> Advanced Filters
+                        <i class="fa fa-sliders mr-1"></i> {{ ui_t('admin_publications.advanced_filters', 'Advanced Filters') }}
                     </button>
                 </div>
                 <div class="pub-filters-card__body">
@@ -180,7 +180,7 @@
                                 <i class="fa fa-rotate-left"></i> {{ ui_t('general.clear', 'Clear') }}
                             </a>
                             <button type="button" id="exportButton" class="pub-filters-btn pub-filters-btn--export">
-                                <i class="fa fa-download"></i> Export
+                                <i class="fa fa-download"></i> {{ ui_t('admin_publications.export', 'Export') }}
                             </button>
                         </div>
                     </form>
@@ -194,10 +194,10 @@
             <div class="card pub-list-card">
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h3 class="card-title mb-0">Manage Publications</h3>
+                        <h3 class="card-title mb-0">{{ ui_t('admin_publications.manage_title', 'Manage Publications') }}</h3>
                         <div>
                             <a href="{{ url('admin/publications/create') }}" class="btn btn-primary btn-sm">
-                                <i class="fa fa-plus"></i> Add Publication
+                                <i class="fa fa-plus"></i> {{ ui_t('admin_publications.add_publication', 'Add Publication') }}
                             </a>
                         </div>
                     </div>
@@ -208,14 +208,14 @@
                         <input type="hidden" name="action" id="bulk-action-type" value="">
 
                         <div class="mb-3 d-flex align-items-center flex-wrap" style="gap:8px;">
-                            <span class="text-muted small">Row color key:</span>
+                            <span class="text-muted small">{{ ui_t('admin_publications.row_color_key', 'Row color key:') }}</span>
                             <span class="pub-state-key">
                                 <span class="pub-state-swatch pub-state-swatch-featured"></span>
-                                Featured
+                                {{ ui_t('admin_publications.featured', 'Featured') }}
                             </span>
                             <span class="pub-state-key">
                                 <span class="pub-state-swatch pub-state-swatch-inactive"></span>
-                                Inactive / Unpublished
+                                {{ ui_t('admin_publications.inactive_unpublished', 'Inactive / Unpublished') }}
                             </span>
                         </div>
 
@@ -228,32 +228,32 @@
 
                         <div class="mb-3 d-flex align-items-center flex-wrap" style="gap:8px;">
                             <select id="bulkActionSelect" class="form-control" style="width: auto; max-width: 260px;">
-                                <option value="">Bulk Actions</option>
-                                <option value="inactive">Inactive/Unpublish Selected</option>
-                                <option value="featured">Mark as Featured</option>
+                                <option value="">{{ ui_t('admin_publications.bulk_actions', 'Bulk Actions') }}</option>
+                                <option value="inactive">{{ ui_t('admin_publications.bulk_inactive', 'Inactive/Unpublish Selected') }}</option>
+                                <option value="featured">{{ ui_t('admin_publications.bulk_featured', 'Mark as Featured') }}</option>
                             </select>
                             <button type="button" class="btn btn-sm btn-outline-primary" id="bulkActionButton" disabled>{{ ui_t('general.apply', 'Apply') }}</button>
-                            <small class="text-muted">Select rows and an action in any order, then click Apply.</small>
+                            <small class="text-muted">{{ ui_t('admin_publications.bulk_help', 'Select rows and an action in any order, then click Apply.') }}</small>
                         </div>
 
-                        <p class="kh-table-mobile-hint"><i class="fa fa-mobile-alt mr-1"></i> Rows are shown as cards on small screens.</p>
+                        <p class="kh-table-mobile-hint"><i class="fa fa-mobile-alt mr-1"></i> {{ ui_t('admin_publications.mobile_hint', 'Rows are shown as cards on small screens.') }}</p>
                         <div class="publication-table-wrap kh-table-mobile-scroll">
                             <table id="publicationTable" data-kh-datatable="custom" class="table table-striped table-bordered table-hover w-100 kh-table-mobile-cards kh-table-mobile-cards--wide">
                                 <thead>
                                     <tr>
-                                        <th class="pub-col-checkbox" data-mobile-label="Select">
+                                        <th class="pub-col-checkbox" data-mobile-label="{{ ui_t('admin_publications.col_select', 'Select') }}">
                                             <input type="checkbox" id="selectAllPublications">
                                         </th>
                                         <th class="pub-col-index">#</th>
-                                        <th class="pub-col-title">Title</th>
-                                        <th class="pub-col-description">Description</th>
-                                        <th class="pub-col-author">Author</th>
-                                        <th class="pub-col-affiliation">Affiliation</th>
-                                        <th class="pub-col-member-state">Member State</th>
-                                        <th class="pub-col-status">Status</th>
-                                        <th class="pub-col-date">Date Created</th>
-                                        <th class="pub-col-moderator">Approved/Rejected By</th>
-                                        <th class="pub-col-actions">Actions</th>
+                                        <th class="pub-col-title">{{ ui_t('admin_publications.col_title', 'Title') }}</th>
+                                        <th class="pub-col-description">{{ ui_t('admin_publications.col_description', 'Description') }}</th>
+                                        <th class="pub-col-author">{{ ui_t('admin_publications.col_author', 'Author') }}</th>
+                                        <th class="pub-col-affiliation">{{ ui_t('admin_publications.col_affiliation', 'Affiliation') }}</th>
+                                        <th class="pub-col-member-state">{{ ui_t('admin_publications.col_member_state', 'Member State') }}</th>
+                                        <th class="pub-col-status">{{ ui_t('admin_publications.col_status', 'Status') }}</th>
+                                        <th class="pub-col-date">{{ ui_t('admin_publications.col_date_created', 'Date Created') }}</th>
+                                        <th class="pub-col-moderator">{{ ui_t('admin_publications.col_moderator', 'Approved/Rejected By') }}</th>
+                                        <th class="pub-col-actions">{{ ui_t('admin_publications.col_actions', 'Actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -271,7 +271,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="pubDescriptionPreviewTitle">Description</h5>
+                    <h5 class="modal-title" id="pubDescriptionPreviewTitle">{{ ui_t('admin_publications.description', 'Description') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -290,17 +290,17 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="bulkActionConfirmModalLabel">Confirm Bulk Action</h5>
+                    <h5 class="modal-title" id="bulkActionConfirmModalLabel">{{ ui_t('admin_publications.confirm_bulk_action', 'Confirm Bulk Action') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <span id="bulkActionConfirmText">Are you sure you want to perform this action?</span>
+                    <span id="bulkActionConfirmText">{{ ui_t('admin_publications.confirm_bulk_generic', 'Are you sure you want to perform this action?') }}</span>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
-                    <button type="button" class="btn btn-primary" id="confirmBulkActionBtn">Yes, Proceed</button>
+                    <button type="button" class="btn btn-primary" id="confirmBulkActionBtn">{{ ui_t('admin_publications.yes_proceed', 'Yes, Proceed') }}</button>
                 </div>
             </div>
         </div>
@@ -311,6 +311,22 @@
 @include('common.select2')
 @include('admin.publications.partials.datatable_assets')
 <script>
+const pubI18n = {
+    confirmBulkInactive: @json(ui_t('admin_publications.confirm_bulk_inactive', 'Are you sure you want to unpublish (set inactive) the selected publications?')),
+    confirmBulkFeatured: @json(ui_t('admin_publications.confirm_bulk_featured', 'Are you sure you want to mark as featured the selected publications?')),
+    confirmBulkGeneric: @json(ui_t('admin_publications.confirm_bulk_generic', 'Are you sure you want to perform this action?')),
+    loading: @json(ui_t('admin_publications.loading_publications', 'Loading publications...')),
+    empty: @json(ui_t('admin_publications.empty_publications', 'No publications match your filters.')),
+    zero: @json(ui_t('admin_publications.zero_publications', 'No matching publications found.')),
+    actionFailed: @json(ui_t('admin_publications.action_failed', 'Action failed. Please try again.')),
+    selectAtLeastOne: @json(ui_t('admin_publications.select_at_least_one', 'Please select at least one publication.')),
+    selectBulkAction: @json(ui_t('admin_publications.select_bulk_action', 'Please select a bulk action.')),
+    removeFeatured: @json(ui_t('admin_publications.confirm_remove_featured', 'Remove this publication from featured?')),
+    markFeatured: @json(ui_t('admin_publications.confirm_mark_featured', 'Mark this publication as featured?')),
+    unpublish: @json(ui_t('admin_publications.confirm_unpublish', 'Unpublish this publication?')),
+    publish: @json(ui_t('admin_publications.confirm_publish', 'Publish this publication?')),
+    description: @json(ui_t('admin_publications.description', 'Description'))
+};
 let pendingBulkAction = null;
 let publicationTable = null;
 let filterReloadTimer = null;
@@ -350,10 +366,10 @@ function scheduleFilterReload() {
 
 function submitBulkAction(action) {
     pendingBulkAction = action;
-    let actionText = '';
-    if (action === 'inactive') actionText = 'unpublish (set inactive)';
-    else if (action === 'featured') actionText = 'mark as featured';
-    document.getElementById('bulkActionConfirmText').textContent = `Are you sure you want to ${actionText} the selected publications?`;
+    let msg = pubI18n.confirmBulkGeneric;
+    if (action === 'inactive') msg = pubI18n.confirmBulkInactive;
+    else if (action === 'featured') msg = pubI18n.confirmBulkFeatured;
+    document.getElementById('bulkActionConfirmText').textContent = msg;
     $('#bulkActionConfirmModal').modal('show');
 }
 
@@ -402,9 +418,9 @@ $(function () {
             { targets: 10, className: 'pub-col-actions kh-mcard-actions text-nowrap' }
         ],
         language: {
-            processing: '<i class="fa fa-spinner fa-spin"></i> Loading publications...',
-            emptyTable: 'No publications match your filters.',
-            zeroRecords: 'No matching publications found.'
+            processing: '<i class="fa fa-spinner fa-spin"></i> ' + pubI18n.loading,
+            emptyTable: pubI18n.empty,
+            zeroRecords: pubI18n.zero
         },
         createdRow: function (row, data) {
             if (data.DT_RowClass) {
@@ -447,7 +463,7 @@ $(function () {
 
     $(document).on('click', '.pub-desc-preview', function (e) {
         e.preventDefault();
-        var title = $(this).attr('data-title') || 'Description';
+        var title = $(this).attr('data-title') || pubI18n.description;
         var description = $(this).attr('data-description') || '';
         try {
             description = JSON.parse(description);
@@ -477,7 +493,7 @@ $(function () {
             error: function (xhr) {
                 const message = xhr.responseJSON && xhr.responseJSON.message
                     ? xhr.responseJSON.message
-                    : 'Action failed. Please try again.';
+                    : pubI18n.actionFailed;
                 alert(message);
                 $btn.prop('disabled', false);
             }
@@ -489,8 +505,8 @@ $(function () {
         const $btn = $(this);
         const isFeatured = String($btn.data('featured')) === '1';
         const text = isFeatured
-            ? 'Remove this publication from featured?'
-            : 'Mark this publication as featured?';
+            ? pubI18n.removeFeatured
+            : pubI18n.markFeatured;
         postPublicationToggle('{{ url('admin/publications/toggle-featured') }}', $btn.data('id'), text, $btn);
     });
 
@@ -499,8 +515,8 @@ $(function () {
         const $btn = $(this);
         const isActive = String($btn.data('active')) === '1';
         const text = isActive
-            ? 'Unpublish this publication?'
-            : 'Publish this publication?';
+            ? pubI18n.unpublish
+            : pubI18n.publish;
         postPublicationToggle('{{ url('admin/publications/toggle-active') }}', $btn.data('id'), text, $btn);
     });
 
@@ -508,11 +524,11 @@ $(function () {
         e.preventDefault();
         const action = $('#bulkActionSelect').val();
         if (!$('#publicationTable .publication-checkbox:checked').length) {
-            alert('Please select at least one publication.');
+            alert(pubI18n.selectAtLeastOne);
             return false;
         }
         if (!action) {
-            alert('Please select a bulk action.');
+            alert(pubI18n.selectBulkAction);
             return false;
         }
         submitBulkAction(action);

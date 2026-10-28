@@ -2,10 +2,22 @@
 @include('partials.maps.africa_map_config', ['mapContext' => 'admin_metrics'])
 <script>
 window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
+window.__adminDashboardI18n = @json(trans('admin_dashboard'));
 </script>
 @include('partials.maps.africa_map_loader')
 <script>
 (function() {
+    var i18n = window.__adminDashboardI18n || {};
+    function t(key, replace) {
+        var text = (i18n[key] != null && i18n[key] !== '') ? String(i18n[key]) : key;
+        if (replace && typeof replace === 'object') {
+            Object.keys(replace).forEach(function (k) {
+                text = text.replace(new RegExp(':' + k, 'g'), String(replace[k]));
+            });
+        }
+        return text;
+    }
+
     var auColors = {
         red: '{{ settings()->au_red ?? "#9F2241" }}',
         gold: '{{ settings()->au_gold ?? "#B4A269" }}',
@@ -41,10 +53,10 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
     ];
 
     function formatPeriodLabel(from, to) {
-        if (from && to) return 'Showing visits from ' + from + ' to ' + to;
-        if (from) return 'Showing visits from ' + from + ' onward';
-        if (to) return 'Showing visits up to ' + to;
-        return 'Showing all recorded visits';
+        if (from && to) return t('showing_visits_from_to', { from: from, to: to });
+        if (from) return t('showing_visits_from', { from: from });
+        if (to) return t('showing_visits_up_to', { to: to });
+        return t('showing_all_recorded_visits');
     }
 
     /**
@@ -93,7 +105,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
     }
 
     function timelineChartOptions(title, color, data) {
-        var granularity = data.granularity === 'daily' ? 'Daily' : 'Monthly';
+        var granularity = data.granularity === 'daily' ? t('daily') : t('monthly');
         return {
             chart: { type: 'areaspline', backgroundColor: 'transparent', height: 240 },
             title: { text: granularity + ' ' + title, style: { fontSize: '13px', color: auColors.greyText } },
@@ -139,7 +151,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
 
         var data = jsonData.visits_over_time;
         if (!data || !data.labels || !data.values || data.labels.length === 0) {
-            container.innerHTML = '<div class="text-muted text-center p-4">No visit trend data for the selected period.</div>';
+            container.innerHTML = '<div class="text-muted text-center p-4">' + t('no_visit_trend') + '</div>';
             visitsTimelineChart = null;
             return;
         }
@@ -152,7 +164,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         }
 
         container.innerHTML = '';
-        visitsTimelineChart = Highcharts.chart('visits-over-time-chart', timelineChartOptions('visits', auColors.corporateGreen, data));
+        visitsTimelineChart = Highcharts.chart('visits-over-time-chart', timelineChartOptions(t('visits'), auColors.corporateGreen, data));
     }
 
     function renderSignupsTimeline(jsonData, animate) {
@@ -161,7 +173,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
 
         var data = jsonData.signups_over_time;
         if (!data || !data.labels || !data.values || data.labels.length === 0) {
-            container.innerHTML = '<div class="text-muted text-center p-4">No signup trend data for the selected period.</div>';
+            container.innerHTML = '<div class="text-muted text-center p-4">' + t('no_signup_trend') + '</div>';
             signupsTimelineChart = null;
             return;
         }
@@ -174,7 +186,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         }
 
         container.innerHTML = '';
-        signupsTimelineChart = Highcharts.chart('signups-over-time-chart', timelineChartOptions('signups', auColors.red, data));
+        signupsTimelineChart = Highcharts.chart('signups-over-time-chart', timelineChartOptions(t('signups'), auColors.red, data));
     }
 
     function updateKpiSummary(summary) {
@@ -287,12 +299,12 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
                 style: { fontFamily: 'inherit' }
             },
             title: {
-                text: config.title || 'Visits by country',
+                text: config.title || t('visits_by_country'),
                 style: { fontSize: '14px', color: '#64748b', fontWeight: '600' }
             },
             credits: {
                 enabled: true,
-                text: config.credits || 'Map © Natural Earth · Portal access logs',
+                text: config.credits || t('map_credits_visits'),
                 style: { fontSize: '10px', color: '#94a3b8' }
             },
             mapNavigation: {
@@ -304,7 +316,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
             plotOptions: KhAfricaMap.choroplethPlotOptions('world'),
             series: [{
                 type: 'map',
-                name: config.seriesName || 'Visits by country',
+                name: config.seriesName || t('visits_by_country'),
                 joinBy: ['hc-key', 'hc-key'],
                 colorAxis: 0,
                 colorKey: 'value',
@@ -338,7 +350,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         if (titleEl) titleEl.textContent = title || 'Map scale';
         if (!minEl || !maxEl) return;
         if (min === null || max === null || !isFinite(min) || !isFinite(max)) {
-            minEl.textContent = 'No data';
+            minEl.textContent = t('no_data');
             maxEl.textContent = '';
             if (barEl) barEl.style.opacity = '0.35';
             return;
@@ -366,7 +378,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         var mapContainer = document.getElementById('admin-africa-map');
         if (!mapContainer || typeof Highcharts === 'undefined') return;
         if (typeof Highcharts.mapChart !== 'function') {
-            mapContainer.innerHTML = '<div class="text-muted text-center p-4">Map module not loaded.</div>';
+            mapContainer.innerHTML = '<div class="text-muted text-center p-4">' + t('map_module_not_loaded') + '</div>';
             return;
         }
         mapContainer.innerHTML = '';
@@ -383,9 +395,9 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         data.values.forEach(function (v, i) { if (v > data.values[maxIdx]) maxIdx = i; });
         var topName = (data.labels && data.labels[maxIdx]) ? data.labels[maxIdx] : '—';
         grid.innerHTML =
-            '<div class="admin-map-stat"><strong>' + total.toLocaleString() + '</strong><span>Total visits</span></div>' +
+            '<div class="admin-map-stat"><strong>' + total.toLocaleString() + '</strong><span>' + t('total_visits') + '</span></div>' +
             '<div class="admin-map-stat"><strong>' + data.values.length + '</strong><span>Countries</span></div>' +
-            '<div class="admin-map-stat"><strong>' + topName + '</strong><span>Top: ' + data.values[maxIdx].toLocaleString() + ' visits</span></div>';
+            '<div class="admin-map-stat"><strong>' + topName + '</strong><span>' + t('top_visits', { count: data.values[maxIdx].toLocaleString() }) + '</span></div>';
     }
 
     function renderVisitsMap(jsonData) {
@@ -403,34 +415,34 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         if (chips) chips.style.display = 'none';
         var mapData = buildVisitsMapSeriesData(data || {});
         if (!data || !mapData.length) {
-            mapContainer.innerHTML = '<div class="text-muted text-center p-4">No visit data for the selected period.</div>';
-            updateAdminScopeSummary('<strong>Portal traffic</strong><span class="admin-map-scope-summary__meta">No visits recorded for this filter.</span>');
-            updateAdminMapLegend('Visits', null, null);
+            mapContainer.innerHTML = '<div class="text-muted text-center p-4">' + t('no_visit_data') + '</div>';
+            updateAdminScopeSummary('<strong>' + t('portal_traffic') + '</strong><span class="admin-map-scope-summary__meta">' + t('no_visits_for_filter') + '</span>');
+            updateAdminMapLegend(t('visits'), null, null);
             updateVisitsMapStats(null);
             return;
         }
         updateVisitsMapStats(data);
         var total = data.values.reduce(function (a, b) { return a + b; }, 0);
-        updateAdminScopeSummary('<strong>Worldwide portal traffic</strong><span class="admin-map-scope-summary__value">' + total.toLocaleString() + ' visits</span><span class="admin-map-scope-summary__meta">' + mapData.length + ' countries with activity</span>');
+        updateAdminScopeSummary('<strong>' + t('worldwide_portal_traffic') + '</strong><span class="admin-map-scope-summary__value">' + t('visits_count_label', { count: total.toLocaleString() }) + '</span><span class="admin-map-scope-summary__meta">' + t('countries_with_activity', { count: mapData.length }) + '</span>');
         var values = mapData.map(function (point) { return point.value; });
         var min = Math.min.apply(null, values);
         var max = Math.max.apply(null, values);
-        updateAdminMapLegend('Visits by country', min, max, function (v) { return Number(v).toLocaleString() + ' visits'; });
-        mapContainer.innerHTML = '<div class="text-muted text-center p-4"><i class="fa fa-spinner fa-spin"></i> Loading map…</div>';
+        updateAdminMapLegend(t('visits_by_country'), min, max, function (v) { return Number(v).toLocaleString() + ' ' + t('visits'); });
+        mapContainer.innerHTML = '<div class="text-muted text-center p-4"><i class="fa fa-spinner fa-spin"></i> ' + t('loading_map') + '</div>';
         ensureHighchartsMapsLoaded(function() {
             loadWorldVisitsTopology().then(function (topology) {
                 renderWorldVisitsMap(topology, mapData, {
                     min: 0,
                     max: max,
                     height: 504,
-                    title: 'Visits by country',
-                    seriesName: 'Visits by country',
+                    title: t('visits_by_country'),
+                    seriesName: t('visits_by_country'),
                     credits: KhAfricaMap && KhAfricaMap.creditsPrefix
-                        ? KhAfricaMap.creditsPrefix() + ' · Portal access logs'
-                        : 'Map © Natural Earth · Portal access logs'
+                        ? KhAfricaMap.creditsPrefix() + ' · ' + t('portal_traffic')
+                        : t('map_credits_visits')
                 });
             }).catch(function () {
-                mapContainer.innerHTML = '<div class="text-muted text-center p-4">Map unavailable. Please refresh and try again.</div>';
+                mapContainer.innerHTML = '<div class="text-muted text-center p-4">' + t('map_unavailable') + '</div>';
             });
         });
     }
@@ -462,14 +474,14 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         var agg = mapPayload.aggregate || {};
         updateAdminScopeSummary('<strong>' + (mapPayload.kpi_name || 'Indicator') + '</strong> · ' + scopeName + '<span class="admin-map-scope-summary__value">' + (agg.value || '—') + (agg.unit_plain ? ' <em style="font-size:0.85rem;font-weight:500;color:#64748b">' + agg.unit_plain + '</em>' : '') + '</span><span class="admin-map-scope-summary__meta">' + (mapPayload.aggregation_label || '') + ' · ' + mapPayload.country_count + ' countries</span>');
         if (!mapPayload.points || !mapPayload.points.length) {
-            mapContainer.innerHTML = '<div class="text-muted text-center p-4">No indicator data for this selection.</div>';
-            updateAdminMapLegend(mapPayload.kpi_name || 'Indicator', null, null);
+            mapContainer.innerHTML = '<div class="text-muted text-center p-4">' + t('no_indicator_data') + '</div>';
+            updateAdminMapLegend(mapPayload.kpi_name || t('indicator'), null, null);
             return;
         }
         updateAdminMapLegend(mapPayload.kpi_name, mapPayload.min, mapPayload.max, function (v) {
             return agg.unit_plain ? Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' ' + agg.unit_plain : Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
         });
-        mapContainer.innerHTML = '<div class="text-muted text-center p-4"><i class="fa fa-spinner fa-spin"></i> Loading map…</div>';
+        mapContainer.innerHTML = '<div class="text-muted text-center p-4"><i class="fa fa-spinner fa-spin"></i> ' + t('loading_map') + '</div>';
         ensureHighchartsMapsLoaded(function() {
             useMapSettings('africa');
             KhAfricaMap.load().then(function(mapAsset) {
@@ -484,10 +496,10 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
                     min: mapPayload.min,
                     max: mapPayload.max,
                     plotVariant: 'world',
-                    title: mapPayload.kpi_name || 'Indicator value',
-                    seriesName: mapPayload.kpi_name || 'Indicator value',
+                    title: mapPayload.kpi_name || t('indicator'),
+                    seriesName: mapPayload.kpi_name || t('indicator'),
                     credits: isPublicationsMap(mapPayload)
-                        ? KhAfricaMap.creditsPrefix() + ' · Knowledge Hub publications'
+                        ? KhAfricaMap.creditsPrefix() + ' · ' + t('publications')
                         : KhAfricaMap.creditsPrefix() + ' · Data: Our World in Data (CC BY 4.0)',
                     tooltip: {
                         useHTML: true,
@@ -495,14 +507,14 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
                             var p = this.point;
                             var html = '<b>' + (p.country_name || p.name || '') + '</b><br/>' + (p.display_value || p.value);
                             if (!isPublicationsMap(mapPayload) && p.period) {
-                                html += '<br/><span style="color:#64748b">Period: ' + p.period + '</span>';
+                                html += '<br/><span style="color:#64748b">' + p.period + '</span>';
                             }
                             return html;
                         }
                     }
                 });
             }).catch(function() {
-                mapContainer.innerHTML = '<div class="text-muted text-center p-4">Map unavailable.</div>';
+                mapContainer.innerHTML = '<div class="text-muted text-center p-4">' + t('map_unavailable') + '</div>';
             });
         });
     }
@@ -511,7 +523,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         var url = (window.__adminMapDataUrl || '') + '?kpi_id=' + encodeURIComponent(kpiId);
         if (regionId) url += '&region_id=' + encodeURIComponent(regionId);
         var mapContainer = document.getElementById('admin-africa-map');
-        if (mapContainer) mapContainer.innerHTML = '<div class="text-muted text-center p-4"><i class="fa fa-spinner fa-spin"></i> Loading…</div>';
+        if (mapContainer) mapContainer.innerHTML = '<div class="text-muted text-center p-4"><i class="fa fa-spinner fa-spin"></i> ' + t('loading') + '</div>';
         return fetch(url, { headers: { 'Accept': 'application/json' } }).then(function (r) { return r.json(); }).then(function (json) { renderKpiMap(json.map || json); });
     }
 
@@ -573,9 +585,9 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
     }
 
     var chartTitleMap = {
-        signups_by_country: 'Signups by country',
-        monthly_signups: 'Monthly signups',
-        monthly_publications: 'Monthly publications'
+        signups_by_country: t('signups_by_country'),
+        monthly_signups: t('monthly_signups'),
+        monthly_publications: t('monthly_publications')
     };
 
     window.renderMetricsCharts = function(chartData, options) {
@@ -669,7 +681,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         var visitCountries = options.visitCountries || [];
         if (countrySelect) {
             var selected = options.selectedCountry || countrySelect.value || '';
-            countrySelect.innerHTML = '<option value="">All Countries</option>';
+            countrySelect.innerHTML = '<option value="">' + t('all_countries') + '</option>';
             if (visitCountries.length) {
                 visitCountries.forEach(function(item) {
                     var opt = document.createElement('option');

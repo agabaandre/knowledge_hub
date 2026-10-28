@@ -603,7 +603,7 @@
 <div class="page-header mb-3">
     <div>
         <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="{{ url('admin') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url('admin') }}">{{ __('admin_nav.dashboard') }}</a></li>
             <li class="breadcrumb-item"><a href="{{ route('admin.configure') }}">{{ __('admin_nav.settings') }}</a></li>
             <li class="breadcrumb-item active">{{ __('admin_nav.storage_management') }}</li>
         </ol>
@@ -638,7 +638,7 @@
 <div class="storage-shell">
     <div class="storage-hero">
         <h1>{{ __('admin_nav.storage_management') }}</h1>
-        <p>Manage where publications, forum attachments, and SQL backups are stored. Files stay outside the application deploy tree so updates do not affect uploads.</p>
+        <p>{{ __('admin_nav.storage_manage_help') }}</p>
     </div>
 
     <div class="storage-kpi-row">

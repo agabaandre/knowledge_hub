@@ -2,11 +2,9 @@
 <div class="tab-pane fade" id="social-login" role="tabpanel">
     <div class="form-section-title">
         <i class="fa fa-sign-in-alt"></i>
-        Social Login
+        {{ __('admin_configure.tab_social_login') }}
     </div>
-    <p class="text-muted small mb-3">
-        Configure Microsoft, Google, and LinkedIn sign-in. Credentials are saved separately from general settings — use <strong>Save social login settings</strong> at the bottom of this tab.
-    </p>
+    <p class="text-muted small mb-3">{{ __('admin_configure.social_login_intro') }}</p>
     @include('admin.settings.partials.sso_credentials_form', ['ssoFields' => $ssoFields, 'standalone' => true])
 </div>
 @endif

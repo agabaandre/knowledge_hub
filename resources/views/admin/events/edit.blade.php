@@ -2,11 +2,11 @@
 
 @section('content')
 <div class="page-header">
-    <h1 class="page-title">Edit Event</h1>
+    <h1 class="page-title">{{ __('admin_nav.edit_event') }}</h1>
     <div>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('admin.events.index') }}">Events</a></li>
-            <li class="breadcrumb-item active">Edit</li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.events.index') }}">{{ __('admin_nav.events') }}</a></li>
+            <li class="breadcrumb-item active">{{ __('general.edit') }}</li>
         </ol>
     </div>
 </div>

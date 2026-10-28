@@ -4,7 +4,7 @@
             <div class="col-md-12">
                 <div class="card" style="border: 1px solid #e2e8f0; border-radius: 0; margin-bottom: 1.5rem;">
                     <div class="card-header d-flex align-items-center justify-content-between" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;">
-                        <h3 class="card-title mb-0">System Metrics</h3>
+                        <h3 class="card-title mb-0">{{ __('admin_nav.system_metrics') }}</h3>
                         <div class="filters-toolbar">
                             <div class="filter-item">
                                 <i class="fa fa-calendar filter-icon"></i>

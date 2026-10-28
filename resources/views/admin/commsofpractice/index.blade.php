@@ -24,7 +24,7 @@
     <div class="card col-lg-12 af-card">
         <div class="card-header d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
-                <strong>Communities of Practice</strong>
+                <strong>{{ __('admin_nav.communities_of_practice') }}</strong>
             </div>
             <div class="d-flex align-items-center">
                 @if(isset($pending_member_approvals_count) && $pending_member_approvals_count > 0)
@@ -102,7 +102,7 @@
                     <div class="pub-filters-card__heading">
                         <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
                         <div>
-                            <h3 class="pub-filters-card__title">Filter Communities</h3>
+                            <h3 class="pub-filters-card__title">{{ __('admin_nav.filter_communities') }}</h3>
                             <p class="pub-filters-card__subtitle">Search by community name, description, or creator email</p>
                         </div>
                     </div>

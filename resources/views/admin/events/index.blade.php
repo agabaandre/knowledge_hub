@@ -5,11 +5,11 @@
 @include('common.table')
 
 <div class="page-header">
-    <h1 class="page-title">Manage Events</h1>
+    <h1 class="page-title">{{ __('admin_nav.manage_events') }}</h1>
     <div>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Events</li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('admin_nav.home') }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.events') }}</li>
         </ol>
     </div>
 </div>

@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalToggleLabel">Resource Approval</h5>
+                <h5 class="modal-title" id="exampleModalToggleLabel">{{ ui_t('admin_publications.approval_title', 'Resource Approval') }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -12,7 +12,7 @@
                 <div class="modal-body text-left">
                     @csrf
                     <p>
-                        Are you sure you want to approve this resource?
+                        {{ ui_t('admin_publications.confirm_approve_resource', 'Are you sure you want to approve this resource?') }}
                     </p>
 
                     <input type="hidden" name="id" value="{{ $record->id }}" />
@@ -22,8 +22,8 @@
                 </div>
                 <div class="modal-footer">
                     <!-- Toogle to second dialog -->
-                    <button type="submit" class="btn btn-outline-success btn-sm edit">Yes Approve</button>
-                    <button type="button" class="btn btn-outline-danger btn-sm edit">{{ ui_t('general.cancel', 'Cancel') }}</button>
+                    <button type="submit" class="btn btn-outline-success btn-sm edit">{{ ui_t('admin_publications.yes_approve', 'Yes Approve') }}</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm edit" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                 </div>
             </form>
         </div>

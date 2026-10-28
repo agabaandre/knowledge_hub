@@ -26,11 +26,11 @@
 
 @section('content')
 <div class="page-header">
-    <h1 class="page-title">Mailing List</h1>
+    <h1 class="page-title">{{ __('admin_nav.mailing_list') }}</h1>
     <div>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Mailing List</li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('admin_nav.home') }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.mailing_list') }}</li>
         </ol>
     </div>
 </div>

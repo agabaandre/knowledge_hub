@@ -1,0 +1,35 @@
+<?php
+
+return [
+
+  'ai_failed' => 'La traducción de IA falló.',
+  'ai_none_updated' => 'No se actualizaron campos. Intenta de nuevo o verifica Admin → Configuración → Integraciones de AI.',
+  'ai_timeout' => 'El tiempo de espera para la traducción de IA ha expirado. Intenta de nuevo: se utilizan lotes más pequeños automáticamente.',
+  'ai_translate' => 'Traducir con IA',
+  'ai_translate_title' => 'Usar IA para traducir el inglés a este idioma. Revise y haga clic en Guardar.',
+  'ai_translating' => 'Traduciendo :done/:total…',
+  'breadcrumb_dashboard' => 'Tablero',
+  'breadcrumb_settings' => 'Configuraciones',
+  'col_english' => 'Inglés (referencia)',
+  'col_key' => 'Clave',
+  'col_translation' => 'Traducción en :locale',
+  'confirm_ai' => '¿Llenar todos los campos de traducción desde el inglés usando AI? Los campos se actualizan en pequeños lotes y luego se guardan automáticamente. Aún puedes editar después.',
+  'confirm_copy' => '¿Llenar los campos de traducción vacíos desde el inglés? Las traducciones existentes se mantienen. Puedes editar antes de guardar.',
+  'copy_failed' => 'La copia del inglés falló.',
+  'copy_from_english' => 'Copiar del inglés',
+  'copy_from_english_title' => 'Copiar los valores predeterminados en inglés en los campos vacíos. Revise y haga clic en Guardar.',
+  'intro' => 'Tú controlas cada cadena de UI editable para el locale seleccionado — incluyendo la navegación del Frontend y la barra lateral del Admin. Prioridad: valores guardados aquí → archivos de idioma empaquetados → títulos de categoría/enlace de la base de datos → Inglés. Deja un campo vacío para mantener el predeterminado empaquetado (o de la base de datos). La navegación es nativa (no Google Translate), así que las ediciones aquí son lo que los visitantes ven para ese idioma.',
+  'load_failed' => 'No se pudieron cargar las traducciones para esta localidad/sección. Por favor, actualiza la página.',
+  'loading' => 'Cargando…',
+  'loading_translations' => 'Cargando traducciones…',
+  'no_fields' => 'No se encontraron campos de traducción en esta página.',
+  'save_failed' => 'No se pudieron guardar las traducciones.',
+  'saved' => 'Traducciones guardadas.',
+  'saved_after_ai' => 'Traducciones de IA aplicadas y guardadas.',
+  'saving' => 'Guardando…',
+  'section' => 'Sección',
+  'select_locale' => 'Seleccionar idioma',
+  'select_non_english_ai' => 'Selecciona una localidad no inglesa para usar la traducción AI.',
+  'select_non_english_copy' => 'Selecciona una localidad no inglesa para copiar el inglés.',
+
+];

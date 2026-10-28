@@ -1,6 +1,6 @@
 @php
-    $pageTitle = $pageTitle ?? ('Search Resources & Discussions - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub'));
-    $pageDescription = $pageDescription ?? 'Search publications, resources and discussion forums. Find public health content and join discussions across Africa.';
+    $pageTitle = $pageTitle ?? (ui_t('frontend_pages.records_search_title', 'Search Resources & Discussions') . ' - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub'));
+    $pageDescription = $pageDescription ?? ui_t('frontend_pages.records_search_description', 'Search publications, resources and discussion forums. Find public health content and join discussions across Africa.');
     $canonicalUrl = $canonicalUrl ?? url('records/search');
     $jsonLdFlags = $jsonLdFlags ?? (JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
 @endphp
@@ -26,7 +26,7 @@
         <div class="container">
             <nav class="mb-3" aria-label="Breadcrumb">
                 <ol class="breadcrumb mb-0" style="background: transparent; padding: 0; font-size: 0.875rem;">
-                    <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url('/') }}">{{ ui_t('frontend_pages.home', 'Home') }}</a></li>
                     <li class="breadcrumb-item active" aria-current="page">{{ ui_t('general.browse_resources', 'Browse resources') }}</li>
                 </ol>
             </nav>
@@ -455,7 +455,7 @@
             window.loadAiInsightsFragment = loadAiInsightsFragment;
 
             function formatInfiniteStatus(loaded, total) {
-                return 'Showing ' + Number(loaded).toLocaleString() + ' of ' + Number(total).toLocaleString() + ' publications';
+                return (@json(ui_t('frontend_pages.showing_of_publications_js', 'Showing :loaded of :total publications'))).replace(':loaded', Number(loaded).toLocaleString()).replace(':total', Number(total).toLocaleString());
             }
 
             function disconnectInfiniteScroll() {

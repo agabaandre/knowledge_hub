@@ -347,8 +347,8 @@
 	<div class="card col-lg-12 my-pub-shell">
 		<div class="card-header text-left d-flex flex-wrap align-items-center justify-content-between">
 			<div>
-				<h3 class="card-title">My Publications</h3>
-				<p class="my-pub-shell__subtitle">Track your contributions, engagement, and community memberships.</p>
+				<h3 class="card-title">{{ ui_t('frontend_pages.my_publications', 'My Publications') }}</h3>
+				<p class="my-pub-shell__subtitle">{{ ui_t('frontend_pages.my_publications_intro', 'Track your contributions, engagement, and community memberships.') }}</p>
 			</div>
 			<a href="{{ route('account.publish') }}" class="btn btn-success mt-2 mt-md-0">
 				<i class="fa fa-plus mr-1"></i> {{ ui_t('general.create_publication', 'Create Publication') }}
@@ -357,61 +357,61 @@
 
 		<div class="card-body pb-2">
 			<div class="my-pub-quick-links">
-				<a href="{{ route('account.my-discussions') }}"><i class="fa fa-comment-dots"></i> My forum posts</a>
-				<a href="{{ route('account.my-forums') }}"><i class="fa fa-comments"></i> My Forums</a>
-				<a href="{{ route('account.my-communities') }}"><i class="fa fa-users"></i> My Communities</a>
+				<a href="{{ route('account.my-discussions') }}"><i class="fa fa-comment-dots"></i> {{ ui_t('frontend_pages.my_forum_posts', 'My forum posts') }}</a>
+				<a href="{{ route('account.my-forums') }}"><i class="fa fa-comments"></i> {{ ui_t('frontend_pages.my_forums', 'My Forums') }}</a>
+				<a href="{{ route('account.my-communities') }}"><i class="fa fa-users"></i> {{ ui_t('frontend_pages.my_communities', 'My Communities') }}</a>
 			</div>
 
 			<div class="my-pub-section">
-				<h4 class="my-pub-section__title">Overview</h4>
+				<h4 class="my-pub-section__title">{{ ui_t('frontend_pages.overview', 'Overview') }}</h4>
 				<div class="metric-grid">
 					<div class="metric-card">
 						<div class="metric-card__icon metric-card__icon--green"><i class="fa fa-file-alt"></i></div>
 						<div>
 							<div class="metric-card__value">{{ number_format($stats['total'] ?? 0) }}</div>
-							<div class="metric-card__label">Publications</div>
+							<div class="metric-card__label">{{ ui_t('frontend_pages.publications', 'Publications') }}</div>
 						</div>
 					</div>
 					<div class="metric-card">
 						<div class="metric-card__icon metric-card__icon--green"><i class="fa fa-check-circle"></i></div>
 						<div>
 							<div class="metric-card__value">{{ number_format($stats['approved'] ?? 0) }}</div>
-							<div class="metric-card__label">Approved</div>
+							<div class="metric-card__label">{{ ui_t('frontend_pages.approved', 'Approved') }}</div>
 						</div>
 					</div>
 					<div class="metric-card">
 						<div class="metric-card__icon metric-card__icon--gold"><i class="fa fa-clock"></i></div>
 						<div>
 							<div class="metric-card__value">{{ number_format($stats['pending'] ?? 0) }}</div>
-							<div class="metric-card__label">Pending</div>
+							<div class="metric-card__label">{{ ui_t('frontend_pages.pending', 'pending') }}</div>
 						</div>
 					</div>
 					<div class="metric-card">
 						<div class="metric-card__icon metric-card__icon--red"><i class="fa fa-eye"></i></div>
 						<div>
 							<div class="metric-card__value">{{ number_format($stats['total_views'] ?? 0) }}</div>
-							<div class="metric-card__label">Total views</div>
+							<div class="metric-card__label">{{ ui_t('frontend_pages.total_views', 'Total views') }}</div>
 						</div>
 					</div>
 					<div class="metric-card">
 						<div class="metric-card__icon metric-card__icon--grey"><i class="fa fa-comment-dots"></i></div>
 						<div>
 							<div class="metric-card__value">{{ number_format($stats['forum_posts'] ?? 0) }}</div>
-							<div class="metric-card__label">Forum posts</div>
+							<div class="metric-card__label">{{ ui_t('frontend_pages.forum_posts', 'Forum posts') }}</div>
 						</div>
 					</div>
 					<div class="metric-card">
 						<div class="metric-card__icon metric-card__icon--plum"><i class="fa fa-reply"></i></div>
 						<div>
 							<div class="metric-card__value">{{ number_format($stats['forum_comments'] ?? 0) }}</div>
-							<div class="metric-card__label">Comments</div>
+							<div class="metric-card__label">{{ ui_t('frontend_pages.comments', 'Comments') }}</div>
 						</div>
 					</div>
 					<div class="metric-card">
 						<div class="metric-card__icon metric-card__icon--green"><i class="fa fa-chart-line"></i></div>
 						<div>
 							<div class="metric-card__value">{{ number_format($stats['forum_engagements'] ?? 0) }}</div>
-							<div class="metric-card__label">Engagements</div>
+							<div class="metric-card__label">{{ ui_t('frontend_pages.engagements', 'Engagements') }}</div>
 						</div>
 					</div>
 				</div>
@@ -419,12 +419,12 @@
 
 			@if(!empty($stats['communities']) && count($stats['communities']) > 0)
 			<div class="my-pub-section">
-				<h4 class="my-pub-section__title">Communities of Practice</h4>
+				<h4 class="my-pub-section__title">{{ ui_t('frontend_pages.communities_title', 'Communities of Practice') }}</h4>
 				<div class="community-panel">
 					<div class="community-panel__head">
 						<div>
-							<h6>Your memberships</h6>
-							<p>Communities where you are an approved member.</p>
+							<h6>{{ ui_t('frontend_pages.your_memberships', 'Your memberships') }}</h6>
+							<p>{{ ui_t('frontend_pages.memberships_help', 'Communities where you are an approved member.') }}</p>
 						</div>
 						<span class="community-panel__count">{{ count($stats['communities']) }}</span>
 					</div>
@@ -438,7 +438,7 @@
 								<span class="community-card__icon"><i class="fa fa-users"></i></span>
 								<span>
 									<span class="community-card__name">{{ $communityName }}</span>
-									<span class="community-card__meta">View community</span>
+									<span class="community-card__meta">{{ ui_t('frontend_pages.view_details', 'View details') }}</span>
 								</span>
 							</a>
 						@endforeach
@@ -459,8 +459,8 @@
                     <div class="pub-filters-card__heading">
                         <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
                         <div>
-                            <h3 class="pub-filters-card__title">Filter Publications</h3>
-                            <p class="pub-filters-card__subtitle">Filters apply automatically as you type or change selections</p>
+                            <h3 class="pub-filters-card__title">{{ ui_t('frontend_pages.filter_publications', 'Filter Publications') }}</h3>
+                            <p class="pub-filters-card__subtitle">{{ ui_t('frontend_pages.filters_apply_auto', 'Filters apply automatically as you type or change selections') }}</p>
                         </div>
                     </div>
                     <button
@@ -473,7 +473,7 @@
                         id="myPublicationsFiltersToggle"
                     >
                         <i class="fa fa-chevron-down mr-1"></i>
-                        <span class="pub-filters-panel-toggle__label">{{ $hasActiveMyPubFilters ? 'Hide Filters' : 'Show Filters' }}</span>
+                        <span class="pub-filters-panel-toggle__label">{{ $hasActiveMyPubFilters ? ui_t('frontend_pages.hide_filters', 'Hide Filters') : ui_t('frontend_pages.show_filters', 'Show Filters') }}</span>
                     </button>
                 </div>
                 <div id="myPublicationsFiltersPanel" class="collapse {{ $hasActiveMyPubFilters ? 'show' : '' }}">
@@ -481,20 +481,20 @@
                         <form id="myPublicationsFiltersForm" method="GET" action="{{ route('account.publications') }}" class="mb-0">
                             <div class="pub-filters-grid">
                                 <div class="pub-filter-field">
-                                    <label class="pub-filter-label" for="filterMyPubTitle">Title</label>
-                                    <input type="text" name="search[title]" id="filterMyPubTitle" class="form-control pub-filter-input" value="{{ request('search.title') }}" placeholder="Filter by title">
+                                    <label class="pub-filter-label" for="filterMyPubTitle">{{ ui_t('frontend_pages.title', 'Title') }}</label>
+                                    <input type="text" name="search[title]" id="filterMyPubTitle" class="form-control pub-filter-input" value="{{ request('search.title') }}" placeholder="{{ ui_t('frontend_pages.filter_by_title', 'Filter by title') }}">
                                 </div>
                                 <div class="pub-filter-field">
-                                    <label class="pub-filter-label" for="filterMyPubDescription">Description</label>
-                                    <input type="text" name="search[description]" id="filterMyPubDescription" class="form-control pub-filter-input" value="{{ request('search.description') }}" placeholder="Filter by description">
+                                    <label class="pub-filter-label" for="filterMyPubDescription">{{ ui_t('frontend_pages.description', 'Description') }}</label>
+                                    <input type="text" name="search[description]" id="filterMyPubDescription" class="form-control pub-filter-input" value="{{ request('search.description') }}" placeholder="{{ ui_t('frontend_pages.filter_by_description', 'Filter by description') }}">
                                 </div>
                                 <div class="pub-filter-field">
-                                    <label class="pub-filter-label" for="filterMyPubStatus">Status</label>
+                                    <label class="pub-filter-label" for="filterMyPubStatus">{{ ui_t('frontend_pages.status', 'Status') }}</label>
                                     <select name="status" id="filterMyPubStatus" class="form-control pub-filter-input">
-                                        <option value="">All statuses</option>
-                                        <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
-                                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                        <option value="">{{ ui_t('frontend_pages.all_statuses', 'All statuses') }}</option>
+                                        <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>{{ ui_t('frontend_pages.approved', 'Approved') }}</option>
+                                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>{{ ui_t('frontend_pages.pending', 'pending') }}</option>
+                                        <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>{{ ui_t('frontend_pages.rejected', 'Rejected') }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -508,18 +508,18 @@
                 </div>
             </div>
 
-            <p class="kh-table-mobile-hint"><i class="fa fa-mobile-alt mr-1"></i> Publication rows are shown as cards on small screens.</p>
+            <p class="kh-table-mobile-hint"><i class="fa fa-mobile-alt mr-1"></i> {{ ui_t('frontend_pages.rows_as_cards_hint', 'Publication rows are shown as cards on small screens.') }}</p>
             <div class="publication-table-wrap kh-table-mobile-scroll">
                 <table id="my-publications" data-kh-datatable="custom" class="table table-striped table-bordered align-middle w-100 kh-table-mobile-cards kh-table-mobile-cards--medium">
                     <thead>
                         <tr>
                             <th class="my-pub-col-index">#</th>
-                            <th class="my-pub-col-title">Title</th>
-                            <th class="my-pub-col-description">Description</th>
-                            <th class="my-pub-col-status">Status</th>
-                            <th class="my-pub-col-views">Total Views</th>
-                            <th class="my-pub-col-created">Created At</th>
-                            <th class="my-pub-col-actions">Actions</th>
+                            <th class="my-pub-col-title">{{ ui_t('frontend_pages.title', 'Title') }}</th>
+                            <th class="my-pub-col-description">{{ ui_t('frontend_pages.description', 'Description') }}</th>
+                            <th class="my-pub-col-status">{{ ui_t('frontend_pages.status', 'Status') }}</th>
+                            <th class="my-pub-col-views">{{ ui_t('frontend_pages.total_views', 'Total views') }}</th>
+                            <th class="my-pub-col-created">{{ ui_t('frontend_pages.created_at', 'Created At') }}</th>
+                            <th class="my-pub-col-actions">{{ ui_t('frontend_pages.actions', 'Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

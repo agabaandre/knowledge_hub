@@ -2,8 +2,8 @@
 
 @php
     // SEO Meta Tags (controller may override for e.g. my-communities)
-    $pageTitle = $pageTitle ?? ('Communities of Practice - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub'));
-    $pageDescription = $pageDescription ?? 'Join professional communities of practice focused on public health topics across Africa. Connect with experts, share knowledge, and collaborate on health initiatives.';
+    $pageTitle = $pageTitle ?? (ui_t('frontend_pages.communities_title', 'Communities of Practice') . ' - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub'));
+    $pageDescription = $pageDescription ?? ui_t('frontend_pages.communities_page_description', 'Join professional communities of practice focused on public health topics across Africa. Connect with experts, share knowledge, and collaborate on health initiatives.');
     $pageKeywords = $pageKeywords ?? ('communities of practice, public health communities, Africa CDC communities, health professionals, networking, collaboration, ' . (settings()->seo_keywords ?? ''));
     $pageImage = $pageImage ?? (settings()->logo ?? asset('assets/images/logo.png'));
     $canonicalUrl = $canonicalUrl ?? url('communities');
@@ -760,8 +760,8 @@
 @section('content')
     <div class="container">
         <div class="page-title pt-3 pb-3">
-            <h1>Communities of Practice</h1>
-            <p style="margin: 0.5rem 0 0 0; font-size: 1rem; color: #718096;">Join a community of practice to connect with peers, share knowledge, and participate in discussions.</p>
+            <h1>{{ ui_t('frontend_pages.communities_title', 'Communities of Practice') }}</h1>
+            <p style="margin: 0.5rem 0 0 0; font-size: 1rem; color: #718096;">{{ ui_t('frontend_pages.communities_intro', 'Join a community of practice to connect with peers, share knowledge, and participate in discussions.') }}</p>
         </div>
 
         @if(Auth::check() && !empty($userMembershipStats))
@@ -770,12 +770,12 @@
                     <i class="fa fa-users"></i>
                 </span>
                 <div class="communities-membership-summary__body">
-                    <p class="communities-membership-summary__title">Your community memberships</p>
+                    <p class="communities-membership-summary__title">{{ ui_t('frontend_pages.your_community_memberships', 'Your community memberships') }}</p>
                     <p class="communities-membership-summary__text">
                         @if(request()->routeIs('account.my-communities'))
-                            You are a member of {{ number_format((int) ($userMembershipStats['joined'] ?? 0)) }} public {{ (int) ($userMembershipStats['joined'] ?? 0) === 1 ? 'community' : 'communities' }}.
+                            {{ ui_t('frontend_pages.member_of_communities', 'You are a member of :count public :noun.', ['count' => number_format((int) ($userMembershipStats['joined'] ?? 0)), 'noun' => ((int) ($userMembershipStats['joined'] ?? 0) === 1 ? ui_t('frontend_pages.community_singular', 'community') : ui_t('frontend_pages.community_plural', 'communities'))]) }}
                         @else
-                            Communities you belong to appear first in the list below.
+                            {{ ui_t('frontend_pages.communities_you_belong_first', 'Communities you belong to appear first in the list below.') }}
                         @endif
                     </p>
                 </div>
@@ -783,19 +783,19 @@
                     <span class="communities-membership-summary__stat">
                         <i class="fa fa-check-circle" aria-hidden="true"></i>
                         <strong>{{ number_format((int) ($userMembershipStats['joined'] ?? 0)) }}</strong>
-                        joined
+                        {{ ui_t('frontend_pages.joined', 'joined') }}
                     </span>
                     @if((int) ($userMembershipStats['pending'] ?? 0) > 0)
                         <span class="communities-membership-summary__stat communities-membership-summary__stat--pending">
                             <i class="fa fa-clock-o" aria-hidden="true"></i>
                             <strong>{{ number_format((int) $userMembershipStats['pending']) }}</strong>
-                            pending
+                            {{ ui_t('frontend_pages.pending', 'pending') }}
                         </span>
                     @endif
                 </div>
                 @if(!request()->routeIs('account.my-communities') && (int) ($userMembershipStats['joined'] ?? 0) > 0)
                     <a href="{{ route('account.my-communities') }}" class="communities-membership-summary__link">
-                        View my communities <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                        {{ ui_t('frontend_pages.view_my_communities', 'View my communities') }} <i class="fa fa-arrow-right" aria-hidden="true"></i>
                     </a>
                 @endif
             </div>
@@ -808,9 +808,9 @@
                 : count($communities ?? []);
             $navJumps = [];
             if (Auth::check() && isset($recommendedCommunities) && $recommendedCommunities->isNotEmpty() && !request()->routeIs('account.my-communities')) {
-                $navJumps[] = ['id' => 'communities-recommended', 'label' => 'Recommended'];
+                $navJumps[] = ['id' => 'communities-recommended', 'label' => ui_t('frontend_pages.recommended', 'Recommended')];
             }
-            $navJumps[] = ['id' => 'communities-all-heading', 'label' => 'All communities'];
+            $navJumps[] = ['id' => 'communities-all-heading', 'label' => ui_t('frontend_pages.all_communities', 'All communities')];
         @endphp
 
         <div id="communities-nav-root"></div>
@@ -818,7 +818,7 @@
             'totalCommunities' => $communities instanceof \Illuminate\Pagination\AbstractPaginator
                 ? $communities->total()
                 : count($communities ?? []),
-            'searchPlaceholder' => 'Search by name, region, country, organisation, department… (min. 4 characters)',
+            'searchPlaceholder' => ui_t('frontend_pages.search_communities_placeholder', 'Search by name, region, country, organisation, department… (min. 4 characters)'),
             'searchDebounceMs' => 400,
             'searchMinChars' => 4,
             'initialSearchTerm' => request('term', ''),
@@ -827,15 +827,15 @@
 
         @if(!request()->routeIs('account.my-communities') && request()->filled('term'))
             <p class="text-muted small mb-3">
-                Showing results for <strong class="notranslate" translate="no">“{{ request('term') }}”</strong>.
-                <a href="{{ route('community.index') }}">Clear search</a>
+                {{ ui_t('frontend_pages.showing_results_for', 'Showing results for') }} <strong class="notranslate" translate="no">“{{ request('term') }}”</strong>.
+                <a href="{{ route('community.index') }}">{{ ui_t('frontend_pages.clear_search', 'Clear search') }}</a>
             </p>
         @endif
 
         @if(Auth::check() && isset($recommendedCommunities) && $recommendedCommunities->isNotEmpty() && !request()->routeIs('account.my-communities'))
             <div class="mb-4 pb-2 border-bottom" id="communities-recommended">
-                <h2 class="community-section-heading">Recommended for you</h2>
-                <p class="text-muted small mb-3 mb-md-4">Based on your profile health themes and tags from publications you have saved.</p>
+                <h2 class="community-section-heading">{{ ui_t('frontend_pages.recommended_for_you', 'Recommended for you') }}</h2>
+                <p class="text-muted small mb-3 mb-md-4">{{ ui_t('frontend_pages.recommended_communities_help', 'Based on your profile health themes and tags from publications you have saved.') }}</p>
                 <div class="{{ communities_listing_grid_wrapper_class() }}">
                     @foreach($recommendedCommunities as $community)
                         <div class="communities-card-grid__item">
@@ -847,9 +847,9 @@
         @endif
 
         @if(request()->routeIs('account.my-communities'))
-            <h2 class="community-section-heading mb-3" id="communities-all-heading">Your communities</h2>
+            <h2 class="community-section-heading mb-3" id="communities-all-heading">{{ ui_t('frontend_pages.your_communities', 'Your communities') }}</h2>
         @else
-            <h2 class="community-section-heading mb-3" id="communities-all-heading">All communities</h2>
+            <h2 class="community-section-heading mb-3" id="communities-all-heading">{{ ui_t('frontend_pages.all_communities', 'All communities') }}</h2>
         @endif
 
         <div id="communities-list-wrap"
@@ -866,7 +866,7 @@
             @else
                 <div class="col-12">
                     <div class="alert alert-info text-center">
-                        <i class="fa fa-info-circle mr-2"></i>No communities found.
+                        <i class="fa fa-info-circle mr-2"></i>{{ ui_t('frontend_pages.no_communities_found', 'No communities found.') }}
                     </div>
                 </div>
             @endif
@@ -875,15 +875,15 @@
         @if($communitiesInfiniteScroll && $communities instanceof \Illuminate\Pagination\AbstractPaginator && $communities->total() > 0)
         <div class="communities-infinite-footer py-3 text-center" id="communities-infinite-footer">
             <p class="text-muted small mb-2" id="communities-infinite-status">
-                Showing {{ number_format($loadedCommunityCount) }} of {{ number_format($communities->total()) }} communities
+                {{ ui_t('frontend_pages.showing_of_communities', 'Showing :loaded of :total communities', ['loaded' => number_format($loadedCommunityCount), 'total' => number_format($communities->total())]) }}
             </p>
             @if($communities->hasMorePages())
                 <div id="communities-infinite-sentinel" class="communities-infinite-sentinel" aria-hidden="true"></div>
                 <div id="communities-infinite-loader" class="communities-infinite-loader d-none" aria-live="polite">
-                    <i class="fa fa-spinner fa-spin me-1"></i>Loading more communities…
+                    <i class="fa fa-spinner fa-spin me-1"></i>{{ ui_t('frontend_pages.loading_more_communities', 'Loading more communities…') }}
                 </div>
             @else
-                <p class="text-muted small mb-0" id="communities-infinite-complete">All communities loaded</p>
+                <p class="text-muted small mb-0" id="communities-infinite-complete">{{ ui_t('frontend_pages.all_communities_loaded', 'All communities loaded') }}</p>
             @endif
         </div>
         @elseif($communities instanceof \Illuminate\Pagination\AbstractPaginator && $communities->hasPages())
@@ -902,17 +902,17 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="joinModalLabel">Join Community</h5>
+                    <h5 class="modal-title" id="joinModalLabel">{{ ui_t('frontend_pages.join_community', 'Join Community') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to join this community?
+                    {{ ui_t('frontend_pages.join_community_confirm', 'Are you sure you want to join this community?') }}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
-                    <button type="button" class="btn btn-primary" id="confirmJoin">Join</button>
+                    <button type="button" class="btn btn-primary" id="confirmJoin">{{ ui_t('frontend_pages.join', 'Join') }}</button>
                 </div>
             </div>
         </div>
@@ -924,17 +924,17 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="leaveModalLabel">Leave Community</h5>
+                    <h5 class="modal-title" id="leaveModalLabel">{{ ui_t('frontend_pages.leave_community', 'Leave Community') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to leave this community?
+                    {{ ui_t('frontend_pages.leave_community_confirm', 'Are you sure you want to leave this community?') }}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
-                    <button type="button" class="btn btn-danger" id="confirmLeave">Leave</button>
+                    <button type="button" class="btn btn-danger" id="confirmLeave">{{ ui_t('frontend_pages.leave', 'Leave') }}</button>
                 </div>
             </div>
         </div>
@@ -951,8 +951,8 @@
             enabled: @json((bool) ($communitiesInfiniteScroll ?? false)),
             pageUrl: @json(route('community.page'))
         };
-        window.COMMUNITIES_INFINITE_STATUS_COMPLETE = 'All communities loaded';
-        window.COMMUNITIES_INFINITE_STATUS_ERROR = 'Could not load more communities. Tap to retry.';
+        window.COMMUNITIES_INFINITE_STATUS_COMPLETE = @json(ui_t('frontend_pages.all_communities_loaded', 'All communities loaded'));
+        window.COMMUNITIES_INFINITE_STATUS_ERROR = @json(ui_t('frontend_pages.communities_load_error', 'Could not load more communities. Tap to retry.'));
     </script>
     <script src="{{ asset('js/communities-index-infinite.js') }}?v={{ @filemtime(public_path('js/communities-index-infinite.js')) }}"></script>
     <script>

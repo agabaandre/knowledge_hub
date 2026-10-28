@@ -2,11 +2,11 @@
 
 @section('content')
 <div class="page-header">
-    <h1 class="page-title">RSS Feeds</h1>
+    <h1 class="page-title">{{ __('admin_nav.rss_feeds') }}</h1>
     <div>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url('admin') }}">Admin</a></li>
-            <li class="breadcrumb-item active">RSS Feeds</li>
+            <li class="breadcrumb-item"><a href="{{ url('admin') }}">{{ __('admin_nav.admin') }}</a></li>
+            <li class="breadcrumb-item active">{{ __('admin_nav.rss_feeds') }}</li>
         </ol>
     </div>
 </div>
@@ -15,7 +15,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <h3 class="card-title mb-0">Manage RSS Feeds</h3>
+                <h3 class="card-title mb-0">{{ __('admin_nav.manage_rss_feeds') }}</h3>
                 <div class="d-flex gap-1">
                     <button type="button" class="btn btn-outline-primary btn-sm js-fetch-all" title="Fetch all active feeds now">
                         <i class="fa fa-refresh"></i> Fetch all now

@@ -118,11 +118,11 @@
 @section('content')
 <!-- PAGE-HEADER -->
 <div class="page-header">
-    <h1 class="page-title">Dashboard</h1>
+    <h1 class="page-title">{{ __('admin_dashboard.dashboard') }}</h1>
     <div>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('admin_dashboard.home') }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ __('admin_dashboard.dashboard') }}</li>
         </ol>
     </div>
 </div>
@@ -134,65 +134,65 @@
         <div class="col-md-4 col-lg-3 mb-4">
             <a href="{{ url('admin/publications') }}" class="stat-card">
                 <div class="stat-value">{{ $publications_count }}</div>
-                <div class="stat-label">Publications</div>
+                <div class="stat-label">{{ __('admin_dashboard.publications') }}</div>
                 <div class="stat-icon"><i class="fa fa-pen"></i></div>
-                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
+                <div class="stat-link">{{ __('admin_dashboard.view_list') }} <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
         <div class="col-md-4 col-lg-3 mb-4">
             <a href="{{ url('admin/authors') }}" class="stat-card">
                 <div class="stat-value" style="color: {{ settings()->au_green ?? '#1A5632' }};">{{ $authors_count }}</div>
-                <div class="stat-label">Resource Authors</div>
+                <div class="stat-label">{{ __('admin_dashboard.resource_authors') }}</div>
                 <div class="stat-icon" style="color: {{ settings()->au_green ?? '#1A5632' }};"><i class="fa fa-users"></i></div>
-                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
+                <div class="stat-link">{{ __('admin_dashboard.view_list') }} <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
         <div class="col-md-4 col-lg-3 mb-4">
             <a href="{{ url('admin/experts') }}" class="stat-card">
                 <div class="stat-value" style="color: {{ settings()->au_gold ?? '#B4A269' }};">{{ $experts_count }}</div>
-                <div class="stat-label">Workforce Experts</div>
+                <div class="stat-label">{{ __('admin_dashboard.workforce_experts') }}</div>
                 <div class="stat-icon" style="color: {{ settings()->au_gold ?? '#B4A269' }};"><i class="fas fa-user-graduate"></i></div>
-                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
+                <div class="stat-link">{{ __('admin_dashboard.view_list') }} <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
         <div class="col-md-4 col-lg-3 mb-4">
             <a href="{{ url('admin/forums') }}" class="stat-card">
                 <div class="stat-value" style="color: {{ settings()->au_gold ?? '#B4A269' }};">{{ $forums_count }}</div>
-                <div class="stat-label">Forum Discussions</div>
+                <div class="stat-label">{{ __('admin_dashboard.forum_discussions') }}</div>
                 <div class="stat-icon" style="color: {{ settings()->au_gold ?? '#B4A269' }};"><i class="fab fa-forumbee"></i></div>
-                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
+                <div class="stat-link">{{ __('admin_dashboard.view_list') }} <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
         <div class="col-md-4 col-lg-3 mb-4">
             <a href="{{ states_enabled() ? url('admin/areas') : url('admin/adminunits') }}" class="stat-card">
                 <div class="stat-value" style="color: {{ settings()->au_red ?? '#9F2241' }};">{{ $states_count }}</div>
-                <div class="stat-label">Total Member States</div>
+                <div class="stat-label">{{ __('admin_dashboard.total_member_states') }}</div>
                 <div class="stat-icon" style="color: {{ settings()->au_red ?? '#9F2241' }};"><i class="fas fa-globe-africa"></i></div>
-                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
+                <div class="stat-link">{{ __('admin_dashboard.view_list') }} <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
         <div class="col-md-4 col-lg-3 mb-4">
             <a href="{{ url('admin/logs/user') }}" class="stat-card">
                 <div class="stat-value" style="color: {{ settings()->au_red ?? '#9F2241' }};">{{ $visits_count }}</div>
-                <div class="stat-label">Avg Daily Visits</div>
+                <div class="stat-label">{{ __('admin_dashboard.avg_daily_visits') }}</div>
                 <div class="stat-icon" style="color: {{ settings()->au_red ?? '#9F2241' }};"><i class="fas fa-signal"></i></div>
-                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
+                <div class="stat-link">{{ __('admin_dashboard.view_list') }} <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
         <div class="col-md-4 col-lg-3 mb-4">
             <a href="{{ states_enabled() ? url('admin/areas') : url('admin/adminunits') }}" class="stat-card">
                 <div class="stat-value" style="color: {{ settings()->au_grey_text ?? '#58595B' }};">{{ $admin_units_count }}</div>
-                <div class="stat-label">Total Administrative Units</div>
+                <div class="stat-label">{{ __('admin_dashboard.total_administrative_units') }}</div>
                 <div class="stat-icon" style="color: {{ settings()->au_grey_text ?? '#58595B' }};"><i class="far fa-building"></i></div>
-                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
+                <div class="stat-link">{{ __('admin_dashboard.view_list') }} <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
         <div class="col-md-4 col-lg-3 mb-4">
             <a href="{{ url('permissions/users') }}" class="stat-card">
                 <div class="stat-value" style="color: {{ settings()->au_corporate_green ?? '#1A5632' }};">{{ $users_count }}</div>
-                <div class="stat-label">Total Platform Users</div>
+                <div class="stat-label">{{ __('admin_dashboard.total_platform_users') }}</div>
                 <div class="stat-icon" style="color: {{ settings()->au_corporate_green ?? '#1A5632' }};"><i class="fas fa-users-cog"></i></div>
-                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
+                <div class="stat-link">{{ __('admin_dashboard.view_list') }} <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
     </div>
@@ -205,8 +205,8 @@
         <div class="col-md-12">
             <div class="card shadow-sm" style="border-radius:12px;">
                 <div class="card-header d-flex align-items-center justify-content-between">
-                    <h4 class="card-title mb-0">Admin Dashboards</h4>
-                    <span class="text-muted small">{{ count($dashboards) }} available</span>
+                    <h4 class="card-title mb-0">{{ __('admin_dashboard.admin_dashboards') }}</h4>
+                    <span class="text-muted small">{{ __('admin_dashboard.available_count', ['count' => count($dashboards)]) }}</span>
                 </div>
                 <div class="card-body">
                     <div class="row" style="row-gap:12px;">
@@ -241,7 +241,7 @@
                                 }
                             }
                             
-                            $statusText = $db->is_approved ? 'Approved' : ($db->is_rejected ? 'Rejected' : 'Pending');
+                            $statusText = $db->is_approved ? __('admin_dashboard.approved') : ($db->is_rejected ? __('admin_dashboard.rejected') : __('admin_dashboard.pending'));
                             $statusClass = $db->is_approved ? 'badge-success' : ($db->is_rejected ? 'badge-danger' : 'badge-secondary');
                             
                             // Use publication link directly if is_embedded != 1, otherwise use admin view
@@ -275,7 +275,7 @@
                                     <div class="mt-auto d-flex align-items-center justify-content-between">
                                         <span class="badge {{ $statusClass }}">{{ $statusText }}</span>
                                         <a href="{{ $url }}" target="{{ $is_external ? '_blank' : '_self' }}" class="btn btn-sm btn-outline-primary">
-                                            <i class="fa fa-chart-line mr-1"></i> Open
+                                            <i class="fa fa-chart-line mr-1"></i> {{ __('admin_dashboard.open') }}
                                         </a>
                                     </div>
                                 </div>
@@ -293,7 +293,7 @@
         <div class="col-md-12">
             <div class="card pub-list-card">
                 <div class="card-header">
-                    <h3 class="card-title mb-0">Most Recent Resources</h3>
+                    <h3 class="card-title mb-0">{{ __('admin_dashboard.most_recent_resources') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="pub-filters-card mb-3">
@@ -301,8 +301,8 @@
                             <div class="pub-filters-card__heading">
                                 <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
                                 <div>
-                                    <h3 class="pub-filters-card__title">Filter Resources</h3>
-                                    <p class="pub-filters-card__subtitle">Filters apply automatically as you type</p>
+                                    <h3 class="pub-filters-card__title">{{ __('admin_dashboard.filter_resources') }}</h3>
+                                    <p class="pub-filters-card__subtitle">{{ __('admin_dashboard.filters_apply_automatically') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -310,8 +310,8 @@
                             <form id="dashboardResourcesFiltersForm" method="GET" action="{{ url('admin') }}" class="mb-0">
                                 <div class="pub-filters-grid pub-filters-grid--single">
                                     <div class="pub-filter-field pub-filter-field--wide">
-                                        <label class="pub-filter-label" for="filterResourceSearch">Search resources</label>
-                                        <input type="text" name="search[q]" id="filterResourceSearch" class="form-control pub-filter-input" placeholder="Search by title, author, description, geography, region, theme, category, or tag" value="{{ request('search.q', request('search.title')) }}">
+                                        <label class="pub-filter-label" for="filterResourceSearch">{{ __('admin_dashboard.search_resources') }}</label>
+                                        <input type="text" name="search[q]" id="filterResourceSearch" class="form-control pub-filter-input" placeholder="{{ __('admin_dashboard.search_resources_placeholder') }}" value="{{ request('search.q', request('search.title')) }}">
                                     </div>
                                 </div>
                                 <div class="pub-filters-actions">
@@ -328,12 +328,12 @@
                             <thead>
                                 <tr>
                                     <th class="dash-col-index">#</th>
-                                    <th class="dash-col-date">Created</th>
-                                    <th class="dash-col-title">Title</th>
-                                    <th class="dash-col-description">Description</th>
-                                    <th class="dash-col-author">Author</th>
-                                    <th class="dash-col-status">Status</th>
-                                    <th class="dash-col-actions">Actions</th>
+                                    <th class="dash-col-date">{{ __('admin_dashboard.created') }}</th>
+                                    <th class="dash-col-title">{{ __('admin_dashboard.title') }}</th>
+                                    <th class="dash-col-description">{{ __('admin_dashboard.description') }}</th>
+                                    <th class="dash-col-author">{{ __('admin_dashboard.author') }}</th>
+                                    <th class="dash-col-status">{{ __('admin_dashboard.status') }}</th>
+                                    <th class="dash-col-actions">{{ __('admin_dashboard.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -349,7 +349,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="pubDescriptionPreviewTitle">Description</h5>
+                <h5 class="modal-title" id="pubDescriptionPreviewTitle">{{ __('admin_dashboard.description') }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -428,9 +428,9 @@
                 { targets: [0, 4, 6], orderable: false }
             ],
             language: {
-                processing: '<i class="fa fa-spinner fa-spin"></i> Loading resources...',
-                emptyTable: 'No resources match your filters.',
-                zeroRecords: 'No matching resources found.'
+                processing: '<i class="fa fa-spinner fa-spin"></i> ' + @json(__('admin_dashboard.loading_resources')),
+                emptyTable: @json(__('admin_dashboard.no_resources_match')),
+                zeroRecords: @json(__('admin_dashboard.no_matching_resources'))
             }
         });
 
@@ -492,9 +492,9 @@
                 },
                 error: function(xhr) {
                     if (xhr.responseJSON) {
-                        $('.charts').html('<div class="col-12 alert alert-danger">Failed to load metrics.</div>');
+                        $('.charts').html('<div class="col-12 alert alert-danger">' + @json(__('admin_dashboard.failed_to_load_metrics')) + '</div>');
                     } else {
-                        $('.charts').html('<div class="col-12 alert alert-warning">Metrics not available (response may be HTML). Refresh the page.</div>');
+                        $('.charts').html('<div class="col-12 alert alert-warning">' + @json(__('admin_dashboard.metrics_not_available')) + '</div>');
                     }
                 }
             });

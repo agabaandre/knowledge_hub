@@ -150,12 +150,12 @@
 
 @section('content')
 <div class="page-header">
-    <h1 class="page-title"><i class="fa fa-globe-africa me-2"></i>RCC Dashboard</h1>
+    <h1 class="page-title"><i class="fa fa-globe-africa me-2"></i>{{ __('admin_nav.rcc_dashboard') }}</h1>
     <div>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url('admin') }}">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="{{ url('admin/kpi') }}">KPIs</a></li>
-            <li class="breadcrumb-item active" aria-current="page">RCC Dashboard</li>
+            <li class="breadcrumb-item"><a href="{{ url('admin') }}">{{ __('admin_nav.dashboard') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ url('admin/kpi') }}">{{ __('admin_nav.kpis') }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.rcc_dashboard') }}</li>
         </ol>
     </div>
 </div>

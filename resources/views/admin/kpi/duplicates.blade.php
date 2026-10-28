@@ -2,11 +2,11 @@
 
 @section('content')
 <div class="page-header">
-    <h1 class="page-title">Review duplicate KPI records</h1>
+    <h1 class="page-title">{{ __('admin_nav.review_duplicate_kpi') }}</h1>
     <div>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url('admin/kpi') }}">Indicators</a></li>
-            <li class="breadcrumb-item active">Duplicates</li>
+            <li class="breadcrumb-item"><a href="{{ url('admin/kpi') }}">{{ __('admin_nav.indicators') }}</a></li>
+            <li class="breadcrumb-item active">{{ __('admin_nav.duplicates') }}</li>
         </ol>
     </div>
 </div>

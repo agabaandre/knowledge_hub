@@ -109,11 +109,11 @@
 
 <div class="users-page">
 <div class="page-header">
-    <h1 class="page-title">Users</h1>
+    <h1 class="page-title">{{ __('admin_nav.users') }}</h1>
     <div>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Users</li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('admin_nav.home') }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.users') }}</li>
         </ol>
     </div>
 </div>

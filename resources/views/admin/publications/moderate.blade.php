@@ -7,11 +7,11 @@
 
 @section('content')
 <div class="page-header">
-    <h1 class="page-title">Moderate Comments</h1>
+    <h1 class="page-title">{{ __('admin_nav.moderate_comments') }}</h1>
     <div>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="javascript:void(0)">{{ ui_t('general.publish', 'Publish') }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Moderate Comments</li>
+            <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.moderate_comments') }}</li>
         </ol>
     </div>
 </div>
@@ -24,7 +24,7 @@
                     <div class="pub-filters-card__heading">
                         <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
                         <div>
-                            <h3 class="pub-filters-card__title">Filter Comments</h3>
+                            <h3 class="pub-filters-card__title">{{ __('admin_nav.filter_comments') }}</h3>
                             <p class="pub-filters-card__subtitle">Search by publication title or comment text</p>
                         </div>
                     </div>

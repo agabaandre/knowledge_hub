@@ -18,7 +18,7 @@
         </span>
         <div>
             <h2 class="records-sidebar-card__title">{{ __('publications.search.related_forums') }}</h2>
-            <p class="records-sidebar-card__hint">Discussions related to your search.</p>
+            <p class="records-sidebar-card__hint">{{ __('publications.search.discussions_related', 'Discussions related to your search.') }}</p>
         </div>
     </div>
     <ul class="search-sidebar-list list-unstyled mb-0">
@@ -53,7 +53,7 @@
         </span>
         <div>
             <h2 class="records-sidebar-card__title">{{ __('publications.search.latest_publications') }}</h2>
-            <p class="records-sidebar-card__hint">Recently added resources on the hub.</p>
+            <p class="records-sidebar-card__hint">{{ __('publications.search.recently_added', 'Recently added resources on the hub.') }}</p>
         </div>
     </div>
     <ul class="search-sidebar-list list-unstyled mb-0">

@@ -2,27 +2,24 @@
 
 return [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines are used during authentication for various
-    | messages that we need to display to the user. You are free to modify
-    | these language lines according to your application's requirements.
-    |
-    */
-
-    'failed'     => 'These credentials do not match our records.',
-    'password'   => 'The provided password is incorrect.',
-    'throttle'   => 'Too many login attempts. Please try again in :seconds seconds.',
-    'permissions'=>'Permissions',
-    'permission' =>'Permission',
-    'role'       =>'Role',
-    'roles'      =>'Roles',
-    'users'  => 'Users',
-    'user'   => 'User',
-    'login_status'=> " Account Status"
-    
+  'failed' => 'Hizi sifa hazilingani na rekodi zetu.',
+  'password' => 'Neno la siri lililotolewa si sahihi.',
+  'throttle' => 'Jaribio nyingi za kuingia. Tafadhali jaribu tena baada ya sekunde :seconds.',
+  'permissions' => 'Ruhusa',
+  'permission' => 'Ruhusa',
+  'role' => 'Jukumu',
+  'roles' => 'Majukumu',
+  'users' => 'Watumiaji',
+  'user' => 'Mtumiaji',
+  'login_status' => ' Account Status',
+  'welcome_back' => 'Karibu Tena',
+  'sign_in_subtitle' => 'Ingia ili kuendelea na akaunti yako',
+  'email_address' => 'Anwani ya Barua Pepe',
+  'email_placeholder' => 'Ingiza anwani yako ya barua pepe',
+  'password_label' => 'Nenosiri',
+  'password_placeholder' => 'Ingiza nenosiri lako',
+  'or_continue_with' => 'auendelea na',
+  'staff_recommend_microsoft' => 'Wafanyakazi wa Africa CDC: Tunapendekeza kutumia Outlook/Microsoft kuingia kwa urahisi.',
+  'dont_have_account' => 'Huna akaunti?',
 
 ];

@@ -16,11 +16,11 @@
 
 @section('content')
     <div class="page-header">
-        <h1 class="page-title">Publication Details</h1>
+        <h1 class="page-title">{{ __('admin_nav.publication_details') }}</h1>
         <div>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="javascript:void(0)">{{ ui_t('general.publish', 'Publish') }}</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Publication Details</li>
+                <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.publication_details') }}</li>
             </ol>
         </div>
     </div>

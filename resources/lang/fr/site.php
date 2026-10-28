@@ -1,8 +1,7 @@
 <?php
 
-
 return [
 
-    'member_states'  => 'Member States',
+  'member_states' => 'États membres',
 
 ];

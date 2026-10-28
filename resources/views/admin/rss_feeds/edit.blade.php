@@ -2,12 +2,12 @@
 
 @section('content')
 <div class="page-header">
-    <h1 class="page-title">Edit RSS Feed</h1>
+    <h1 class="page-title">{{ __('admin_nav.edit_rss_feed') }}</h1>
     <div>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url('admin') }}">Admin</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.rss_feeds.index') }}">RSS Feeds</a></li>
-            <li class="breadcrumb-item active">Edit</li>
+            <li class="breadcrumb-item"><a href="{{ url('admin') }}">{{ __('admin_nav.admin') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.rss_feeds.index') }}">{{ __('admin_nav.rss_feeds') }}</a></li>
+            <li class="breadcrumb-item active">{{ __('general.edit') }}</li>
         </ol>
     </div>
 </div>

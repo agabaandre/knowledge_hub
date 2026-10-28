@@ -9,7 +9,7 @@
     <div class="row">
         <div class="card col-lg-12">
             <div class="card-header text-left">
-                <h3 class="card-title float-left">{{ $title ?? 'Tags' }}</h3>
+                <h3 class="card-title float-left">{{ $title ?? __('admin_nav.tags') }}</h3>
                 <hr>
             </div>
 
@@ -21,7 +21,7 @@
                     <div class="row">
 
                         <div class="col-md-12 text-right">
-                            <a href="#create-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> Add Tag</a>
+                            <a href="#create-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> {{ __('admin_nav.add_tag') }}</a>
                         </div>
 
                         <div class="col-md-12">

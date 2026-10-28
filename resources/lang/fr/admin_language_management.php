@@ -1,0 +1,35 @@
+<?php
+
+return [
+
+  'ai_failed' => 'Échec de la traduction IA.',
+  'ai_none_updated' => 'Aucun champ mis à jour. Réessayez ou vérifiez Admin → Paramètres → Intégrations IA.',
+  'ai_timeout' => 'Délai dépassé pour la traduction IA. Réessayez — des lots plus petits sont utilisés automatiquement.',
+  'ai_translate' => 'Traduction IA',
+  'ai_translate_title' => 'Utiliser l’IA pour traduire l’anglais vers cette locale. Vérifiez puis enregistrez.',
+  'ai_translating' => 'Traduction :done/:total…',
+  'breadcrumb_dashboard' => 'Tableau de bord',
+  'breadcrumb_settings' => 'Paramètres',
+  'col_english' => 'Anglais (référence)',
+  'col_key' => 'Clé',
+  'col_translation' => 'Traduction :locale',
+  'confirm_ai' => 'Remplir tous les champs depuis l’anglais avec l’IA ? Les champs se mettent à jour par lots, puis l’enregistrement est automatique. Vous pourrez encore modifier ensuite.',
+  'confirm_copy' => 'Remplir les champs vides depuis l’anglais ? Les traductions existantes sont conservées. Vous pouvez modifier avant d’enregistrer.',
+  'copy_failed' => 'Échec de la copie depuis l’anglais.',
+  'copy_from_english' => 'Copier depuis l’anglais',
+  'copy_from_english_title' => 'Copier les valeurs anglaises dans les champs vides. Vérifiez puis enregistrez.',
+  'intro' => 'Vous contrôlez chaque chaîne d’interface éditable pour la locale sélectionnée — y compris la navigation frontend et le menu admin. Priorité : valeurs enregistrées ici → fichiers lang empaquetés → titres DB → anglais. Laissez un champ vide pour conserver la valeur par défaut. La navigation est native (pas Google Translate).',
+  'load_failed' => 'Impossible de charger les traductions pour cette locale/section. Actualisez la page.',
+  'loading' => 'Chargement…',
+  'loading_translations' => 'Chargement des traductions…',
+  'no_fields' => 'Aucun champ de traduction sur cette page.',
+  'save_failed' => 'Impossible d’enregistrer les traductions.',
+  'saved' => 'Traductions enregistrées.',
+  'saved_after_ai' => 'Traductions IA appliquées et enregistrées.',
+  'saving' => 'Enregistrement…',
+  'section' => 'Section',
+  'select_locale' => 'Choisir la locale',
+  'select_non_english_ai' => 'Sélectionnez une locale autre que l’anglais pour la traduction IA.',
+  'select_non_english_copy' => 'Sélectionnez une locale autre que l’anglais pour copier depuis l’anglais.',
+
+];

@@ -4,7 +4,7 @@
 <div class="row">
 	<div class="card col-lg-12">
 		<div class="card-header">
-			<h3 class="card-title">Edit License</h3>
+			<h3 class="card-title">{{ __('admin_nav.edit_license') }}</h3>
 		</div>
 		<div class="card-body">
 			@include('layouts.partials.alerts')

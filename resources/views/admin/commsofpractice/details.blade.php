@@ -50,7 +50,7 @@
             <div class="af-card-header d-flex align-items-center justify-content-between">
                 <div>
                     <strong>Community Management</strong>
-                    <div class="text-muted" style="font-size:.9rem;">Manage members and invitations for this community</div>
+                    <div class="text-muted" style="font-size:.9rem;">{{ __('admin_nav.manage_community_members_help') }}</div>
                 </div>
                 <div>
                     <span class="stat-chip total">Total Members: {{ $totalMembers }}</span>

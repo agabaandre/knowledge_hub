@@ -6,19 +6,19 @@
 
 @section('content')
     <div class="page-header">
-        <h1 class="page-title">Sub Categories</h1>
+        <h1 class="page-title">{{ __('admin_nav.sub_categories') }}</h1>
         <div>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url('admin') }}">Admin</a></li>
-                <li class="breadcrumb-item"><a href="javascript:void(0)">Dropdown Lists</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Sub Categories</li>
+                <li class="breadcrumb-item"><a href="{{ url('admin') }}">{{ __('admin_nav.admin') }}</a></li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('admin_nav.dropdown_lists') }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.sub_categories') }}</li>
             </ol>
         </div>
     </div>
     <div class="row">
         <div class="card col-lg-12">
             <div class="card-header text-left d-flex justify-content-between align-items-center flex-wrap">
-                <h3 class="card-title mb-0">Manage Categories</h3>
+                <h3 class="card-title mb-0">{{ __('admin_nav.manage_categories') }}</h3>
                 <a href="#add-subcategory-modal" data-toggle="modal" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> {{ ui_t('general.add_category', 'Add Category') }}</a>
             </div>
             <div class="card-header">

@@ -17,8 +17,8 @@
 
 @section('content')
 <div class="appr-hero">
-    <h1>Pending approvals</h1>
-    <p>Review only items waiting for a decision. Approved and rejected records stay on their original admin pages.</p>
+    <h1>{{ __('admin_nav.pending_approvals') }}</h1>
+    <p>{{ __('admin_nav.pending_approvals_intro') }}</p>
 </div>
 
 @if(session('alert-success'))
@@ -34,10 +34,10 @@
 <div class="row g-2 mb-3">
     @php
         $tabs = [
-            'all' => ['All pending', $counts['all'] ?? 0],
-            'publication' => ['Publications', $counts['publication'] ?? 0],
-            'forum' => ['Forums', $counts['forum'] ?? 0],
-            'cop_participant' => ['CoP participants', $counts['cop_participant'] ?? 0],
+            'all' => [__('admin_nav.all_pending'), $counts['all'] ?? 0],
+            'publication' => [__('admin_nav.publications_tab'), $counts['publication'] ?? 0],
+            'forum' => [__('admin_nav.forums'), $counts['forum'] ?? 0],
+            'cop_participant' => [__('admin_nav.cop_participants'), $counts['cop_participant'] ?? 0],
             'federated' => ['Federated content', $counts['federated'] ?? 0],
         ];
     @endphp

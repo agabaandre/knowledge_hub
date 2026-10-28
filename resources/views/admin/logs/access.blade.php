@@ -3,11 +3,11 @@
 
 <!-- PAGE-HEADER -->
 <div class="page-header">
-            <h1 class="page-title">Site Access Logs</h1>
+            <h1 class="page-title">{{ __('admin_nav.site_access_logs') }}</h1>
             <div>
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="javascript:void(0)">Logs</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Site Access Logs</li>
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('admin_nav.logs') }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.site_access_logs') }}</li>
                 </ol>
             </div>
         </div>

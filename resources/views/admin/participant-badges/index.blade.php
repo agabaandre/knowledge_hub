@@ -6,12 +6,12 @@
 
 @section('content')
     <div class="page-header">
-        <h1 class="page-title">Participant badge management</h1>
+        <h1 class="page-title">{{ __('admin_nav.participant_badge_management') }}</h1>
         <div>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url('admin') }}">Admin</a></li>
-                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ ui_t('general.publish', 'Publish') }}</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Participant badges</li>
+                <li class="breadcrumb-item"><a href="{{ url('admin') }}">{{ __('admin_nav.admin') }}</a></li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('admin_nav.publish') }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.participant_badges') }}</li>
             </ol>
         </div>
     </div>

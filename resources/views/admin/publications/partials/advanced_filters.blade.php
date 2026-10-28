@@ -19,48 +19,48 @@
 @endphp
 
 <div class="pub-filters-advanced__label">
-    <i class="fa fa-layer-group"></i> Advanced filters
+    <i class="fa fa-layer-group"></i> {{ ui_t('admin_publications.advanced_filters_label', 'Advanced filters') }}
 </div>
 
 @if (@states_enabled())
 <div class="row">
     <div class="{{ $advCol }}">
         <div class="form-group pub-filter-field">
-            <label class="pub-filter-label" for="rcc">Region</label>
+            <label class="pub-filter-label" for="rcc">{{ ui_t('admin_publications.filter_region', 'Region') }}</label>
             @include('partials.regions.dropdown', [
                 'class' => 'rcc select2 form-control pub-filter-input',
                 'selected' => @$search->rcc,
-                'allfield' => 'All',
+                'allfield' => ui_t('admin_publications.filter_all', 'All'),
             ])
         </div>
     </div>
     <div class="{{ $advCol }}">
         <div class="form-group pub-filter-field">
-            <label class="pub-filter-label" for="country_id">Member State</label>
+            <label class="pub-filter-label" for="country_id">{{ ui_t('admin_publications.filter_member_state', 'Member State') }}</label>
             @include('partials.countries.dropdown', [
                 'class' => 'country select2 form-control pub-filter-input',
                 'selected' => @$search->country_id,
-                'allfield' => 'All',
+                'allfield' => ui_t('admin_publications.filter_all', 'All'),
             ])
         </div>
     </div>
     <div class="{{ $advCol }}">
         <div class="form-group pub-filter-field">
-            <label class="pub-filter-label" for="thematic_area_id">Thematic Area</label>
+            <label class="pub-filter-label" for="thematic_area_id">{{ ui_t('admin_publications.filter_thematic_area', 'Thematic Area') }}</label>
             @include('partials.publications.theme_dropdown', [
                 'class' => 'theme select2 form-control pub-filter-input',
                 'selected' => @$search->thematic_area_id,
-                'allfield' => 'All',
+                'allfield' => ui_t('admin_publications.filter_all', 'All'),
             ])
         </div>
     </div>
     <div class="{{ $advCol }}">
         <div class="form-group pub-filter-field">
-            <label class="pub-filter-label" for="sub_thematic_area_id">Sub-Thematic Area</label>
+            <label class="pub-filter-label" for="sub_thematic_area_id">{{ ui_t('admin_publications.filter_sub_thematic', 'Sub-Thematic Area') }}</label>
             @include('partials.publications.subtheme_dropdown', [
                 'class' => 'subtheme select2 form-control pub-filter-input',
                 'selected' => @$search->sub_thematic_area_id ?? @$search->subtheme,
-                'allfield' => 'All',
+                'allfield' => ui_t('admin_publications.filter_all', 'All'),
             ])
         </div>
     </div>
@@ -68,13 +68,13 @@
 <div class="row">
     <div class="{{ $advCol }}">
         <div class="form-group pub-filter-field">
-            <label class="pub-filter-label" for="file_category_id">Sub Category</label>
+            <label class="pub-filter-label" for="file_category_id">{{ ui_t('admin_publications.filter_sub_category', 'Sub Category') }}</label>
             @include('partials.publications.filecategory_dropdown', [
                 'field' => 'file_category_id',
                 'id' => 'file_category_id',
                 'class' => 'select2 form-control pub-filter-input',
                 'selected' => $fileCategorySelected,
-                'allfield' => 'All',
+                'allfield' => ui_t('admin_publications.filter_all', 'All'),
             ])
         </div>
     </div>
@@ -86,7 +86,7 @@
                 'field' => 'data_category_id',
                 'id' => 'data_category_id',
                 'selected' => $categorySelected,
-                'allfield' => 'All',
+                'allfield' => ui_t('admin_publications.filter_all', 'All'),
                 'exclude_special' => true,
             ])
         </div>
@@ -96,33 +96,33 @@
 <div class="row">
     <div class="{{ $advCol }}">
         <div class="form-group pub-filter-field">
-            <label class="pub-filter-label" for="thematic_area_id">Thematic Area</label>
+            <label class="pub-filter-label" for="thematic_area_id">{{ ui_t('admin_publications.filter_thematic_area', 'Thematic Area') }}</label>
             @include('partials.publications.theme_dropdown', [
                 'class' => 'theme select2 form-control pub-filter-input',
                 'selected' => @$search->thematic_area_id,
-                'allfield' => 'All',
+                'allfield' => ui_t('admin_publications.filter_all', 'All'),
             ])
         </div>
     </div>
     <div class="{{ $advCol }}">
         <div class="form-group pub-filter-field">
-            <label class="pub-filter-label" for="sub_thematic_area_id">Sub-Thematic Area</label>
+            <label class="pub-filter-label" for="sub_thematic_area_id">{{ ui_t('admin_publications.filter_sub_thematic', 'Sub-Thematic Area') }}</label>
             @include('partials.publications.subtheme_dropdown', [
                 'class' => 'subtheme select2 form-control pub-filter-input',
                 'selected' => @$search->sub_thematic_area_id ?? @$search->subtheme,
-                'allfield' => 'All',
+                'allfield' => ui_t('admin_publications.filter_all', 'All'),
             ])
         </div>
     </div>
     <div class="{{ $advCol }}">
         <div class="form-group pub-filter-field">
-            <label class="pub-filter-label" for="file_category_id">Sub Category</label>
+            <label class="pub-filter-label" for="file_category_id">{{ ui_t('admin_publications.filter_sub_category', 'Sub Category') }}</label>
             @include('partials.publications.filecategory_dropdown', [
                 'field' => 'file_category_id',
                 'id' => 'file_category_id',
                 'class' => 'select2 form-control pub-filter-input',
                 'selected' => $fileCategorySelected,
-                'allfield' => 'All',
+                'allfield' => ui_t('admin_publications.filter_all', 'All'),
             ])
         </div>
     </div>
@@ -134,7 +134,7 @@
                 'field' => 'data_category_id',
                 'id' => 'data_category_id',
                 'selected' => $categorySelected,
-                'allfield' => 'All',
+                'allfield' => ui_t('admin_publications.filter_all', 'All'),
                 'exclude_special' => true,
             ])
         </div>

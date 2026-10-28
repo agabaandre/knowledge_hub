@@ -134,10 +134,10 @@ class RecordsSearchSeo
         );
 
         $searchHeading = match (true) {
-            $term !== '' => 'Search results for “'.$term.'”',
-            $context['label'] !== '' => 'Resources: '.$context['label'],
-            $tagModel !== null => 'Resources tagged “'.$tagModel->tag_text.'”',
-            default => 'Browse public health resources',
+            $term !== '' => __('publications.search.heading_results_for', ['term' => $term]),
+            $context['label'] !== '' => __('publications.search.heading_resources_label', ['label' => $context['label']]),
+            $tagModel !== null => __('publications.search.heading_resources_tagged', ['tag' => $tagModel->tag_text]),
+            default => __('publications.search.heading_browse'),
         };
 
         return [

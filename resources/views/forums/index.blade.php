@@ -2,8 +2,8 @@
     $hide_search = true;
     // SEO Meta Tags for Forums Listing Page (controller may override for tag filters)
     $siteName = settings()->site_name ?? 'Africa CDC Knowledge Hub';
-    $pageTitle = $pageTitle ?? ('Discussion Forums - '.$siteName);
-    $pageDescription = $pageDescription ?? 'Join public health discussion forums, share insights, ask questions, and collaborate with experts across Africa. Participate in health-related discussions and knowledge exchange.';
+    $pageTitle = $pageTitle ?? (ui_t('frontend_pages.forums_title', 'Discussions & Forums').' - '.$siteName);
+    $pageDescription = $pageDescription ?? ui_t('frontend_pages.forums_page_description', 'Join public health discussion forums, share insights, ask questions, and collaborate with experts across Africa. Participate in health-related discussions and knowledge exchange.');
     $pageKeywords = $pageKeywords ?? ('discussion forums, public health forums, health discussions, Africa CDC forums, health experts, '.(settings()->seo_keywords ?? ''));
     $pageImage = $pageImage ?? (settings()->logo ?? asset('assets/images/logo.png'));
     $canonicalUrl = $canonicalUrl ?? url('forums');
@@ -1391,10 +1391,10 @@
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                 <div style="text-align: center; padding: 2rem 0;">
                     <h1 style="font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: white;">
-                        <i class="fa fa-comments me-2"></i>Discussions & Forums
+                        <i class="fa fa-comments me-2"></i>{{ ui_t('frontend_pages.forums_title', 'Discussions & Forums') }}
                     </h1>
                     <p style="margin: 0; color: rgba(255, 255, 255, 0.95); font-size: 1rem;">
-                        Join conversations, share knowledge, and collaborate with the community
+                        {{ ui_t('frontend_pages.forums_intro', 'Join conversations, share knowledge, and collaborate with the community') }}
                     </p>
                 </div>
                             </div>
@@ -1425,7 +1425,7 @@
                     'totalForums' => $forums instanceof \Illuminate\Pagination\AbstractPaginator
                         ? $forums->count()
                         : count($forums ?? []),
-                    'searchPlaceholder' => 'Search discussions by title, description, or tags...',
+                    'searchPlaceholder' => ui_t('frontend_pages.search_discussions_placeholder', 'Search discussions by title, description, or tags...'),
                     'searchDebounceMs' => 220,
                 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 
@@ -1451,15 +1451,15 @@
                 @if($forumsInfiniteScroll && $forums instanceof \Illuminate\Pagination\AbstractPaginator && $forums->total() > 0)
                 <div class="forums-infinite-footer py-3 text-center" id="forums-infinite-footer">
                     <p class="text-muted small mb-2" id="forums-infinite-status">
-                        Showing {{ number_format($loadedForumCount) }} of {{ number_format($forums->total()) }} discussions
+                        {{ ui_t('frontend_pages.showing_of_discussions', 'Showing :loaded of :total discussions', ['loaded' => number_format($loadedForumCount), 'total' => number_format($forums->total())]) }}
                     </p>
                     @if($forums->hasMorePages())
                         <div id="forums-infinite-sentinel" class="forums-infinite-sentinel" aria-hidden="true"></div>
                         <div id="forums-infinite-loader" class="forums-infinite-loader d-none" aria-live="polite">
-                            <i class="fa fa-spinner fa-spin me-1"></i>Loading more discussions…
+                            <i class="fa fa-spinner fa-spin me-1"></i>{{ ui_t('frontend_pages.loading_more_discussions', 'Loading more discussions…') }}
                         </div>
                     @else
-                        <p class="text-muted small mb-0" id="forums-infinite-complete">All discussions loaded</p>
+                        <p class="text-muted small mb-0" id="forums-infinite-complete">{{ ui_t('frontend_pages.all_discussions_loaded', 'All discussions loaded') }}</p>
                     @endif
                 </div>
                 @elseif($forums instanceof \Illuminate\Pagination\AbstractPaginator && $forums->hasPages())
@@ -2211,8 +2211,8 @@ document.addEventListener('DOMContentLoaded', function() {
         infiniteScrollEnabled: @json((bool) ($forumsInfiniteScroll ?? false)),
         activeTag: @json($activeForumTag ?? request('tag'))
     };
-    window.FORUMS_INFINITE_STATUS_COMPLETE = 'All discussions loaded';
-    window.FORUMS_INFINITE_STATUS_ERROR = 'Could not load more discussions. Tap to retry.';
+    window.FORUMS_INFINITE_STATUS_COMPLETE = @json(ui_t('frontend_pages.all_discussions_loaded', 'All discussions loaded'));
+    window.FORUMS_INFINITE_STATUS_ERROR = @json(ui_t('frontend_pages.discussions_load_error', 'Could not load more discussions. Tap to retry.'));
 </script>
 <script src="{{ asset('js/forums-index-tag-ajax.js') }}?v={{ @filemtime(public_path('js/forums-index-tag-ajax.js')) }}"></script>
 <script src="{{ asset('js/forums-index-infinite.js') }}?v={{ @filemtime(public_path('js/forums-index-infinite.js')) }}"></script>

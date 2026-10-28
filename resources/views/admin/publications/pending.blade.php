@@ -7,11 +7,11 @@
 
 @section('content')
     <div class="page-header">
-        <h1 class="page-title">Pending Public Health Resources</h1>
+        <h1 class="page-title">{{ ui_t('admin_publications.pending_title', 'Pending Public Health Resources') }}</h1>
         <div>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ ui_t('general.publish', 'Publish') }}</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Pending Public Health Resource</li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('admin_nav.publish') }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ ui_t('admin_publications.pending_breadcrumb', 'Pending Public Health Resource') }}</li>
             </ol>
         </div>
     </div>
@@ -23,12 +23,12 @@
                     <div class="pub-filters-card__heading">
                         <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
                         <div>
-                            <h3 class="pub-filters-card__title">Filter Pending Resources</h3>
-                            <p class="pub-filters-card__subtitle">Filters apply automatically as you type or change selections</p>
+                            <h3 class="pub-filters-card__title">{{ ui_t('admin_publications.filter_pending', 'Filter Pending Resources') }}</h3>
+                            <p class="pub-filters-card__subtitle">{{ ui_t('admin_publications.filter_subtitle', 'Filters apply automatically as you type or change selections') }}</p>
                         </div>
                     </div>
                     <button class="pub-filters-advanced-toggle" type="button" data-toggle="collapse" data-target="#advancedFilters" aria-expanded="false" aria-controls="advancedFilters">
-                        <i class="fa fa-sliders mr-1"></i> Advanced Filters
+                        <i class="fa fa-sliders mr-1"></i> {{ ui_t('admin_publications.advanced_filters', 'Advanced Filters') }}
                     </button>
                 </div>
                 <div class="pub-filters-card__body">
@@ -53,33 +53,30 @@
     <div class="row">
         <div class="col-md-12">
             <div class="card pub-list-card">
-                <div class="card-header"><h3 class="card-title mb-0">Pending Publications</h3></div>
+                <div class="card-header"><h3 class="card-title mb-0">{{ ui_t('admin_publications.pending_publications', 'Pending Publications') }}</h3></div>
                 <div class="card-body">
                     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
                     @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
 
                     @if(!empty($allowContentWipe))
                         <div class="alert alert-danger border">
-                            <strong>Danger zone — wipe hub content</strong>
+                            <strong>{{ ui_t('admin_publications.wipe_title', 'Danger zone — wipe hub content') }}</strong>
                             <p class="mb-2 small">
-                                Permanently deletes all publications, forums, comments, access/search logs,
-                                authors, and related pivot data (and communities if selected),
-                                then resets table auto-increment. Taxonomy/users/settings are kept.
-                                Enable only via <code>HUB_ALLOW_CONTENT_WIPE=true</code>.
+                                {{ ui_t('admin_publications.wipe_help', 'Permanently deletes all publications, forums, comments, access/search logs, authors, and related pivot data (and communities if selected), then resets table auto-increment. Taxonomy/users/settings are kept. Enable only via HUB_ALLOW_CONTENT_WIPE=true.') }}
                             </p>
                             <form method="post" action="{{ route('admin.publications.wipe-content') }}" class="form-inline flex-wrap"
-                                  onsubmit="return confirm('This cannot be undone. Wipe all content on this hub?');">
+                                  onsubmit="return confirm(@json(ui_t('admin_publications.wipe_confirm_prompt', 'This cannot be undone. Wipe all content on this hub?')));">
                                 @csrf
                                 <div class="form-group mr-2 mb-2">
-                                    <label class="sr-only" for="wipeConfirmation">Type {{ $wipeConfirmationPhrase ?? 'WIPE' }}</label>
+                                    <label class="sr-only" for="wipeConfirmation">{{ ui_t('admin_publications.wipe_type_placeholder', 'Type :phrase', ['phrase' => $wipeConfirmationPhrase ?? 'WIPE']) }}</label>
                                     <input type="text" name="confirmation" id="wipeConfirmation" class="form-control form-control-sm"
-                                           placeholder="Type {{ $wipeConfirmationPhrase ?? 'WIPE' }}" required autocomplete="off">
+                                           placeholder="{{ ui_t('admin_publications.wipe_type_placeholder', 'Type :phrase', ['phrase' => $wipeConfirmationPhrase ?? 'WIPE']) }}" required autocomplete="off">
                                 </div>
                                 <div class="form-check mr-2 mb-2">
                                     <input class="form-check-input" type="checkbox" name="include_communities" value="1" id="wipeCommunities" checked>
-                                    <label class="form-check-label" for="wipeCommunities">Also wipe communities</label>
+                                    <label class="form-check-label" for="wipeCommunities">{{ ui_t('admin_publications.wipe_communities', 'Also wipe communities') }}</label>
                                 </div>
-                                <button type="submit" class="btn btn-danger btn-sm mb-2">Wipe content</button>
+                                <button type="submit" class="btn btn-danger btn-sm mb-2">{{ ui_t('admin_publications.wipe_button', 'Wipe content') }}</button>
                             </form>
                         </div>
                     @endif
@@ -107,14 +104,14 @@
                                     <tr>
                                         <th width="40">@can('moderate_publication')<input type="checkbox" id="selectAllPending">@endcan</th>
                                         <th width="60">#</th>
-                                        <th>Title</th>
-                                        <th>Description</th>
-                                        <th>Author</th>
-                                        <th>Affiliation</th>
-                                        <th>Member State</th>
-                                        <th>Status</th>
-                                        <th>Date Created</th>
-                                        <th>Actions</th>
+                                        <th>{{ ui_t('admin_publications.col_title', 'Title') }}</th>
+                                        <th>{{ ui_t('admin_publications.col_description', 'Description') }}</th>
+                                        <th>{{ ui_t('admin_publications.col_author', 'Author') }}</th>
+                                        <th>{{ ui_t('admin_publications.col_affiliation', 'Affiliation') }}</th>
+                                        <th>{{ ui_t('admin_publications.col_member_state', 'Member State') }}</th>
+                                        <th>{{ ui_t('admin_publications.col_status', 'Status') }}</th>
+                                        <th>{{ ui_t('admin_publications.col_date_created', 'Date Created') }}</th>
+                                        <th>{{ ui_t('admin_publications.col_actions', 'Actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -130,11 +127,11 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Reject selected publications</h5>
+                    <h5 class="modal-title">{{ ui_t('admin_publications.reject_selected_title', 'Reject selected publications') }}</h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <textarea id="bulkRejectReason" class="form-control" rows="3" placeholder="Reason for rejection (optional)"></textarea>
+                    <textarea id="bulkRejectReason" class="form-control" rows="3" placeholder="{{ ui_t('admin_publications.reject_reason_placeholder', 'Reason for rejection (optional)') }}"></textarea>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
@@ -152,6 +149,10 @@
 @include('common.select2')
 @include('admin.publications.partials.datatable_assets')
 <script>
+const pubI18n = {
+    selectedCount: @json(ui_t('admin_publications.selected_count', ':count selected')),
+    confirmApprove: @json(ui_t('admin_publications.confirm_approve_selected', 'Approve the selected publication(s)?'))
+};
 let publicationTable = null;
 let filterReloadTimer = null;
 
@@ -179,7 +180,7 @@ function scheduleFilterReload() {
 function updateBulkState() {
     const n = $('#publicationTable .pending-pub-cb:checked').length;
     $('#bulkApproveBtn, #bulkRejectBtn').prop('disabled', n === 0);
-    $('#bulkSelectionCount').text(n > 0 ? n + ' selected' : '');
+    $('#bulkSelectionCount').text(n > 0 ? pubI18n.selectedCount.replace(':count', String(n)) : '');
     const total = $('#publicationTable .pending-pub-cb').length;
     $('#selectAllPending').prop('checked', n > 0 && n === total).prop('indeterminate', n > 0 && n < total);
 }
@@ -225,7 +226,7 @@ $(function () {
 
     $('#bulkApproveBtn').on('click', function () {
         if (!$('#publicationTable .pending-pub-cb:checked').length) return;
-        if (!confirm('Approve the selected publication(s)?')) return;
+        if (!confirm(pubI18n.confirmApprove)) return;
         $('#bulk-approval-action').val('approve');
         $('#bulk-approval-form').submit();
     });

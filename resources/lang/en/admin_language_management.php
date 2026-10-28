@@ -1,0 +1,35 @@
+<?php
+
+return [
+
+    'breadcrumb_dashboard' => 'Dashboard',
+    'breadcrumb_settings' => 'Settings',
+    'intro' => 'You control every editable UI string for the selected locale — including Frontend navigation and Admin sidebar. Priority: values saved here → packaged lang files → DB category/link titles → English. Leave a field empty to keep the packaged (or DB) default. Nav is native (not Google Translate), so edits here are what visitors see for that language.',
+    'select_locale' => 'Select locale',
+    'section' => 'Section',
+    'loading' => 'Loading…',
+    'loading_translations' => 'Loading translations…',
+    'copy_from_english' => 'Copy from English',
+    'copy_from_english_title' => 'Copy English defaults into empty fields. Review and click Save.',
+    'ai_translate' => 'AI translate',
+    'ai_translate_title' => 'Use AI to translate English into this locale. Review and click Save.',
+    'ai_translating' => 'Translating :done/:total…',
+    'col_key' => 'Key',
+    'col_english' => 'English (reference)',
+    'col_translation' => ':locale translation',
+    'saved' => 'Translations saved.',
+    'save_failed' => 'Could not save translations.',
+    'load_failed' => 'Could not load translations for this locale/section. Please refresh the page.',
+    'select_non_english_copy' => 'Select a non-English locale to copy English into.',
+    'select_non_english_ai' => 'Select a non-English locale to use AI translate.',
+    'confirm_copy' => 'Fill empty translation fields from English? Existing translations are kept. You can edit before saving.',
+    'confirm_ai' => 'Fill all translation fields from English using AI? Fields update in small batches, then save automatically. You can still edit afterward.',
+    'no_fields' => 'No translation fields found on this page.',
+    'ai_none_updated' => 'No fields were updated. Try again or check Admin → Settings → AI integrations.',
+    'ai_timeout' => 'AI translate timed out. Try again — smaller batches are used automatically.',
+    'ai_failed' => 'AI translate failed.',
+    'copy_failed' => 'Copy from English failed.',
+    'saving' => 'Saving…',
+    'saved_after_ai' => 'AI translations applied and saved.',
+
+];

@@ -6,7 +6,7 @@
         <h1 class="page-title">{{ $dashboard->title }}</h1>
         <div>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url('admin/dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url('admin/dashboard') }}">{{ __('admin_nav.dashboard') }}</a></li>
                 <li class="breadcrumb-item active" aria-current="page">{{ $dashboard->title }}</li>
             </ol>
         </div>

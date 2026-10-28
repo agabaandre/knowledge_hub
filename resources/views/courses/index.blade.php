@@ -2,8 +2,12 @@
 
 @php
     $site = settings()->site_name ?? 'Africa Health Knowledge Hub';
-    $pageTitle = 'Knowledge Hub Courses — '.$site;
-    $pageDescription = 'Browse online courses on public health, leadership, and technical topics on '.$site.'. Compare providers, ratings, and enrol in self-paced or facilitated learning.';
+    $pageTitle = ui_t('frontend_pages.courses_title', 'Knowledge Hub Courses').' — '.$site;
+    $pageDescription = ui_t(
+        'frontend_pages.courses_page_description',
+        'Browse online courses on public health, leadership, and technical topics on :site. Compare providers, ratings, and enrol in self-paced or facilitated learning.',
+        ['site' => $site]
+    );
 @endphp
 
 @section('styles')
@@ -109,11 +113,11 @@
             <div class="col-12">
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                     <h4 class="mb-0 ft-medium fs-lg">
-                        Knowledge Hub Courses
+                        {{ ui_t('frontend_pages.courses_title', 'Knowledge Hub Courses') }}
                     </h4>
                     @if(!empty($canFetchCourses))
                         <button type="button" class="btn btn-sm theme-primary" id="courseFetchBtn">
-                            <i class="fa fa-refresh me-1"></i> Fetch courses
+                            <i class="fa fa-refresh me-1"></i> {{ ui_t('frontend_pages.fetch_courses', 'Fetch courses') }}
                         </button>
                     @endif
                 </div>
@@ -143,15 +147,15 @@
         @php $loadedCourseCount = (($courses->currentPage() - 1) * $courses->perPage()) + $courses->count(); @endphp
         <div class="courses-infinite-footer py-3 text-center" id="courses-infinite-footer">
             <p class="text-muted small mb-2" id="courses-infinite-status">
-                Showing {{ number_format($loadedCourseCount) }} of {{ number_format($courses->total()) }} courses
+                {{ ui_t('frontend_pages.showing_of_courses', 'Showing :loaded of :total courses', ['loaded' => number_format($loadedCourseCount), 'total' => number_format($courses->total())]) }}
             </p>
             @if($courses->hasMorePages())
                 <div id="courses-infinite-sentinel" class="courses-infinite-sentinel" aria-hidden="true"></div>
                 <div id="courses-infinite-loader" class="courses-infinite-loader d-none" aria-live="polite">
-                    <i class="fa fa-spinner fa-spin me-1"></i>Loading more courses…
+                    <i class="fa fa-spinner fa-spin me-1"></i>{{ ui_t('frontend_pages.loading_more_courses', 'Loading more courses…') }}
                 </div>
             @else
-                <p class="text-muted small mb-0" id="courses-infinite-complete">All courses loaded</p>
+                <p class="text-muted small mb-0" id="courses-infinite-complete">{{ ui_t('frontend_pages.all_courses_loaded', 'All courses loaded') }}</p>
             @endif
         </div>
     @elseif($courses instanceof \Illuminate\Pagination\AbstractPaginator && $courses->hasPages())
@@ -170,8 +174,8 @@
             enabled: @json((bool) ($coursesInfiniteScroll ?? false)),
             pageUrl: @json(route('courses.page'))
         };
-        window.COURSES_INFINITE_STATUS_COMPLETE = 'All courses loaded';
-        window.COURSES_INFINITE_STATUS_ERROR = 'Could not load more courses. Tap to retry.';
+        window.COURSES_INFINITE_STATUS_COMPLETE = @json(ui_t('frontend_pages.all_courses_loaded', 'All courses loaded'));
+        window.COURSES_INFINITE_STATUS_ERROR = @json(ui_t('frontend_pages.courses_load_error', 'Could not load more courses. Tap to retry.'));
     </script>
     <script src="{{ asset('js/courses-index-infinite.js') }}?v={{ @filemtime(public_path('js/courses-index-infinite.js')) }}"></script>
 @endsection

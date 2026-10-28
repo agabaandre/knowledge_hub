@@ -8,12 +8,12 @@
         <div class="d-flex align-items-center flex-wrap gap-1">
             @if ($currentLocale !== 'en')
                 <button type="button" class="btn btn-outline-primary btn-sm" id="lm-copy-english-btn"
-                        title="Copy English defaults into empty fields. Review and click Save.">
-                    <i class="fa fa-copy me-1"></i> Copy from English
+                        title="{{ __('admin_language_management.copy_from_english_title') }}">
+                    <i class="fa fa-copy me-1"></i> {{ __('admin_language_management.copy_from_english') }}
                 </button>
                 <button type="button" class="btn btn-outline-secondary btn-sm" id="lm-ai-translate-btn"
-                        title="Use OpenAI to translate English into this locale. Review and click Save.">
-                    <i class="fa fa-magic me-1"></i> AI translate
+                        title="{{ __('admin_language_management.ai_translate_title') }}">
+                    <i class="fa fa-magic me-1"></i> {{ __('admin_language_management.ai_translate') }}
                 </button>
             @endif
             <button type="submit" class="btn btn-primary btn-sm">
@@ -27,9 +27,9 @@
                 <thead class="table-light">
                     <tr>
                         <th class="text-center text-muted" style="width:3.5rem">#</th>
-                        <th style="width:20%">Key</th>
-                        <th style="width:38%">English (reference)</th>
-                        <th style="width:38%"><span id="lm-locale-col-label">{{ strtoupper($currentLocale) }}</span> translation</th>
+                        <th style="width:20%">{{ __('admin_language_management.col_key') }}</th>
+                        <th style="width:38%">{{ __('admin_language_management.col_english') }}</th>
+                        <th style="width:38%">{{ __('admin_language_management.col_translation', ['locale' => strtoupper($currentLocale)]) }}</th>
                     </tr>
                 </thead>
                 <tbody id="lm-translation-tbody">

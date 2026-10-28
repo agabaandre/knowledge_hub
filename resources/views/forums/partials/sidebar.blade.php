@@ -40,7 +40,7 @@
             </span>
             <div>
                 <h2 class="forums-sidebar-card__title mb-0">{{ __('ui_body.footer_popular_tags') }}</h2>
-                <p class="forums-sidebar-card__hint mb-0">Browse discussions by popular health topics.</p>
+                <p class="forums-sidebar-card__hint mb-0">{{ ui_t('frontend_pages.browse_by_topics', 'Browse discussions by popular health topics.') }}</p>
             </div>
         </div>
         <ul class="forums-sidebar-topics list-unstyled mb-0">
@@ -62,7 +62,7 @@
             @endforeach
         </ul>
         <div class="forums-sidebar-clear-wrap{{ $activeTag ? '' : ' d-none' }}">
-            <a href="{{ tag_forums_url(null) }}" class="forums-sidebar-clear small js-forums-tag-ajax">Clear topic filter</a>
+            <a href="{{ tag_forums_url(null) }}" class="forums-sidebar-clear small js-forums-tag-ajax">{{ ui_t('frontend_pages.clear_topic_filter', 'Clear topic filter') }}</a>
         </div>
     </div>
     @endif
@@ -74,8 +74,8 @@
                 <i class="fa fa-clock"></i>
             </span>
             <div>
-                <h2 class="forums-sidebar-card__title mb-0">Recent forums</h2>
-                <p class="forums-sidebar-card__hint mb-0">Latest discussions from the community.</p>
+                <h2 class="forums-sidebar-card__title mb-0">{{ ui_t('frontend_pages.recent_forums', 'Recent forums') }}</h2>
+                <p class="forums-sidebar-card__hint mb-0">{{ ui_t('frontend_pages.latest_discussions', 'Latest discussions from the community.') }}</p>
             </div>
         </div>
         <ul class="forums-sidebar-recent list-unstyled mb-0">
@@ -110,8 +110,8 @@
                 <i class="fa fa-fire"></i>
             </span>
             <div>
-                <h2 class="forums-sidebar-card__title mb-0">Most engaged</h2>
-                <p class="forums-sidebar-card__hint mb-0">Ranked by views, comments, and likes.</p>
+                <h2 class="forums-sidebar-card__title mb-0">{{ ui_t('frontend_pages.most_engaged', 'Most engaged') }}</h2>
+                <p class="forums-sidebar-card__hint mb-0">{{ ui_t('frontend_pages.ranked_by_engagement', 'Ranked by views, comments, and likes.') }}</p>
             </div>
         </div>
         <ol class="forums-sidebar-ranked list-unstyled mb-0">
@@ -143,13 +143,13 @@
                 <i class="fa fa-compass"></i>
             </span>
             <div>
-                <h2 class="forums-sidebar-card__title mb-0">Explore</h2>
+                <h2 class="forums-sidebar-card__title mb-0">{{ ui_t('frontend_pages.explore', 'Explore') }}</h2>
             </div>
         </div>
         <ul class="forums-sidebar-links list-unstyled mb-0">
-            <li><a href="{{ url('communities') }}"><i class="fa fa-users" aria-hidden="true"></i>Communities of Practice</a></li>
-            <li><a href="{{ url('forums/create') }}"><i class="fa fa-plus-circle" aria-hidden="true"></i>Start a discussion</a></li>
-            <li><a href="{{ url('faqs') }}"><i class="fa fa-life-ring" aria-hidden="true"></i>FAQs &amp; guidelines</a></li>
+            <li><a href="{{ url('communities') }}"><i class="fa fa-users" aria-hidden="true"></i>{{ ui_t('frontend_pages.communities_title', 'Communities of Practice') }}</a></li>
+            <li><a href="{{ url('forums/create') }}"><i class="fa fa-plus-circle" aria-hidden="true"></i>{{ ui_t('frontend_pages.start_a_discussion', 'Start a discussion') }}</a></li>
+            <li><a href="{{ url('faqs') }}"><i class="fa fa-life-ring" aria-hidden="true"></i>{{ ui_t('frontend_pages.faqs_guidelines', 'FAQs & guidelines') }}</a></li>
             <li><a href="{{ url('records/search') }}"><i class="fa fa-book" aria-hidden="true"></i>{{ __('general.browse_resources') }}</a></li>
         </ul>
     </div>

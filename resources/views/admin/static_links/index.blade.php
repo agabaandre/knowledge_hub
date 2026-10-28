@@ -6,9 +6,9 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">Static Links</h4>
+                    <h4 class="card-title mb-0">{{ __('admin_nav.static_links') }}</h4>
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create-static-link-modal">
-                        <i class="fa fa-plus"></i> Add Link
+                        <i class="fa fa-plus"></i> {{ __('admin_nav.add_link') }}
                     </button>
                 </div>
                 <div class="card-body">

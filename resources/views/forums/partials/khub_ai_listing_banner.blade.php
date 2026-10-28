@@ -7,7 +7,7 @@
             <i class="fa-solid fa-microchip"></i>
         </div>
         <div class="khub-forums-ai-banner-copy">
-            <h2 class="khub-forums-ai-banner-title">Khub AI — Forums assistant</h2>
+            <h2 class="khub-forums-ai-banner-title">{{ ui_t('frontend_pages.khub_ai_forums', 'Khub AI — Forums assistant') }}</h2>
             <p class="khub-forums-ai-banner-text">
                 Ask about trends across these discussions, compare threads, or drill into a specific topic.
                 Khub AI uses the discussions shown on this page and loads full thread detail when you ask about one.
@@ -21,11 +21,11 @@
         <div class="khub-forums-ai-banner-actions">
             @auth
                 <button type="button" class="btn theme-bg text-white btn-sm px-3" id="btn-open-forums-khub-ai">
-                    <i class="fa-solid fa-microchip me-1"></i> Open Khub AI
+                    <i class="fa-solid fa-microchip me-1"></i> {{ ui_t('frontend_pages.open_khub_ai', 'Open Khub AI') }}
                 </button>
             @else
                 <a href="{{ route('login') }}?redirect={{ urlencode(url('forums')) }}" class="btn theme-bg text-white btn-sm px-3">
-                    <i class="fa-solid fa-microchip me-1"></i> Log in to use Khub AI
+                    <i class="fa-solid fa-microchip me-1"></i> {{ ui_t('frontend_pages.log_in_khub_ai', 'Log in to use Khub AI') }}
                 </a>
             @endauth
         </div>

@@ -5,6 +5,7 @@ return [
     'account' => 'Account',
     'admin_panel' => 'Admin Panel',
     'my_profile' => 'My Profile',
+    'view_khub_website' => 'View Khub Website',
     'publications' => 'Publications',
     'my_forums' => 'My Forums',
     'my_communities' => 'My Communities',

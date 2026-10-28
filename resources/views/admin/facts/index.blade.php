@@ -11,11 +11,11 @@
 
 @section('content')
 <div class="page-header">
-    <h1 class="page-title">Facts — Health in Africa</h1>
+    <h1 class="page-title">{{ __('admin_nav.facts_health_africa') }}</h1>
     <div>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Facts</li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)">{{ __('admin_nav.home') }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ __('admin_nav.facts') }}</li>
         </ol>
     </div>
 </div>
@@ -66,7 +66,7 @@
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <div>
-                    <h3 class="card-title mb-0">Filter Facts</h3>
+                    <h3 class="card-title mb-0">{{ __('admin_nav.filter_facts') }}</h3>
                     <small class="text-muted">Search and filter facts</small>
                 </div>
                 <div>

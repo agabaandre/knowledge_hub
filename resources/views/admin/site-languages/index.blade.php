@@ -5,8 +5,8 @@
         <h1 class="page-title">{{ __('admin_nav.site_languages') }}</h1>
         <div>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('admin.configure') }}">Settings</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">{{ __('admin_nav.dashboard') }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.configure') }}">{{ __('admin_nav.settings') }}</a></li>
                 <li class="breadcrumb-item active">{{ __('admin_nav.site_languages') }}</li>
             </ol>
         </div>

@@ -1,7 +1,7 @@
 @if(!empty($canFetchCourses))
 <div id="courseSyncProgressWrap" class="alert alert-info d-none mb-3" role="status">
     <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-        <strong id="courseSyncProgressTitle">Fetching courses…</strong>
+        <strong id="courseSyncProgressTitle">{{ ui_t('frontend_pages.fetching_courses', 'Fetching courses…') }}</strong>
         <span id="courseSyncProgressPercent" class="badge bg-light text-dark">0%</span>
     </div>
     <div class="progress mb-2" style="height: 22px;">

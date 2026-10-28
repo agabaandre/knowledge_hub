@@ -3,18 +3,18 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Delete</h5>
+                <h5 class="modal-title" id="deleteModalLabel">{{ ui_t('admin_publications.delete_title', 'Delete') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"></button>
             </div>
             <div class="modal-body">
                 <p>
-                    Are you sure you want to delete this row?
+                    {{ ui_t('admin_publications.confirm_delete_row', 'Are you sure you want to delete this row?') }}
                 </p>
             </div>
             <div class="modal-footer">
                 <!-- Toogle to second dialog -->
                 <button class="btn btn-outline-danger btn-sm edit"
-                        onclick="deleteRow()">{{ ui_t('general.yes_delete', 'Yes Delete') }}</button>
+                        onclick="deleteRow()">{{ ui_t('general.yes_delete', 'Yes, delete') }}</button>
             </div>
         </div>
     </div>

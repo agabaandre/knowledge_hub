@@ -250,10 +250,10 @@
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                     <div style="text-align: center; padding: 2rem 0;">
                         <h2 style="font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: white;">
-                            <i class="fa fa-file-alt me-2"></i>Content Request Form
+                            <i class="fa fa-file-alt me-2"></i>{{ ui_t('frontend_pages.content_request_title', 'Content Request Form') }}
                         </h2>
                         <p style="margin: 0; color: rgba(255, 255, 255, 0.95); font-size: 1rem;">
-                            Help us understand what content you need
+                            {{ ui_t('frontend_pages.content_request_intro', 'Help us understand what content you need') }}
                         </p>
                     </div>
                 </div>
@@ -278,7 +278,7 @@
 
                         @if($errors->any())
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <strong>Please fix the following errors:</strong>
+                                <strong>{{ ui_t('frontend_pages.please_fix_errors', 'Please fix the following errors:') }}</strong>
                                 <ul class="mb-0 mt-2">
                                     @foreach($errors->all() as $error)
                                         <li>{{ $error }}</li>
@@ -291,7 +291,7 @@
                         <div class="info-box">
                             <p>
                                 <i class="fa fa-info-circle"></i>
-                                <strong>Request Content:</strong> Use this form to request specific health-related content that you'd like to see added to our knowledge hub. We review all requests and will do our best to provide the information you need.
+                                <strong>{{ ui_t('frontend_pages.request_content', 'Request Content:') }}</strong> {{ ui_t('frontend_pages.content_request_help', "Use this form to request specific health-related content that you'd like to see added to our knowledge hub. We review all requests and will do our best to provide the information you need.") }}
                             </p>
                         </div>
 
@@ -301,19 +301,19 @@
                             <div class="form-section">
                                 <div class="form-section-title">
                                     <i class="fa fa-clipboard-list"></i>
-                                    Request Details
+                                    {{ ui_t('frontend_pages.request_details', 'Request Details') }}
                                 </div>
 
                                 <div class="form-group">
                                     <label class="form-label" for="title">
-                                        What is the subject of your request?
+                                        {{ ui_t('frontend_pages.request_subject', 'What is the subject of your request?') }}
                                         <span class="required">*</span>
                                     </label>
                                     <input type="text" 
                                            id="title" 
                                            name="title" 
                                            class="form-control-custom @error('title') is-invalid @enderror"
-                                           placeholder="e.g., COVID-19 vaccination data for East Africa" 
+                                           placeholder="{{ ui_t('frontend_pages.request_subject_placeholder', 'e.g., COVID-19 vaccination data for East Africa') }}" 
                                            value="{{ old('title') }}" 
                                            required>
                                     @error('title')
@@ -325,13 +325,13 @@
 
                                 <div class="form-group">
                                     <label class="form-label" for="summernote">
-                                        Share more details about your request
+                                        {{ ui_t('frontend_pages.request_more_details', 'Share more details about your request') }}
                                         <span class="required">*</span>
                                     </label>
                                     <textarea id="summernote" 
                                               name="description" 
                                               class="form-control-custom @error('description') is-invalid @enderror"
-                                              placeholder="Please provide detailed information about the content you're requesting. Include any specific topics, regions, timeframes, or formats you need."
+                                              placeholder="{{ ui_t('frontend_pages.request_details_placeholder', 'Please provide detailed information about the content you need') }}"
                                               rows="6"
                                               required>{!! old('description') !!}</textarea>
                                     @error('description')
@@ -346,14 +346,14 @@
                             <div class="form-section" style="margin-top: 2.5rem;">
                                 <div class="form-section-title">
                                     <i class="fa fa-user"></i>
-                                    Contact Information
+                                    {{ ui_t('frontend_pages.contact_information', 'Contact Information') }}
                                 </div>
 
                                 <div class="form-row">
                                     <div class="form-col">
                                         <div class="form-group">
                                             <label class="form-label" for="country_id">
-                                                Which country are you from?
+                                                {{ ui_t('frontend_pages.which_country', 'Which country are you from?') }}
                                                 <span class="required">*</span>
                                             </label>
                                     @include('partials.countries.dropdown', [
@@ -373,7 +373,7 @@
                                     <div class="form-col">
                                         <div class="form-group">
                                             <label class="form-label" for="email">
-                                                Email Address
+                                                {{ ui_t('frontend_pages.email_address', 'Email Address') }}
                                                 <span class="required">*</span>
                                             </label>
                                             <input type="email" 

@@ -14,7 +14,7 @@
                             $app_url_parsed = parse_url($app_url);
                             $is_external_link = isset($url_parsed['host']) && isset($app_url_parsed['host']) && $url_parsed['host'] !== $app_url_parsed['host'];
                         @endphp
-                        <li class="nav-item"><a href="{{ $dashboard_url }}" target="{{ $is_external_link ? '_blank' : '_self' }}" class="nav-link">{{ $dashboard->title }}</a></li>
+                        <li class="nav-item"><a href="{{ $dashboard_url }}" target="{{ $is_external_link ? '_blank' : '_self' }}" class="nav-link">{{ \App\Support\UiLocaleLabels::adminDashboardPublicationLabel($dashboard) }}</a></li>
                     @endforeach
                 @endif
                 <li class="nav-item"><a href="{{ url('admin/dashboard/list') }}" class="nav-link {{ request()->is('admin/dashboard/list') ? 'active' : '' }}">{{ __('admin_nav.view_all_dashboards') }}</a></li>

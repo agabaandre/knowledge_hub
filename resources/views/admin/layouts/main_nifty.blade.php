@@ -203,7 +203,7 @@
                      <a href="{{ route('admin.configure') }}" class="dropdown-item"><i class="fa fa-cog me-2"></i> Settings</a>
                      <a href="{{ url('/') }}" class="dropdown-item" target="_blank"><i class="fa fa-external-link-alt me-2"></i> View Site</a>
                      <hr class="dropdown-divider">
-                     <a href="{{ url('logout') }}" class="dropdown-item text-danger"><i class="fa fa-sign-out-alt me-2"></i> Logout</a>
+                     <a href="{{ url('logout') }}" class="dropdown-item text-danger"><i class="fa fa-sign-out-alt me-2"></i> {{ __('ui_body.log_out') }}</a>
                   </div>
                </div>
                <div class="vr mx-1 d-none d-md-block"></div>

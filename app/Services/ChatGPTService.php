@@ -541,6 +541,21 @@ class ChatGPTService implements AIModel{
             return [];
         }
 
+        if (! $retryPass) {
+            $cached = \App\Support\UiTranslationCache::getAiChunk($targetLanguageLabel, $chunk);
+            if (is_array($cached) && $cached !== []) {
+                $hit = [];
+                foreach ($chunk as $key => $_) {
+                    if (isset($cached[$key]) && is_string($cached[$key]) && trim($cached[$key]) !== '') {
+                        $hit[$key] = $cached[$key];
+                    }
+                }
+                if (count($hit) === count($chunk)) {
+                    return $hit;
+                }
+            }
+        }
+
         $requiredKeys = implode(', ', array_keys($chunk));
 
         $guide = 'You translate short UI strings for a public health knowledge hub (navigation labels, buttons, footer links). '
@@ -585,6 +600,8 @@ class ChatGPTService implements AIModel{
                 'missing' => array_values(array_diff(array_keys($chunk), array_keys($parsed))),
                 'snippet' => mb_substr($content, 0, 1500),
             ]);
+        } elseif ($parsed !== []) {
+            \App\Support\UiTranslationCache::putAiChunk($targetLanguageLabel, $chunk, $parsed);
         }
 
         return $parsed;
