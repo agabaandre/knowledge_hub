@@ -111,7 +111,19 @@ class SettingsController extends Controller
         }
 
         if($saved):
-            $data = ['alert-success'=>'Settings saved successfully','status'=>'success','data'=>$saved];
+            $savedLanguage = null;
+            try {
+                $savedLanguage = \App\Models\SiteLanguage::normalizeLocaleCode(
+                    is_string($saved->language ?? null) ? $saved->language : null
+                ) ?? \App\Models\SiteLanguage::systemDefaultLocale();
+            } catch (\Throwable $e) {
+                $savedLanguage = null;
+            }
+            $success = 'Settings saved successfully';
+            if (is_string($savedLanguage) && $savedLanguage !== '') {
+                $success .= ' · Default language: '.strtoupper($savedLanguage);
+            }
+            $data = ['alert-success' => $success, 'status' => 'success', 'data' => $saved];
         else:
             $data = ['alert-danger'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
         endif;

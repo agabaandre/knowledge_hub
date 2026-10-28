@@ -124,12 +124,18 @@ class SettingsRepository
         $settings->site_description     = $request->site_description;
         $settings->seo_keywords         = $request->seo_keywords;
         $resolvedSiteLanguage = null;
-        if (Schema::hasColumn('setting', 'language') && $request->exists('language')) {
+        if (Schema::hasColumn('setting', 'language')) {
+            // Prefer explicit POST keys (hidden field survives Select2 / display:contents quirks).
+            $rawLanguage = $request->input('language', $request->input('default_language'));
+            if (is_array($rawLanguage)) {
+                $rawLanguage = reset($rawLanguage);
+            }
             $requestedLocale = \App\Models\SiteLanguage::normalizeLocaleCode(
-                is_string($request->input('language')) ? (string) $request->input('language') : null
+                is_string($rawLanguage) ? $rawLanguage : null
             );
-            $activeCodes = \App\Models\SiteLanguage::activeLocaleCodes();
-            if ($requestedLocale !== null && in_array($requestedLocale, $activeCodes, true)) {
+            if ($requestedLocale !== null) {
+                // Trust the configure dropdown value; do not silently drop it when
+                // active-locale cache is stale on a hub.
                 $resolvedSiteLanguage = $requestedLocale;
                 $settings->language = $requestedLocale;
             }
@@ -541,8 +547,9 @@ class SettingsRepository
         // Default language is site-wide: keep every setting row in sync so theme
         // switches / inactive configs cannot resurrect a stale "english" value.
         if ($resolvedSiteLanguage !== null && Schema::hasColumn('setting', 'language')) {
-            Setting::query()->update(['language' => $resolvedSiteLanguage]);
-            $settings->language = $resolvedSiteLanguage;
+            DB::table('setting')->update(['language' => $resolvedSiteLanguage]);
+            $settings->setAttribute('language', $resolvedSiteLanguage);
+            $settings->syncOriginalAttribute('language');
         }
 
         DisposableEmailChecker::forgetCache();

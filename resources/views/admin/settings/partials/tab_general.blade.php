@@ -27,8 +27,10 @@
                         ?? $systemDefaultLocale;
                 @endphp
                 <label for="setting_language">Default language</label>
-                {{-- form= associates explicitly: #settings-main-form uses display:contents --}}
-                <select name="language" id="setting_language" class="form-control no-select2" form="settings-main-form">
+                {{-- Hidden carries the value: native <select> inside display:contents forms / Select2 can be dropped from POST. --}}
+                <input type="hidden" name="language" id="setting_language_value" value="{{ $selectedLanguage }}" form="settings-main-form">
+                <select id="setting_language" class="form-control no-select2" form="settings-main-form"
+                        data-sync-language-hidden="#setting_language_value">
                     @forelse($siteLanguageOptions as $code => $meta)
                         <option value="{{ $code }}" @selected($selectedLanguage === $code)>
                             {{ ($meta['flag'] ?? '') ? $meta['flag'].' ' : '' }}{{ $meta['name'] ?? $code }} ({{ strtoupper($code) }})
