@@ -2392,6 +2392,26 @@
         }
 
         $(function() {
+            // Keep hidden language field in sync (POST must not depend on the <select>).
+            function syncSettingLanguageHidden() {
+                var $select = $('#setting_language');
+                var $hidden = $('#setting_language_value');
+                if (!$select.length || !$hidden.length) {
+                    return;
+                }
+                var value = $select.val() || $hidden.val() || 'en';
+                $hidden.val(value);
+                $hidden.prop('disabled', false);
+                // If Select2 disabled the original control, still post via hidden.
+                $select.prop('disabled', false);
+            }
+
+            $(document).on('change', '#setting_language', syncSettingLanguageHidden);
+            $('button[form="settings-main-form"], #settings-main-form').on('click submit', function () {
+                syncSettingLanguageHidden();
+            });
+            syncSettingLanguageHidden();
+
             // Tab switching functionality
             var emailDriverPanels = {
                 http: 'http',
