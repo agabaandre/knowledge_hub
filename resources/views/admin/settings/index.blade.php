@@ -1077,6 +1077,7 @@
             <div class="tab-content settings-content" id="settingsTabContent">
                 <form action="{{ route('admin.config.save') }}" method="post" enctype="multipart/form-data" id="settings-main-form">
                     @csrf
+                    <input type="hidden" name="_settings_tab" id="settings_active_tab" value="general" form="settings-main-form">
                 @include('admin.settings.partials.tab_general')
                 @include('admin.settings.partials.tab_branding', ['configGalleryImages' => $configGalleryImages ?? []])
                 @include('admin.settings.partials.tab_colors')
@@ -2406,11 +2407,23 @@
                 $select.prop('disabled', false);
             }
 
+            function syncSettingsActiveTab() {
+                var $tab = $('#settings_active_tab');
+                if (!$tab.length) {
+                    return;
+                }
+                var active = $('.settings-tabs .nav-link.active').data('tab')
+                    || (window.location.hash ? window.location.hash.replace('#', '') : 'general');
+                $tab.val(active || 'general');
+            }
+
             $(document).on('change', '#setting_language', syncSettingLanguageHidden);
             $('button[form="settings-main-form"], #settings-main-form').on('click submit', function () {
                 syncSettingLanguageHidden();
+                syncSettingsActiveTab();
             });
             syncSettingLanguageHidden();
+            syncSettingsActiveTab();
 
             // Tab switching functionality
             var emailDriverPanels = {

@@ -131,8 +131,16 @@ class SettingsController extends Controller
         if($request->ajax()){
             return response($data,200);
         }
-        
-        return back()->with($data);
+
+        // Prefer named route (honours APP_URL subdirectory) over back()/Referer,
+        // which can drop /knowledge_hub and send browsers to /admin/configure.
+        $tab = $request->input('_settings_tab');
+        $url = route('admin.configure');
+        if (is_string($tab) && preg_match('/^[a-z0-9_-]+$/i', $tab)) {
+            $url .= '#'.$tab;
+        }
+
+        return redirect()->to($url)->with($data);
     }
 
     public function generateFederationToken(Request $request)

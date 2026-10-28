@@ -245,41 +245,39 @@ class SiteLanguage extends Model
 
     /**
      * Site-wide default locale from Admin → Configure (setting.language).
-     * Reads DB directly so a stale settings() cache cannot keep showing EN.
+     * Always reads DB (no long-lived cache) so Configure / frontend stay in sync.
      */
     public static function systemDefaultLocale(): string
     {
-        return Cache::remember(self::CACHE_KEY_SYSTEM_DEFAULT, 3600, static function () {
-            $codes = self::activeLocaleCodes();
-            $fallback = in_array('en', $codes, true)
-                ? 'en'
-                : ($codes[0] ?? config('supported_locales.default', 'en'));
+        $codes = self::activeLocaleCodes();
+        $fallback = in_array('en', $codes, true)
+            ? 'en'
+            : ($codes[0] ?? config('supported_locales.default', 'en'));
 
-            $normalized = self::storedSiteLanguage();
-            if ($normalized === null) {
-                try {
-                    if (function_exists('settings')) {
-                        $normalized = self::normalizeLocaleCode(
-                            is_string(settings()->language ?? null) ? settings()->language : null
-                        );
-                    }
-                } catch (\Throwable $e) {
-                    $normalized = null;
+        $normalized = self::storedSiteLanguage();
+        if ($normalized === null) {
+            try {
+                if (function_exists('settings')) {
+                    $normalized = self::normalizeLocaleCode(
+                        is_string(settings()->language ?? null) ? settings()->language : null
+                    );
                 }
+            } catch (\Throwable $e) {
+                $normalized = null;
             }
+        }
 
-            // Honour Configure → Default language even if active-locale cache is stale.
-            if ($normalized !== null) {
-                return $normalized;
-            }
+        // Honour Configure → Default language even if active-locale cache is stale.
+        if ($normalized !== null) {
+            return $normalized;
+        }
 
-            $cfgDefault = self::normalizeLocaleCode((string) config('supported_locales.default', 'en'));
-            if ($cfgDefault !== null && in_array($cfgDefault, $codes, true)) {
-                return $cfgDefault;
-            }
+        $cfgDefault = self::normalizeLocaleCode((string) config('supported_locales.default', 'en'));
+        if ($cfgDefault !== null && in_array($cfgDefault, $codes, true)) {
+            return $cfgDefault;
+        }
 
-            return $fallback;
-        });
+        return $fallback;
     }
 
     /**
