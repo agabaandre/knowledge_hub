@@ -257,10 +257,14 @@ class UsersRepository {
     }
 
     public function send_email($request, $token){
+        $email = is_string($request->email ?? null) ? $request->email : null;
+        $locale = resolve_mail_locale($email);
 
-        $mail['subject'] = 'Account confirmation';
-        $mail['email'] = $request->email;
-        $mail['body'] = view('emails.email_verification', ['token' => $token])->render();
+        $mail['subject'] = with_mail_locale($locale, static function () {
+            return __('emails.verify_subject');
+        });
+        $mail['email'] = $email;
+        $mail['body'] = render_mail_view('emails.email_verification', ['token' => $token], $locale, $email);
 
         SendMailJob::dispatch($mail)->onQueue('default');
     }

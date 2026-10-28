@@ -27,7 +27,7 @@ Comments
                 <small class="text-success">{{time_ago($comm->created_at)}}</small>
             </li>
             @endforeach
-            <a class="py-3" href="{{publication_url($row)}}">View All</a>
+            <a class="py-3 notranslate" href="{{publication_url($row)}}" data-khub-i18n="home_sections.view_all">{{ __('home_sections.view_all') }}</a>
         </ul>
     </div>
      @endif

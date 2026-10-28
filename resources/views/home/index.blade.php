@@ -201,8 +201,8 @@
                 enabled: true,
                 pageUrl: @json(route('home.events-page'))
             };
-            window.HOME_EVENTS_INFINITE_STATUS_COMPLETE = 'All events loaded';
-            window.HOME_EVENTS_INFINITE_STATUS_ERROR = 'Could not load more events. Tap to retry.';
+            window.HOME_EVENTS_INFINITE_STATUS_COMPLETE = @json(__('home_sections.all_events_loaded'));
+            window.HOME_EVENTS_INFINITE_STATUS_ERROR = @json(__('home_sections.load_more_events_error'));
         </script>
         <script src="{{ asset('js/home-events-infinite.js') }}?v={{ @filemtime(public_path('js/home-events-infinite.js')) }}"></script>
     @endif

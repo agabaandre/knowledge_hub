@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     'recommended' => 'Yaliyopendekezwa',
     'top_searches' => 'Utafutaji unaoongoza',
     'flagship_initiatives' => 'Miradi kuu',
@@ -10,7 +9,6 @@ return [
     'explore_key_sections_subtitle' => 'Vinjari milango kuu ya maarifa ya afya, vyanzo, jiografia, na majadiliano ya jamii.',
     'events' => 'Matukio',
     'health_emergencies' => 'Dharura za afya',
-
     'search' => 'Tafuta',
     'ai_search' => 'Utafutaji wa AI',
     'search_placeholder' => 'Unatafuta nini?',
@@ -23,7 +21,6 @@ return [
     'apply_filters' => 'Tumia vichujio',
     'explore_more_resources' => 'Chunguza rasilimali zaidi',
     'source' => 'Chanzo',
-
     'region' => 'Mkoa',
     'member_state' => 'Nchi mwanachama',
     'thematic_area' => 'Eneo la mada',
@@ -40,5 +37,29 @@ return [
     'communities_intro' => 'Jamii za utendaji kwenye Knowledge Hub.',
     'faqs_intro' => 'Maswali yanayoulizwa mara kwa mara.',
     'footer_explore' => 'Chunguza',
-
+    'showing_resources' => 'Inaonyesha :loaded kati ya :total rasilimali',
+    'showing_events' => 'Inaonyesha :loaded kati ya :total matukio',
+    'all_events_loaded' => 'Matukio yote yamepakuliwa',
+    'load_more_events_error' => 'Haikuweza kupakia matukio zaidi. Gusa kujaribu tena.',
+    'read_more' => 'Soma zaidi',
+    'view_all' => 'Angalia zote',
+    'tags_label' => 'Lebo:',
+    'subscribe_now' => 'Jisajili sasa',
+    'subscribe_updates' => 'Pata masasisho yote mapya',
+    'subscribe_email_placeholder' => 'Weka barua pepe yako',
+    'subscribe_button' => 'Jisajili',
+    'subscribe_error' => 'Hitilafu!',
+    'subscribe_generic_error' => 'Kuna hitilafu. Jaribu tena baadaye.',
+    'banner_keywords_placeholder' => 'Andika maneno muhimu ili kugundua zaidi',
+    'banner_unfold' => 'Bofya kugundua',
+    'quiz_attempt' => 'Jaribu jaribio hili',
+    'quiz_next' => 'Ijayo',
+    'quiz_prev' => 'Iliyotangulia',
+    'quiz_start_over' => 'Anza upya',
+    'scroll_to_top' => 'Rudi juu',
+    'footer_about' => 'Kuhusu',
+    'footer_tags' => 'Lebo',
+    'footer_privacy_short' => 'Faragha',
+    'cookie_allow_short' => 'Ruhusu',
+    'cookie_decline' => 'Kataa',
 ];

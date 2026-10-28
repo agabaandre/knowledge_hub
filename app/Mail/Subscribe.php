@@ -28,6 +28,10 @@ class Subscribe extends Mailable
      */
     public function build()
     {
-        return $this->view('emails.subscribed');
+        $locale = resolve_mail_locale();
+        app()->setLocale($locale);
+
+        return $this->subject(__('emails.subscribed_title'))
+            ->view('emails.subscribed');
     }
 }

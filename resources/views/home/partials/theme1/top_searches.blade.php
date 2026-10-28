@@ -127,7 +127,7 @@
             @if($topSearchesLoaded < $topSearchesTotal)
                 <div class="records-search-infinite-footer py-3 text-center" id="home-top-searches-footer">
                     <p class="text-muted small mb-2" id="home-top-searches-status">
-                        Showing {{ number_format($topSearchesLoaded) }} of {{ number_format($topSearchesTotal) }} resources
+                        {{ __('home_sections.showing_resources', ['loaded' => number_format($topSearchesLoaded), 'total' => number_format($topSearchesTotal)]) }}
                     </p>
                     <div id="home-top-searches-sentinel" class="records-search-infinite-sentinel" aria-hidden="true"></div>
                     <div id="home-top-searches-loader" class="records-search-infinite-loader d-none" aria-live="polite">

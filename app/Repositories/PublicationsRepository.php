@@ -1771,13 +1771,13 @@ public function change_approval_status(Request $request){
                 ? publication_url($publication)
                 : url('admin/publications/summaries');
             
-            $body = view('emails.publication_approved', [
+            $body = render_mail_view('emails.publication_approved', [
                 'userName' => $userName,
                 'publicationTitle' => $publication->title ?? 'Your Resource',
                 'publicationDescription' => $publication->description ?? '',
                 'publicationUrl' => $publicationUrl,
                 'isSummary' => $request->is_summary ?? false,
-            ])->render();
+            ], null, $userEmail);
         } else {
             // Rejected - use simple format for now (can create a template later)
             $reason = $request->input('rejected_reason');

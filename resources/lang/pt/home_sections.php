@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     'recommended' => 'Recomendado',
     'top_searches' => 'Pesquisas mais frequentes',
     'flagship_initiatives' => 'Iniciativas de referência',
@@ -10,7 +9,6 @@ return [
     'explore_key_sections_subtitle' => 'Navegue pelos principais pontos de entrada para o conhecimento em saúde, fontes, geografia e discussões da comunidade.',
     'events' => 'Eventos',
     'health_emergencies' => 'Emergências de saúde',
-
     'search' => 'Pesquisar',
     'ai_search' => 'Pesquisa com IA',
     'search_placeholder' => 'O que procura?',
@@ -23,7 +21,6 @@ return [
     'apply_filters' => 'Aplicar filtros',
     'explore_more_resources' => 'Explorar mais recursos',
     'source' => 'Fonte',
-
     'region' => 'Região',
     'member_state' => 'Estado-membro',
     'thematic_area' => 'Área temática',
@@ -40,5 +37,29 @@ return [
     'communities_intro' => 'Comunidades de prática do Knowledge Hub.',
     'faqs_intro' => 'Perguntas frequentes.',
     'footer_explore' => 'Explorar',
-
+    'showing_resources' => 'A mostrar :loaded de :total recursos',
+    'showing_events' => 'A mostrar :loaded de :total eventos',
+    'all_events_loaded' => 'Todos os eventos carregados',
+    'load_more_events_error' => 'Não foi possível carregar mais eventos. Toque para tentar novamente.',
+    'read_more' => 'Ler mais',
+    'view_all' => 'Ver tudo',
+    'tags_label' => 'Etiquetas:',
+    'subscribe_now' => 'Subscreva agora',
+    'subscribe_updates' => 'Receba todas as novidades',
+    'subscribe_email_placeholder' => 'Introduza o seu e-mail',
+    'subscribe_button' => 'Subscrever',
+    'subscribe_error' => 'Erro!',
+    'subscribe_generic_error' => 'Algo correu mal. Tente novamente mais tarde.',
+    'banner_keywords_placeholder' => 'Escreva palavras-chave para descobrir tudo',
+    'banner_unfold' => 'Clique para descobrir',
+    'quiz_attempt' => 'Tentar este questionário',
+    'quiz_next' => 'Seguinte',
+    'quiz_prev' => 'Anterior',
+    'quiz_start_over' => 'Recomeçar',
+    'scroll_to_top' => 'Ir para o topo',
+    'footer_about' => 'Sobre',
+    'footer_tags' => 'Etiquetas',
+    'footer_privacy_short' => 'Privacidade',
+    'cookie_allow_short' => 'Permitir',
+    'cookie_decline' => 'Recusar',
 ];

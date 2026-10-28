@@ -66,16 +66,21 @@ class ForgotPasswordController extends Controller
                 'email' => $user->email,
             ]);
             
+            $locale = resolve_mail_locale($user->email, $user);
             $mailData = [
                 'email' => $user->email,
-                'subject' => 'Reset Your Password - Africa CDC Knowledge Hub',
-                'body' => view('emails.password_reset', [
+                'subject' => with_mail_locale($locale, static function () {
+                    return __('emails.reset_subject');
+                }),
+                'body' => render_mail_view('emails.password_reset', [
                     'name' => $user->name,
                     'token' => $token,
                     'email' => $user->email,
                     'resetUrl' => $resetUrl,
-                ])->render(),
-                'title' => 'Reset Your Password'
+                ], $locale, $user->email, $user),
+                'title' => with_mail_locale($locale, static function () {
+                    return __('emails.reset_title');
+                }),
             ];
             
             // Send via queue system (which uses Exchange)

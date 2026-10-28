@@ -47,17 +47,22 @@ class SendIncompleteProfileReminder extends Command
                     continue;
                 }
 
-                $body = view('emails.profile_completion_reminder', [
+                $locale = resolve_mail_locale($user->email, $user);
+                $body = render_mail_view('emails.profile_completion_reminder', [
                     'name' => $user->name ?: 'Colleague',
                     'accountUrl' => $accountUrl,
                     'missingItems' => $missing,
                     'geoLabel' => $geoLabel,
-                ])->render();
+                ], $locale, $user->email, $user);
 
                 SendMailJob::dispatch([
                     'to' => $user->email,
-                    'subject' => 'Please complete your Knowledge Hub profile',
-                    'title' => 'Profile completion reminder',
+                    'subject' => with_mail_locale($locale, static function () {
+                        return __('emails.profile_reminder_subject');
+                    }),
+                    'title' => with_mail_locale($locale, static function () {
+                        return __('emails.profile_reminder_title');
+                    }),
                     'body' => $body,
                 ])->onQueue('default');
                 $sent++;

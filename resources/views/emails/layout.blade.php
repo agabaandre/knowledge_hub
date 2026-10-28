@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,7 +56,7 @@
                                     <td align="center" style="padding-bottom: 20px;">
                                         <p style="margin: 0; font-size: 14px; color: #64748b; line-height: 1.6;">
                                             <strong style="color: #119A48;">{{ $siteName ?? (settings()->site_name ?? 'Africa CDC Knowledge Hub') }}</strong><br>
-                                            Comprehensive knowledge repository for public health resources
+                                            {{ __('emails.layout_tagline') }}
                                         </p>
                                     </td>
                                 </tr>
@@ -65,11 +65,11 @@
                                         <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                                             <tr>
                                                 <td style="padding: 0 10px;">
-                                                    <a href="https://africacdc.org" style="color: #119A48; text-decoration: none; font-size: 14px;">Website</a>
+                                                    <a href="https://africacdc.org" style="color: #119A48; text-decoration: none; font-size: 14px;">{{ __('emails.layout_website') }}</a>
                                                 </td>
                                                 <td style="padding: 0 10px; color: #cbd5e1;">|</td>
                                                 <td style="padding: 0 10px;">
-                                                    <a href="{{ url('/') }}" style="color: #119A48; text-decoration: none; font-size: 14px;">Knowledge Hub</a>
+                                                    <a href="{{ url('/') }}" style="color: #119A48; text-decoration: none; font-size: 14px;">{{ __('emails.layout_knowledge_hub') }}</a>
                                                 </td>
                                             </tr>
                                         </table>
@@ -78,8 +78,8 @@
                                 <tr>
                                     <td align="center" style="border-top: 1px solid #e2e8f0; padding-top: 20px;">
                                         <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.5;">
-                                            This email was sent by {{ $siteName ?? (settings()->site_name ?? 'Africa CDC Knowledge Hub') }}<br>
-                                            © {{ date('Y') }} {{ $siteName ?? (settings()->site_name ?? 'Africa CDC') }}. All rights reserved.
+                                            {{ __('emails.layout_sent_by', ['site' => $siteName ?? (settings()->site_name ?? 'Africa CDC Knowledge Hub')]) }}<br>
+                                            {{ __('emails.layout_rights', ['year' => date('Y'), 'site' => $siteName ?? (settings()->site_name ?? 'Africa CDC')]) }}
                                         </p>
                                     </td>
                                 </tr>
@@ -93,7 +93,7 @@
                     <tr>
                         <td style="padding: 20px 0; text-align: center;">
                             <p style="margin: 0; font-size: 12px; color: #94a3b8;">
-                                If you have any questions, please contact us at 
+                                {{ __('emails.layout_questions') }}
                                 @php $contactEmail = settings()->email ?? config('emails.username', 'support@africacdc.org'); @endphp
                                 <a href="mailto:{{ $contactEmail }}" style="color: #119A48; text-decoration: none;">{{ $contactEmail }}</a>
                             </p>

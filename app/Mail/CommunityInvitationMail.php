@@ -36,8 +36,10 @@ class CommunityInvitationMail extends Mailable implements ShouldQueue
     public function build()
     {
         $acceptUrl = url('/communities/accept-invitation/' . $this->invitation->token);
-        
-        return $this->subject('Invitation to Join: ' . $this->community->community_name)
+        $locale = resolve_mail_locale($this->invitation->email ?? null);
+        app()->setLocale($locale);
+
+        return $this->subject(__('emails.invite_title').': '.$this->community->community_name)
                     ->view('emails.community_invitation')
                     ->with([
                         'invitation' => $this->invitation,

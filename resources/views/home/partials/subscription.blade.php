@@ -5,8 +5,8 @@
         <div class="row justify-content-center">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                 <div class="sec_title position-relative text-center mb-5">
-                    <h6 class="text-light mb-0">Subscribe Now</h6>
-                    <h2 class="ft-bold text-light">Get All New Updates</h2>
+                    <h6 class="text-light mb-0 notranslate" data-khub-i18n="home_sections.subscribe_now">{{ __('home_sections.subscribe_now') }}</h6>
+                    <h2 class="ft-bold text-light notranslate" data-khub-i18n="home_sections.subscribe_updates">{{ __('home_sections.subscribe_updates') }}</h2>
                 </div>
             </div>
         </div>
@@ -36,19 +36,19 @@
 
                     <!-- Row with alert centered to show alert messages, hidden by default -->
                     <div class="alert alert-danger d-none" role="alert">
-                        <strong>Error!</strong>
+                        <strong class="notranslate" data-khub-i18n="home_sections.subscribe_error">{{ __('home_sections.subscribe_error') }}</strong>
                     </div>
 
                     <div class="row no-gutters">
                         <div class="col-xl-9 col-lg-9 col-md-8 col-sm-8 col-8">
                             <div class="form-group mb-0 position-relative">
-                                <input id="subscribe-email" type="text" class="form-control lg left-ico" placeholder="Enter Your Email Address" name="email">
+                                <input id="subscribe-email" type="text" class="form-control lg left-ico notranslate" placeholder="{{ __('home_sections.subscribe_email_placeholder') }}" name="email" data-khub-i18n="home_sections.subscribe_email_placeholder">
                                 <i class="bnc-ico lni lni-envelope"></i>
                             </div>
                         </div>
                         <div class="col-xl-3 col-lg-3 col-md-4 col-sm-4 col-4">
                             <div class="form-group mb-0 position-relative">
-                                <button type="submit" id="subscribe-bt" class="btn full-width custom-height-lg theme-bg text-light fs-md">Subscribe</button>
+                                <button type="submit" id="subscribe-bt" class="btn full-width custom-height-lg theme-bg text-light fs-md notranslate" data-khub-i18n="home_sections.subscribe_button">{{ __('home_sections.subscribe_button') }}</button>
                             </div>
                         </div>
                     </div>
@@ -102,7 +102,7 @@
                     $alert.removeClass('d-none')
                         .removeClass('alert-success')
                         .addClass('alert-danger')
-                        .html('Something went wrong. Please try again later.');
+                        .html(@json(__('home_sections.subscribe_generic_error')));
 
                     // Set a timeout to clear the alert after 5 seconds (adjust as needed)
                     alertTimeout = setTimeout(function() {
@@ -111,7 +111,7 @@
                 },
                 complete: function() {
                     // Re-enable the submit button and restore its original text
-                    $submitButton.prop('disabled', false).html('Submit');
+                    $submitButton.prop('disabled', false).html(@json(__('home_sections.subscribe_button')));
                     $('#subscription-form')[0].reset(); // Reset the form after AJAX request is complete
                 }
             });

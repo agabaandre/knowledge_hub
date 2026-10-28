@@ -1,9 +1,13 @@
 <div id="google_translate_element" style="display: none;"></div>
+    @php
+        $profileLangSelected = \App\Models\SiteLanguage::normalizeLocaleCode($user->langauge ?? null)
+            ?? \App\Models\SiteLanguage::systemDefaultLocale();
+    @endphp
     <select class="form-control select2 khub-profile-lang-select" style="border:#FFF;" name="langauge" id="khubProfileLangSelect">
         @foreach(\App\Models\SiteLanguage::selectorMap() as $code => $row)
             <option value="{{ $code }}"
                     data-google-code="{{ $row['google_code'] ?? $code }}"
-                    {{ ($code == ($user->langauge ?? '')) ? 'selected' : '' }}>{{ $row['name'] }}</option>
+                    {{ ((string) $code === (string) $profileLangSelected) ? 'selected' : '' }}>{{ $row['name'] }}</option>
         @endforeach
     </select>
 

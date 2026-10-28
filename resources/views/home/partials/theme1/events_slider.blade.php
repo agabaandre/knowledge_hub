@@ -58,15 +58,15 @@
 <div class="container mb-3" id="home-events-infinite-footer">
     <div id="home-events-infinite-sentinel" class="home-events-infinite-sentinel" aria-hidden="true" style="height:1px;"></div>
     <p class="text-muted small text-center mb-2" id="home-events-infinite-status">
-        Showing {{ number_format(count($events)) }} of {{ number_format($eventsTotal) }} events
+        {{ __('home_sections.showing_events', ['loaded' => number_format(count($events)), 'total' => number_format($eventsTotal)]) }}
     </p>
     <div id="home-events-infinite-loader" class="text-muted small text-center d-none" aria-live="polite">
-        <i class="fa fa-spinner fa-spin me-1"></i>Loading more events…
+        <i class="fa fa-spinner fa-spin me-1"></i>{{ __('publications.search.loading_more') }}
     </div>
 </div>
 @elseif(!empty($homeEventsInfiniteScroll) && isset($eventsTotal) && $eventsTotal > 0 && count($events) >= $eventsTotal)
 <div class="container mb-3">
-    <p class="text-muted small text-center mb-0" id="home-events-infinite-complete">All events loaded</p>
+    <p class="text-muted small text-center mb-0" id="home-events-infinite-complete">{{ __('home_sections.all_events_loaded') }}</p>
 </div>
 @endif
 

@@ -574,10 +574,18 @@
 
     function getCurrentLang() {
         var serverLang = '{{ $currentLang }}';
-        var khub = readCookie(khubLocaleCookieName);
-        if (khub && window.khubLangMeta && window.khubLangMeta[khub]) return khub;
-        if (serverLang && window.khubLangMeta && window.khubLangMeta[serverLang]) return serverLang;
-        return resolveLocaleFromGoogleCookie() || serverLang || 'en';
+        // Server already resolved profile language / site default. Prefer it over a
+        // stale khub_locale cookie (common after Configure default language changes).
+        if (serverLang && window.khubLangMeta && window.khubLangMeta[serverLang]) {
+            var khub = readCookie(khubLocaleCookieName);
+            if (khub !== serverLang) {
+                writeAppCookie(khubLocaleCookieName, serverLang, khubLocaleMaxAgeSec);
+            }
+            return serverLang;
+        }
+        var khubFallback = readCookie(khubLocaleCookieName);
+        if (khubFallback && window.khubLangMeta && window.khubLangMeta[khubFallback]) return khubFallback;
+        return resolveLocaleFromGoogleCookie() || serverLang || (window.khubSystemDefaultLocale || 'en');
     }
 
     function updateLanguageUI(langCode) {

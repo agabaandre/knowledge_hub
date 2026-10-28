@@ -14,14 +14,14 @@
 							<div class="row no-gutters">
 									<div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
-											<input type="text" class="form-control lg left-ico autocomplete term" name="term" value="{{ @old('term') }}" placeholder="Type Keywords to unfold it all" />
+											<input type="text" class="form-control lg left-ico autocomplete term notranslate" name="term" value="{{ @old('term') }}" placeholder="{{ __('home_sections.banner_keywords_placeholder') }}" data-khub-i18n="home_sections.banner_keywords_placeholder" />
 											<i class="bnc-ico lni lni-search-alt"></i>
 										</div>
 									</div>
 								
 									<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
-											<button class="btn full-width custom-height-lg theme-bg text-white fs-md" type="submit">Click to Unfold</button>
+											<button class="btn full-width custom-height-lg theme-bg text-white fs-md notranslate" type="submit" data-khub-i18n="home_sections.banner_unfold">{{ __('home_sections.banner_unfold') }}</button>
 										</div>
 									</div>
 								</div>
@@ -31,7 +31,7 @@
 
                             <?php /*
 							<div class="d-block mb-2 mt-3">
-                                <span class="text-muted">Tags:</span>
+                                <span class="text-muted notranslate" data-khub-i18n="home_sections.tags_label">{{ __('home_sections.tags_label') }}</span>
 
 	  							@php
                                  $colors = ['dark','blue','green'];
@@ -79,13 +79,13 @@
 
 						<div id='container' class="quiz" style="z-index:100; display: none; position:absolute; top:70px; opacity:0.9;">
 							<div id='title'>
-								<h1 class="quizH1">Attempt this Quiz</h1>
+								<h1 class="quizH1 notranslate" data-khub-i18n="home_sections.quiz_attempt">{{ __('home_sections.quiz_attempt') }}</h1>
 							</div>
 							<br/>
 							<div id='quiz'></div>
-							<div class='button' id='next'><a href='#'>Next</a></div>
-							<div class='button' id='prev'><a href='#'>Prev</a></div>
-							<div class='button' id='start'> <a href='#'>Start Over</a></div>
+							<div class='button' id='next'><a href='#' class="notranslate" data-khub-i18n="home_sections.quiz_next">{{ __('home_sections.quiz_next') }}</a></div>
+							<div class='button' id='prev'><a href='#' class="notranslate" data-khub-i18n="home_sections.quiz_prev">{{ __('home_sections.quiz_prev') }}</a></div>
+							<div class='button' id='start'> <a href='#' class="notranslate" data-khub-i18n="home_sections.quiz_start_over">{{ __('home_sections.quiz_start_over') }}</a></div>
 						</div>
 						</div>
 

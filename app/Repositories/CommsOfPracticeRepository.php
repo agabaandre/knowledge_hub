@@ -1094,14 +1094,17 @@ class CommsOfPracticeRepository{
 
         // Send invitation email via queue system (which uses Exchange)
         $acceptUrl = url('/communities/accept-invitation/' . $invitation->token);
-        $subject = 'Invitation to Join: ' . $invitation->community->community_name;
-        
-        $body = view('emails.community_invitation', [
+        $locale = resolve_mail_locale($email);
+        $subject = with_mail_locale($locale, static function () use ($invitation) {
+            return __('emails.invite_title').': '.$invitation->community->community_name;
+        });
+
+        $body = render_mail_view('emails.community_invitation', [
             'invitation' => $invitation,
             'community' => $invitation->community,
             'inviterName' => $invitation->inviter->name ?? 'Administrator',
             'acceptUrl' => $acceptUrl,
-        ])->render();
+        ], $locale, $email);
 
         // Use plain array so queue serialization preserves recipient; 'email' and 'to' = invitee
         $emailData = [
@@ -1229,15 +1232,18 @@ class CommsOfPracticeRepository{
         $invitation->load(['community', 'inviter']);
 
         $acceptUrl = url('/communities/accept-invitation/' . $invitation->token);
-        $subject = 'Reminder: Invitation to Join: ' . $invitation->community->community_name;
-        $body = view('emails.community_invitation', [
+        $to = $invitation->email;
+        $locale = resolve_mail_locale($to);
+        $subject = with_mail_locale($locale, static function () use ($invitation) {
+            return __('emails.invite_title').': '.$invitation->community->community_name;
+        });
+        $body = render_mail_view('emails.community_invitation', [
             'invitation' => $invitation,
             'community' => $invitation->community,
             'inviterName' => $invitation->inviter->name ?? 'Administrator',
             'acceptUrl' => $acceptUrl,
-        ])->render();
+        ], $locale, $to);
 
-        $to = $invitation->email;
         $emailData = [
             'email' => $to,
             'to' => $to,

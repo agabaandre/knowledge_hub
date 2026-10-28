@@ -283,9 +283,13 @@ class SiteLanguage extends Model
     /**
      * Resolve which locale is active for the UI (matches selector keys).
      *
-     * Explicit app choice (cookie) and user profile win. Google Translate's
-     * googtrans cookie must not override the site default — that kept hubs on EN
-     * after Configure → Default language was set to another locale.
+     * Priority:
+     * 1. Signed-in user's profile language (permissions/profile) when set
+     * 2. Site default from Configure (setting.language)
+     * 3. Guest-only: khub_locale cookie (explicit selector choice)
+     *
+     * Stale EN cookies must not override Configure → Default language for users
+     * who never set a profile preference. Google Translate googtrans is ignored.
      */
     public static function resolveActiveLocale(?string $userLocale, ?string $googtransRaw, ?string $khubLocale): string
     {
@@ -296,12 +300,20 @@ class SiteLanguage extends Model
             $default = in_array('en', $codes, true) ? 'en' : ($codes[0] ?? $default);
         }
 
-        if (is_string($khubLocale) && $khubLocale !== '' && in_array($khubLocale, $codes, true)) {
-            return $khubLocale;
+        $normalizedUser = self::normalizeLocaleCode(
+            is_string($userLocale) ? $userLocale : null
+        );
+        if ($normalizedUser !== null && in_array($normalizedUser, $codes, true)) {
+            return $normalizedUser;
         }
 
-        if (is_string($userLocale) && $userLocale !== '' && in_array($userLocale, $codes, true)) {
-            return $userLocale;
+        // Authenticated with no profile language → follow site default (ignore cookie).
+        if (auth()->check()) {
+            return $default;
+        }
+
+        if (is_string($khubLocale) && $khubLocale !== '' && in_array($khubLocale, $codes, true)) {
+            return $khubLocale;
         }
 
         return $default;

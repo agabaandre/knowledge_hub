@@ -13,7 +13,7 @@
     <tr>
         <td style="padding-bottom: 25px;">
             <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #1e293b; line-height: 1.3; text-align: center;">
-                Successfully Unsubscribed
+                {{ __('emails.unsubscribed_title') }}
             </h1>
         </td>
     </tr>
@@ -21,7 +21,7 @@
     <tr>
         <td style="padding-bottom: 25px;">
             <p style="margin: 0; font-size: 16px; color: #475569; line-height: 1.7; text-align: center;">
-                We're sorry to see you go. You have successfully unsubscribed from our email notifications. You will no longer receive updates from Africa CDC Knowledge Hub.
+                {{ __('emails.unsubscribed_body') }}
             </p>
         </td>
     </tr>
@@ -33,7 +33,7 @@
                     <td align="center">
                         <a href="{{ url('/') }}" 
                            style="display: inline-block; padding: 14px 32px; background-color: #119A48; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; line-height: 1.5;">
-                            Visit Knowledge Hub
+                            {{ __('emails.layout_knowledge_hub') }}
                         </a>
                     </td>
                 </tr>
@@ -42,18 +42,9 @@
     </tr>
     
     <tr>
-        <td style="padding: 20px; background-color: #fef2f2; border-radius: 6px; border-left: 4px solid #dc2626;">
-            <p style="margin: 0; font-size: 14px; color: #991b1b; line-height: 1.6;">
-                <strong>We value your feedback</strong><br>
-                If you have any suggestions or feedback about why you unsubscribed, please don't hesitate to contact us. We're always looking to improve our services.
-            </p>
-        </td>
-    </tr>
-    
-    <tr>
-        <td style="padding-top: 30px; text-align: center;">
+        <td style="padding-top: 10px; text-align: center;">
             <p style="margin: 0; font-size: 14px; color: #64748b; line-height: 1.6;">
-                Changed your mind? You can always resubscribe from your account settings or by visiting our website.
+                {{ __('emails.unsubscribed_resub') }}
             </p>
         </td>
     </tr>

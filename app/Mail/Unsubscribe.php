@@ -28,6 +28,10 @@ class Unsubscribe extends Mailable
      */
     public function build()
     {
-        return $this->view('emails.unsubscribed');
+        $locale = resolve_mail_locale();
+        app()->setLocale($locale);
+
+        return $this->subject(__('emails.unsubscribed_title'))
+            ->view('emails.unsubscribed');
     }
 }

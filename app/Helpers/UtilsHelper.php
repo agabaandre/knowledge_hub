@@ -2536,4 +2536,73 @@ if (! function_exists('locale_direction')) {
     }
 }
 
+if (! function_exists('resolve_mail_locale')) {
+    /**
+     * Locale for outbound mail: recipient profile language, else site default.
+     */
+    function resolve_mail_locale(?string $email = null, $user = null): string
+    {
+        $codes = \App\Models\SiteLanguage::activeLocaleCodes();
+        $fallback = \App\Models\SiteLanguage::systemDefaultLocale();
+
+        if ($user === null && is_string($email) && $email !== '') {
+            try {
+                $user = \App\Models\User::query()->where('email', $email)->first();
+            } catch (\Throwable $e) {
+                $user = null;
+            }
+        }
+
+        $raw = null;
+        if (is_object($user) && isset($user->langauge)) {
+            $raw = is_string($user->langauge) ? $user->langauge : null;
+        }
+
+        $normalized = \App\Models\SiteLanguage::normalizeLocaleCode($raw);
+        if ($normalized !== null && in_array($normalized, $codes, true)) {
+            return $normalized;
+        }
+
+        return in_array($fallback, $codes, true) ? $fallback : ($codes[0] ?? 'en');
+    }
+}
+
+if (! function_exists('with_mail_locale')) {
+    /**
+     * Run a callback with app locale set for email rendering, then restore.
+     *
+     * @template T
+     * @param  callable():T  $callback
+     * @return T
+     */
+    function with_mail_locale(?string $locale, callable $callback)
+    {
+        $resolved = \App\Models\SiteLanguage::normalizeLocaleCode($locale)
+            ?? \App\Models\SiteLanguage::systemDefaultLocale();
+        $previous = app()->getLocale();
+        app()->setLocale($resolved);
+        try {
+            return $callback();
+        } finally {
+            app()->setLocale($previous);
+        }
+    }
+}
+
+if (! function_exists('render_mail_view')) {
+    /**
+     * Render an email Blade view in the recipient's (or site default) locale.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    function render_mail_view(string $view, array $data = [], ?string $locale = null, ?string $email = null, $user = null): string
+    {
+        $locale = $locale ?? resolve_mail_locale($email, $user);
+
+        return with_mail_locale($locale, static function () use ($view, $data) {
+            return view($view, $data)->render();
+        });
+    }
+}
+
 ?>

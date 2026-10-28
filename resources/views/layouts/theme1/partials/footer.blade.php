@@ -21,29 +21,29 @@
                 @endif
             </div>
             <div class="col-lg-2 col-md-4">
-                <h6 class="h6 fw-bold mb-3">Navigate</h6>
+                <h6 class="h6 fw-bold mb-3">{{ __('ui_body.footer_navigate') }}</h6>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a href="{{ url('/') }}" class="link-secondary text-decoration-none">Home</a></li>
+                    <li class="mb-2"><a href="{{ url('/') }}" class="link-secondary text-decoration-none">{{ __('ui_body.footer_home') }}</a></li>
                     @guest
-                        <li class="mb-2"><a href="{{ url('login') }}" class="link-secondary text-decoration-none">Login</a></li>
+                        <li class="mb-2"><a href="{{ url('login') }}" class="link-secondary text-decoration-none">{{ __('ui_body.footer_login') }}</a></li>
                     @else
-                        <li class="mb-2"><a href="{{ url('account/publish') }}" class="link-secondary text-decoration-none">Publish resource</a></li>
+                        <li class="mb-2"><a href="{{ url('account/publish') }}" class="link-secondary text-decoration-none">{{ __('ui_body.publish_a_resource') }}</a></li>
                     @endguest
-                    <li class="mb-2"><a href="{{ url('forums') }}" class="link-secondary text-decoration-none">Forums</a></li>
-                    <li class="mb-2"><a href="{{ url('courses') }}" class="link-secondary text-decoration-none">Courses</a></li>
+                    <li class="mb-2"><a href="{{ url('forums') }}" class="link-secondary text-decoration-none">{{ __('ui_body.footer_discussion_forums') }}</a></li>
+                    <li class="mb-2"><a href="{{ url('courses') }}" class="link-secondary text-decoration-none">{{ __('ui_body.footer_courses') }}</a></li>
                 </ul>
             </div>
             <div class="col-lg-2 col-md-4">
-                <h6 class="h6 fw-bold mb-3">About</h6>
+                <h6 class="h6 fw-bold mb-3">{{ __('home_sections.footer_about') }}</h6>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a href="{{ url('faqs') }}" class="link-secondary text-decoration-none">FAQs</a></li>
-                    <li class="mb-2"><a href="https://africacdc.org" target="_blank" class="link-secondary text-decoration-none">Africa CDC</a></li>
-                    <li class="mb-2"><a href="{{ url('privacy') }}" class="link-secondary text-decoration-none">Privacy Policy</a></li>
-                    <li class="mb-2"><a href="{{ url('user_manual') }}" class="link-secondary text-decoration-none">User Guide</a></li>
+                    <li class="mb-2"><a href="{{ url('faqs') }}" class="link-secondary text-decoration-none">{{ __('ui_body.footer_faq') }}</a></li>
+                    <li class="mb-2"><a href="https://africacdc.org" target="_blank" class="link-secondary text-decoration-none">{{ __('ui_body.footer_africa_cdc_website') }}</a></li>
+                    <li class="mb-2"><a href="{{ url('privacy') }}" class="link-secondary text-decoration-none">{{ __('ui_body.footer_privacy_policy') }}</a></li>
+                    <li class="mb-2"><a href="{{ url('user_manual') }}" class="link-secondary text-decoration-none">{{ __('ui_body.footer_user_guide') }}</a></li>
                 </ul>
             </div>
             <div class="col-lg-2 col-md-4">
-                <h6 class="h6 fw-bold mb-3">Find us</h6>
+                <h6 class="h6 fw-bold mb-3">{{ __('ui_body.footer_find_us') }}</h6>
                 <div class="d-flex gap-2">
                     @if(settings()->facebook ?? null)<a href="{{ settings()->facebook }}" target="_blank" class="btn btn-icon btn-sm btn-light" title="Facebook"><i class="fa-brands fa-facebook"></i></a>@endif
                     @if(settings()->twitter ?? null)<a href="{{ settings()->twitter }}" target="_blank" class="btn btn-icon btn-sm btn-light" title="Twitter"><i class="fa-brands fa-x-twitter"></i></a>@endif
@@ -52,7 +52,7 @@
                 @php $footerPopularTags = $popular_tags ?? collect(); @endphp
                 @if((settings()->show_tags ?? false) && $footerPopularTags->count() > 0)
                     <div class="mt-3">
-                        <h6 class="h6 fw-bold mb-2">Tags</h6>
+                        <h6 class="h6 fw-bold mb-2">{{ __('home_sections.footer_tags') }}</h6>
                         <div class="d-flex flex-wrap gap-1">
                             @foreach($footerPopularTags->take(8) as $tag)
                                 <a href="{{ tag_records_url($tag) }}" class="badge bg-primary text-decoration-none">{{ truncate($tag->tag_text, 12) }}</a>
@@ -65,25 +65,25 @@
         <hr class="my-4">
         <div class="row">
             <div class="col-md-6 text-center text-md-start">
-                <p class="small text-muted mb-0">© {{ date('Y') }} {{ settings()->site_name ?? 'Knowledge Hub' }}. All rights reserved.</p>
+                <p class="small text-muted mb-0">{{ __('ui_body.footer_copyright', ['year' => date('Y')]) }}</p>
             </div>
             <div class="col-md-6 text-center text-md-end">
-                <a href="{{ url('privacy') }}" class="small link-secondary text-decoration-none">Privacy</a>
+                <a href="{{ url('privacy') }}" class="small link-secondary text-decoration-none">{{ __('home_sections.footer_privacy_short') }}</a>
                 <span class="mx-1">·</span>
-                <a href="{{ url('user_manual') }}" class="small link-secondary text-decoration-none">User Guide</a>
+                <a href="{{ url('user_manual') }}" class="small link-secondary text-decoration-none">{{ __('ui_body.footer_user_guide') }}</a>
             </div>
         </div>
     </div>
 </footer>
 
-<button id="scrollToTop" class="scroll-btn" tabindex="0" type="button" aria-label="Scroll to top"></button>
+<button id="scrollToTop" class="scroll-btn" tabindex="0" type="button" aria-label="{{ __('home_sections.scroll_to_top') }}"></button>
 
 @if (!get_cookie('is_returning'))
     <div class="cookie-consent position-fixed bottom-0 start-0 end-0 p-3 bg-dark text-white small text-center" style="z-index: 1050;">
-        This site uses cookies. <a href="{{ url('privacy_policy/read') }}" class="text-white text-decoration-underline">Privacy policy</a>
+        {{ __('ui_body.cookie_notice') }} <a href="{{ url('privacy_policy/read') }}" class="text-white text-decoration-underline">{{ __('ui_body.cookie_privacy_policy') }}</a>
         <div class="mt-2">
-            <button class="btn btn-sm btn-light me-1 allow-button" allow="1">Allow</button>
-            <button class="btn btn-sm btn-outline-light allow-button" allow="0">Decline</button>
+            <button class="btn btn-sm btn-light me-1 allow-button" allow="1">{{ __('home_sections.cookie_allow_short') }}</button>
+            <button class="btn btn-sm btn-outline-light allow-button" allow="0">{{ __('home_sections.cookie_decline') }}</button>
         </div>
     </div>
 @endif

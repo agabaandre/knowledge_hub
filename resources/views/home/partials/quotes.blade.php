@@ -19,7 +19,7 @@
                     @endif
                     <p class="quotes-slide-text mb-0" style="color: var(--banner-text-color, #334155) !important; font-size: 1.05rem; line-height: 1.5;">{{ nl2br(e(Str::words($quoteItem->quote, 30))) }}</p>
                     @if(!empty($quoteItem->link_url))
-                        <a href="{{ $quoteItem->link_url }}" target="_blank" rel="noopener" class="quotes-slide-link small mt-1 d-inline-block" style="color: var(--theme-color-primary, #119A48) !important;">Read more</a>
+                        <a href="{{ $quoteItem->link_url }}" target="_blank" rel="noopener" class="quotes-slide-link small mt-1 d-inline-block notranslate" style="color: var(--theme-color-primary, #119A48) !important;" data-khub-i18n="home_sections.read_more">{{ __('home_sections.read_more') }}</a>
                     @endif
                 </div>
             </div>

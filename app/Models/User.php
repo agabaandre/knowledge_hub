@@ -169,16 +169,21 @@ class User extends Authenticatable
                 'email' => $this->email,
             ]);
             
+            $locale = resolve_mail_locale($this->email, $this);
             $mailData = [
                 'email' => $this->email,
-                'subject' => 'Reset Your Password - Africa CDC Knowledge Hub',
-                'body' => view('emails.password_reset', [
+                'subject' => with_mail_locale($locale, static function () {
+                    return __('emails.reset_subject');
+                }),
+                'body' => render_mail_view('emails.password_reset', [
                     'name' => $this->name,
                     'token' => $token,
                     'email' => $this->email,
                     'resetUrl' => $resetUrl,
-                ])->render(),
-                'title' => 'Reset Your Password'
+                ], $locale, $this->email, $this),
+                'title' => with_mail_locale($locale, static function () {
+                    return __('emails.reset_title');
+                }),
             ];
             
             \App\Jobs\SendMailJob::dispatch($mailData)->onQueue('default');

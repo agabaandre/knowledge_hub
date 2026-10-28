@@ -4,11 +4,14 @@
     var LOADING_TEXT = @json(__('publications.search.loading_more'));
     var COMPLETE_TEXT = @json(__('publications.search.all_results_loaded'));
     var ERROR_TEXT = @json(__('publications.search.load_more_error'));
+    var SHOWING_TEMPLATE = @json(__('home_sections.showing_resources'));
     var observer = null;
     var loading = false;
 
     function formatStatus(loaded, total) {
-        return 'Showing ' + Number(loaded).toLocaleString() + ' of ' + Number(total).toLocaleString() + ' resources';
+        return String(SHOWING_TEMPLATE || 'Showing :loaded of :total resources')
+            .replace(':loaded', Number(loaded).toLocaleString())
+            .replace(':total', Number(total).toLocaleString());
     }
 
     function disconnectObserver() {

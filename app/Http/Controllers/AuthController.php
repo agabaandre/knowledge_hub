@@ -104,7 +104,36 @@ class AuthController extends Controller
         $data['message']     = $data['alert']= $message;
         $data['status']      = 200;
 
-        return back()->with($data);
+        $response = back()->with($data);
+
+        // Persist UI locale the same way as the header selector (cookie + app locale).
+        if ($saved && $request->filled('langauge')) {
+            $locale = \App\Models\SiteLanguage::normalizeLocaleCode((string) $request->input('langauge'));
+            $supported = \App\Models\SiteLanguage::activeLocaleCodes();
+            if ($locale !== null && in_array($locale, $supported, true)) {
+                \Illuminate\Support\Facades\App::setLocale($locale);
+                $cookieName = (string) config('supported_locales.locale_cookie', 'khub_locale');
+                $cookieMinutes = (int) config('supported_locales.locale_cookie_minutes', 525600);
+                $cookiePath = (string) config('supported_locales.cookie_path', '/');
+                $basePath = $request->getBasePath();
+                if (is_string($basePath) && $basePath !== '' && $basePath !== '/') {
+                    $cookiePath = rtrim($basePath, '/').'/';
+                }
+                $response->cookie(
+                    $cookieName,
+                    $locale,
+                    $cookieMinutes,
+                    $cookiePath,
+                    null,
+                    cookie_secure_flag(),
+                    true,
+                    false,
+                    config('session.same_site', 'lax')
+                );
+            }
+        }
+
+        return $response;
     }
 
     public function update_password(Request $request){

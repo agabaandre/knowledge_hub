@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     'recommended' => 'موصى به',
     'top_searches' => 'أكثر عمليات البحث',
     'flagship_initiatives' => 'المبادرات الرئيسية',
@@ -10,7 +9,6 @@ return [
     'explore_key_sections_subtitle' => 'تصفح نقاط الدخول الأساسية إلى المعرفة الصحية والمصادر والجغرافيا ونقاشات المجتمع.',
     'events' => 'الفعاليات',
     'health_emergencies' => 'حالات الطوارئ الصحية',
-
     'search' => 'بحث',
     'ai_search' => 'بحث بالذكاء الاصطناعي',
     'search_placeholder' => 'عمّ تبحث؟',
@@ -23,7 +21,6 @@ return [
     'apply_filters' => 'تطبيق عوامل التصفية',
     'explore_more_resources' => 'استكشف مزيداً من الموارد',
     'source' => 'المصدر',
-
     'region' => 'الإقليم',
     'member_state' => 'الدولة العضو',
     'thematic_area' => 'المجال الموضوعي',
@@ -40,5 +37,29 @@ return [
     'communities_intro' => 'مجتمعات الممارسة في مركز المعرفة.',
     'faqs_intro' => 'الأسئلة المتكررة.',
     'footer_explore' => 'استكشف',
-
+    'showing_resources' => 'عرض :loaded من :total موارد',
+    'showing_events' => 'عرض :loaded من :total فعاليات',
+    'all_events_loaded' => 'تم تحميل جميع الفعاليات',
+    'load_more_events_error' => 'تعذر تحميل المزيد من الفعاليات. اضغط لإعادة المحاولة.',
+    'read_more' => 'اقرأ المزيد',
+    'view_all' => 'عرض الكل',
+    'tags_label' => 'الوسوم:',
+    'subscribe_now' => 'اشترك الآن',
+    'subscribe_updates' => 'احصل على كل التحديثات',
+    'subscribe_email_placeholder' => 'أدخل بريدك الإلكتروني',
+    'subscribe_button' => 'اشترك',
+    'subscribe_error' => 'خطأ!',
+    'subscribe_generic_error' => 'حدث خطأ ما. يرجى المحاولة لاحقًا.',
+    'banner_keywords_placeholder' => 'اكتب كلمات مفتاحية لاكتشاف المزيد',
+    'banner_unfold' => 'انقر للاكتشاف',
+    'quiz_attempt' => 'حاول هذا الاختبار',
+    'quiz_next' => 'التالي',
+    'quiz_prev' => 'السابق',
+    'quiz_start_over' => 'البدء من جديد',
+    'scroll_to_top' => 'إلى الأعلى',
+    'footer_about' => 'حول',
+    'footer_tags' => 'الوسوم',
+    'footer_privacy_short' => 'الخصوصية',
+    'cookie_allow_short' => 'السماح',
+    'cookie_decline' => 'رفض',
 ];

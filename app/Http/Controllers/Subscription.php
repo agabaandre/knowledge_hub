@@ -39,11 +39,16 @@ class Subscription extends Controller
 
         // Send subscription email via queue system (which uses Exchange)
         try {
+            $locale = resolve_mail_locale($request->email);
             $mailData = [
                 'email' => $request->email,
-                'subject' => 'Subscription Confirmation - Africa CDC Knowledge Hub',
-                'body' => view('emails.subscribed', ['subscriber' => $subscriber])->render(),
-                'title' => 'Subscription Confirmation'
+                'subject' => with_mail_locale($locale, static function () {
+                    return __('emails.subscribed_title');
+                }),
+                'body' => render_mail_view('emails.subscribed', ['subscriber' => $subscriber], $locale, $request->email),
+                'title' => with_mail_locale($locale, static function () {
+                    return __('emails.subscribed_title');
+                }),
             ];
             
             \App\Jobs\SendMailJob::dispatch($mailData)->onQueue('default');
@@ -71,11 +76,16 @@ class Subscription extends Controller
 
             // Send unsubscription email via queue system (which uses Exchange)
             try {
+                $locale = resolve_mail_locale($request->email);
                 $mailData = [
                     'email' => $request->email,
-                    'subject' => 'Unsubscription Confirmation - Africa CDC Knowledge Hub',
-                    'body' => view('emails.unsubscribed', ['subscriber' => $subscriber])->render(),
-                    'title' => 'Unsubscription Confirmation'
+                    'subject' => with_mail_locale($locale, static function () {
+                        return __('emails.unsubscribed_title');
+                    }),
+                    'body' => render_mail_view('emails.unsubscribed', ['subscriber' => $subscriber], $locale, $request->email),
+                    'title' => with_mail_locale($locale, static function () {
+                        return __('emails.unsubscribed_title');
+                    }),
                 ];
                 
                 \App\Jobs\SendMailJob::dispatch($mailData)->onQueue('default');

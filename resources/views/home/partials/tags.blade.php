@@ -1,7 +1,7 @@
 @php $homePopularTags = $popular_tags ?? collect(); @endphp
 @if($homePopularTags->isNotEmpty())
 <div class="d-block mb-2 mt-3" id="tags">
-    <span class="text-white">Tags:</span>
+    <span class="text-white notranslate" data-khub-i18n="home_sections.tags_label">{{ __('home_sections.tags_label') }}</span>
 
     <div class="row px-2 custom-row">
     @php 
