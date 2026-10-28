@@ -6,7 +6,7 @@
                                 <span class="font-weight-semibold modal-title">
                         {{ strtoupper($role->name) }} {{ __('auth.permissions') }} 
                                 </span>
-                    <button aria-label="Close" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                    <button aria-label="{{ ui_t('general.close', 'Close') }}" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
                 </div>
 
                 <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">

@@ -100,9 +100,9 @@
                   <option value="3" data-class="avatar" data-style="background-image: url(&apos;http://www.gravatar.com/avatar/bdeaec11dd663f26fa58ced0eb7facc8?d=monsterid&amp;r=g&amp;s=16&apos;);">Jane Doe</option>
                 </select> -->
 
-              <button class="custom-btn" >Close</button>
-              <button class="custom-btn" >Share</button>
-              <button class="custom-btn" onclick="save(true)">Save</button>
+              <button class="custom-btn" >{{ __('general.close') }}</button>
+              <button class="custom-btn" >{{ __('general.share') }}</button>
+              <button class="custom-btn" onclick="save(true)">{{ __('general.save') }}</button>
             </div>
         </div>
         <div class="loading-placeholder background-mask-layer topmost"></div>

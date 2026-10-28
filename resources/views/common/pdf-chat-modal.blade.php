@@ -553,7 +553,7 @@
             </div>
             <div class="khub-ai-header-actions">
               <span class="khub-ai-mode-badge" id="pdf-chat-mode-badge" aria-live="polite">Document chat</span>
-              <button type="button" class="khub-ai-close btn-close-placeholder" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+              <button type="button" class="khub-ai-close btn-close-placeholder" data-dismiss="modal" data-bs-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                 <i class="fa fa-times"></i>
               </button>
             </div>
@@ -577,7 +577,7 @@
                 <i class="fa fa-file-word"></i> Export Word
               </button>
               <button type="button" class="btn btn-outline-secondary btn-sm" id="pdf-chat-share-all" title="Share via social or copy link">
-                <i class="fa fa-share-alt"></i> Share
+                <i class="fa fa-share-alt"></i> {{ ui_t('general.share', 'Share') }}
               </button>
             </div>
           </div>
@@ -602,7 +602,7 @@
         <div class="khub-ai-input-row">
           <textarea class="form-control" id="pdf-chat-input" placeholder="Ask anything about this resource…" rows="1" aria-label="Message Khub AI"></textarea>
           <button type="button" class="btn btn-primary pdf-chat-send-btn" id="pdf-chat-send">
-            <i class="fa fa-paper-plane"></i> Send
+            <i class="fa fa-paper-plane"></i> {{ ui_t('general.send', 'Send') }}
           </button>
         </div>
         <p class="khub-ai-disclaimer">AI-generated responses may contain errors. Verify important information against the original document.</p>

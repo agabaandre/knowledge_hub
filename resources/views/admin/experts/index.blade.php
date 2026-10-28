@@ -62,7 +62,7 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group mb-0">
-                                <label>Search</label>
+                                <label>{{ ui_t('general.search', 'Search') }}</label>
                                 <input type="text" name="term" id="filterTitle" class="form-control" placeholder="Search by name, email, or job title..." value="{{ @$search->term ?? ''}}">
                             </div>
                         </div>
@@ -70,8 +70,8 @@
                             <div class="form-group mb-0">
                                 <label>&nbsp;</label>
                                 <div class="d-flex">
-                                    <button type="submit" id="filterButton" class="btn btn-primary btn-sm mr-2">Filter</button>
-                                    <a href="{{ url('admin/experts') }}" class="btn btn-secondary btn-sm">Clear</a>
+                                    <button type="submit" id="filterButton" class="btn btn-primary btn-sm mr-2">{{ ui_t('general.filter', 'Filter') }}</button>
+                                    <a href="{{ url('admin/experts') }}" class="btn btn-secondary btn-sm">{{ ui_t('general.clear', 'Clear') }}</a>
                                 </div>
                             </div>
                         </div>
@@ -128,7 +128,7 @@
                                         <td>{{ $expert->email ?? '-' }}</td>
                                         <td>
                                             <a href="#create-modal{{ $expert->id }}" data-toggle="modal" class="btn btn-sm btn-outline-primary mr-1" title="Edit">
-                                                <i class="fa fa-edit mr-1"></i> Edit
+                                                <i class="fa fa-edit mr-1"></i> {{ ui_t('general.edit', 'Edit') }}
                                             </a>
                                             <a href="javascript:void(0);" onclick="openDeleteModal('{{ $expert->id }}')" class="btn btn-sm btn-outline-danger" title="Delete">
                                                 <i class="fa fa-trash"></i>

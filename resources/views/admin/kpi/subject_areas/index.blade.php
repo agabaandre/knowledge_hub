@@ -108,8 +108,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
+                <button type="submit" class="btn btn-primary">{{ ui_t('general.save', 'Save') }}</button>
             </div>
         </form>
     </div>

@@ -50,7 +50,7 @@
 							        Added {{ time_ago($tool->created_at) }}</span>
 						</div>
 						<div class="jb-list-01-info d-block mb-3 mt-3">
-						  <a class="btn btn-sm theme-bg text-white" href="{{ $tool->tool_url}}" target="_blank"><i class="fa fa-eye mr-1"></i>Details</a>
+						  <a class="btn btn-sm theme-bg text-white" href="{{ $tool->tool_url}}" target="_blank"><i class="fa fa-eye mr-1"></i>{{ __('general.details') }}</a>
 						</div>
 					</div>
 				</div>

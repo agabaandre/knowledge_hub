@@ -61,7 +61,7 @@
                 <input type="search" name="q" value="{{ $q }}" class="form-control" placeholder="Search title, submitter, or source">
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-outline-secondary w-100">Search</button>
+                <button type="submit" class="btn btn-outline-secondary w-100">{{ ui_t('general.search', 'Search') }}</button>
             </div>
         </form>
 
@@ -79,8 +79,8 @@
                     <input type="hidden" name="q" value="{{ $q }}">
                 @endif
                 <div class="d-flex flex-wrap gap-2 mb-3">
-                    <button type="submit" class="btn btn-success btn-sm" onclick="document.getElementById('approvalsAction').value='approve';">Approve selected</button>
-                    <button type="button" class="btn btn-outline-danger btn-sm" id="approvalsRejectSelectedBtn">Reject selected</button>
+                    <button type="submit" class="btn btn-success btn-sm" onclick="document.getElementById('approvalsAction').value='approve';">{{ ui_t('general.approve_selected', 'Approve selected') }}</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="approvalsRejectSelectedBtn">{{ ui_t('general.reject_selected', 'Reject selected') }}</button>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-sm align-middle">
@@ -106,11 +106,11 @@
                                     <td>{{ $item['submitted_by'] }}</td>
                                     <td class="small text-muted">{{ optional($item['submitted_at'])->diffForHumans() ?? '—' }}</td>
                                     <td class="text-end text-nowrap">
-                                        <button type="submit" class="btn btn-success btn-sm py-0 px-2" name="action" value="approve" formaction="{{ route('admin.approvals.review') }}" form="approval-one-{{ $item['key'] }}">Approve</button>
+                                        <button type="submit" class="btn btn-success btn-sm py-0 px-2" name="action" value="approve" formaction="{{ route('admin.approvals.review') }}" form="approval-one-{{ $item['key'] }}">{{ ui_t('general.approve', 'Approve') }}</button>
                                         @if(in_array($item['type'], ['forum', 'publication'], true))
-                                            <button type="button" class="btn btn-outline-danger btn-sm py-0 px-2" onclick="approvalsRejectOne('{{ $item['type'] }}', {{ (int) $item['id'] }})">Reject</button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm py-0 px-2" onclick="approvalsRejectOne('{{ $item['type'] }}', {{ (int) $item['id'] }})">{{ ui_t('general.reject', 'Reject') }}</button>
                                         @else
-                                            <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" name="action" value="reject" formaction="{{ route('admin.approvals.review') }}" form="approval-one-{{ $item['key'] }}" onclick="return confirm('Reject this item?');">Reject</button>
+                                            <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" name="action" value="reject" formaction="{{ route('admin.approvals.review') }}" form="approval-one-{{ $item['key'] }}" onclick="return confirm(@json(ui_t('general.confirm_reject', 'Reject this item?')));">{{ ui_t('general.reject', 'Reject') }}</button>
                                         @endif
                                     </td>
                                 </tr>
@@ -150,8 +150,8 @@
                 <textarea name="rejected_reason" class="form-control" rows="4" minlength="10" required placeholder="Explain why this is being rejected (required for forums; recommended for publications)."></textarea>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" data-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-danger">Reject</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
+                <button type="submit" class="btn btn-danger">{{ ui_t('general.reject', 'Reject') }}</button>
             </div>
         </form>
     </div>

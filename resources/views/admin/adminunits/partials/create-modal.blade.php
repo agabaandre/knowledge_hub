@@ -3,7 +3,7 @@
     <form class="modal-content" action="{{ url('admin/adminunits/save') }}" enctype="multipart/form-data" method="post" id="create-adminunit-form">
       <div class="modal-header">
         <h5 class="modal-title">Create Admin Unit</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -11,8 +11,8 @@
         @include('admin.adminunits.partials.form_fields', ['row' => null])
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-dismiss="modal" type="button">Cancel</button>
-        <button class="btn btn-primary" type="submit">Save Record</button>
+        <button class="btn btn-secondary" data-dismiss="modal" type="button">{{ ui_t('general.cancel', 'Cancel') }}</button>
+        <button class="btn btn-primary" type="submit">{{ ui_t('general.save_record', 'Save Record') }}</button>
       </div>
     </form>
   </div>

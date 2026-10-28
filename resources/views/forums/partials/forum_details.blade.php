@@ -217,7 +217,7 @@
                 <div class="comment-form-footer" style="justify-content: flex-end;">
                     <button type="submit" class="comment-submit-btn">
                         <i class="fa fa-paper-plane"></i>
-                        Post Comment
+                        {{ __('general.post_comment') }}
                     </button>
                 </div>
             </form>
@@ -230,7 +230,7 @@
         <p style="color: #64748b; margin-bottom: 1rem;">You need to join this discussion before you can comment.</p>
         <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="comment-submit-btn" style="text-decoration: none; display: inline-flex;">
             <i class="fa fa-link"></i>
-            Join Discussion
+            {{ __('general.join_discussion') }}
         </a>
     </div>
     @endif
@@ -241,7 +241,7 @@
         <p style="color: #64748b; margin-bottom: 1rem;">Please log in to participate in discussions.</p>
         <a href="{{ route('login') }}" class="comment-submit-btn" style="text-decoration: none; display: inline-flex;">
             <i class="fa fa-sign-in-alt"></i>
-            Login
+            {{ __('general.login') }}
         </a>
     </div>
 @endauth
@@ -302,7 +302,7 @@
                             @php $commentShareUrl = forum_thread_url($forum).'#comment-'.$comment->id; @endphp
                             <button type="button" class="comment-action-btn share-comment-btn" data-share-url="{{ $commentShareUrl }}" title="Share comment" style="cursor: pointer; padding: 0.25rem 0.5rem; font-size: 0.8125rem; background: transparent; border: none; color: #64748b;">
                                 <i class="fa fa-share-alt"></i>
-                                <span>Share</span>
+                                <span>{{ __('general.share') }}</span>
                             </button>
                                                 </div>
                         @else
@@ -318,7 +318,7 @@
                             </a>
                             <a href="{{ route('login') }}" class="comment-action-btn" style="text-decoration: none; padding: 0.25rem 0.5rem; font-size: 0.8125rem; color: #64748b;">
                                 <i class="fa fa-share-alt"></i>
-                                <span>Share</span>
+                                <span>{{ __('general.share') }}</span>
                             </a>
                                             </div>
                         @endauth
@@ -432,7 +432,7 @@
                                         Reply
                                     </button>
                                     <button type="button" class="cancel-reply-btn" data-comment-id="{{ $comment->id }}" style="margin-top: 0.5rem; margin-left: 0.5rem; padding: 0.5rem 1rem; background: #e2e8f0; border: none; border-radius: 4px; color: #64748b; font-size: 0.875rem; cursor: pointer;">
-                                        Cancel
+                                        {{ __('general.cancel') }}
                                     </button>
                                 </div>
                                         </div>
@@ -489,7 +489,7 @@
                                     @php $replyShareUrl = forum_thread_url($forum).'#reply-'.$reply->id; @endphp
                                     <button type="button" class="comment-action-btn share-comment-btn" data-share-url="{{ $replyShareUrl }}" title="Share reply" style="cursor: pointer; padding: 0.25rem 0.5rem; font-size: 0.8125rem; background: transparent; border: none; color: #64748b;">
                                         <i class="fa fa-share-alt"></i>
-                                        <span>Share</span>
+                                        <span>{{ __('general.share') }}</span>
                                     </button>
                                 </div>
                                 @else
@@ -501,7 +501,7 @@
                                     </a>
                                     <a href="{{ route('login') }}" class="comment-action-btn" style="text-decoration: none; padding: 0.25rem 0.5rem; font-size: 0.8125rem; color: #64748b;">
                                         <i class="fa fa-share-alt"></i>
-                                        <span>Share</span>
+                                        <span>{{ __('general.share') }}</span>
                                     </a>
                                 </div>
                                 @endauth

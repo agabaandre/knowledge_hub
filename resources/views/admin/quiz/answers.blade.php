@@ -99,7 +99,7 @@
                                         </td>
                                         <td>
                                             <a href="javascript:void(0);" onclick="openEditModal({{ $row->id }})" class="btn btn-sm btn-outline-primary mr-1" title="Edit">
-                                                <i class="fa fa-edit mr-1"></i> Edit
+                                                <i class="fa fa-edit mr-1"></i> {{ ui_t('general.edit', 'Edit') }}
                                             </a>
                                             <a href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="btn btn-sm btn-outline-danger" title="Delete">
                                                 <i class="fa fa-trash"></i>

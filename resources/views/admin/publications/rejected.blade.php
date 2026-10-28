@@ -13,7 +13,7 @@
         <h1 class="page-title">Rejected Public Health Resources</h1>
         <div>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ ui_t('general.publish', 'Publish') }}</a></li>
                 <li class="breadcrumb-item"><a href="{{ url('admin/publications') }}">Manage Publications</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Rejected Resources</li>
             </ol>
@@ -73,7 +73,7 @@
 
                         <div class="pub-filters-actions">
                             <a href="{{ url('admin/publications/rejected') }}" class="pub-filters-btn pub-filters-btn--clear">
-                                <i class="fa fa-rotate-left"></i> Clear
+                                <i class="fa fa-rotate-left"></i> {{ ui_t('general.clear', 'Clear') }}
                             </a>
                         </div>
                     </form>

@@ -26,8 +26,8 @@
             <strong>Status:</strong> <span class="badge {{ $event->status==='active' ? 'badge-success' : 'badge-secondary' }}">{{ ucfirst($event->status ?? 'pending') }}</span>
         </div>
         <div class="mt-4">
-            <a href="{{ route('admin.events.edit', $event->id) }}" class="btn btn-primary">Edit</a>
-            <a href="{{ route('admin.events.index') }}" class="btn btn-secondary">Back</a>
+            <a href="{{ route('admin.events.edit', $event->id) }}" class="btn btn-primary">{{ ui_t('general.edit', 'Edit') }}</a>
+            <a href="{{ route('admin.events.index') }}" class="btn btn-secondary">{{ ui_t('general.back', 'Back') }}</a>
         </div>
     </div>
 </div>

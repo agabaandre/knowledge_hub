@@ -48,7 +48,7 @@
 	<div class="modal-dialog modal-xl login-pop-form" role="document">
 		<div class="modal-content" id="loginmodal">
 			<div class="modal-headers">
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
 					<span class="ti-close"></span>
 				</button>
 			</div>

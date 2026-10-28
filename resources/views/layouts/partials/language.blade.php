@@ -24,6 +24,17 @@
     window.khubSystemDefaultLocale = @json($systemDefaultLocale);
     window.khubContentLocale = @json($contentLocale);
     window.khubPageLanguageGoogle = @json($pageLanguageGoogle);
+    window.khubActiveUiLocale = @json($uiLocale);
+
+    /** Native Laravel UI covers system default + authored content language — no Google Translate. */
+    window.khubShouldUseGoogleTranslate = function (localeCode) {
+        var locale = localeCode || window.khubActiveUiLocale || '';
+        var content = window.khubContentLocale || 'en';
+        var systemDefault = window.khubSystemDefaultLocale || content;
+        if (!locale) return false;
+        if (locale === content || locale === systemDefault) return false;
+        return true;
+    };
 
     function googleTranslateElementInit() {
         if (!document.getElementById('google_translate_element')) {
@@ -100,15 +111,44 @@
     function doGTranslate(lang_code) {
         var pageLang = window.khubPageLanguageGoogle || 'en';
         var contentLocale = window.khubContentLocale || 'en';
+        var systemDefault = window.khubSystemDefaultLocale || contentLocale;
         var lang = lang_code || pageLang;
 
+        // Map google code back to app locale when possible.
+        var matchedLocale = null;
+        if (window.khubLangMeta) {
+            for (var loc in window.khubLangMeta) {
+                if (!Object.prototype.hasOwnProperty.call(window.khubLangMeta, loc)) continue;
+                var gc = window.khubLangMeta[loc].google_code || loc;
+                if (gc === lang || loc === lang) {
+                    matchedLocale = loc;
+                    break;
+                }
+            }
+        }
+        var localeForGate = matchedLocale || lang;
+        if (typeof window.khubShouldUseGoogleTranslate === 'function'
+            && !window.khubShouldUseGoogleTranslate(localeForGate)
+            && (lang === pageLang || lang === contentLocale || lang === systemDefault
+                || localeForGate === contentLocale || localeForGate === systemDefault)) {
+            lang = pageLang;
+        }
+
         if (!window.khubGoogleTranslateReady) {
+            if (typeof window.khubShouldUseGoogleTranslate === 'function'
+                && !window.khubShouldUseGoogleTranslate(localeForGate)) {
+                window.khubPendingGoogleTranslate = null;
+                return;
+            }
             window.khubPendingGoogleTranslate = lang;
             return;
         }
 
-        // Only clear when showing the authored content language (untranslated HTML).
-        if (lang === pageLang || lang === contentLocale) {
+        // Clear when authored content language OR site default (native UI translations).
+        if (lang === pageLang || lang === contentLocale || lang === systemDefault
+            || localeForGate === contentLocale || localeForGate === systemDefault
+            || (typeof window.khubShouldUseGoogleTranslate === 'function'
+                && !window.khubShouldUseGoogleTranslate(localeForGate))) {
             var clearDate = new Date();
             clearDate.setTime(clearDate.getTime() - 1);
             document.cookie = "googtrans=; expires=" + clearDate.toUTCString() + "; path={{ $localeCookiePath }}";
@@ -191,14 +231,32 @@
     window.khubApplyGoogleTranslate = doGTranslate;
 
     (function () {
+        function clearGoogleTranslateCookie() {
+            var clearDate = new Date();
+            clearDate.setTime(clearDate.getTime() - 1);
+            document.cookie = "googtrans=; expires=" + clearDate.toUTCString() + "; path={{ $localeCookiePath }}";
+            document.cookie = "googtrans=; expires=" + clearDate.toUTCString() + "; path=/";
+        }
+
         function bootGoogleTranslateFromCookies() {
             var cookieLang = GTranslateGetCurrentLang();
-            var userLang = @json($uiLocale);
+            var userLang = window.khubActiveUiLocale || @json($uiLocale);
             var contentLocale = window.khubContentLocale || 'en';
             var pageLang = window.khubPageLanguageGoogle || 'en';
             var googleLang = khubGoogleCodeForLocale(userLang);
 
-            // Translate when the active UI locale differs from authored content language.
+            // Site default (and content language) use packaged Laravel translations only.
+            if (!window.khubShouldUseGoogleTranslate(userLang)) {
+                clearGoogleTranslateCookie();
+                if (typeof window.khubClearGoogleTranslationState === 'function') {
+                    window.khubClearGoogleTranslationState();
+                }
+                if (typeof window.khubApplyDocumentDirection === 'function') {
+                    window.khubApplyDocumentDirection(userLang || contentLocale);
+                }
+                return;
+            }
+
             if (userLang && userLang !== contentLocale) {
                 if (cookieLang !== googleLang) {
                     var date = new Date();
@@ -209,9 +267,7 @@
             } else if (cookieLang && cookieLang !== pageLang) {
                 doGTranslate(cookieLang);
             } else {
-                var clearDate = new Date();
-                clearDate.setTime(clearDate.getTime() - 1);
-                document.cookie = "googtrans=; expires=" + clearDate.toUTCString() + "; path={{ $localeCookiePath }}";
+                clearGoogleTranslateCookie();
                 if (typeof window.khubApplyDocumentDirection === 'function') {
                     window.khubApplyDocumentDirection(userLang || contentLocale);
                 }
@@ -220,14 +276,30 @@
 
         if (typeof jQuery !== 'undefined' && jQuery) {
             jQuery(function () {
-                khubWhenGoogleTranslateReady(bootGoogleTranslateFromCookies);
+                if (window.khubShouldUseGoogleTranslate(window.khubActiveUiLocale)) {
+                    khubWhenGoogleTranslateReady(bootGoogleTranslateFromCookies);
+                } else {
+                    bootGoogleTranslateFromCookies();
+                }
                 jQuery('.selectpicker').selectpicker();
             });
         } else {
             document.addEventListener('DOMContentLoaded', function () {
-                khubWhenGoogleTranslateReady(bootGoogleTranslateFromCookies);
+                if (window.khubShouldUseGoogleTranslate(window.khubActiveUiLocale)) {
+                    khubWhenGoogleTranslateReady(bootGoogleTranslateFromCookies);
+                } else {
+                    bootGoogleTranslateFromCookies();
+                }
             });
         }
     })();
 </script>
+{{-- Load GT widget only on the public site, and only when UI is not the site default / content language. --}}
+@php
+    $khubLoadGoogleTranslate = ! \App\Models\SiteLanguage::isBackendRequest()
+        && $uiLocale !== $systemDefaultLocale
+        && $uiLocale !== $contentLocale;
+@endphp
+@if($khubLoadGoogleTranslate)
 <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+@endif

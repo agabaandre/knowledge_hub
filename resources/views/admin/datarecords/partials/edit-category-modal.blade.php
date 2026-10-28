@@ -4,8 +4,8 @@
             <form action="{{ url('admin/datarecords/categories/update') }}" method="post">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title" id="edit_category_title">Edit Category</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title" id="edit_category_title">{{ ui_t('general.edit_category', 'Edit Category') }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -25,8 +25,8 @@
                     @include('admin.datarecords.partials.category-access-fields', ['prefix' => 'edit'])
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary btn-sm">Save changes</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
+                    <button type="submit" class="btn btn-primary btn-sm">{{ ui_t('general.save_changes', 'Save changes') }}</button>
                 </div>
             </form>
         </div>

@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalToggleLabel">Create New Sub Theme</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -45,7 +45,7 @@
                 </div>
                 <div class="modal-footer">
                     <!-- Button to submit the form -->
-                    <button type="submit" class="btn btn-primary">Create</button>
+                    <button type="submit" class="btn btn-primary">{{ ui_t('general.create', 'Create') }}</button>
                 </div>
             </form>
         </div>

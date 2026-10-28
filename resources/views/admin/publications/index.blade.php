@@ -102,7 +102,7 @@
         </div>
         <div>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ ui_t('general.publish', 'Publish') }}</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Manage Publications</li>
             </ol>
         </div>
@@ -177,7 +177,7 @@
 
                         <div class="pub-filters-actions">
                             <a href="{{ url('admin/publications') }}" class="pub-filters-btn pub-filters-btn--clear" id="clearFiltersBtn">
-                                <i class="fa fa-rotate-left"></i> Clear
+                                <i class="fa fa-rotate-left"></i> {{ ui_t('general.clear', 'Clear') }}
                             </a>
                             <button type="button" id="exportButton" class="pub-filters-btn pub-filters-btn--export">
                                 <i class="fa fa-download"></i> Export
@@ -232,7 +232,7 @@
                                 <option value="inactive">Inactive/Unpublish Selected</option>
                                 <option value="featured">Mark as Featured</option>
                             </select>
-                            <button type="button" class="btn btn-sm btn-outline-primary" id="bulkActionButton" disabled>Apply</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="bulkActionButton" disabled>{{ ui_t('general.apply', 'Apply') }}</button>
                             <small class="text-muted">Select rows and an action in any order, then click Apply.</small>
                         </div>
 
@@ -272,7 +272,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="pubDescriptionPreviewTitle">Description</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -280,7 +280,7 @@
                     <div id="pubDescriptionPreviewBody"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.close', 'Close') }}</button>
                 </div>
             </div>
         </div>
@@ -291,7 +291,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="bulkActionConfirmModalLabel">Confirm Bulk Action</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -299,7 +299,7 @@
                     <span id="bulkActionConfirmText">Are you sure you want to perform this action?</span>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                     <button type="button" class="btn btn-primary" id="confirmBulkActionBtn">Yes, Proceed</button>
                 </div>
             </div>

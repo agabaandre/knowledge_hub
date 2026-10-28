@@ -38,7 +38,7 @@
     @if(session('alert'))
         <div class="alert alert-{{ session('alert_class', 'info') }} alert-dismissible fade show" role="alert">
             {{ session('alert') }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <button type="button" class="close" data-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}"><span aria-hidden="true">&times;</span></button>
         </div>
     @endif
     <div class="page-header">
@@ -87,10 +87,10 @@
                         <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
                             <span class="text-muted small">Select participants to approve or reject:</span>
                             <button type="button" class="btn btn-success btn-sm" id="bulk-approve-btn" disabled>
-                                <i class="fa fa-check mr-1"></i>Approve selected
+                                <i class="fa fa-check mr-1"></i>{{ ui_t('general.approve_selected', 'Approve selected') }}
                             </button>
                             <button type="button" class="btn btn-danger btn-sm" id="bulk-reject-btn" disabled>
-                                <i class="fa fa-times mr-1"></i>Reject selected
+                                <i class="fa fa-times mr-1"></i>{{ ui_t('general.reject_selected', 'Reject selected') }}
                             </button>
                         </div>
                         @endcan
@@ -217,17 +217,17 @@
                                                     <button type="button" class="btn btn-outline-success btn-sm mr-1 js-member-action" data-member-id="{{ $member->id }}" data-action="activate"><i class="fa fa-play mr-1"></i>Mark active</button>
                                                 @endif
                                                 @can('moderate_cop_participants')
-                                                <button type="button" class="btn btn-outline-danger btn-sm js-member-action" data-member-id="{{ $member->id }}" data-action="reject"><i class="fa fa-times mr-1"></i>Remove</button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm js-member-action" data-member-id="{{ $member->id }}" data-action="reject"><i class="fa fa-times mr-1"></i>{{ ui_t('general.remove', 'Remove') }}</button>
                                                 @endcan
                                             @elseif ($member->is_approved == 2)
                                                 @can('moderate_cop_participants')
                                                 <button type="button" class="btn btn-outline-success btn-sm mr-1 js-member-action" data-member-id="{{ $member->id }}" data-action="approve"><i class="fa fa-undo mr-1"></i>Reconsider</button>
                                                 @endcan
-                                                <button type="button" class="btn btn-outline-danger btn-sm js-member-action" data-member-id="{{ $member->id }}" data-action="delete" title="Permanently remove this rejected request"><i class="fa fa-trash mr-1"></i>Delete</button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm js-member-action" data-member-id="{{ $member->id }}" data-action="delete" title="Permanently remove this rejected request"><i class="fa fa-trash mr-1"></i>{{ ui_t('general.delete', 'Delete') }}</button>
                                             @else
                                                 @can('moderate_cop_participants')
-                                                <button type="button" class="btn btn-outline-success btn-sm mr-1 js-member-action" data-member-id="{{ $member->id }}" data-action="approve"><i class="fa fa-check mr-1"></i>Approve</button>
-                                                <button type="button" class="btn btn-outline-danger btn-sm js-member-action" data-member-id="{{ $member->id }}" data-action="reject"><i class="fa fa-times mr-1"></i>Reject</button>
+                                                <button type="button" class="btn btn-outline-success btn-sm mr-1 js-member-action" data-member-id="{{ $member->id }}" data-action="approve"><i class="fa fa-check mr-1"></i>{{ ui_t('general.approve', 'Approve') }}</button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm js-member-action" data-member-id="{{ $member->id }}" data-action="reject"><i class="fa fa-times mr-1"></i>{{ ui_t('general.reject', 'Reject') }}</button>
                                                 @endcan
                                             @endif
                                         </td>
@@ -310,7 +310,7 @@
                                                 </button>
                                             @endif
                                             <button type="button" class="btn btn-outline-danger btn-sm js-delete-invitation" data-invitation-id="{{ $invitation->id }}" data-community-id="{{ $community->id }}" data-delete-url="{{ route('admin.commsofpractice.deleteInvitation') }}" title="Delete invitation">
-                                                <i class="fa fa-trash mr-1"></i>Delete
+                                                <i class="fa fa-trash mr-1"></i>{{ ui_t('general.delete', 'Delete') }}
                                             </button>
                                         </td>
                                     </tr>
@@ -329,7 +329,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="approvalModalLabel">Confirm Action</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -337,8 +337,8 @@
                     <p class="mb-0" id="approvalModalText">Are you sure you want to <span id="actionType"></span> this member?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="confirmAction">Confirm</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="confirmAction">{{ ui_t('general.confirm', 'Confirm') }}</button>
                 </div>
             </div>
         </div>
@@ -350,7 +350,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="sendInvitationModalLabel">Send Invitation</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -366,7 +366,7 @@
                         <input type="hidden" name="community_id" value="{{ $community->id }}">
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                         <button type="submit" class="btn btn-primary" id="sendInvitationSubmitBtn">Send Invitation(s)</button>
                     </div>
                 </form>
@@ -380,7 +380,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="importCsvModalLabel">Import Invitations from CSV</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -423,7 +423,7 @@
                         <input type="hidden" name="community_id" value="{{ $community->id }}">
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                         <button type="submit" class="btn btn-primary" id="importCsvSubmitBtn">
                             <i class="fa fa-upload mr-1"></i>Import and Send
                         </button>
@@ -438,7 +438,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add member</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <form id="addMemberForm">
                     @csrf
@@ -454,7 +454,7 @@
                         <input type="hidden" name="community_id" value="{{ $community->id }}">
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                         <button type="submit" class="btn btn-primary" id="addMemberSubmitBtn">Add member</button>
                     </div>
                 </form>

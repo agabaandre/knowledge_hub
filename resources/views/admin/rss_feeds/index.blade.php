@@ -79,7 +79,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="rssFetchProgressModalLabel">Fetching RSS feeds</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="rssFetchProgressCloseBtn" style="display:none;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}" id="rssFetchProgressCloseBtn" style="display:none;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>

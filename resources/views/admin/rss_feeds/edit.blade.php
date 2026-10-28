@@ -36,8 +36,8 @@
                             <label class="custom-control-label" for="is_active">Active</label>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Update</button>
-                    <a href="{{ route('admin.rss_feeds.index') }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">{{ ui_t('general.update', 'Update') }}</button>
+                    <a href="{{ route('admin.rss_feeds.index') }}" class="btn btn-secondary">{{ ui_t('general.cancel', 'Cancel') }}</a>
                 </form>
             </div>
         </div>

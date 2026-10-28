@@ -51,7 +51,7 @@
                         </a>
                     @elseif ($row->content)
                         <a href="{{ url('courses/details/'.$row->id) }}" class="btn theme-secondary btn-sm">
-                            Details
+                            {{ ui_t('general.details', 'Details') }}
                         </a>
                     @elseif ($row->course_url)
                         <a href="{{ $row->course_url }}" target="_blank" rel="noopener noreferrer" class="btn theme-primary btn-sm">

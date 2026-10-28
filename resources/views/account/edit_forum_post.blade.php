@@ -123,7 +123,7 @@
                         </div>
 
                         <div class="form-group mt-4" style="display: flex; gap: 1rem; justify-content: flex-end;">
-                            <a href="{{ route('account.my-discussions') }}" class="btn btn-secondary" type="button">Cancel</a>
+                            <a href="{{ route('account.my-discussions') }}" class="btn btn-secondary" type="button">{{ ui_t('general.cancel', 'Cancel') }}</a>
                             <button class="btn btn-primary theme-bg text-white" type="submit">
                                 @if($isLive)
                                     <i class="fa fa-paper-plane me-2"></i>Save & submit for approval

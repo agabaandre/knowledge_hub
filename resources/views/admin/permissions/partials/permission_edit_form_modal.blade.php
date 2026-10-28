@@ -6,7 +6,7 @@
                                 <span class="font-weight-semibold modal-title">
                                     {{ __('general.edit') }} {{ __('auth.permission') }} 
                                 </span>
-                                <button aria-label="Close" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                                <button aria-label="{{ ui_t('general.close', 'Close') }}" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
                             </div>
                             <form action="{{ route('permissions.permission') }}" class="feeForm{{$perm->id}}" method="POST">
                        

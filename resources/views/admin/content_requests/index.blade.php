@@ -65,7 +65,7 @@
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                <label for="search" class="form-label small font-weight-bold">Search</label>
+                                <label for="search" class="form-label small font-weight-bold">{{ ui_t('general.search', 'Search') }}</label>
                                 <input type="text" 
                                        name="search" 
                                        id="search" 
@@ -93,7 +93,7 @@
                             </div>
                             <div class="col-md-2 d-flex align-items-end">
                                 <a href="{{ route('admin.content-requests.index') }}" class="btn btn-secondary btn-sm">
-                                    <i class="fa fa-times mr-1"></i>Clear
+                                    <i class="fa fa-times mr-1"></i>{{ ui_t('general.clear', 'Clear') }}
                                 </a>
                             </div>
                         </div>
@@ -103,7 +103,7 @@
                     @if(Session::has('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             {{ Session::get('success') }}
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -111,7 +111,7 @@
                     @if(Session::has('error'))
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             {{ Session::get('error') }}
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -148,7 +148,7 @@
                 <h5 class="modal-title" id="processRequestModalLabel">
                     <i class="fa fa-check-circle mr-2"></i>Process Content Request
                 </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white; opacity: 0.9;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}" style="color: white; opacity: 0.9;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -196,7 +196,7 @@
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #e2e8f0;">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius: 0.25rem;">
-                        <i class="fa fa-times mr-1"></i>Cancel
+                        <i class="fa fa-times mr-1"></i>{{ ui_t('general.cancel', 'Cancel') }}
                     </button>
                     <button type="submit" class="btn btn-success" style="border-radius: 0.25rem;">
                         <i class="fa fa-check mr-1"></i>Process & Send Email
@@ -215,7 +215,7 @@
                 <h5 class="modal-title" id="viewProcessedModalLabel">
                     <i class="fa fa-eye mr-2"></i>Processed Request Details
                 </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white; opacity: 0.9;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}" style="color: white; opacity: 0.9;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -247,7 +247,7 @@
             </div>
             <div class="modal-footer" style="border-top: 1px solid #e2e8f0;">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius: 0.25rem;">
-                    <i class="fa fa-times mr-1"></i>Close
+                    <i class="fa fa-times mr-1"></i>{{ ui_t('general.close', 'Close') }}
                 </button>
             </div>
         </div>
@@ -263,7 +263,7 @@
                 <h5 class="modal-title" id="referRequestModalLabel">
                     <i class="fa fa-share mr-2"></i>Refer content request
                 </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -300,7 +300,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                     <button type="submit" class="btn btn-primary">
                         <i class="fa fa-paper-plane mr-1"></i>Refer &amp; notify
                     </button>

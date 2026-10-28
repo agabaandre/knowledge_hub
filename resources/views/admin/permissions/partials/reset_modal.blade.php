@@ -6,7 +6,7 @@
                                 <span class="font-weight-semibold modal-title">
                                     {{ __('general.edit') }} <span class="text-success"> {{$user->name }}'s</span>  {{ __('auth.login_status') }} 
                                 </span>
-                                         <button aria-label="Close" class="btn-close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                                         <button aria-label="{{ ui_t('general.close', 'Close') }}" class="btn-close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
                             </div>
 
                             <div class="modal-body">

@@ -258,8 +258,8 @@
                                                             <span class="af-badge af-badge-muted">{{ $comment->status ? ucwords($comment->status) : 'Pending' }}</span>
                                                             @can('moderate_forum')
                                                                 @if($commentNeedsModeration)
-                                                                    <a href="{{ url('admin/forums/approve-comment') }}?id={{ $comment->id }}" class="btn btn-sm btn-success">Approve</a>
-                                                                    <a href="{{ url('admin/forums/reject-comment') }}?id={{ $comment->id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Reject this comment? The author will receive an email if their account has an email address.');">Reject</a>
+                                                                    <a href="{{ url('admin/forums/approve-comment') }}?id={{ $comment->id }}" class="btn btn-sm btn-success">{{ ui_t('general.approve', 'Approve') }}</a>
+                                                                    <a href="{{ url('admin/forums/reject-comment') }}?id={{ $comment->id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Reject this comment? The author will receive an email if their account has an email address.');">{{ ui_t('general.reject', 'Reject') }}</a>
                                                                 @endif
                                                             @endcan
                                                         </div>

@@ -7,7 +7,7 @@
       </style>
       <div class="modal-header">
         <h6 class="modal-title"><i class="fa fa-user-edit text-primary"></i> Edit User</h6>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"><span aria-hidden="true">&times;</span></button>
       </div>
       <form method="POST" action="{{ route('permissions.saveuser') }}">
         @csrf
@@ -125,7 +125,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">
-              <i class="icon-cross3 mr-2"></i>Close
+              <i class="icon-cross3 mr-2"></i>{{ ui_t('general.close', 'Close') }}
             </button>
             <button type="submit" class="btn btn-success">
               <i class="fa fa-save mr-2"></i>Update User
@@ -142,7 +142,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h6 class="modal-title">Reset Password</h6>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"><span aria-hidden="true">&times;</span></button>
       </div>
       <form method="POST" action="{{ route('permissions.reset') }}">
         @csrf
@@ -151,8 +151,8 @@
             <p>Reset this user's password to default?</p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-warning">Reset</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
+            <button type="submit" class="btn btn-warning">{{ ui_t('general.reset', 'Reset') }}</button>
         </div>
       </form>
     </div>
@@ -165,7 +165,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h6 class="modal-title">Delete User</h6>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"><span aria-hidden="true">&times;</span></button>
       </div>
       <form method="POST" action="{{ route('permissions.delete') }}">
         @csrf
@@ -174,8 +174,8 @@
             <p>Are you sure you want to delete this user?</p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-danger">Delete</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
+            <button type="submit" class="btn btn-danger">{{ ui_t('general.delete', 'Delete') }}</button>
         </div>
       </form>
     </div>

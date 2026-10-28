@@ -185,7 +185,7 @@
                         @else
                             <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}"
                                class="btn btn-sm btn-outline-danger">
-                                <i class="fa fa-heart-o mr-1"></i> Add favorite
+                                <i class="fa fa-heart-o mr-1"></i> {{ ui_t('general.add_favorite', 'Add favorite') }}
                             </a>
                         @endauth
                         <a href="{{ publication_url($row) }}" class="btn btn-sm btn-primary community-pub-action-btn--primary">
@@ -198,12 +198,12 @@
                                     class="btn btn-sm btn-primary community-pub-action-btn--primary"
                                     id="pub-show-comment-btn-{{ $pubId }}"
                                     onclick="showInlinePublicationCommentForm({{ $pubId }})">
-                                <i class="fa fa-plus-circle mr-1"></i> Add Comment
+                                <i class="fa fa-plus-circle mr-1"></i> {{ ui_t('general.add_comment', 'Add Comment') }}
                             </button>
                         @else
                             <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}"
                                class="btn btn-sm btn-outline-secondary">
-                                <i class="fa fa-plus-circle mr-1"></i> Add Comment
+                                <i class="fa fa-plus-circle mr-1"></i> {{ ui_t('general.add_comment', 'Add Comment') }}
                             </a>
                         @endauth
                         @include('partials.publications.publication_share_buttons', ['row' => $row, 'variant' => 'inline'])
@@ -232,9 +232,9 @@
                         </div>
                         <div class="inline-comment-actions">
                             <button type="button" class="btn btn-sm btn-outline-secondary"
-                                    onclick="cancelInlinePublicationComment({{ $pubId }})">Cancel</button>
+                                    onclick="cancelInlinePublicationComment({{ $pubId }})">{{ ui_t('general.cancel', 'Cancel') }}</button>
                             <button type="submit" class="btn btn-sm btn-primary community-pub-action-btn--primary">
-                                <i class="fa fa-paper-plane mr-1"></i>Post Comment
+                                <i class="fa fa-paper-plane mr-1"></i>{{ ui_t('general.post_comment', 'Post Comment') }}
                             </button>
                         </div>
                     </form>

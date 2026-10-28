@@ -287,7 +287,7 @@
                 @if(Session::has('alert') || Session::has('message'))
                     <div class="alert alert-{{ Session::get('alert_class', 'info') }} alert-dismissible fade show" role="alert">
                         {{ Session::get('alert') ?? Session::get('message') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}"></button>
                     </div>
                 @endif
 
@@ -354,16 +354,16 @@
                                        id="remember" 
                                        name="remember" 
                                         {{ old('remember') ? 'checked' : '' }}>
-                                <label for="remember">Remember me</label>
+                                <label for="remember">{{ ui_t('general.remember_me', 'Remember me') }}</label>
                             </div>
                             <a href="{{ route('password.request') }}" class="forgot-password-link">
-                                Forgot Password?
+                                {{ ui_t('general.forgot_password', 'Forgot Password?') }}
                             </a>
                         </div>
                         </div>
 
                     <button type="submit" class="btn btn-login">
-                        <i class="fa fa-sign-in-alt me-2"></i>Sign In
+                        <i class="fa fa-sign-in-alt me-2"></i>{{ ui_t('general.sign_in', 'Sign In') }}
                     </button>
                 </form>
 
@@ -421,7 +421,7 @@
                 <div class="register-link">
                     <p>
                         Don't have an account?
-                        <a href="{{ route('register') }}">Register Now</a>
+                        <a href="{{ route('register') }}">{{ ui_t('general.register_now', 'Register Now') }}</a>
                     </p>
                 </div>
             </div>

@@ -9,7 +9,7 @@
     <div class="mega-menu-container">
         <div class="mega-menu-grid">
             <aside class="mega-menu-sidebar">
-                <p class="mega-sidebar-label">{{ __('frontend_nav.health_emergencies') }}</p>
+                <p class="mega-sidebar-label"><span class="khub-i18n-text" data-khub-i18n="frontend_nav.health_emergencies">{{ __('frontend_nav.health_emergencies') }}</span></p>
                 <ul>
                     @foreach($filteredTags as $tag)
                         <li
@@ -48,18 +48,18 @@
                         <div class="mega-panel-header">
                             <div>
                                 <h4 class="mega-panel-title">{{ $tag->tag_text }}</h4>
-                                <p class="mega-panel-subtitle">{{ __('frontend_nav.featured_resources') }}</p>
+                                <p class="mega-panel-subtitle"><span class="khub-i18n-text" data-khub-i18n="frontend_nav.featured_resources">{{ __('frontend_nav.featured_resources') }}</span></p>
                             </div>
                             <a href="{{ tag_records_url($tag) }}" class="mega-view-all">
-                                {{ __('frontend_nav.view_all_resources') }}
+                                <span class="khub-i18n-text" data-khub-i18n="frontend_nav.view_all_resources">{{ __('frontend_nav.view_all_resources') }}</span>
                                 <i class="fa fa-arrow-right" aria-hidden="true"></i>
                             </a>
                         </div>
 
                         @if($publications->isEmpty())
                             <div class="mega-empty">
-                                <p>{{ __('frontend_nav.no_resources_for_topic') }}</p>
-                                <a href="{{ tag_records_url($tag) }}" class="mega-view-all">{{ __('frontend_nav.browse_topic') }}</a>
+                                <p><span class="khub-i18n-text" data-khub-i18n="frontend_nav.no_resources_for_topic">{{ __('frontend_nav.no_resources_for_topic') }}</span></p>
+                                <a href="{{ tag_records_url($tag) }}" class="mega-view-all"><span class="khub-i18n-text" data-khub-i18n="frontend_nav.browse_topic">{{ __('frontend_nav.browse_topic') }}</span></a>
                             </div>
                         @else
                             <div class="mega-cards-grid">

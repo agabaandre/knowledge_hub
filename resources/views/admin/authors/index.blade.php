@@ -257,8 +257,8 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary" id="authorFormSubmit">Save</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
+            <button type="submit" class="btn btn-primary" id="authorFormSubmit">{{ ui_t('general.save', 'Save') }}</button>
         </div>
       </form>
     </div>
@@ -272,7 +272,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="mergeAuthorsModalLabel">Merge authors</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"><span aria-hidden="true">&times;</span></button>
       </div>
       <form method="post" action="{{ url('admin/authors/merge') }}" id="mergeAuthorsForm" onsubmit="return confirmMerge();">
         @csrf
@@ -298,7 +298,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
           <button type="submit" class="btn btn-warning">Merge</button>
         </div>
       </form>
@@ -311,7 +311,7 @@
     <div class="modal-content">
       <div class="modal-header border-danger bg-light">
         <h5 class="modal-title text-danger" id="deleteAuthorModalLabel"><i class="fa fa-exclamation-triangle mr-1"></i> Delete author</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"><span aria-hidden="true">&times;</span></button>
       </div>
       <form method="post" action="{{ url('admin/authors/delete') }}" id="deleteAuthorForm">
         @csrf
@@ -325,7 +325,7 @@
           <p class="text-muted small mt-3 mb-0">This cannot be undone. If publications or user accounts still reference this author, the delete may fail—use <strong>Merge authors</strong> to reassign first.</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
           <button type="submit" class="btn btn-danger">Delete author</button>
         </div>
       </form>

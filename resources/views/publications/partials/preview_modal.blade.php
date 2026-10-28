@@ -11,7 +11,7 @@
                     </h5>
                 </div>
                 <div class="header-actions">
-                    <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" style="background: none; border: none; font-size: 1.5rem; opacity: 0.9; cursor: pointer; padding: 0.5rem; color: white;">
+                    <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}" style="background: none; border: none; font-size: 1.5rem; opacity: 0.9; cursor: pointer; padding: 0.5rem; color: white;">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>

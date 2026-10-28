@@ -155,7 +155,7 @@
                     </span>
             </button>
             <button class="close-button" role="button" aria-disabled="false" type="button">
-                    <span data-bind="text: res.close">Close
+                    <span data-bind="text: res.close">{{ ui_t('general.close', 'Close') }}
                     </span>
             </button>
         </div>
@@ -183,7 +183,7 @@
                 </span>
         </button>
         <button class="delete-button" role="button" aria-disabled="false" type="button">
-                <span data-bind="text: res.nameManagerDialog.deleteName">Delete
+                <span data-bind="text: res.nameManagerDialog.deleteName">{{ ui_t('general.delete', 'Delete') }}
                 </span>
         </button>
         <div align="right" class="filter-area">

@@ -113,8 +113,8 @@
                 <div class="row">
                     <div class="col-md-12 text-right">
                         <!-- Export Button -->
-                        <button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
-                        <button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
+                        <button type="submit" id="filterButton" class="btn btn-primary btn-sm">{{ ui_t('general.filter_data', 'Filter Data') }}</button>
+                        <button type="button" id="reset" class="btn btn-secondary btn-sm">{{ ui_t('general.reset', 'Reset') }}</button>
                         <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
 
                     </div>
@@ -167,7 +167,7 @@
                                             <p>{{ Str::limit($comment->comment, 100) }}</p>
                                         </div>
                                         <div class="comment-actions">
-                                            <button class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#editCommentModal{{ $comment->id }}">Edit</button>
+                                            <button class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#editCommentModal{{ $comment->id }}">{{ ui_t('general.edit', 'Edit') }}</button>
                                         </div>
                                     </div>
                                     @endforeach
@@ -181,7 +181,7 @@
                             <div class="btn-group" role="group" aria-label="Actions">
                                 <a class="btn btn-sm btn-success" href="{{ route('forums.approve', $forum->id) }}">
                                     <i class="fas fa-check"></i>
-                                    <span>Approve</span>
+                                    <span>{{ ui_t('general.approve', 'Approve') }}</span>
                                 </a>
                                 <a class="btn btn-sm btn-danger" href="{{ route('forums.decline', $forum->id) }}">
                                     <i class="fas fa-times"></i>

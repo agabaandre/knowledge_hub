@@ -21,7 +21,7 @@
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -119,9 +119,9 @@
 
                         <div class="d-flex flex-wrap gap-2">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fa fa-save mr-1"></i>Save changes
+                                <i class="fa fa-save mr-1"></i>{{ ui_t('general.save_changes', 'Save changes') }}
                             </button>
-                            <a href="{{ route('admin.content-requests.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <a href="{{ route('admin.content-requests.index') }}" class="btn btn-outline-secondary">{{ ui_t('general.cancel', 'Cancel') }}</a>
                         </div>
                     </form>
                 </div>

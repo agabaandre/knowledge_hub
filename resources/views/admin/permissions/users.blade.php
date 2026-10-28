@@ -151,7 +151,7 @@
     <form id="user-filters" action="{{ route('permissions.users') }}" method="GET">
         <div class="row bg-white pb-3">
             <div class="form-group col-md-12">
-                <label>Search</label>
+                <label>{{ ui_t('general.search', 'Search') }}</label>
                 <input type="text" name="term" value="{{ old('term', $search->term ?? '') }}" class="form-control" placeholder="Search by name, email, or phone">
             </div>
             <div class="form-group col-md-3">
@@ -292,7 +292,7 @@
                             data-level-id="{{ $u->access_level_id ?? '' }}"
                             data-verified="{{ $u->email_verified_at ? 1 : 0 }}"
                             data-status="{{ (int) $u->status }}">
-                            <i class="fa fa-edit"></i> Edit
+                            <i class="fa fa-edit"></i> {{ ui_t('general.edit', 'Edit') }}
                         </button>
                         <button type="button" class="btn btn-outline-warning btn-reset-user" data-id="{{ $u->id }}"><i class="fa fa-key"></i> Reset password</button>
                         @if(!$u->email_verified_at)
@@ -300,7 +300,7 @@
                             <button type="button" class="btn btn-outline-info btn-mark-verify" data-id="{{ $u->id }}"><i class="fa fa-check"></i> Mark verified</button>
                         @endif
                         <a href="{{ route('permissions.profile') }}?user={{ $u->id }}" class="btn btn-outline-secondary"><i class="fa fa-user"></i> Profile</a>
-                        <button type="button" class="btn btn-outline-danger btn-delete-user" data-id="{{ $u->id }}"><i class="fa fa-trash"></i> Delete</button>
+                        <button type="button" class="btn btn-outline-danger btn-delete-user" data-id="{{ $u->id }}"><i class="fa fa-trash"></i> {{ ui_t('general.delete', 'Delete') }}</button>
                     </div>
                 </div>
             </div>

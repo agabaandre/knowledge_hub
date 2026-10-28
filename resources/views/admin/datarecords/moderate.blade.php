@@ -50,8 +50,8 @@
                                                     <td>{{ $comment->user->name }}</td>
                                                     <td>{{ $comment->created_at }}</td>
                                                     <td>
-                                                        <a href="{{ url('admin/publications/approve_comment')}}?id={{ $comment->id}}>" class="btn btn-success btn-sm approve_comment" id="approve_comment">Approve</a>
-                                                        <a href="{{ url('admin/publications/reject_comment') }}?id={{$comment->id}}" class="btn btn-danger btn-sm reject_comment" id="reject_comment">Reject</a>
+                                                        <a href="{{ url('admin/publications/approve_comment')}}?id={{ $comment->id}}>" class="btn btn-success btn-sm approve_comment" id="approve_comment">{{ ui_t('general.approve', 'Approve') }}</a>
+                                                        <a href="{{ url('admin/publications/reject_comment') }}?id={{$comment->id}}" class="btn btn-danger btn-sm reject_comment" id="reject_comment">{{ ui_t('general.reject', 'Reject') }}</a>
                                                     </td>
                                                 </tr>
                                             @endforeach

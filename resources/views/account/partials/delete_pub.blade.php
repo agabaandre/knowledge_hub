@@ -4,7 +4,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalToggleLabel">Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"></button>
             </div>
             <div class="modal-body">
                 <p>
@@ -14,7 +14,7 @@
             <div class="modal-footer">
                 <!-- Toogle to second dialog -->
                 <button class="btn btn-outline-danger btn-sm edit"
-                        onclick="deleteRow()">Yes Delete</button>
+                        onclick="deleteRow()">{{ ui_t('general.yes_delete', 'Yes Delete') }}</button>
             </div>
         </div>
     </div>

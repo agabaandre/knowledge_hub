@@ -236,7 +236,7 @@
             <form id="participantsFiltersForm" method="GET" action="{{ route('admin.commsofpractice.participants') }}" class="mb-0">
                 <div class="pub-filters-grid pub-filters-grid--single" style="margin-bottom: 1rem;">
                     <div class="pub-filter-field">
-                        <label class="pub-filter-label" for="filterQ">Search</label>
+                        <label class="pub-filter-label" for="filterQ">{{ ui_t('general.search', 'Search') }}</label>
                         <input type="text" class="form-control pub-filter-input" id="filterQ" name="q" value="{{ $search->q ?? '' }}" placeholder="Name, email, phone, community, organisation, {{ \Illuminate\Support\Str::lower($geoLabel) }}">
                     </div>
                 </div>
@@ -285,7 +285,7 @@
                 </div>
                 <div class="pub-filters-actions">
                     <a href="{{ route('admin.commsofpractice.participants') }}" class="pub-filters-btn pub-filters-btn--clear" id="clearParticipantsFilters">
-                        <i class="fa fa-rotate-left"></i> Clear
+                        <i class="fa fa-rotate-left"></i> {{ ui_t('general.clear', 'Clear') }}
                     </a>
                 </div>
             </form>
@@ -303,10 +303,10 @@
                 <div class="cop-pending-actions">
                     @can('moderate_cop_participants')
                     <button type="button" class="btn btn-success btn-sm" id="bulkApprovePending" disabled>
-                        <i class="fa fa-check mr-1"></i> Approve selected
+                        <i class="fa fa-check mr-1"></i> {{ ui_t('general.approve_selected', 'Approve selected') }}
                     </button>
                     <button type="button" class="btn btn-outline-danger btn-sm" id="bulkRejectPending" disabled>
-                        <i class="fa fa-times mr-1"></i> Reject selected
+                        <i class="fa fa-times mr-1"></i> {{ ui_t('general.reject_selected', 'Reject selected') }}
                     </button>
                     @endcan
                 </div>
@@ -376,7 +376,7 @@
         <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
             <div class="modal-header" style="background: linear-gradient(135deg, #f0f7f4 0%, #fff 100%);">
                 <h5 class="modal-title" id="participantCommunitiesModalTitle">Communities subscribed</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>

@@ -4,7 +4,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalToggleLabel">Resource Approval</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -23,7 +23,7 @@
                 <div class="modal-footer">
                     <!-- Toogle to second dialog -->
                     <button type="submit" class="btn btn-outline-success btn-sm edit">Yes Approve</button>
-                    <button type="button" class="btn btn-outline-danger btn-sm edit">Cancel</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm edit">{{ ui_t('general.cancel', 'Cancel') }}</button>
                 </div>
             </form>
         </div>

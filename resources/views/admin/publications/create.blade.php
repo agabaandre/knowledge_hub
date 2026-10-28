@@ -11,7 +11,7 @@
     <h1 class="page-title">New Public Health Resource</h1>
     <div>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)">{{ ui_t('general.publish', 'Publish') }}</a></li>
             <li class="breadcrumb-item active" aria-current="page">New Public Health Resource</li>
         </ol>
     </div>
@@ -43,7 +43,7 @@
                     <div class="toast-header">
                         <strong class="mr-auto">Message</strong>
                         <small class="text-muted"></small>
-                        <button type="button" class="m-l-5 mb-1 mt-1 close" data-dismiss="toast" aria-label="Close">
+                        <button type="button" class="m-l-5 mb-1 mt-1 close" data-dismiss="toast" aria-label="{{ ui_t('general.close', 'Close') }}">
                             <span>×</span>
                         </button>
                     </div>

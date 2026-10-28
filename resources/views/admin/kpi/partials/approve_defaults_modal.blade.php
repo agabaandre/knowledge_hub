@@ -8,7 +8,7 @@
             @csrf
             <div class="modal-header">
                 <h5 class="modal-title" id="approveDefaultsModalTitle">Publish recommended indicators</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -91,7 +91,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                 <button type="submit" class="btn btn-info" id="approveDefaultsSubmitBtn" {{ $publishableCount === 0 ? 'disabled' : '' }}>
                     Publish selected
                 </button>

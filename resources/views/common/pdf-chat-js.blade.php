@@ -477,7 +477,7 @@
     var contentHtml = isStreamingPlaceholder ? '' : (role === 'assistant' ? formatAssistantReply(content) : escapeHtml(content));
     var showExportOnResponse = role === 'assistant' && content && !isStreamingPlaceholder;
     var actionsHtml = showExportOnResponse
-      ? '<div class="pdf-chat-msg-actions"><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-pdf" title="Download as PDF"><i class="fa fa-file-pdf"></i> PDF</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-word" title="Export as Word"><i class="fa fa-file-word"></i> Word</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-share-msg" title="Share"><i class="fa fa-share-alt"></i> Share</button></div>'
+      ? '<div class="pdf-chat-msg-actions"><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-pdf" title="Download as PDF"><i class="fa fa-file-pdf"></i> PDF</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-word" title="Export as Word"><i class="fa fa-file-word"></i> Word</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-share-msg" title="Share"><i class="fa fa-share-alt"></i> {{ ui_t('general.share', 'Share') }}</button></div>'
       : '';
     el.innerHTML = '<div class="role-label">' + escapeHtml(label) + '</div><div class="pdf-chat-msg-bubble"><div class="content">' + contentHtml + '</div></div>' + actionsHtml;
     row.innerHTML = '<div class="pdf-chat-avatar" aria-hidden="true">' + avatarIcon + '</div>';
@@ -605,7 +605,7 @@
     contentEl.innerHTML = formatAssistantReply(text);
     var msgDiv = contentEl.closest('.pdf-chat-msg');
     if (msgDiv && text) {
-      var btn = '<div class="pdf-chat-msg-actions"><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-pdf" title="Download as PDF"><i class="fa fa-file-pdf"></i> PDF</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-word" title="Export as Word"><i class="fa fa-file-word"></i> Word</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-share-msg" title="Share"><i class="fa fa-share-alt"></i> Share</button></div>';
+      var btn = '<div class="pdf-chat-msg-actions"><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-pdf" title="Download as PDF"><i class="fa fa-file-pdf"></i> PDF</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-word" title="Export as Word"><i class="fa fa-file-word"></i> Word</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-share-msg" title="Share"><i class="fa fa-share-alt"></i> {{ ui_t('general.share', 'Share') }}</button></div>';
       var wrap = document.createElement('div');
       wrap.innerHTML = btn;
       msgDiv.appendChild(wrap.firstChild);

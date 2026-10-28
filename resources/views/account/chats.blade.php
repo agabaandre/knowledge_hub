@@ -292,7 +292,7 @@
                 @if (Session::has('alert'))
                     <div class="alert alert-{{ Session::get('alert_class', 'info') }} alert-dismissible fade show m-3 mb-0" role="alert">
                         {{ Session::get('alert') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}"></button>
                     </div>
                 @endif
 
@@ -301,7 +301,7 @@
                         <div class="my-chats-empty__icon"><i class="fa fa-microchip" aria-hidden="true"></i></div>
                         <h2>No Khub AI chats yet</h2>
                         <p>Open a publication and use <strong>Khub AI</strong> to ask questions about the resource. Your conversations will appear here.</p>
-                        <a href="{{ url('records') }}" class="btn btn-primary mt-3">Browse resources</a>
+                        <a href="{{ url('records') }}" class="btn btn-primary mt-3">{{ ui_t('general.browse_resources', 'Browse resources') }}</a>
                     </div>
                 @else
                     @foreach ($chatsByDocument as $doc)
@@ -354,7 +354,7 @@
                                                         <i class="fa fa-comment-dots me-1" aria-hidden="true"></i> Open chat
                                                     </a>
                                                     <button type="button" class="btn btn-sm btn-outline-danger js-delete-chat" data-session-id="{{ $s['id'] }}">
-                                                        <i class="fa fa-trash-alt me-1" aria-hidden="true"></i> Delete
+                                                        <i class="fa fa-trash-alt me-1" aria-hidden="true"></i> {{ ui_t('general.delete', 'Delete') }}
                                                     </button>
                                                 </td>
                                             </tr>
@@ -376,12 +376,12 @@
         <div class="modal-content">
             <div class="modal-header border-bottom">
                 <h5 class="modal-title fw-bold" id="confirmDeleteChatLabel">Delete chat</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"></button>
             </div>
             <div class="modal-body">Are you sure you want to delete this chat? This cannot be undone.</div>
             <div class="modal-footer border-top">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirm-delete-chat-btn"><i class="fa fa-trash-alt me-1"></i> Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-chat-btn"><i class="fa fa-trash-alt me-1"></i> {{ ui_t('general.delete', 'Delete') }}</button>
             </div>
         </div>
     </div>

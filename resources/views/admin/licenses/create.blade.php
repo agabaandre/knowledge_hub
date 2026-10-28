@@ -58,7 +58,7 @@
 				</div>
 				
 				<div class="form-group">
-					<a href="{{ route('admin.licenses.index') }}" class="btn btn-secondary">Cancel</a>
+					<a href="{{ route('admin.licenses.index') }}" class="btn btn-secondary">{{ ui_t('general.cancel', 'Cancel') }}</a>
 					<button type="submit" class="btn btn-primary">Save License</button>
 				</div>
 			</form>

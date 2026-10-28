@@ -7,12 +7,14 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Translation\FileLoader;
 
 /**
- * Loads PHP lang groups from resources/lang, then merges overrides from
- * storage/app/ui_translations/{locale}/{group}.php (writable on production).
+ * Loads PHP lang groups with this priority (last wins):
+ * 1. English packaged defaults
+ * 2. Dynamic DB seeds (browse categories, key links, branding) — fill missing keys only
+ * 3. Locale packaged resources/lang/{locale}
+ * 4. Language Management storage overrides (non-empty) — always win
  *
- * For non-English locales, storage values that are empty or still identical to
- * English do not replace a real packaged translation — so nav can follow the
- * site default locale while content remains authored in English.
+ * So Configure → Language management controls nav and UI even when packaged
+ * or hardcoded fallbacks exist.
  */
 class MergingTranslationLoader extends FileLoader
 {
@@ -41,12 +43,31 @@ class MergingTranslationLoader extends FileLoader
             return parent::load($locale, $group, $namespace);
         }
 
-        $base = $this->loadPath($this->path, $locale, $group);
-        if (! is_array($base)) {
-            $base = [];
+        $english = $this->loadPath($this->path, 'en', $group);
+        if (! is_array($english)) {
+            $english = [];
         }
 
-        $base = array_merge($base, app(UiTranslationService::class)->dynamicGroupKeys($group));
+        $localePackaged = [];
+        if ($locale !== 'en' && $locale !== 'en_US') {
+            $loaded = $this->loadPath($this->path, $locale, $group);
+            $localePackaged = is_array($loaded) ? $loaded : [];
+        } else {
+            $localePackaged = $english;
+        }
+
+        $dynamic = [];
+        try {
+            $dynamic = app(UiTranslationService::class)->dynamicGroupKeys($group);
+            if (! is_array($dynamic)) {
+                $dynamic = [];
+            }
+        } catch (\Throwable $e) {
+            $dynamic = [];
+        }
+
+        // English → DB seeds for missing keys → packaged locale (packaged beats English DB seeds).
+        $base = array_replace($english, $dynamic, $localePackaged);
 
         $overrideFile = $this->overrideBasePath.'/'.$locale.'/'.$group.'.php';
         if (! $this->files->exists($overrideFile)) {
@@ -58,32 +79,12 @@ class MergingTranslationLoader extends FileLoader
             return $base;
         }
 
-        $english = [];
-        if ($locale !== 'en' && $locale !== 'en_US') {
-            $english = $this->loadPath($this->path, 'en', $group);
-            if (! is_array($english)) {
-                $english = [];
-            }
-        }
-
         foreach ($extra as $key => $value) {
             if (! is_string($key)) {
                 continue;
             }
+            // Non-empty Language Management values always override packaged + DB seeds.
             if (! is_string($value) || trim($value) === '') {
-                continue;
-            }
-
-            $enVal = $english[$key] ?? null;
-            $baseVal = $base[$key] ?? null;
-
-            // Keep packaged locale string when the admin override is still English.
-            if ($enVal !== null
-                && $value === $enVal
-                && is_string($baseVal)
-                && $baseVal !== ''
-                && $baseVal !== $enVal
-            ) {
                 continue;
             }
 

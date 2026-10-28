@@ -50,7 +50,7 @@
 
                                 <a href="{{ publication_url($publication)}}"
                                     class="btn btn-md rounded bg-white border fs-sm ft-medium"><i class="fa fa-link"></i>
-                                    View Original Resource</a>
+                                    {{ ui_t('general.view_original', 'View Original Resource') }}</a>
 
                             </div>
                         </div>

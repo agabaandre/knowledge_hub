@@ -4,7 +4,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="title">Create Asset Type</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -26,7 +26,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-secondary btn-sm" data-dismiss="modal" type="button">Cancel</button>
+                    <button class="btn btn-secondary btn-sm" data-dismiss="modal" type="button">{{ ui_t('general.cancel', 'Cancel') }}</button>
                     <button class="btn btn-primary btn-sm" type="submit">Save Asset Type</button>
                 </div>
             </form>

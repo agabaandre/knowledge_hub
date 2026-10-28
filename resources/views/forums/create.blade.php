@@ -104,9 +104,9 @@
                        </div>
 
                        <div class="form-group mt-4" style="display: flex; gap: 1rem; justify-content: flex-end;">
-                           <a href="{{ url('forums') }}" class="btn btn-secondary" type="button">Cancel</a>
+                           <a href="{{ url('forums') }}" class="btn btn-secondary" type="button">{{ __('general.cancel') }}</a>
                            <button class="btn btn-primary theme-bg text-white" type="submit">
-                               <i class="fa fa-paper-plane me-2"></i>Submit Forum
+                               <i class="fa fa-paper-plane me-2"></i>{{ __('general.submit_forum') }}
                            </button>
                        </div>
 

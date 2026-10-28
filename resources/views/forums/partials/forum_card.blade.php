@@ -122,7 +122,7 @@
 
                 <div class="forum-actions">
                     <a href="{{ forum_thread_url($forum)}}" class="btn btn-sm btn-outline-secondary forum-action-btn">
-                        <i class="fa fa-info-circle" aria-hidden="true"></i> Details
+                        <i class="fa fa-info-circle" aria-hidden="true"></i> {{ __('general.details') }}
                     </a>
                     @include('forums.partials.khub_ai_thread_button', [
                         'forum' => $forum,
@@ -131,26 +131,26 @@
                     @auth
                         @if(in_array($forum->id, $my_forums))
                             <a href="{{ forum_thread_url($forum)}}" class="btn btn-sm theme-bg text-white forum-action-btn forum-action-btn--primary">
-                                <i class="fa fa-comments" aria-hidden="true"></i> View Discussion
+                                <i class="fa fa-comments" aria-hidden="true"></i> {{ __('general.view_discussion') }}
                             </a>
                             <button type="button" class="btn btn-sm theme-bg text-white forum-action-btn forum-action-btn--primary"
                                     onclick="showInlineCommentForm({{ $forum->id }})"
                                     id="show-comment-btn-{{ $forum->id }}">
-                                <i class="fa fa-plus-circle me-1" aria-hidden="true"></i> Add Comment
+                                <i class="fa fa-plus-circle me-1" aria-hidden="true"></i> {{ __('general.add_comment') }}
                             </button>
                         @else
                             <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn btn-sm btn-dark forum-action-btn" id="join{{ $forum->id }}">
-                                <i class="fa fa-link" aria-hidden="true"></i> Join Discussion
+                                <i class="fa fa-link" aria-hidden="true"></i> {{ __('general.join_discussion') }}
                             </a>
                             <button type="button" class="btn btn-sm theme-bg text-white forum-action-btn forum-action-btn--primary"
                                     onclick="showInlineCommentJoinPanel({{ $forum->id }})"
                                     id="show-comment-btn-join-{{ $forum->id }}">
-                                <i class="fa fa-plus-circle me-1" aria-hidden="true"></i> Add Comment
+                                <i class="fa fa-plus-circle me-1" aria-hidden="true"></i> {{ __('general.add_comment') }}
                             </button>
                         @endif
                     @else
                         <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn btn-sm btn-dark forum-action-btn" id="join{{ $forum->id }}">
-                            <i class="fa fa-link" aria-hidden="true"></i> Join Discussion
+                            <i class="fa fa-link" aria-hidden="true"></i> {{ __('general.join_discussion') }}
                         </a>
                     @endauth
                     @include('forums.partials.share_buttons', ['forum' => $forum, 'variant' => 'inline'])
@@ -236,9 +236,9 @@
                         </div>
                         <div class="inline-comment-actions">
                             <button type="button" class="btn btn-sm btn-outline-secondary"
-                                    onclick="cancelInlineComment({{ $forum->id }})">Cancel</button>
+                                    onclick="cancelInlineComment({{ $forum->id }})">{{ __('general.cancel') }}</button>
                             <button type="submit" class="btn btn-sm theme-bg text-white">
-                                <i class="fa fa-paper-plane me-1" aria-hidden="true"></i>Post Comment
+                                <i class="fa fa-paper-plane me-1" aria-hidden="true"></i>{{ __('general.post_comment') }}
                             </button>
                         </div>
                         @csrf
@@ -248,9 +248,9 @@
                 <div class="inline-comment-form" id="comment-form-join-{{ $forum->id }}" style="display: none;">
                     <p class="mb-2 text-muted small">Join this discussion to post a comment from the listing.</p>
                     <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn btn-sm theme-bg text-white">
-                        <i class="fa fa-link me-1" aria-hidden="true"></i>Join discussion
+                        <i class="fa fa-link me-1" aria-hidden="true"></i>{{ __('general.join_discussion') }}
                     </a>
-                    <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="cancelInlineCommentJoin({{ $forum->id }})">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="cancelInlineCommentJoin({{ $forum->id }})">{{ __('general.cancel') }}</button>
                 </div>
                 @endif
                 @endauth

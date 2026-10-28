@@ -43,10 +43,17 @@ return [
     |--------------------------------------------------------------------------
     */
     'ui_groups' => [
-        'frontend_nav' => 'Frontend navigation (main menu, browse categories & key links)',
-        'admin_nav' => 'Admin sidebar menu',
+        'frontend_nav' => 'Frontend navigation (main menu, browse categories & key links) — saved values override packaged/DB labels',
+        'admin_nav' => 'Admin sidebar / top menu — saved values override packaged labels',
         'ui_body' => 'Account menu, site title/tagline, footer & static body chrome',
         'home_sections' => 'Homepage sections, search & filters',
+        'emails' => 'Transactional email templates',
+        'publications' => 'Publications listing & search UI',
+        'auth' => 'Login, register & account auth screens',
+        'passwords' => 'Password reset messages',
+        'pagination' => 'Pagination labels',
+        'general' => 'Shared buttons & actions (Save, Cancel, Approve, …)',
+        'site' => 'Site-wide misc strings',
     ],
 
     /*
@@ -56,6 +63,10 @@ return [
         'frontend_nav',
         'ui_body',
         'home_sections',
+        'admin_nav',
+        'publications',
+        'general',
+        'auth',
     ],
 
     /*

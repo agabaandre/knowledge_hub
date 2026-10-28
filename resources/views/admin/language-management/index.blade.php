@@ -22,9 +22,11 @@
     <div class="card mb-3">
         <div class="card-body">
             <p class="text-muted mb-0">
-                Edit UI strings for the public site navigation, admin sidebar, and static footer/account chrome.
-                English is the source of keys; other locales fall back to English until you save a value here.
-                Existing Laravel groups such as <code>general</code> and <code>auth</code> are unchanged.
+                You control every editable UI string for the selected locale — including
+                <strong>Frontend navigation</strong> and <strong>Admin sidebar</strong>.
+                Priority: values saved here → packaged lang files → DB category/link titles → English.
+                Leave a field empty to keep the packaged (or DB) default. Nav is native (not Google Translate),
+                so edits here are what visitors see for that language.
             </p>
         </div>
     </div>

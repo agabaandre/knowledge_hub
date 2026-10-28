@@ -248,7 +248,7 @@
                 @if(Session::has('alert') || Session::has('message'))
                     <div class="alert alert-{{ Session::get('alert_class', 'info') }} alert-dismissible fade show" role="alert">
                         {{ Session::get('alert') ?? Session::get('message') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}"></button>
                     </div>
                 @endif
 
@@ -305,14 +305,14 @@
                         </div>
 
                     <button type="submit" class="btn btn-reset">
-                        <i class="fa fa-key me-2"></i>Reset Password
+                        <i class="fa fa-key me-2"></i>{{ ui_t('general.reset_password', 'Reset Password') }}
                                 </button>
                     </form>
 
                 <div class="back-to-login">
                     <p>
                         Remember your password?
-                        <a href="{{ route('login') }}">Back to Login</a>
+                        <a href="{{ route('login') }}">{{ ui_t('general.back_to_login', 'Back to Login') }}</a>
                     </p>
                 </div>
             </div>

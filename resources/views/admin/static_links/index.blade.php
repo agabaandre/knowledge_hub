@@ -36,11 +36,11 @@
                                     <td><a href="{{ $link->link }}" target="{{ $link->open_in_new_tab ? '_blank' : '_self' }}">{{ $link->link }}</a></td>
                                     <td>{{ $link->open_in_new_tab ? 'Yes' : 'No' }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-info edit-link-btn" data-toggle="modal" data-target="#edit-static-link-modal" data-link='@json($link)'>Edit</button>
+                                        <button class="btn btn-sm btn-info edit-link-btn" data-toggle="modal" data-target="#edit-static-link-modal" data-link='@json($link)'>{{ ui_t('general.edit', 'Edit') }}</button>
                                         <form action="{{ url('admin/static-links/delete/'.$link->id) }}" method="POST" style="display:inline-block;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this link?')">Delete</button>
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this link?')">{{ ui_t('general.delete', 'Delete') }}</button>
                                         </form>
                                     </td>
                                 </tr>

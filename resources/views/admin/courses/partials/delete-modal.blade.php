@@ -4,7 +4,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Delete Course</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
 					<span aria-hidden="true">&times;</span>
 				</button>
             </div>
@@ -15,7 +15,7 @@
                 <p class="text-muted small mb-0" id="course-to-delete-name"></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                 <button type="button" class="btn btn-danger" onclick="deleteCourse()">
                     <i class="fa fa-trash"></i> Delete Course
                 </button>

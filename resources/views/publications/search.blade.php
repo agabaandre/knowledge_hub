@@ -27,7 +27,7 @@
             <nav class="mb-3" aria-label="Breadcrumb">
                 <ol class="breadcrumb mb-0" style="background: transparent; padding: 0; font-size: 0.875rem;">
                     <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Browse resources</li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ ui_t('general.browse_resources', 'Browse resources') }}</li>
                 </ol>
             </nav>
 

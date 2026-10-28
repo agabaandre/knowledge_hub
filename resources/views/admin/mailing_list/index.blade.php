@@ -97,10 +97,10 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary btn-block">Filter</button>
+                            <button type="submit" class="btn btn-primary btn-block">{{ ui_t('general.filter', 'Filter') }}</button>
                         </div>
                         <div class="col-md-2">
-                            <a href="{{ route('admin.mailing_list.index') }}" class="btn btn-secondary btn-block">Clear</a>
+                            <a href="{{ route('admin.mailing_list.index') }}" class="btn btn-secondary btn-block">{{ ui_t('general.clear', 'Clear') }}</a>
                         </div>
                     </div>
                 </form>
@@ -115,7 +115,7 @@
                             <option value="unsubscribed">Unsubscribe Selected</option>
                             <option value="delete">Delete Selected</option>
                         </select>
-                        <button type="submit" class="btn btn-sm btn-outline-primary">Apply</button>
+                        <button type="submit" class="btn btn-sm btn-outline-primary">{{ ui_t('general.apply', 'Apply') }}</button>
                     </div>
                 </form>
 
@@ -216,7 +216,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                     <button type="submit" class="btn btn-primary">Add Subscriber</button>
                 </div>
             </form>
@@ -255,7 +255,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                     <button type="submit" class="btn btn-primary">Update Subscriber</button>
                 </div>
             </form>
@@ -293,7 +293,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                     <button type="submit" class="btn btn-primary">Send Email</button>
                 </div>
             </form>

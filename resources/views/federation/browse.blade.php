@@ -324,7 +324,7 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Search</label>
+                            <label class="form-label">{{ ui_t('general.search', 'Search') }}</label>
                             <input type="text" name="term" class="form-control" value="{{ $term ?? '' }}" placeholder="Title or description">
                         </div>
                         <div class="col-md-2">
@@ -335,7 +335,7 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <button type="submit" class="btn fed-btn-primary w-100">Filter</button>
+                            <button type="submit" class="btn fed-btn-primary w-100">{{ ui_t('general.filter', 'Filter') }}</button>
                         </div>
                     </form>
                 </div>

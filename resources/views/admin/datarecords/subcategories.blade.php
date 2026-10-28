@@ -46,9 +46,9 @@
 							
 								<!-- Edit Modal Action -->
 								<a class="btn btn-primary btn-sm" 
-								>Edit</a>
+								>{{ ui_t('general.edit', 'Edit') }}</a>
 								<!-- Delete Modal Action -->
-								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $record->id }}')" class="text-danger"> Delete</a>
+								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $record->id }}')" class="text-danger"> {{ ui_t('general.delete', 'Delete') }}</a>
 							</td>
 						</tr>
 					@endforeach

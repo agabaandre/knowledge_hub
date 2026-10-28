@@ -10,7 +10,7 @@
 	<div class="card col-lg-12">
 		<div class="card-header text-left">
 			<h3 class="card-title float-left">{{ $title ?? '' }}</h3>
-				<a href="#add_category" data-toggle="modal" class="btn btn-info">Add Category</a>
+				<a href="#add_category" data-toggle="modal" class="btn btn-info">{{ ui_t('general.add_category', 'Add Category') }}</a>
 			    <hr>
 		</div>
 		<!-- Card Header With Form Filters -->
@@ -60,10 +60,10 @@
 									data-show-menu="{{ $record->showsOnMenu() ? '1' : '0' }}"
 									data-special="{{ !empty($record->is_special) ? '1' : '0' }}"
 									data-restricted="{{ !empty($record->is_restricted) ? '1' : '0' }}"
-									data-permission="{{ $record->required_permission }}">Edit</a>
+									data-permission="{{ $record->required_permission }}">{{ ui_t('general.edit', 'Edit') }}</a>
 								<!-- Delete Modal Action -->
                                 @can('delete_publication_metadata')
-                                <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick='openDeleteModal({{ (int) $record->id }}, @json((string) $record->category_name))'> Delete</a>
+                                <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick='openDeleteModal({{ (int) $record->id }}, @json((string) $record->category_name))'> {{ ui_t('general.delete', 'Delete') }}</a>
                                 @endcan
 							</td>
 						</tr>

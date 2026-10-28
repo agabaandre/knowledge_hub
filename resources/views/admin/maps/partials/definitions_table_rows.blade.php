@@ -37,7 +37,7 @@
                 </button>
                 @if(!empty($definition['managed_id']))
                     <a href="{{ route('admin.maps.edit', $definition['managed_id']) }}" class="btn btn-outline-primary btn-sm">
-                        <i class="fa fa-pencil me-1"></i>Edit
+                        <i class="fa fa-pencil me-1"></i>{{ ui_t('general.edit', 'Edit') }}
                     </a>
                     <form method="post" action="{{ route('admin.maps.destroy', $definition['managed_id']) }}" class="d-inline" onsubmit="return confirm('Delete this map definition?');">
                         @csrf

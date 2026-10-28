@@ -761,6 +761,16 @@
         }
         if (localeCode) {
             khubApplyDocumentDirection(localeCode);
+            window.khubActiveUiLocale = localeCode;
+        }
+        // Packaged UI strings cover site default + content language — skip Google Translate.
+        if (typeof window.khubShouldUseGoogleTranslate === 'function'
+            && !window.khubShouldUseGoogleTranslate(localeCode || window.khubActiveUiLocale)) {
+            clearAppCookie('googtrans');
+            if (typeof window.khubClearGoogleTranslationState === 'function') {
+                window.khubClearGoogleTranslationState();
+            }
+            return;
         }
         khubApplyGoogleTranslateWhenReady(googleCode);
     }
@@ -777,9 +787,13 @@
         googleCode = googleCode || localeCode;
 
         writeAppCookie(khubLocaleCookieName, localeCode, khubLocaleMaxAgeSec);
-        // Clear GT only when viewing authored content language (usually en), not site UI default.
+        window.khubActiveUiLocale = localeCode;
+        // Clear GT for content language OR Configure default language (native Laravel UI).
         var contentLocale = window.khubContentLocale || 'en';
-        if (localeCode === contentLocale) {
+        var systemDefault = window.khubSystemDefaultLocale || contentLocale;
+        if (localeCode === contentLocale || localeCode === systemDefault
+            || (typeof window.khubShouldUseGoogleTranslate === 'function'
+                && !window.khubShouldUseGoogleTranslate(localeCode))) {
             clearAppCookie('googtrans');
         } else {
             writeAppCookie('googtrans', '/auto/' + googleCode, khubLocaleMaxAgeSec);

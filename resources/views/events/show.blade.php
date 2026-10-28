@@ -101,14 +101,14 @@
                 <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 bg-show">
                   <div class="form-group mb-0 position-relative">
                     <button class="btn full-width theme-bg text-white fs-md py-3" type="submit">
-                      <i class="fa fa-magnifying-glass"></i> Search
+                      <i class="fa fa-magnifying-glass"></i> {{ ui_t('general.search', 'Search') }}
                     </button>
                   </div>
                 </div>
               </div>
               <div class="col-md-4 sm-show mt-1 d-md-none">
                 <button class="btn full-width theme-bg text-white fs-md py-3" type="submit">
-                  <i class="fa fa-magnifying-glass"></i> Search
+                  <i class="fa fa-magnifying-glass"></i> {{ ui_t('general.search', 'Search') }}
                 </button>
               </div>
             </form>

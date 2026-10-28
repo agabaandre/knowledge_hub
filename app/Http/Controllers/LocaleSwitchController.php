@@ -75,7 +75,10 @@ class LocaleSwitchController extends Controller
             config('session.same_site', 'lax')
         );
 
-        if ($locale === 'en') {
+        // Google Translate only when UI locale is neither content nor Configure default.
+        $contentLocale = SiteLanguage::contentLocale();
+        $systemDefault = SiteLanguage::systemDefaultLocale();
+        if ($locale === $contentLocale || $locale === $systemDefault || $locale === 'en') {
             $response->cookie('googtrans', '', -1, $cookiePath, null, cookie_secure_flag(), false, false, config('session.same_site', 'lax'));
         } else {
             $response->cookie('googtrans', '/auto/'.$googleCode, $cookieMinutes, $cookiePath, null, cookie_secure_flag(), false, false, config('session.same_site', 'lax'));
@@ -116,7 +119,9 @@ class LocaleSwitchController extends Controller
             config('session.same_site', 'lax')
         );
 
-        if ($locale === 'en') {
+        $contentLocale = SiteLanguage::contentLocale();
+        $systemDefault = SiteLanguage::systemDefaultLocale();
+        if ($locale === $contentLocale || $locale === $systemDefault || $locale === 'en') {
             $response->cookie('googtrans', '', -1, $cookiePath, null, cookie_secure_flag(), false, false, config('session.same_site', 'lax'));
         } else {
             $response->cookie('googtrans', '/auto/'.$googleCode, $cookieMinutes, $cookiePath, null, cookie_secure_flag(), false, false, config('session.same_site', 'lax'));

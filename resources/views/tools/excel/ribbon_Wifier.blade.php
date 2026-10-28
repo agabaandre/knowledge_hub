@@ -711,7 +711,7 @@
                                 data-bind="attr: { title: res.ribbon.home.Delete }" class="gcui-ribbon-bigbutton"
                                 name="delete">
                             <span class="gcui-ribbon-delete"></span>
-                            <span data-bind="text: res.ribbon.home.Delete">Delete</span>
+                            <span data-bind="text: res.ribbon.home.Delete">{{ ui_t('general.delete', 'Delete') }}</span>
                         </button>
                         <ul>
                             <li>
@@ -972,7 +972,7 @@
                             <div>
                                 <button title="Clear"
                                         data-bind="attr: { title: res.ribbon.home.clear }, text: res.ribbon.home.clear"
-                                        class="gcui-ribbon-clearall" name="clear-all">Clear
+                                        class="gcui-ribbon-clearall" name="clear-all">{{ ui_t('general.clear', 'Clear') }}
                                 </button>
                                 <span>
                                         <button class="ui-button-icon-only gcui-ribbon-smallsplit"></button>
@@ -1044,7 +1044,7 @@
                                     <button name="set-filter" title="Filter"
                                             data-bind="attr: { title: res.ribbon.home.filter }">
                                         <span class="gcui-ribbon-filter"></span>
-                                        <span data-bind="text: res.ribbon.home.filter">Filter</span>
+                                        <span data-bind="text: res.ribbon.home.filter">{{ ui_t('general.filter', 'Filter') }}</span>
                                     </button>
                                 </li>
                                 <li>
@@ -1304,7 +1304,7 @@
                         <button title="Filter" data-bind="attr: { title: res.ribbon.data.filter }"
                                 data-button-size="61px" class="gcui-ribbon-bigbutton" name="set-filter">
                             <span class="gcui-ribbon-filterbig"></span>
-                            <span data-bind="text: res.ribbon.data.filter">Filter</span>
+                            <span data-bind="text: res.ribbon.data.filter">{{ ui_t('general.filter', 'Filter') }}</span>
                         </button>
                     </div>
                     <div class="gcui-ribbon-list">
@@ -1312,7 +1312,7 @@
                             <div>
                                 <button class="gcui-ribbon-clearfilter" name="clear-filter" title="Clear Filter"
                                         data-bind="attr: { title: res.ribbon.data.clearFilter }, text: res.ribbon.data.clear">
-                                    Clear
+                                    {{ ui_t('general.clear', 'Clear') }}
                                 </button>
                             </div>
                             <div>
@@ -1812,7 +1812,7 @@
                             <div>
                                 <button title="Clear Selected Sparkline"
                                         data-bind="attr: { title: res.ribbon.sparkLineDesign.clearSparkline }, text: res.ribbon.sparkLineDesign.clear"
-                                        name="sparkline-clear" class="gcui-ribbon-clearall">Clear
+                                        name="sparkline-clear" class="gcui-ribbon-clearall">{{ ui_t('general.clear', 'Clear') }}
                                 </button>
                                 <span>
                                         <button class="ui-button-icon-only gcui-ribbon-smallsplit"></button>
@@ -2971,7 +2971,7 @@
             <div>
                 <button class="cancel-table-binding-button table-binding-setting-button">
                     <span></span>
-                    <span data-bind="text: res.ribbon.data.cancel">Cancel</span>
+                    <span data-bind="text: res.ribbon.data.cancel">{{ ui_t('general.cancel', 'Cancel') }}</span>
                 </button>
                 <button class="ok-table-binding-button table-binding-setting-button">
                     <span></span>

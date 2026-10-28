@@ -34,7 +34,7 @@
 
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label for="filterTitle">Search</label>
+                                <label for="filterTitle">{{ ui_t('general.search', 'Search') }}</label>
                                 <input type="text" name="term" id="filterTitle" class="form-control"
                                     placeholder="Filter by name" value="{{ @$search->term ?? '' }}">
                             </div>
@@ -58,8 +58,8 @@
 
                     <div class="row">
                         <div class="col-md-12 text-right">
-                            <button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
-                            <button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
+                            <button type="submit" id="filterButton" class="btn btn-primary btn-sm">{{ ui_t('general.filter_data', 'Filter Data') }}</button>
+                            <button type="button" id="reset" class="btn btn-secondary btn-sm">{{ ui_t('general.reset', 'Reset') }}</button>
                             <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
 
                         </div>
@@ -91,10 +91,10 @@
                                         data-description="{{ e((string) $row->description) }}" data-icon="{{ e((string) $row->icon) }}"
                                         data-detailed_description="{{ e((string) ($row->detailed_description ?? '')) }}"
                                         data-thematic_area_id="{{ $row->thematic_area_id }}"
-                                        class="btn btn-sm btn-primary ml-1">Edit</a>
+                                        class="btn btn-sm btn-primary ml-1">{{ ui_t('general.edit', 'Edit') }}</a>
                                     @can('delete_publication_metadata')
                                     <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);"
-                                        onclick='openDeleteModal({{ (int) $row->id }}, @json((string) $row->description))'>Delete</a>
+                                        onclick='openDeleteModal({{ (int) $row->id }}, @json((string) $row->description))'>{{ ui_t('general.delete', 'Delete') }}</a>
                                     @endcan
                                 </td>
                             </tr>

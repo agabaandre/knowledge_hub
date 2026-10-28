@@ -6,7 +6,7 @@
                     <p class="country-kpi-modal__eyebrow mb-1" id="countryKpiModalSubject"></p>
                     <h5 class="modal-title ft-bold mb-0" id="countryKpiModalLabel"></h5>
                 </div>
-                <button type="button" class="btn-close btn-close-white country-kpi-modal__close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white country-kpi-modal__close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"></button>
             </div>
             <div class="modal-body country-kpi-modal__body">
                 <div class="country-kpi-modal__hero">
@@ -26,7 +26,7 @@
                 <a href="#" id="countryKpiModalOwidLink" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener noreferrer" style="display:none;">
                     <i class="fa fa-chart-line mr-1"></i> View on Our World in Data
                 </a>
-                <button type="button" class="btn btn-secondary btn-sm country-kpi-modal__close" data-bs-dismiss="modal" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary btn-sm country-kpi-modal__close" data-bs-dismiss="modal" data-dismiss="modal">{{ ui_t('general.close', 'Close') }}</button>
             </div>
         </div>
     </div>

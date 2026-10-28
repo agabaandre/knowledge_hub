@@ -16,7 +16,7 @@
         <p class="text-muted small mb-3">
             Social login credentials are read from <code>.env</code> by default. Values are saved to the database only when you change a field from what is in <code>.env</code>.
             @if($standalone)
-                Use <strong>Save social login settings</strong> below — this is separate from <strong>Save All Changes</strong> so general settings saves do not affect sign-in options.
+                Use <strong>Save social login settings</strong> below — this is separate from <strong>{{ ui_t('general.save_all_changes', 'Save All Changes') }}</strong> so general settings saves do not affect sign-in options.
             @endif
         </p>
     @endif

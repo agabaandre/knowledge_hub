@@ -83,7 +83,7 @@
                         <span><i class="fa fa-comments"></i> {{ $commentsCount }} Comments</span>
                     </div>
                     <div class="initiative-actions" onclick="event.stopPropagation();">
-                        <button type="button" class="btn-share-init" title="Share" data-details-url="{{ $detailsUrl }}" data-title="{{ e(Str::limit(strip_tags(clean_unicode($row->title)), 70)) }}"><i class="fa fa-share-alt"></i> Share</button>
+                        <button type="button" class="btn-share-init" title="Share" data-details-url="{{ $detailsUrl }}" data-title="{{ e(Str::limit(strip_tags(clean_unicode($row->title)), 70)) }}"><i class="fa fa-share-alt"></i> {{ __('general.share') }}</button>
                     </div>
                     @if($description)
                     <div class="initiative-desc">{!! Str::words(strip_tags($description), 30, '...') !!}</div>

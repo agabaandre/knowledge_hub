@@ -81,7 +81,7 @@
                                      <td>{{ $row->action }}</td>
                                      <td>{{ $row->user->name }}</td>
                                      <td>
-                                         <a data-toggle="modal" class="btn btn-sm btn-outline-secondary" href="#trail{{ $row->id }}0">View</a>
+                                         <a data-toggle="modal" class="btn btn-sm btn-outline-secondary" href="#trail{{ $row->id }}0">{{ ui_t('general.view', 'View') }}</a>
                                      </td>
                                 </tr>
                                     @include('admin.permissions.partials.audit_trail_modal')

@@ -250,7 +250,7 @@
                 <p class="my-pub-shell__subtitle">Track your discussions, moderation status, and community engagement.</p>
             </div>
             <a href="{{ route('forums.create') }}" class="btn btn-success mt-2 mt-md-0">
-                <i class="fa fa-plus mr-1"></i> Start new discussion
+                <i class="fa fa-plus mr-1"></i> {{ ui_t('general.start_new_discussion', 'Start new discussion') }}
             </a>
         </div>
 
@@ -394,7 +394,7 @@
                             </div>
                             <div class="pub-filters-actions">
                                 <a href="{{ route('account.my-discussions') }}" class="pub-filters-btn pub-filters-btn--clear" id="clearMyDiscussionsFilters">
-                                    <i class="fa fa-rotate-left"></i> Clear
+                                    <i class="fa fa-rotate-left"></i> {{ ui_t('general.clear', 'Clear') }}
                                 </a>
                             </div>
                         </form>
@@ -446,7 +446,7 @@
                                     {{ $thread->created_at ? \Carbon\Carbon::parse($thread->created_at)->format('M j, Y g:i A') : '—' }}
                                 </td>
                                 <td class="my-disc-col-actions kh-mcard-actions text-center" data-label="Actions">
-                                    <a href="{{ forum_thread_url($thread) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                    <a href="{{ forum_thread_url($thread) }}" class="btn btn-sm btn-outline-primary">{{ ui_t('general.view', 'View') }}</a>
                                     <a href="{{ route('account.my-discussions.edit', $thread) }}" class="btn btn-sm btn-primary">
                                         {{ $isRejected ? 'Edit & resubmit' : 'Edit' }}
                                     </a>

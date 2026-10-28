@@ -54,7 +54,7 @@
                     <form id="kpiIndicatorsFiltersForm" method="GET" action="{{ url('admin/kpi') }}" class="mb-0">
                         <div class="pub-filters-grid">
                             <div class="pub-filter-field pub-filter-field--wide">
-                                <label class="pub-filter-label" for="filterKpiTerm">Search</label>
+                                <label class="pub-filter-label" for="filterKpiTerm">{{ ui_t('general.search', 'Search') }}</label>
                                 <input type="text" name="term" id="filterKpiTerm" class="form-control pub-filter-input" placeholder="Name or description" value="{{ @$search->term ?? '' }}">
                             </div>
                             <div class="pub-filter-field">
@@ -77,7 +77,7 @@
                         </div>
                         <div class="pub-filters-actions">
                             <a href="{{ url('admin/kpi') }}" class="pub-filters-btn pub-filters-btn--clear" id="clearKpiFiltersBtn">
-                                <i class="fa fa-rotate-left"></i> Clear
+                                <i class="fa fa-rotate-left"></i> {{ ui_t('general.clear', 'Clear') }}
                             </a>
                             @if(($kpi_stats['indicator_duplicate_groups'] ?? 0) > 0)
                                 <a href="{{ url('admin/kpi/duplicates') }}" class="pub-filters-btn pub-filters-btn--clear">
@@ -139,7 +139,7 @@
                                 <option value="recall">Recall selected</option>
                                 <option value="delete">Delete selected</option>
                             </select>
-                            <button type="button" class="btn btn-sm btn-outline-primary" id="kpiBulkActionButton" disabled>Apply</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="kpiBulkActionButton" disabled>{{ ui_t('general.apply', 'Apply') }}</button>
                             <small class="text-muted">Select rows and an action, then click Apply.</small>
                         </div>
 
@@ -176,7 +176,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Confirm bulk action</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"><span aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
                     <p id="kpiBulkActionConfirmText" class="mb-2">Are you sure?</p>
@@ -186,7 +186,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                     <button type="button" class="btn btn-primary" id="confirmKpiBulkActionBtn">Yes, proceed</button>
                 </div>
             </div>

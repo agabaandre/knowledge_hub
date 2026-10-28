@@ -26,7 +26,7 @@
 
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label for="filterTitle">Search</label>
+                                <label for="filterTitle">{{ ui_t('general.search', 'Search') }}</label>
                                 <input type="text" name="term" id="filterTitle" class="form-control"
                                        placeholder="Search tag name or description"
                                        value="{{ @$search->term ?? '' }}"
@@ -39,8 +39,8 @@
 
                     <div class="row">
                         <div class="col-md-12 text-right">
-                            <button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
-                            <button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
+                            <button type="submit" id="filterButton" class="btn btn-primary btn-sm">{{ ui_t('general.filter_data', 'Filter Data') }}</button>
+                            <button type="button" id="reset" class="btn btn-secondary btn-sm">{{ ui_t('general.reset', 'Reset') }}</button>
                             <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
 
                         </div>
@@ -112,10 +112,10 @@
                                 <a href="#edit-tag-modal" data-toggle="modal" data-id="{{ $row->id }}" data-tag="{{ $row->tag_text }}" 
                                     data-is_health_topic="{{$row->is_health_topic ?? 1 }}" data-is_health_emergency="{{$row->is_health_emergency ?? 0 }}"
                                     data-overview="{{ e($row->overview ?? '') }}"
-                                    class="btn btn-sm btn-primary ml-1">Edit</a>
+                                    class="btn btn-sm btn-primary ml-1">{{ ui_t('general.edit', 'Edit') }}</a>
                                 @canany(['delete_publication_metadata', 'delete_meta_data'])
                                 <a href="javascript:void(0);" class="btn btn-sm btn-danger ml-1"
-                                   onclick="openDeleteModal({{ (int) $row->id }}, @json((string) $row->tag_text))">Delete</a>
+                                   onclick="openDeleteModal({{ (int) $row->id }}, @json((string) $row->tag_text))">{{ ui_t('general.delete', 'Delete') }}</a>
                                 @endcanany
                             </td>
                         </tr>

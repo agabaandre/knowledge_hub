@@ -63,15 +63,14 @@ class UiLocaleLabels
      */
     public static function navCategoryLabel(object $category): string
     {
+        $fallback = (string) ($category->category_name ?? '');
         $slug = (string) ($category->slug ?? '');
         if ($slug === '') {
-            return (string) ($category->category_name ?? '');
+            return $fallback;
         }
 
-        $fullKey = 'frontend_nav.'.self::navCategoryTranslationKey($slug);
-        $translation = __($fullKey);
-
-        return $translation !== $fullKey ? $translation : (string) ($category->category_name ?? '');
+        // Language Management / packaged translation wins over DB category_name.
+        return ui_t('frontend_nav.'.self::navCategoryTranslationKey($slug), $fallback);
     }
 
     /**
@@ -79,15 +78,14 @@ class UiLocaleLabels
      */
     public static function navStaticLinkLabel(object $link): string
     {
+        $fallback = (string) ($link->title ?? '');
         $id = (int) ($link->id ?? 0);
         if ($id <= 0) {
-            return (string) ($link->title ?? '');
+            return $fallback;
         }
 
-        $fullKey = 'frontend_nav.'.self::navStaticLinkTranslationKey($id);
-        $translation = __($fullKey);
-
-        return $translation !== $fullKey ? $translation : (string) ($link->title ?? '');
+        // Language Management / packaged translation wins over DB link title.
+        return ui_t('frontend_nav.'.self::navStaticLinkTranslationKey($id), $fallback);
     }
 
     /**

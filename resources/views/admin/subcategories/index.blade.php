@@ -19,20 +19,20 @@
         <div class="card col-lg-12">
             <div class="card-header text-left d-flex justify-content-between align-items-center flex-wrap">
                 <h3 class="card-title mb-0">Manage Categories</h3>
-                <a href="#add-subcategory-modal" data-toggle="modal" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Add Category</a>
+                <a href="#add-subcategory-modal" data-toggle="modal" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> {{ ui_t('general.add_category', 'Add Category') }}</a>
             </div>
             <div class="card-header">
                 <form method="GET" action="{{ route('admin.subcategories.index') }}" class="container-fluid">
                     <div class="row align-items-end">
                         <div class="col-md-8">
                             <div class="form-group mb-0">
-                                <label for="term">Search</label>
+                                <label for="term">{{ ui_t('general.search', 'Search') }}</label>
                                 <input type="text" name="term" id="term" class="form-control" placeholder="Name or description..." value="{{ $search->term ?? '' }}">
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <button type="submit" class="btn btn-primary btn-sm">Search</button>
-                            <a href="{{ route('admin.subcategories.index') }}" class="btn btn-secondary btn-sm">Clear</a>
+                            <button type="submit" class="btn btn-primary btn-sm">{{ ui_t('general.search', 'Search') }}</button>
+                            <a href="{{ route('admin.subcategories.index') }}" class="btn btn-secondary btn-sm">{{ ui_t('general.clear', 'Clear') }}</a>
                         </div>
                     </div>
                 </form>
@@ -89,9 +89,9 @@
                                            data-category_name="{{ e($row->category_name) }}"
                                            data-category_desc="{{ e($row->category_desc ?? '') }}"
                                            data-linked_categories="{{ e(json_encode($linkedIds)) }}"
-                                           class="btn btn-sm btn-outline-primary">Edit</a>
+                                           class="btn btn-sm btn-outline-primary">{{ ui_t('general.edit', 'Edit') }}</a>
                                         @can('delete_publication_metadata')
-                                            <a href="javascript:void(0);" class="btn btn-sm btn-outline-danger" onclick='openDeleteModal({{ (int) $row->id }}, @json((string) $row->category_name))'>Delete</a>
+                                            <a href="javascript:void(0);" class="btn btn-sm btn-outline-danger" onclick='openDeleteModal({{ (int) $row->id }}, @json((string) $row->category_name))'>{{ ui_t('general.delete', 'Delete') }}</a>
                                         @endcan
                                     </td>
                                 </tr>

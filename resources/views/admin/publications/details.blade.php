@@ -19,7 +19,7 @@
         <h1 class="page-title">Publication Details</h1>
         <div>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ ui_t('general.publish', 'Publish') }}</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Publication Details</li>
             </ol>
         </div>
@@ -86,7 +86,7 @@
                     <span class="badge {{ $statusClass }} mr-2">{{ $statusText }}</span>
                     <a href="{{ url('admin/publications/edit') }}?id={{ $publication->id }}"
                        class="btn btn-outline-dark btn-sm ml-1">
-                        <i class="fa fa-edit mr-1"></i>Edit
+                        <i class="fa fa-edit mr-1"></i>{{ ui_t('general.edit', 'Edit') }}
                     </a>
                     <a href="{{ publication_url($publication)}}"
                        target="_blank"

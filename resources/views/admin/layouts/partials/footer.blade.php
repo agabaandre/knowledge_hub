@@ -101,8 +101,10 @@
 <script src="{{ asset('assets/plugins/sweet-alert/sweetalert.min.js') }}"></script>
 
 
-<!-- Create Quize  -->
+{{-- Admin uses packaged Laravel translations for Configure default language; skip Google Translate. --}}
+@unless(\App\Models\SiteLanguage::isBackendRequest())
 @include('layouts.partials.language')
+@endunless
 <script>
 	//CSRF setup
 	$.ajaxSetup({ headers: {

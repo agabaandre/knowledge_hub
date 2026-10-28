@@ -74,7 +74,7 @@
      </div>
 
     <div class="row justify-content-center">
-        <a href="{{ url('publications/request-content') }}" class="btn btn-dark mt-2">Request Content</a>
+        <a href="{{ url('publications/request-content') }}" class="btn btn-dark mt-2">{{ ui_t('general.request_content', 'Request Content') }}</a>
     </div>
 @endif
 

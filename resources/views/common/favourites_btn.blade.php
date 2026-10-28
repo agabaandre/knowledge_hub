@@ -13,7 +13,7 @@
         @else
            <span class="mr-1">
             <a href="{{ url('login') }}" class="btn btn-sm btn-outline-danger" style="border-color: #ef4444; color: #ef4444; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem;">
-                <i class="fa fa-heart-o mr-1"></i> Add favorite
+                <i class="fa fa-heart-o mr-1"></i> {{ ui_t('general.add_favorite', 'Add favorite') }}
             </a>
             </span>
         @endauth

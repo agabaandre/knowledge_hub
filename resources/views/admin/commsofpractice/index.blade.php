@@ -117,7 +117,7 @@
                         </div>
                         <div class="pub-filters-actions">
                             <a href="{{ request()->url() }}" class="pub-filters-btn pub-filters-btn--clear" id="clearCommunitiesFilters">
-                                <i class="fa fa-rotate-left"></i> Clear
+                                <i class="fa fa-rotate-left"></i> {{ ui_t('general.clear', 'Clear') }}
                             </a>
                         </div>
                     </form>

@@ -10,7 +10,7 @@
         <h1 class="page-title">Pending Public Health Resources</h1>
         <div>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ ui_t('general.publish', 'Publish') }}</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Pending Public Health Resource</li>
             </ol>
         </div>
@@ -41,7 +41,7 @@
 
                         <div class="pub-filters-actions">
                             <a href="{{ url('admin/publications/pending') }}" class="pub-filters-btn pub-filters-btn--clear">
-                                <i class="fa fa-rotate-left"></i> Clear
+                                <i class="fa fa-rotate-left"></i> {{ ui_t('general.clear', 'Clear') }}
                             </a>
                         </div>
                     </form>
@@ -92,10 +92,10 @@
                         <div class="mb-3 d-flex align-items-center flex-wrap" style="gap:8px;">
                             @can('moderate_publication')
                             <button type="button" class="btn btn-sm btn-success" id="bulkApproveBtn" disabled>
-                                <i class="fa fa-check-circle mr-1"></i> Approve selected
+                                <i class="fa fa-check-circle mr-1"></i> {{ ui_t('general.approve_selected', 'Approve selected') }}
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-danger" id="bulkRejectBtn" disabled>
-                                <i class="fa fa-times-circle mr-1"></i> Reject selected
+                                <i class="fa fa-times-circle mr-1"></i> {{ ui_t('general.reject_selected', 'Reject selected') }}
                             </button>
                             @endcan
                             <span class="text-muted small" id="bulkSelectionCount"></span>
@@ -137,8 +137,8 @@
                     <textarea id="bulkRejectReason" class="form-control" rows="3" placeholder="Reason for rejection (optional)"></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger btn-sm" id="bulkRejectConfirmBtn">Reject selected</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
+                    <button type="button" class="btn btn-danger btn-sm" id="bulkRejectConfirmBtn">{{ ui_t('general.reject_selected', 'Reject selected') }}</button>
                 </div>
             </div>
         </div>

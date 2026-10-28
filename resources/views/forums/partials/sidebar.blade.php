@@ -150,7 +150,7 @@
             <li><a href="{{ url('communities') }}"><i class="fa fa-users" aria-hidden="true"></i>Communities of Practice</a></li>
             <li><a href="{{ url('forums/create') }}"><i class="fa fa-plus-circle" aria-hidden="true"></i>Start a discussion</a></li>
             <li><a href="{{ url('faqs') }}"><i class="fa fa-life-ring" aria-hidden="true"></i>FAQs &amp; guidelines</a></li>
-            <li><a href="{{ url('records/search') }}"><i class="fa fa-book" aria-hidden="true"></i>Browse resources</a></li>
+            <li><a href="{{ url('records/search') }}"><i class="fa fa-book" aria-hidden="true"></i>{{ __('general.browse_resources') }}</a></li>
         </ul>
     </div>
 </aside>

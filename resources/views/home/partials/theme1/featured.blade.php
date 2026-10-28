@@ -172,7 +172,7 @@
         </div>
         <div class="row justify-content-center mt-4">
             <div class="col-12 text-center">
-                <a href="{{ url('records/search') }}" class="btn btn-outline-primary px-4 py-2 rounded" style="border-color: {{ $primary }}; color: {{ $primary }};">View more</a>
+                <a href="{{ url('records/search') }}" class="btn btn-outline-primary px-4 py-2 rounded" style="border-color: {{ $primary }}; color: {{ $primary }};">{{ __('general.view_more') }}</a>
             </div>
         </div>
     </div>

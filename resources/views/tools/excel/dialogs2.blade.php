@@ -1531,7 +1531,7 @@
                     <span data-bind="text: res.formatTableStyle.format">Format</span>
                 </button>
                 <button class="clear-table-element">
-                    <span data-bind="text: res.formatTableStyle.clear">Clear</span>
+                    <span data-bind="text: res.formatTableStyle.clear">{{ ui_t('general.clear', 'Clear') }}</span>
                 </button>
             </fieldset>
         </div>
@@ -1608,10 +1608,10 @@
             <input type="text" class="page-range-count" />
         </fieldset>
         <button class="add-print-range printer-range-setting-button">
-            <span data-bind="text:res.fileMenu.addRange">Add</span>
+            <span data-bind="text:res.fileMenu.addRange">{{ ui_t('general.add', 'Add') }}</span>
         </button>
         <button class="remove-print-range printer-range-setting-button">
-            <span data-bind="text: res.fileMenu.removeRange">Remove</span>
+            <span data-bind="text: res.fileMenu.removeRange">{{ ui_t('general.remove', 'Remove') }}</span>
         </button>
         <div class="printer-range-panel">
             <table class="printer-range-table">
@@ -1855,7 +1855,7 @@
                     <span data-bind="text: res.formatSlicerStyle.format">Format</span>
                 </button>
                 <button class="clear-slicer-element">
-                    <span data-bind="text: res.formatSlicerStyle.clear">Clear</span>
+                    <span data-bind="text: res.formatSlicerStyle.clear">{{ ui_t('general.clear', 'Clear') }}</span>
                 </button>
             </fieldset>
         </div>

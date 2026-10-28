@@ -17,7 +17,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="mb-0">Events</h4>
-        <a href="{{ route('admin.events.create') }}" class="btn btn-primary btn-sm"><i class="fa fa-plus mr-1"></i>New Event</a>
+        <a href="{{ route('admin.events.create') }}" class="btn btn-primary btn-sm"><i class="fa fa-plus mr-1"></i>{{ ui_t('general.new_event', 'New Event') }}</a>
     </div>
     <div class="card-body">
         <div class="table-responsive">

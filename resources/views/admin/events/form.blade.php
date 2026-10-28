@@ -80,8 +80,8 @@
 </div>
 
 <div class="text-right">
-    <a href="{{ route('admin.events.index') }}" class="btn btn-secondary">Cancel</a>
-    <button type="submit" class="btn btn-success">Save</button>
+    <a href="{{ route('admin.events.index') }}" class="btn btn-secondary">{{ ui_t('general.cancel', 'Cancel') }}</a>
+    <button type="submit" class="btn btn-success">{{ ui_t('general.save', 'Save') }}</button>
     @isset($event)
     <a href="{{ route('admin.events.show', $event->id) }}" class="btn btn-outline-primary">Preview</a>
     @endisset

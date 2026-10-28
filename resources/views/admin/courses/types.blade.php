@@ -22,7 +22,7 @@
 
 					<div class="col-md-12">
 						<div class="form-group">
-							<label for="title">Search</label>
+							<label for="title">{{ ui_t('general.search', 'Search') }}</label>
 							<input type="text" name="term" id="filterTitle" class="form-control"
 								placeholder="Filter by name"
                                 value="{{ @$search->term ?? ''}}"
@@ -57,7 +57,7 @@
 							<td>{{ $row->type_name }}</td>
 							<td>{{ $row->type_desc }}</td>
 							<td>
-								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
+								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> {{ ui_t('general.delete', 'Delete') }}</a>
 							</td>
 						</tr>
 					@endforeach

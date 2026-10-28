@@ -49,7 +49,7 @@
                         </button>
                     @endif
                     <button type="button" class="comment-action-btn share-comment-btn" data-share-url="{{ $commentShareUrl }}">
-                        <i class="fa fa-share-alt"></i><span>Share</span>
+                        <i class="fa fa-share-alt"></i><span>{{ ui_t('general.share', 'Share') }}</span>
                     </button>
                 </div>
             @else
@@ -122,7 +122,7 @@
                                 <div style="margin-top:0.5rem;">
                                     <button type="submit" class="comment-submit-btn"><i class="fa fa-paper-plane"></i> Reply</button>
                                     <button type="button" class="cancel-reply-btn" data-comment-id="{{ $comment->id }}"
-                                            style="margin-left:0.5rem;padding:0.5rem 1rem;background:#e2e8f0;border:none;border-radius:4px;color:#64748b;cursor:pointer;">Cancel</button>
+                                            style="margin-left:0.5rem;padding:0.5rem 1rem;background:#e2e8f0;border:none;border-radius:4px;color:#64748b;cursor:pointer;">{{ ui_t('general.cancel', 'Cancel') }}</button>
                                 </div>
                             </div>
                         </div>

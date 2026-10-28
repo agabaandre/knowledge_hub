@@ -48,7 +48,7 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-outline-secondary w-100">Filter</button>
+                <button type="submit" class="btn btn-outline-secondary w-100">{{ ui_t('general.filter', 'Filter') }}</button>
             </div>
         </form>
 
@@ -58,8 +58,8 @@
             <form method="post" action="{{ route('admin.federation.content-review') }}" id="fedReviewForm">
                 @csrf
                 <div class="d-flex gap-2 mb-3">
-                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm" id="fedApproveBtn">Approve selected</button>
-                    <button type="submit" name="action" value="reject" class="btn btn-outline-danger btn-sm" id="fedRejectBtn">Reject selected</button>
+                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm" id="fedApproveBtn">{{ ui_t('general.approve_selected', 'Approve selected') }}</button>
+                    <button type="submit" name="action" value="reject" class="btn btn-outline-danger btn-sm" id="fedRejectBtn">{{ ui_t('general.reject_selected', 'Reject selected') }}</button>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-sm align-middle">
@@ -94,8 +94,8 @@
                                     <td>
                                         <a href="{{ $url }}" target="_blank" rel="noopener" class="btn btn-link btn-sm p-0">Preview on hub</a>
                                         <div class="mt-1 d-flex gap-2">
-                                            <button type="submit" class="btn btn-success btn-sm py-0 px-2" form="fed-approve-{{ $item->id }}">Approve</button>
-                                            <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" form="fed-reject-{{ $item->id }}" onclick="return confirm('Reject this item?');">Reject</button>
+                                            <button type="submit" class="btn btn-success btn-sm py-0 px-2" form="fed-approve-{{ $item->id }}">{{ ui_t('general.approve', 'Approve') }}</button>
+                                            <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-2" form="fed-reject-{{ $item->id }}" onclick="return confirm(@json(ui_t('general.confirm_reject', 'Reject this item?')));">{{ ui_t('general.reject', 'Reject') }}</button>
                                         </div>
                                     </td>
                                 </tr>

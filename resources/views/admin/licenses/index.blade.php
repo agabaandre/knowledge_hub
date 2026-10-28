@@ -21,7 +21,7 @@
 			@if(session('success'))
 				<div class="alert alert-success alert-dismissible fade show" role="alert">
 					{{ session('success') }}
-					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+					<button type="button" class="close" data-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}">
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
@@ -29,7 +29,7 @@
 			@if(session('error'))
 				<div class="alert alert-danger alert-dismissible fade show" role="alert">
 					{{ session('error') }}
-					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+					<button type="button" class="close" data-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}">
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
@@ -60,7 +60,7 @@
 							<td>
 								@if($license->url)
 									<a href="{{ $license->url }}" target="_blank" rel="noopener noreferrer">
-										<i class="fa fa-external-link"></i> View
+										<i class="fa fa-external-link"></i> {{ ui_t('general.view', 'View') }}
 									</a>
 								@else
 									—
@@ -76,13 +76,13 @@
 							<td>{{ $license->sort_order }}</td>
 							<td>
 								<a href="{{ route('admin.licenses.edit', $license->id) }}" class="btn btn-sm btn-outline-primary ml-1">
-									<i class="fa fa-edit"></i> Edit
+									<i class="fa fa-edit"></i> {{ ui_t('general.edit', 'Edit') }}
 								</a>
 								<form action="{{ route('admin.licenses.destroy', $license->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this license?');">
 									@csrf
 									@method('DELETE')
 									<button type="submit" class="btn btn-sm btn-danger ml-1">
-										<i class="fa fa-trash"></i> Delete
+										<i class="fa fa-trash"></i> {{ ui_t('general.delete', 'Delete') }}
 									</button>
 								</form>
 							</td>

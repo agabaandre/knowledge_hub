@@ -386,7 +386,7 @@
                                 <input class="form-check-input" type="checkbox" name="auto_sync" value="1" id="new_auto_sync">
                                 <label class="form-check-label" for="new_auto_sync">Include in nightly <code>federation:sync</code> (02:45)</label>
                             </div>
-                            <button type="submit" class="btn btn-primary">Add hub</button>
+                            <button type="submit" class="btn btn-primary">{{ ui_t('general.add_hub', 'Add hub') }}</button>
                         </form>
                     </div>
                 </div>
@@ -451,9 +451,9 @@
                                                                 @endforeach
                                                             </select>
                                                         </div>
-                                                        <div class="col-md-2"><button type="submit" class="btn btn-sm btn-secondary">Save</button></div>
+                                                        <div class="col-md-2"><button type="submit" class="btn btn-sm btn-secondary">{{ ui_t('general.save', 'Save') }}</button></div>
                                                     </form>
-                                                    <form method="post" action="{{ route('admin.federation.destroy', $hub) }}" class="d-inline mt-1" onsubmit="return confirm('Remove this hub?');">@csrf @method('DELETE')<button type="submit" class="btn btn-sm btn-outline-danger">Remove</button></form>
+                                                    <form method="post" action="{{ route('admin.federation.destroy', $hub) }}" class="d-inline mt-1" onsubmit="return confirm('Remove this hub?');">@csrf @method('DELETE')<button type="submit" class="btn btn-sm btn-outline-danger">{{ ui_t('general.remove', 'Remove') }}</button></form>
                                                 </td>
                                             </tr>
                                         @endforeach

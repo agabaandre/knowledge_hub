@@ -4,7 +4,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Delete Indicator Data</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -16,9 +16,9 @@
                     <p>Are you sure you want to delete this indicator data record? This action cannot be undone.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                     <button type="submit" class="btn btn-danger">
-                        <i class="fa fa-trash"></i> Delete
+                        <i class="fa fa-trash"></i> {{ ui_t('general.delete', 'Delete') }}
                     </button>
                 </div>
             </form>

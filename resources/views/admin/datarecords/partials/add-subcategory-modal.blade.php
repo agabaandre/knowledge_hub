@@ -5,7 +5,7 @@
             <form action="{{ url('admin/datarecords/categories/savesub')}}" method="post">
             <div class="modal-header">
                 <h5 class="modal-title" id="">Add Sub Category</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
 						<span aria-hidden="true">&times;</span>
 					</button>
             </div>
@@ -36,7 +36,7 @@
             </div>
             <div class="modal-footer">
                 <!-- Toogle to second dialog -->
-                <button type="submit" class="btn btn-outline-danger btn-sm">Save Record</button>
+                <button type="submit" class="btn btn-outline-danger btn-sm">{{ ui_t('general.save_record', 'Save Record') }}</button>
             </div>
             </form>
         </div>

@@ -32,8 +32,8 @@
 							</div>
 						</div>
 						<div class="col-md-4 d-flex align-items-end justify-content-end" style="gap:8px;">
-							<button type="submit" id="filterButton" class="btn btn-dark btn-sm"><i class="fa fa-filter mr-1"></i> Apply</button>
-							<button type="button" id="reset" class="btn btn-soft btn-sm"><i class="fa fa-rotate-left mr-1"></i> Reset</button>
+							<button type="submit" id="filterButton" class="btn btn-dark btn-sm"><i class="fa fa-filter mr-1"></i> {{ ui_t('general.apply', 'Apply') }}</button>
+							<button type="button" id="reset" class="btn btn-soft btn-sm"><i class="fa fa-rotate-left mr-1"></i> {{ ui_t('general.reset', 'Reset') }}</button>
 						</div>
 					</div>
 				</form>

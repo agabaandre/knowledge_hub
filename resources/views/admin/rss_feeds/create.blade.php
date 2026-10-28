@@ -36,7 +36,7 @@
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary">Save Feed</button>
-                    <a href="{{ route('admin.rss_feeds.index') }}" class="btn btn-secondary">Cancel</a>
+                    <a href="{{ route('admin.rss_feeds.index') }}" class="btn btn-secondary">{{ ui_t('general.cancel', 'Cancel') }}</a>
                 </form>
             </div>
         </div>

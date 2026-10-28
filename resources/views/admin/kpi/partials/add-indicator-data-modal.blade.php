@@ -4,7 +4,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="myExtraLargeModalLabel">Add Indicator Data (Excel-like Table)</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -84,7 +84,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-danger" data-dismiss="modal" type="button">Cancel</button>
+                    <button class="btn btn-danger" data-dismiss="modal" type="button">{{ ui_t('general.cancel', 'Cancel') }}</button>
                     <button class="btn btn-primary" type="submit">
                         <i class="fa fa-save"></i> Save All Records
                     </button>

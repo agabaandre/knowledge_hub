@@ -83,8 +83,8 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i> Apply</button>
-                <a href="{{ route('admin.search-logs.index') }}" class="btn btn-outline-secondary">Reset</a>
+                <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i> {{ ui_t('general.apply', 'Apply') }}</button>
+                <a href="{{ route('admin.search-logs.index') }}" class="btn btn-outline-secondary">{{ ui_t('general.reset', 'Reset') }}</a>
             </div>
         </form>
 
@@ -156,7 +156,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="searchLogKeywordsModalLabel">Keywords for decision-making</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"></button>
             </div>
             <div class="modal-body">
                 <p class="small text-muted mb-2">Original query:</p>
@@ -168,7 +168,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-primary" id="searchLogKeywordsCopy"><i class="fa fa-copy"></i> Copy CSV</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ ui_t('general.close', 'Close') }}</button>
             </div>
         </div>
     </div>

@@ -22,7 +22,7 @@
 
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label for="title">Search</label>
+                                <label for="title">{{ ui_t('general.search', 'Search') }}</label>
                                 <input type="text" name="term" id="filterTitle" class="form-control"
                                        placeholder="Filter by name"
                                        value="{{ @$search->term ?? '' }}"
@@ -36,8 +36,8 @@
                     <div class="row">
                         <div class="col-md-12 text-right">
                             <!-- Export Button -->
-                            <button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
-                            <button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
+                            <button type="submit" id="filterButton" class="btn btn-primary btn-sm">{{ ui_t('general.filter_data', 'Filter Data') }}</button>
+                            <button type="button" id="reset" class="btn btn-secondary btn-sm">{{ ui_t('general.reset', 'Reset') }}</button>
                             <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
 
                         </div>
@@ -72,9 +72,9 @@
 							<td>{{ $row->category->category_name }}/{{ optional($row->sub_category)->sub_category_name }}</td>
 
                             <td>
-                                <a href="{{ url('/admin/datarecords/edit?id=' . $row->id)}}" class="btn btn-sm btn-primary ml-1">Edit</a>
+                                <a href="{{ url('/admin/datarecords/edit?id=' . $row->id)}}" class="btn btn-sm btn-primary ml-1">{{ ui_t('general.edit', 'Edit') }}</a>
                                 <a href="javascript:void(0);" class="btn btn-sm btn-danger ml-1"
-                                   onclick="openDeleteModal('{{ $row->id }}')">Delete</a>
+                                   onclick="openDeleteModal('{{ $row->id }}')">{{ ui_t('general.delete', 'Delete') }}</a>
                             </td>
                         </tr>
                     @endforeach

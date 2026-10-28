@@ -342,7 +342,7 @@
                     <small class="text-muted">Separate by comma, space, or new line.</small>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                     <button type="submit" class="btn btn-primary">Send invitations</button>
                 </div>
             </form>
@@ -375,7 +375,7 @@
                     <div class="form-group"><label>Event link (optional)</label><input type="url" class="form-control" name="event_link"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                     <button type="submit" class="btn text-light" style="background-color: {{ settings()->primary_color ?? '#119A48' }}; border-color: {{ settings()->primary_color ?? '#119A48' }};">Create event</button>
                 </div>
             </form>
@@ -389,11 +389,11 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Join community</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"><span aria-hidden="true">&times;</span></button>
             </div>
             <div class="modal-body">Request to join <strong class="notranslate" translate="no">{{ $community->community_name }}</strong>? An administrator may need to approve your membership.</div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
                 <button type="button" class="btn btn-primary" id="confirmJoinCommunityDetail">Join</button>
             </div>
         </div>

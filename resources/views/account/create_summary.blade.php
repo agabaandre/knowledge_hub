@@ -57,8 +57,8 @@
         </div>
         <div class="modal-footer">
 
-            <button class="btn btn-danger" data-dismiss="modal" type="button">Cancel</button>
-            <button class="btn btn-primary" type="submit">Submit</button>
+            <button class="btn btn-danger" data-dismiss="modal" type="button">{{ ui_t('general.cancel', 'Cancel') }}</button>
+            <button class="btn btn-primary" type="submit">{{ ui_t('general.submit', 'Submit') }}</button>
         </div>
 
         </form>

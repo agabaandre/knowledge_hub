@@ -58,7 +58,15 @@ class UiTranslationService
         $data = require $path;
         $data = is_array($data) ? $data : [];
 
-        return array_merge($data, $this->dynamicGroupKeys($group));
+        // Language management edits flat string keys only (skip nested Laravel arrays like validation.custom).
+        $flat = [];
+        foreach ($data as $key => $value) {
+            if (is_string($key) && is_string($value)) {
+                $flat[$key] = $value;
+            }
+        }
+
+        return array_merge($flat, $this->dynamicGroupKeys($group));
     }
 
     /**
@@ -127,7 +135,9 @@ class UiTranslationService
     }
 
     /**
-     * Merged lines for editing: same keys as English, values from locale file or English fallback.
+     * Merged lines for editing: English keys are the catalog.
+     * Priority: non-empty Language Management (storage) → packaged lang → English.
+     * Admin/storage overrides always win so editors see what the live site will use.
      *
      * @return array<string, string>
      */
@@ -138,23 +148,38 @@ class UiTranslationService
             return [];
         }
 
-        $loc = [];
-
-        $storagePath = $this->storageLocalePath($locale, $group);
-        if (File::exists($storagePath)) {
-            $loaded = require $storagePath;
-            $loc = is_array($loaded) ? $loaded : [];
-        } elseif ($locale !== 'en') {
+        $packaged = [];
+        if ($locale !== 'en') {
             $legacy = $this->resourceLocalePath($locale, $group);
             if (File::exists($legacy)) {
                 $loaded = require $legacy;
-                $loc = is_array($loaded) ? $loaded : [];
+                $packaged = is_array($loaded) ? $loaded : [];
             }
+        }
+
+        $storage = [];
+        $storagePath = $this->storageLocalePath($locale, $group);
+        if (File::exists($storagePath)) {
+            $loaded = require $storagePath;
+            $storage = is_array($loaded) ? $loaded : [];
         }
 
         $out = [];
         foreach ($en as $key => $default) {
-            $out[$key] = $loc[$key] ?? $default;
+            $storageVal = $storage[$key] ?? null;
+            $packagedVal = $packaged[$key] ?? null;
+
+            if (is_string($storageVal) && trim($storageVal) !== '') {
+                $out[$key] = $storageVal;
+                continue;
+            }
+
+            if (is_string($packagedVal) && trim($packagedVal) !== '') {
+                $out[$key] = $packagedVal;
+                continue;
+            }
+
+            $out[$key] = $default;
         }
 
         return $out;
@@ -195,6 +220,16 @@ class UiTranslationService
         $export = "<?php\n\nreturn ".var_export($out, true).";\n";
         if (File::put($path, $export) === false) {
             throw new \RuntimeException('Could not write translation file: '.$path);
+        }
+
+        // Ensure next __()/ui_t() call picks up Language Management overrides (nav included).
+        if (function_exists('opcache_invalidate')) {
+            @opcache_invalidate($path, true);
+        }
+        try {
+            app('translator')->setLoaded([]);
+        } catch (\Throwable $e) {
+            // Translator may be unbound in some console contexts.
         }
     }
 

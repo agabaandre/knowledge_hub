@@ -5,7 +5,7 @@
                 <li id="file-menu-goback" class="nohover-effect">
                     <div class="goback-image" /></li>
                 <li><a href="#new-page" data-bind="text: res.fileMenu.new">New</a></li>
-                <li><a href="#save-page">Save</a></li>
+                <li><a href="#save-page">{{ ui_t('general.save', 'Save') }}</a></li>
                 <li><a href="#import-page" data-bind="text: res.fileMenu.import">Import</a></li>
                 <li><a href="#export-page" data-bind="text: res.fileMenu.export">Export</a></li>
             </ul>

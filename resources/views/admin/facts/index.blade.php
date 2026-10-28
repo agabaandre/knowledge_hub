@@ -85,8 +85,8 @@
                         </div>
                         <div class="col-md-2">
                             <div class="d-flex">
-                                <button type="submit" id="filterButton" class="btn btn-primary btn-sm mr-2">Filter</button>
-                                <a href="{{ url('admin/facts') }}" class="btn btn-secondary btn-sm">Clear</a>
+                                <button type="submit" id="filterButton" class="btn btn-primary btn-sm mr-2">{{ ui_t('general.filter', 'Filter') }}</button>
+                                <a href="{{ url('admin/facts') }}" class="btn btn-secondary btn-sm">{{ ui_t('general.clear', 'Clear') }}</a>
                             </div>
                         </div>
                     </div>
@@ -142,7 +142,7 @@
                                                 data-id="{{ $row->id }}" data-title="{{ $row->fact_title }}"
                                                 data-summary="{{ $row->fact_summary }}"
                                                 data-description="{!! htmlspecialchars($row->fact_description, ENT_QUOTES) !!}" title="Edit">
-                                                <i class="fa fa-edit mr-1"></i> Edit
+                                                <i class="fa fa-edit mr-1"></i> {{ ui_t('general.edit', 'Edit') }}
                                             </a>
                                             <a href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="btn btn-sm btn-outline-danger" title="Delete">
                                                 <i class="fa fa-trash"></i>

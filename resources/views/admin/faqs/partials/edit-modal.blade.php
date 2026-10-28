@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalToggleLabel">Edit</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
 						<span aria-hidden="true">&times;</span>
 					</button>
             </div>
@@ -14,7 +14,7 @@
             </div>
             <div class="modal-footer">
                 <!-- Toogle to second dialog -->
-                <button class="btn btn-outline-danger btn-sm submit">Update</button>
+                <button class="btn btn-outline-danger btn-sm submit">{{ ui_t('general.update', 'Update') }}</button>
             </div>
         </div>
     </div>

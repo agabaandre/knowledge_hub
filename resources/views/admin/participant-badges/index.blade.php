@@ -10,7 +10,7 @@
         <div>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ url('admin') }}">Admin</a></li>
-                <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
+                <li class="breadcrumb-item"><a href="javascript:void(0)">{{ ui_t('general.publish', 'Publish') }}</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Participant badges</li>
             </ol>
         </div>

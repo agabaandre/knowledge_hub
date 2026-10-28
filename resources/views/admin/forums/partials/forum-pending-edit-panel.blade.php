@@ -17,7 +17,7 @@
                 <i class="fa fa-magic mr-1"></i> AI: Fix grammar only
             </button>
             <button type="button" class="btn btn-sm btn-success btn-forum-save-pending" data-forum-id="{{ $forum->id }}">
-                <i class="fa fa-save mr-1"></i> Save changes
+                <i class="fa fa-save mr-1"></i> {{ ui_t('general.save_changes', 'Save changes') }}
             </button>
             <span class="small text-muted forum-mod-status" id="mod_status_{{ $forum->id }}" style="display:none;"></span>
         </div>

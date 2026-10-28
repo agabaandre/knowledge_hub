@@ -81,7 +81,7 @@
                                         data-id="{{ $community->id }}" data-name="{{ $community->community_name }}"
                                         data-description="{{ $community->description }}"
                                         data-active="{{ $community->is_active }}">
-                                        <i class="fa fa-edit"></i> Edit
+                                        <i class="fa fa-edit"></i> {{ ui_t('general.edit', 'Edit') }}
                                     </button>
                                 </td>
                             </tr>
@@ -99,7 +99,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addCommunityModalLabel">Add Community of Practice</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -124,8 +124,8 @@
                             </select>
                         </div>
                         <div class="text-right">
-                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-dark ml-2"><i class="fa fa-save mr-1"></i> Save</button>
+                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
+                            <button type="submit" class="btn btn-dark ml-2"><i class="fa fa-save mr-1"></i> {{ ui_t('general.save', 'Save') }}</button>
                         </div>
                     </form>
                 </div>

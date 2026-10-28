@@ -172,8 +172,6 @@ class SettingsController extends Controller
             // keep redirect even if profile sync fails
         }
 
-        $map = \App\Models\SiteLanguage::selectorMap();
-        $googleCode = $map[$locale]['google_code'] ?? $locale;
         $cookieName = (string) config('supported_locales.locale_cookie', 'khub_locale');
         $cookieMinutes = (int) config('supported_locales.locale_cookie_minutes', 525600);
         $cookiePath = (string) config('supported_locales.cookie_path', '/');
@@ -194,23 +192,9 @@ class SettingsController extends Controller
             config('session.same_site', 'lax')
         );
 
-        // Content stays English (pageLanguage); only set googtrans when UI locale ≠ content.
-        $contentLocale = \App\Models\SiteLanguage::contentLocale();
-        if ($locale === $contentLocale || $locale === 'en') {
-            $response->cookie('googtrans', '', -1, $cookiePath, null, cookie_secure_flag(), false, false, config('session.same_site', 'lax'));
-        } else {
-            $response->cookie(
-                'googtrans',
-                '/'.$contentLocale.'/'.$googleCode,
-                $cookieMinutes,
-                $cookiePath,
-                null,
-                cookie_secure_flag(),
-                false,
-                false,
-                config('session.same_site', 'lax')
-            );
-        }
+        // Saving Configure default language: never enable Google Translate for that locale.
+        // Native Laravel lang packs cover the site default UI.
+        $response->cookie('googtrans', '', -1, $cookiePath, null, cookie_secure_flag(), false, false, config('session.same_site', 'lax'));
     }
 
     public function generateFederationToken(Request $request)

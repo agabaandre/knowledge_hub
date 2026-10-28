@@ -18,7 +18,7 @@
                     <div class="toast-header">
                         <strong class="mr-auto">Message</strong>
                         <small class="text-muted"></small>
-                        <button type="button" class="m-l-5 mb-1 mt-1 close" data-dismiss="toast" aria-label="Close">
+                        <button type="button" class="m-l-5 mb-1 mt-1 close" data-dismiss="toast" aria-label="{{ ui_t('general.close', 'Close') }}">
                             <span>×</span>
                         </button>
                     </div>
@@ -142,8 +142,8 @@
             </div>
             <div class="modal-footer">
 
-                <button class="btn btn-danger" data-dismiss="modal" type="button">Cancel</button>
-                <button class="btn btn-primary" type="submit">Save Record</button>
+                <button class="btn btn-danger" data-dismiss="modal" type="button">{{ ui_t('general.cancel', 'Cancel') }}</button>
+                <button class="btn btn-primary" type="submit">{{ ui_t('general.save_record', 'Save Record') }}</button>
             </div>
 
             </form>

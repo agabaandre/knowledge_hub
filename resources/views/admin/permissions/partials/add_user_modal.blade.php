@@ -4,7 +4,7 @@
             <div class="modal-header">
                 <h6 class="modal-title text-dark"> <i class="fa fa-user-o text-danger"></i> {{ __('general.add') }}
                     {{ __('auth.user') }}</h6>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>

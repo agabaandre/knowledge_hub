@@ -64,7 +64,7 @@
                         <textarea id="message" name="message" class="form-control" rows="6" required>{{ old('message') }}</textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">Send</button>
+                    <button type="submit" class="btn btn-primary">{{ ui_t('general.send', 'Send') }}</button>
                 </form>
             </div>
         </div>

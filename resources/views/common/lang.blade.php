@@ -58,14 +58,16 @@ window.translateLanguage = function() {
                     }
                 }
 
-                if (localeCode !== 'en') {
-                    setTimeout(function() {
-                        window.location.reload();
-                    }, 500);
-                }
+                setTimeout(function() {
+                    window.location.reload();
+                }, 500);
 
                 if (typeof doGTranslate === 'function') {
-                    if (localeCode === 'en') {
+                    var systemDefault = window.khubSystemDefaultLocale || 'en';
+                    var contentLocale = window.khubContentLocale || 'en';
+                    if (localeCode === 'en' || localeCode === systemDefault || localeCode === contentLocale
+                        || (typeof window.khubShouldUseGoogleTranslate === 'function'
+                            && !window.khubShouldUseGoogleTranslate(localeCode))) {
                         var date = new Date();
                         date.setTime(date.getTime() - 1);
                         document.cookie = "googtrans=; expires=" + date.toUTCString() + "; path=/";
@@ -78,26 +80,10 @@ window.translateLanguage = function() {
                         }
 
                         if (typeof window.khubApplyDocumentDirection === 'function') {
-                            window.khubApplyDocumentDirection('en');
+                            window.khubApplyDocumentDirection(localeCode);
                         } else {
                             document.documentElement.setAttribute('dir', 'ltr');
-                            document.documentElement.setAttribute('lang', 'en');
-                        }
-
-                        var teCombo = document.querySelector('select.goog-te-combo:not(.menu-language-menu-container select)');
-                        if (teCombo) {
-                            var enIndex = Array.from(teCombo.options).findIndex(function(option) {
-                                return option.value === 'en' || option.value === '';
-                            });
-                            if (enIndex !== -1) {
-                                teCombo.selectedIndex = enIndex;
-                                if (typeof GTranslateFireEvent === 'function') {
-                                    GTranslateFireEvent(teCombo, 'change');
-                                } else {
-                                    var event = new Event('change', { bubbles: true });
-                                    teCombo.dispatchEvent(event);
-                                }
-                            }
+                            document.documentElement.setAttribute('lang', localeCode);
                         }
                     } else {
                         if (typeof window.khubApplyDocumentDirection === 'function') {
@@ -109,7 +95,9 @@ window.translateLanguage = function() {
             },
             error: function(xhr, status, error) {
                 console.error('Failed to save language preference:', error);
-                if (typeof doGTranslate === 'function' && localeCode !== 'en') {
+                if (typeof doGTranslate === 'function'
+                    && (typeof window.khubShouldUseGoogleTranslate !== 'function'
+                        || window.khubShouldUseGoogleTranslate(localeCode))) {
                     doGTranslate(googleCode);
                 }
             }

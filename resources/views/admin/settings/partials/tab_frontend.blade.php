@@ -57,7 +57,7 @@
                         <strong>{{ $pack['name'] }}</strong>
                         <small class="text-muted"> · {{ $pack['id'] }} · extends {{ $pack['extends'] }}</small>
                     </span>
-                    <button type="submit" form="frontend-theme-delete-{{ $pack['id'] }}" class="btn btn-sm btn-outline-danger">Remove</button>
+                    <button type="submit" form="frontend-theme-delete-{{ $pack['id'] }}" class="btn btn-sm btn-outline-danger">{{ ui_t('general.remove', 'Remove') }}</button>
                 </li>
             @endforeach
         </ul>

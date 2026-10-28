@@ -108,7 +108,7 @@ $(function() {
                     var htmlToAppend = "";
 
                     if (file.type.startsWith('image/')) {
-                        htmlToAppend = $($.parseHTML('<span class="text-danger preview_' + newIndex + ' style="max-height:30px!important; margin-top:50px; cursor:pointer;" onclick="deleteFile(' + newIndex + ')">Remove</span> <h6 class="preview_' + newIndex + '">' + fileName + '</h6><img style="max-height:200px; max-width:230px" class="mt-2 rounded preview_' + newIndex + '">'))
+                        htmlToAppend = $($.parseHTML('<span class="text-danger preview_' + newIndex + ' style="max-height:30px!important; margin-top:50px; cursor:pointer;" onclick="deleteFile(' + newIndex + ')">{{ ui_t('general.remove', 'Remove') }}</span> <h6 class="preview_' + newIndex + '">' + fileName + '</h6><img style="max-height:200px; max-width:230px" class="mt-2 rounded preview_' + newIndex + '">'))
                             .attr('src', my_file);
 
                         $(placeToInsertImagePreview).removeAttr('style');
@@ -124,7 +124,7 @@ $(function() {
                         else if (file.type.includes('audio')) icon = 'fa-file-audio';
                         else if (file.type.includes('video')) icon = 'fa-file-video';
 
-                        htmlToAppend = $($.parseHTML('<span class="text-danger preview_' + newIndex + '" style="max-height:30px!important; margin-top:50px; cursor:pointer;" onclick="deleteFile(' + newIndex + ')">Remove</span><h6 class="preview_' + newIndex + '">' + fileName + '</h6><i class="fas ' + icon + ' fa-3x preview_' + newIndex + '"></i>'));
+                        htmlToAppend = $($.parseHTML('<span class="text-danger preview_' + newIndex + '" style="max-height:30px!important; margin-top:50px; cursor:pointer;" onclick="deleteFile(' + newIndex + ')">{{ ui_t('general.remove', 'Remove') }}</span><h6 class="preview_' + newIndex + '">' + fileName + '</h6><i class="fas ' + icon + ' fa-3x preview_' + newIndex + '"></i>'));
                     }
 
                     var wholeDiv = $($.parseHTML("<div class='col-lg-4 preview_" + newIndex + "'>"));

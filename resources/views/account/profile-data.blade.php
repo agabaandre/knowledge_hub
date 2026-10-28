@@ -26,7 +26,7 @@
                     </div>
                 </div>
                 <div class="card-footer text-right bg-white border-top">
-                    <button type="submit" class="btn btn-success">Update password</button>
+                    <button type="submit" class="btn btn-success">{{ ui_t('general.update_password', 'Update password') }}</button>
                 </div>
             </form>
         </div>
@@ -72,7 +72,7 @@
                         </div>
                         <div class="account-profile-photo__actions">
                             <label class="btn btn-outline-success btn-sm mb-2" for="profilePhotoInput">
-                                <i class="fa fa-camera me-1"></i> Upload photo
+                                <i class="fa fa-camera me-1"></i> {{ ui_t('general.upload_photo', 'Upload photo') }}
                             </label>
                             <input type="file" name="photo" id="profilePhotoInput" accept="image/jpeg,image/png,image/gif,image/webp" class="d-none">
                             <p class="small text-muted mb-0">JPG, PNG, GIF or WebP · max 5 MB</p>
@@ -292,7 +292,7 @@
                 </div>
 
                 <div class="card-footer text-right bg-white border-top">
-                    <button type="submit" class="btn btn-success">Update profile</button>
+                    <button type="submit" class="btn btn-success">{{ ui_t('general.update_profile', 'Update profile') }}</button>
                 </div>
             </form>
         </div>

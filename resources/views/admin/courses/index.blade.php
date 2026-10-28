@@ -42,15 +42,15 @@
 
 								<div class="col-md-4">
 									<div class="form-group">
-										<label for="country">Search</label>
+										<label for="country">{{ ui_t('general.search', 'Search') }}</label>
 										<input class="form-control" id="term" name="term" value="{{$search->term ?? ''}}">
 									</div>
 								</div>
 
 								<div class="col-md-3 mt-4 text-right">
 									<!-- Export Button -->
-								<button type="submit" id="filterButton" class="btn btn-primary">Filter Data</button>
-								<button type="button" id="reset" class="btn btn-secondary">Reset</button>
+								<button type="submit" id="filterButton" class="btn btn-primary">{{ ui_t('general.filter_data', 'Filter Data') }}</button>
+								<button type="button" id="reset" class="btn btn-secondary">{{ ui_t('general.reset', 'Reset') }}</button>
 							
 								</div>
 							</div>
@@ -100,9 +100,9 @@
 														<a href="{{ $course->course_url }}" target="_blank" class="btn btn-dark float-right ml-2"><i class="fa fa-external-link"></i> View Course</a>
 													@endif
 													<button type="button" class="btn btn-danger float-right ml-2" onclick="openDeleteCourseModal({{ $course->id }}, '{{ addslashes($course->fullname) }}')">
-														<i class="fa fa-trash"></i> Delete
+														<i class="fa fa-trash"></i> {{ ui_t('general.delete', 'Delete') }}
 													</button>
-													<button type="button" class="btn btn-primary float-right edit-course-btn ml-2" data-toggle="modal" data-target="#edit-course-modal" data-course='@json($course)'><i class="fa fa-pencil"></i> Edit</button>
+													<button type="button" class="btn btn-primary float-right edit-course-btn ml-2" data-toggle="modal" data-target="#edit-course-modal" data-course='@json($course)'><i class="fa fa-pencil"></i> {{ ui_t('general.edit', 'Edit') }}</button>
 												</div>
 											</div>
 										</div>
@@ -133,7 +133,7 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">Import Courses from Excel</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
@@ -155,7 +155,7 @@
 						</div>
 					</div>
 					<div class="modal-footer">
-						<button class="btn btn-danger" data-dismiss="modal" type="button">Cancel</button>
+						<button class="btn btn-danger" data-dismiss="modal" type="button">{{ ui_t('general.cancel', 'Cancel') }}</button>
 						<button class="btn btn-success" type="submit">Import</button>
 					</div>
 				</form>

@@ -6,7 +6,7 @@
                                 <span class="font-weight-semibold modal-title">
                                     {{ __('general.edit') }} {{ __('auth.role') }} 
                                 </span>
-                                <button aria-label="Close" class="btn-close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button></div>
+                                <button aria-label="{{ ui_t('general.close', 'Close') }}" class="btn-close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button></div>
 
                             <div class="modal-body">
                                 

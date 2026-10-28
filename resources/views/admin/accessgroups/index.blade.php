@@ -22,7 +22,7 @@
 
 					<div class="col-md-12">
 						<div class="form-group">
-							<label for="title">Search</label>
+							<label for="title">{{ ui_t('general.search', 'Search') }}</label>
 							<input type="text" name="term" id="filterTitle" class="form-control"
 								placeholder="Filter by name"
                                 value="{{ @$search->term ?? ''}}"
@@ -36,8 +36,8 @@
 				<div class="row">
 					<div class="col-md-12 text-right">
 						<!-- Export Button -->
-						<button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
-						<button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
+						<button type="submit" id="filterButton" class="btn btn-primary btn-sm">{{ ui_t('general.filter_data', 'Filter Data') }}</button>
+						<button type="button" id="reset" class="btn btn-secondary btn-sm">{{ ui_t('general.reset', 'Reset') }}</button>
                         <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
 						
 					</div>
@@ -67,7 +67,7 @@
 							<td>{{ $row->group_name }}</td>
 							<td>{{ $row->group_description }}</td>
 							<td>
-								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
+								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> {{ ui_t('general.delete', 'Delete') }}</a>
 							</td>
 						</tr>
 					@endforeach

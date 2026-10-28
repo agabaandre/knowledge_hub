@@ -203,7 +203,7 @@
                         <option value="">All Countries</option>
                     </select>
                 </div>
-                <button id="applyFilters" class="btn btn-apply"><i class="fa fa-filter mr-1"></i>Apply</button>
+                <button id="applyFilters" class="btn btn-apply"><i class="fa fa-filter mr-1"></i>{{ ui_t('general.apply', 'Apply') }}</button>
             </div>
         </div>
 

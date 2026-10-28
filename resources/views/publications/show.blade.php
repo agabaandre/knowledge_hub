@@ -314,7 +314,7 @@
         <nav class="mb-3" aria-label="Breadcrumb">
             <ol class="breadcrumb mb-0" style="background: transparent; padding: 0; font-size: 0.875rem;">
                 <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ url('records/search') }}">Browse resources</a></li>
+                <li class="breadcrumb-item"><a href="{{ url('records/search') }}">{{ ui_t('general.browse_resources', 'Browse resources') }}</a></li>
                 <li class="breadcrumb-item active" aria-current="page">{{ Str::limit($pubTitle, 80) }}</li>
             </ol>
         </nav>
@@ -422,14 +422,14 @@
                                         <a href="{{ route('account.publications.edit') }}?id={{ $publication->id }}"
                                            class="btn btn-sm btn-outline-secondary"
                                            title="Edit this publication">
-                                            <i class="fa fa-edit mr-1"></i>Edit publication
+                                            <i class="fa fa-edit mr-1"></i>{{ ui_t('general.edit_publication', 'Edit publication') }}
                                         </a>
                                     @endif
                                     @if (is_admin() || auth()->user()->can('view_publications'))
                                         <a href="{{ url('admin/publications/details') }}?id={{ $publication->id }}"
                                            class="btn btn-sm btn-outline-secondary"
                                            title="View this publication in Admin">
-                                            <i class="fa fa-eye mr-1"></i>View as admin
+                                            <i class="fa fa-eye mr-1"></i>{{ ui_t('general.view_as_admin', 'View as admin') }}
                                         </a>
                                     @endif
                                 @endauth
@@ -556,11 +556,11 @@
                 @auth
                             @if((!isset($publication->is_version) || $publication->is_version == 0) && (settings()->enable_version_submission ?? true))
                             <a href="{{ route('account.newversion') }}?id={{ $publication->id }}" class="btn btn-outline-danger btn-sm" style="margin-right:4px !important;">
-                        <i class="fa fa-plus"></i> Submit Version
+                        <i class="fa fa-plus"></i> {{ ui_t('general.submit_version', 'Submit Version') }}
                     </a>
                             @endif
                             <a href="{{ route('account.summarize') }}?id={{ $publication->id }}" class="btn btn-outline-danger btn-sm">
-                        <i class="fa fa-file"></i> Submit Summary
+                        <i class="fa fa-file"></i> {{ ui_t('general.submit_summary', 'Submit Summary') }}
                     </a>
                 @endauth
             </div>
@@ -659,7 +659,7 @@
                                                         <i class="fa fa-eye mr-1"></i> Preview
                                                     </button>
                                                     <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download: {{ e($humanReadable) }}" download="{{ e($downloadFilename) }}">
-                                                        <i class="fa fa-download mr-1"></i> Download
+                                                        <i class="fa fa-download mr-1"></i> {{ ui_t('general.download', 'Download') }}
                                                     </a>
                                                 </div>
                                             </div>
@@ -717,7 +717,7 @@
                     <div class="head">
                         <h5>Related Resources</h5>
                         <a href="{{ url('records') }}" class="btn btn-au btn-sm">
-                            View All
+                            {{ ui_t('general.view_all', 'View All') }}
                         </a>
                             </div>
                     <div id="relatedResourcesTrack" class="related-resources-track">
@@ -756,7 +756,7 @@
                         @endif
                                 <div class="related-resource-actions">
                                     <a href="{{ $detailsUrl }}" target="_blank" class="btn btn-au btn-sm" onclick="event.stopPropagation();">
-                                        <i class="fa fa-eye mr-1"></i>View
+                                        <i class="fa fa-eye mr-1"></i>{{ ui_t('general.view', 'View') }}
                                     </a>
                                 </div>
                             </div>
@@ -887,7 +887,7 @@
                                                         <i class="fa fa-eye mr-1"></i> Preview
                                                     </button>
                                                     <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download: {{ e($humanReadable) }}" download="{{ e($downloadFilename) }}">
-                                                        <i class="fa fa-download mr-1"></i> Download
+                                                        <i class="fa fa-download mr-1"></i> {{ ui_t('general.download', 'Download') }}
                                                     </a>
                                                 </div>
                                             </div>
@@ -1063,12 +1063,12 @@
                                 @endif
                             </div>
                             <div class="d-flex justify-content-end">
-                                <button type="submit" class="btn btn-au btn-sm">Post</button>
+                                <button type="submit" class="btn btn-au btn-sm">{{ ui_t('general.post', 'Post') }}</button>
                             </div>
                         </form>
                     @else
                         <p class="text-muted">Login to comment.</p>
-                        <a href="{{ url('/login') }}" class="btn btn-outline-primary btn-sm">Login</a>
+                        <a href="{{ url('/login') }}" class="btn btn-outline-primary btn-sm">{{ ui_t('general.login', 'Login') }}</a>
                     @endauth
 
                     <div id="commentsList">

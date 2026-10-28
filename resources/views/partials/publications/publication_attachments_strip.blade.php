@@ -75,7 +75,7 @@
                                     Preview
                                 </button>
                             @endif
-                            <a href="{{ $url }}" class="btn btn-link btn-sm p-0" download target="_blank" rel="noopener">Download</a>
+                            <a href="{{ $url }}" class="btn btn-link btn-sm p-0" download target="_blank" rel="noopener">{{ ui_t('general.download', 'Download') }}</a>
                         </div>
                     </div>
                 </div>

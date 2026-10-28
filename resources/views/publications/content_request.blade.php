@@ -272,7 +272,7 @@
                         @if(Session::has('message') || Session::has('alert'))
                             <div class="alert alert-{{ Session::get('alert_class', Session::has('message') ? 'success' : 'info') }} alert-dismissible fade show" role="alert">
                                 {{ Session::get('message') ?? Session::get('alert') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}"></button>
                             </div>
                         @endif
 
@@ -284,7 +284,7 @@
                                         <li>{{ $error }}</li>
                                     @endforeach
                                 </ul>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}"></button>
                             </div>
                         @endif
 
@@ -414,10 +414,10 @@
 
                             <div class="submit-section">
                                 <a href="{{ url('/') }}" class="btn-cancel">
-                                    <i class="fa fa-times me-2"></i>Cancel
+                                    <i class="fa fa-times me-2"></i>{{ ui_t('general.cancel', 'Cancel') }}
                                 </a>
                                 <button type="submit" class="btn-submit">
-                                    <i class="fa fa-paper-plane me-2"></i>Submit Request
+                                    <i class="fa fa-paper-plane me-2"></i>{{ ui_t('general.submit_request', 'Submit Request') }}
                                 </button>
                         </div>
                     </form>

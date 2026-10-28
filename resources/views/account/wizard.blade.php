@@ -501,7 +501,7 @@
                                     @foreach ($row->attachments as $pub_file)
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <a href="{{ $pub_file->file }}" target="_blank" title="{{ e($pub_file->original_filename ?? $pub_file->description ?? '') }}"><i class="fa fa-paperclip text-muted"></i> {{ Str::limit($pub_file->original_filename ?? $pub_file->description ?? 'Attachment', 90) }}</a>
-                                            <label class="mb-0"><input type="checkbox" name="remove_attachments[]" value="{{ $pub_file->id }}"> Remove</label>
+                                            <label class="mb-0"><input type="checkbox" name="remove_attachments[]" value="{{ $pub_file->id }}"> {{ ui_t('general.remove', 'Remove') }}</label>
                                         </li>
                             @endforeach
                                 </ul>
@@ -971,13 +971,13 @@
             if (!countrySelect.length) {
                 return;
             }
-
+            
             countrySelect.prop('disabled', false);
 
             if (!Array.isArray(selectedValues)) {
                 selectedValues = selectedValues ? [selectedValues] : [];
             }
-
+            
             // Capture before rebuild — emptying options clears the current value.
             var previousValues = wizardNormalizeCountrySelection(wizardGetSelectValue(countrySelect));
 
@@ -1089,7 +1089,7 @@
             lastAutoSelectedCountries = values.slice();
             if (typeof $.fn.select2 !== 'undefined' && $select.data('select2')) {
                 $select.val(values).trigger('change.select2');
-            } else {
+                    } else {
                 $select.val(values).trigger('change');
             }
         }
@@ -1162,7 +1162,7 @@
             }
 
             if (e.originalEvent) {
-                userManuallyChangedCountries = true;
+                    userManuallyChangedCountries = true;
                 if (normalized.length && normalized[0] !== 'all') {
                     lastAutoSelectedCountries = normalized.slice();
                 }

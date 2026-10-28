@@ -2522,6 +2522,36 @@ if (! function_exists('active_ui_locale')) {
     }
 }
 
+if (! function_exists('ui_t')) {
+    /**
+     * Translate a UI key; if no translation exists, keep the hardcoded fallback.
+     * Language Management / storage overrides win via MergingTranslationLoader.
+     *
+     * @param  array<string, string|int|float>  $replace
+     */
+    function ui_t(string $key, ?string $fallback = null, array $replace = [], ?string $locale = null): string
+    {
+        $translated = $locale === null
+            ? __($key, $replace)
+            : __($key, $replace, $locale);
+
+        if (is_string($translated) && $translated !== '' && $translated !== $key) {
+            return $translated;
+        }
+
+        if ($fallback === null) {
+            return $key;
+        }
+
+        $out = $fallback;
+        foreach ($replace as $search => $value) {
+            $out = str_replace(':'.$search, (string) $value, $out);
+        }
+
+        return $out;
+    }
+}
+
 if (! function_exists('locale_is_rtl')) {
     function locale_is_rtl(?string $locale = null): bool
     {

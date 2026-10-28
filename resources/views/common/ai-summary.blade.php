@@ -67,7 +67,7 @@
         <h5 class="modal-title" id="summarise-modal-label">
           <i class="fa-solid fa-microchip"></i> AI Processing (Summarizer)
         </h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -105,7 +105,7 @@
         <button class="btn btn-outline-secondary btn-sm copy" style="display: none;" type="button" onclick="copyToClipboard()">
           <i class="fa fa-copy"></i> Copy
         </button>
-        <button class="btn btn-secondary btn-sm" data-dismiss="modal" type="button">Close</button>
+        <button class="btn btn-secondary btn-sm" data-dismiss="modal" type="button">{{ ui_t('general.close', 'Close') }}</button>
       </div>
     </div>
   </div>

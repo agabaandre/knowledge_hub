@@ -229,7 +229,7 @@
                             <td><code>{{ $cf->font_family }}</code></td>
                             <td>{{ $cf->font_files ? implode(', ', array_keys($cf->font_files)) : '—' }}</td>
                             <td class="text-right">
-                                <button type="submit" class="btn btn-sm btn-outline-danger" form="custom-font-delete-{{ $cf->id }}" onclick="return confirm('Remove this font?');">Remove</button>
+                                <button type="submit" class="btn btn-sm btn-outline-danger" form="custom-font-delete-{{ $cf->id }}" onclick="return confirm('Remove this font?');">{{ ui_t('general.remove', 'Remove') }}</button>
                             </td>
                         </tr>
                     @endforeach

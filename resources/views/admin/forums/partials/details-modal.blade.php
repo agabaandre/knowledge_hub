@@ -3,7 +3,7 @@
         <div class="modal-content" style="max-height: 100vh;">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalToggleLabel">Forum Details</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
 						<span aria-hidden="true">&times;</span>
 					</button>
             </div>
@@ -41,12 +41,12 @@
                             <i class="fa fa-times mr-1"></i> Reject post…
                         </button>
                     </div>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.close', 'Close') }}</button>
                 @elseif((int) $forum->is_approved === 0 && ! $forumIsRejected)
                     <a href="{{ url('admin/forums/approve') }}?id={{$forum->id}}" class="btn btn-outline-success">Approve &amp; post</a>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.close', 'Close') }}</button>
                 @else
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.close', 'Close') }}</button>
                 @endif
             </div>
         </div>

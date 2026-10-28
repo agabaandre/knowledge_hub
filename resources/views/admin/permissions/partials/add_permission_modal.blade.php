@@ -3,7 +3,7 @@
                 <div class="modal-content modal-content-demo">
                     <div class="modal-header">
                         <h6 class="modal-title text-dark"> <i class="fa fa-user-o text-danger"></i>   {{ __('general.add') }} {{ __('auth.permission') }}</h6>
-                        <button aria-label="Close" class="btn-close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                        <button aria-label="{{ ui_t('general.close', 'Close') }}" class="btn-close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
                     </div>
              <form class="form-horizontal"  action="{{ route('permissions.permission') }}" method="POST" class="feeFormperm">
                 

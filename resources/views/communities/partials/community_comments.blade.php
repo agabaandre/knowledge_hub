@@ -71,7 +71,7 @@
                             </div>
                         </div>
                         <div class="comment-form-footer d-flex justify-content-end mt-3">
-                            <button type="button" class="btn btn-sm btn-outline-secondary mr-2" onclick="toggleCommunityCommentForm()">Cancel</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary mr-2" onclick="toggleCommunityCommentForm()">{{ ui_t('general.cancel', 'Cancel') }}</button>
                             <button type="submit" class="comment-submit-btn">
                                 <i class="fa fa-paper-plane"></i> Post to community wall
                             </button>

@@ -991,7 +991,7 @@
     @if(Session::has('alert-success') || Session::has('alert-danger'))
         <div class="alert alert-{{ Session::has('alert-success') ? 'success' : 'danger' }} alert-dismissible fade show" role="alert">
             {{ Session::get('alert-success') ?? Session::get('alert-danger') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}"></button>
         </div>
     @endif
 
@@ -1042,7 +1042,7 @@
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="search-tab" data-tab="search" type="button" role="tab" aria-controls="search" aria-selected="false">
-                        <i class="fa fa-search me-2"></i>Search
+                        <i class="fa fa-search me-2"></i>{{ ui_t('general.search', 'Search') }}
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -2026,7 +2026,7 @@
                     <div class="settings-action-bar__primary">
                         <p class="settings-action-bar__primary-label">Save configuration</p>
                         <button type="submit" class="btn btn-save" form="settings-main-form">
-                            <i class="fa fa-save me-2"></i>Save All Changes
+                            <i class="fa fa-save me-2"></i>{{ ui_t('general.save_all_changes', 'Save All Changes') }}
                         </button>
                         <p class="settings-action-bar__primary-hint">Applies updates from all tabs above.</p>
                     </div>
@@ -2057,7 +2057,7 @@
                            onclick="clearCache()"
                            id="clear-cache-btn"
                            title="Clear all cached data including settings">
-                                <i class="fa fa-broom"></i>Clear Cache
+                                <i class="fa fa-broom"></i>{{ ui_t('general.clear_cache', 'Clear Cache') }}
                         </button>
                     </div>
                 </div>
@@ -2065,7 +2065,7 @@
 
                 <p class="settings-action-footnote mb-0">
                     <i class="fa fa-info-circle"></i>
-                    Settings are cached for 24 hours for better performance — use <strong>Clear Cache</strong> to apply changes immediately.
+                    Settings are cached for 24 hours for better performance — use <strong>{{ ui_t('general.clear_cache', 'Clear Cache') }}</strong> to apply changes immediately.
                     <strong>Export</strong> saves the active theme as XML (images excluded).
                     <strong>Import</strong> overwrites the active theme from XML (images are not changed).
                 </p>
@@ -2080,7 +2080,7 @@
                     <h5 class="modal-title" id="cacheOutputModalLabel">
                         <i class="fa fa-terminal me-2"></i>Cache Clear Output
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}"></button>
                 </div>
                 <div class="modal-body">
                     <div id="cache-output-terminal" class="terminal-output">
@@ -2091,7 +2091,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ ui_t('general.close', 'Close') }}</button>
                     <button type="button" class="btn btn-primary" onclick="copyCacheOutput()">
                         <i class="fa fa-copy me-2"></i>Copy Output
                     </button>
@@ -2382,7 +2382,7 @@
             alertDiv.setAttribute('role', 'alert');
             alertDiv.innerHTML = `
                 ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}"></button>
             `;
             
             // Insert at top of content

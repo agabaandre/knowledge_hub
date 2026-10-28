@@ -6,7 +6,7 @@
                     Categories linked to
                     <strong id="linkedCategoriesParentName">this subcategory</strong>
                 </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -14,7 +14,7 @@
                 <ul class="list-group list-group-flush" id="linkedCategoriesList"></ul>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">{{ ui_t('general.close', 'Close') }}</button>
             </div>
         </div>
     </div>

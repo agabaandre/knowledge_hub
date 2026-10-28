@@ -70,7 +70,7 @@
                                 <div class="form-group mb-0">
                                     <label class="form-label">&nbsp;</label>
                                     <div>
-                                        <a href="{{ url('admin/kpi/data') }}" class="btn btn-secondary btn-sm">Clear</a>
+                                        <a href="{{ url('admin/kpi/data') }}" class="btn btn-secondary btn-sm">{{ ui_t('general.clear', 'Clear') }}</a>
                                     </div>
                                 </div>
                             </div>

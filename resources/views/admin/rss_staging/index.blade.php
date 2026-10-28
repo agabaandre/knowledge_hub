@@ -46,7 +46,7 @@
                             </select>
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary">Filter</button>
+                            <button type="submit" class="btn btn-primary">{{ ui_t('general.filter', 'Filter') }}</button>
                         </div>
                     </div>
                 </form>
@@ -80,7 +80,7 @@
                                 <td>
                                     @if($item->processed_status === 'pending')
                                         <a href="{{ route('admin.rss_staging.edit', $item->id) }}" class="btn btn-sm btn-success mr-1"><i class="fa fa-check"></i> Edit & Approve</a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#rejectModal{{ $item->id }}"><i class="fa fa-times"></i> Reject</button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#rejectModal{{ $item->id }}"><i class="fa fa-times"></i> {{ ui_t('general.reject', 'Reject') }}</button>
                                         <div class="modal fade" id="rejectModal{{ $item->id }}" tabindex="-1">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -96,8 +96,8 @@
                                                             <textarea name="rejection_reason" id="rejection_reason{{ $item->id }}" class="form-control" rows="3" placeholder="Why this item is not approved"></textarea>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                                            <button type="submit" class="btn btn-danger">Reject</button>
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
+                                                            <button type="submit" class="btn btn-danger">{{ ui_t('general.reject', 'Reject') }}</button>
                                                         </div>
                                                     </form>
                                                 </div>

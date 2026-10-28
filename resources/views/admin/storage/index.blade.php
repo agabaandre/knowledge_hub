@@ -611,10 +611,10 @@
 </div>
 
 @if(session('alert-success'))
-    <div class="alert alert-success alert-dismissible fade show">{{ session('alert-success') }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
+    <div class="alert alert-success alert-dismissible fade show">{{ session('alert-success') }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}"></button></div>
 @endif
 @if(session('alert-danger'))
-    <div class="alert alert-danger alert-dismissible fade show">{{ session('alert-danger') }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
+    <div class="alert alert-danger alert-dismissible fade show">{{ session('alert-danger') }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ ui_t('general.close', 'Close') }}"></button></div>
 @endif
 
 @if($isUsingLegacyUploadFallback)
@@ -1368,7 +1368,7 @@
                                         @foreach(array_slice($envBackups, 0, 8) as $envBackup)
                                             <li class="d-flex justify-content-between align-items-center py-1 border-bottom">
                                                 <span><code>{{ $envBackup['name'] }}</code></span>
-                                                <a href="{{ route('admin.storage.download-env-backup', ['name' => $envBackup['name']]) }}" class="btn btn-link btn-sm p-0">Download</a>
+                                                <a href="{{ route('admin.storage.download-env-backup', ['name' => $envBackup['name']]) }}" class="btn btn-link btn-sm p-0">{{ ui_t('general.download', 'Download') }}</a>
                                             </li>
                                         @endforeach
                                     </ul>

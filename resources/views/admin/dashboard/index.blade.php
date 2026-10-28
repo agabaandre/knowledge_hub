@@ -316,7 +316,7 @@
                                 </div>
                                 <div class="pub-filters-actions">
                                     <a href="{{ url('admin') }}" class="pub-filters-btn pub-filters-btn--clear" id="clearDashboardResourceFilters">
-                                        <i class="fa fa-rotate-left"></i> Clear
+                                        <i class="fa fa-rotate-left"></i> {{ ui_t('general.clear', 'Clear') }}
                                     </a>
                                 </div>
                             </form>
@@ -350,7 +350,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="pubDescriptionPreviewTitle">Description</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -358,7 +358,7 @@
                 <div id="pubDescriptionPreviewBody"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.close', 'Close') }}</button>
             </div>
         </div>
     </div>

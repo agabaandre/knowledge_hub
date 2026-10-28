@@ -3,7 +3,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Confirm Delete</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -13,8 +13,8 @@
             Are you sure you want to delete this tool?
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-danger">Delete</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>
+            <button type="submit" class="btn btn-danger">{{ ui_t('general.delete', 'Delete') }}</button>
         </div>
       </form>
     </div>
@@ -26,7 +26,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalToggleLabel">Delete</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="{{ ui_t('general.close', 'Close') }}">
 						<span aria-hidden="true">&times;</span>
 					</button>
             </div>
@@ -38,7 +38,7 @@
             <div class="modal-footer">
                 <!-- Toogle to second dialog -->
                 <button class="btn btn-outline-danger btn-sm edit"
-                        onclick="deleteRow()">Yes Delete</button>
+                        onclick="deleteRow()">{{ ui_t('general.yes_delete', 'Yes Delete') }}</button>
             </div>
         </div>
     </div>

@@ -52,8 +52,8 @@
                         </div>
                         <div class="col-md-2">
                             <div class="d-flex">
-                                <button type="submit" id="filterButton" class="btn btn-primary btn-sm mr-2">Filter</button>
-                                <a href="{{ url('admin/healthassets') }}" class="btn btn-secondary btn-sm">Clear</a>
+                                <button type="submit" id="filterButton" class="btn btn-primary btn-sm mr-2">{{ ui_t('general.filter', 'Filter') }}</button>
+                                <a href="{{ url('admin/healthassets') }}" class="btn btn-secondary btn-sm">{{ ui_t('general.clear', 'Clear') }}</a>
                             </div>
                         </div>
                     </div>
@@ -102,7 +102,7 @@
                                         <td>
                                             @if($row->url)
                                                 <a href="{{ $row->url }}" target="_blank" class="text-primary">
-                                                    <i class="fa fa-external-link mr-1"></i> View
+                                                    <i class="fa fa-external-link mr-1"></i> {{ ui_t('general.view', 'View') }}
                                                 </a>
                                             @else
                                                 <span class="text-muted">-</span>
@@ -110,7 +110,7 @@
                                         </td>
                                         <td>
                                             <a href="{{ url('admin/healthassets/detail') }}?id={{ $row->id }}" class="btn btn-sm btn-outline-info mr-1" title="View Details">
-                                                <i class="fa fa-eye mr-1"></i> View
+                                                <i class="fa fa-eye mr-1"></i> {{ ui_t('general.view', 'View') }}
                                             </a>
                                         </td>
                                     </tr>

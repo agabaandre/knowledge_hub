@@ -70,7 +70,7 @@
                                         <td><strong>{{ strtoupper($role->name) }}</strong></td>
                                         <td class="text-center">
                                             <a href="#role{{$role->id}}0" data-toggle="modal" class="btn btn-sm btn-outline-primary mr-1" title="Edit Role">
-                                                <i class="fa fa-pencil mr-1"></i> Edit
+                                                <i class="fa fa-pencil mr-1"></i> {{ ui_t('general.edit', 'Edit') }}
                                             </a>
                                             <a href="#perms{{$role->id}}0" class="btn btn-sm btn-outline-success" data-toggle="modal" title="Manage Permissions">
                                                 <i class="fa fa-shield"></i> {{ __('auth.permissions') }}

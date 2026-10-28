@@ -13,6 +13,6 @@
         {{ __('general.details') }}  </a>
     
     <a href="#delete{{$user->id}}0" data-toggle="modal" class="dropdown-item text-danger">
-        Delete </a>
+        {{ ui_t('general.delete', 'Delete') }} </a>
     </div>
 </div>
