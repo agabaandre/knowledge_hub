@@ -9,6 +9,10 @@ use Illuminate\Translation\FileLoader;
 /**
  * Loads PHP lang groups from resources/lang, then merges overrides from
  * storage/app/ui_translations/{locale}/{group}.php (writable on production).
+ *
+ * For non-English locales, storage values that are empty or still identical to
+ * English do not replace a real packaged translation — so nav can follow the
+ * site default locale while content remains authored in English.
  */
 class MergingTranslationLoader extends FileLoader
 {
@@ -45,11 +49,45 @@ class MergingTranslationLoader extends FileLoader
         $base = array_merge($base, app(UiTranslationService::class)->dynamicGroupKeys($group));
 
         $overrideFile = $this->overrideBasePath.'/'.$locale.'/'.$group.'.php';
-        if ($this->files->exists($overrideFile)) {
-            $extra = $this->files->getRequire($overrideFile);
-            if (is_array($extra)) {
-                return array_merge($base, $extra);
+        if (! $this->files->exists($overrideFile)) {
+            return $base;
+        }
+
+        $extra = $this->files->getRequire($overrideFile);
+        if (! is_array($extra)) {
+            return $base;
+        }
+
+        $english = [];
+        if ($locale !== 'en' && $locale !== 'en_US') {
+            $english = $this->loadPath($this->path, 'en', $group);
+            if (! is_array($english)) {
+                $english = [];
             }
+        }
+
+        foreach ($extra as $key => $value) {
+            if (! is_string($key)) {
+                continue;
+            }
+            if (! is_string($value) || trim($value) === '') {
+                continue;
+            }
+
+            $enVal = $english[$key] ?? null;
+            $baseVal = $base[$key] ?? null;
+
+            // Keep packaged locale string when the admin override is still English.
+            if ($enVal !== null
+                && $value === $enVal
+                && is_string($baseVal)
+                && $baseVal !== ''
+                && $baseVal !== $enVal
+            ) {
+                continue;
+            }
+
+            $base[$key] = $value;
         }
 
         return $base;
