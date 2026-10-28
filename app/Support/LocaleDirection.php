@@ -39,6 +39,11 @@ class LocaleDirection
     {
         $request = $request ?? request();
 
+        // Backend html lang / labels track Configure default, not profile cookie.
+        if (SiteLanguage::isBackendRequest($request)) {
+            return SiteLanguage::systemDefaultLocale();
+        }
+
         return SiteLanguage::resolveActiveLocale(
             auth()->check() ? (auth()->user()->langauge ?? null) : null,
             $_COOKIE['googtrans'] ?? null,

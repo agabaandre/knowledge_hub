@@ -281,15 +281,47 @@ class SiteLanguage extends Model
     }
 
     /**
+     * Admin / permissions (backend) UI — always follows Configure → Default language.
+     */
+    public static function isBackendRequest(?\Illuminate\Http\Request $request = null): bool
+    {
+        try {
+            $request = $request ?? request();
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        if (! $request) {
+            return false;
+        }
+
+        if ($request->is('admin') || $request->is('admin/*')
+            || $request->is('permissions') || $request->is('permissions/*')
+            || $request->is('*/admin') || $request->is('*/admin/*')
+            || $request->is('*/permissions') || $request->is('*/permissions/*')) {
+            return true;
+        }
+
+        $name = optional($request->route())->getName();
+        if (! is_string($name) || $name === '') {
+            return false;
+        }
+
+        return str_starts_with($name, 'admin.')
+            || str_starts_with($name, 'permissions.')
+            || str_starts_with($name, 'admin_');
+    }
+
+    /**
      * Resolve which locale is active for the UI (matches selector keys).
      *
-     * Priority:
+     * Backend (admin/permissions): always Configure → Default language.
+     * Frontend priority:
      * 1. Signed-in user's profile language (permissions/profile) when set
      * 2. Site default from Configure (setting.language)
      * 3. Guest-only: khub_locale cookie (explicit selector choice)
      *
-     * Stale EN cookies must not override Configure → Default language for users
-     * who never set a profile preference. Google Translate googtrans is ignored.
+     * Google Translate googtrans is ignored for native UI strings.
      */
     public static function resolveActiveLocale(?string $userLocale, ?string $googtransRaw, ?string $khubLocale): string
     {
@@ -298,6 +330,11 @@ class SiteLanguage extends Model
         $default = self::systemDefaultLocale();
         if ($codes !== [] && ! in_array($default, $codes, true)) {
             $default = in_array('en', $codes, true) ? 'en' : ($codes[0] ?? $default);
+        }
+
+        // Admin nav / configure / permissions always track the site default language.
+        if (self::isBackendRequest()) {
+            return $default;
         }
 
         $normalizedUser = self::normalizeLocaleCode(

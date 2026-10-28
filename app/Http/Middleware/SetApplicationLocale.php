@@ -13,7 +13,17 @@ class SetApplicationLocale
     public function handle(Request $request, Closure $next): Response
     {
         $supported = SiteLanguage::activeLocaleCodes();
-        $locale = SiteLanguage::systemDefaultLocale();
+
+        // Admin / permissions: always Configure → Default language (dynamic per hub).
+        if (SiteLanguage::isBackendRequest($request)) {
+            $locale = SiteLanguage::systemDefaultLocale();
+            if (! in_array($locale, $supported, true) && $supported !== []) {
+                $locale = in_array('en', $supported, true) ? 'en' : $supported[0];
+            }
+            App::setLocale($locale);
+
+            return $next($request);
+        }
 
         $queryLocale = $request->query('locale');
         if (is_string($queryLocale) && in_array($queryLocale, $supported, true)) {
@@ -22,7 +32,7 @@ class SetApplicationLocale
             return $next($request);
         }
 
-        // Explicit selector choice (cookie) wins — menu/footer use Laravel lang files, not Google Translate.
+        // Frontend: profile language, then site default, then guest cookie.
         $cookieName = config('supported_locales.locale_cookie');
         $cookieLocale = $cookieName ? $request->cookie($cookieName) : null;
         $userLang = $request->user()?->langauge ?? null;
