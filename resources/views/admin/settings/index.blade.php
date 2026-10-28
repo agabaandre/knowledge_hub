@@ -2394,16 +2394,25 @@
 
         $(function() {
             // Keep hidden language field in sync (POST must not depend on the <select>).
-            function syncSettingLanguageHidden() {
+            // On load, prefer the server-rendered hidden value (profile-style persistence) and
+            // push it onto the <select> — never let an unselected first option overwrite FR→EN.
+            function syncSettingLanguageHidden(fromUserChange) {
                 var $select = $('#setting_language');
                 var $hidden = $('#setting_language_value');
                 if (!$select.length || !$hidden.length) {
                     return;
                 }
-                var value = $select.val() || $hidden.val() || 'en';
+                var value;
+                if (fromUserChange) {
+                    value = $select.val() || $hidden.val() || 'en';
+                } else {
+                    value = $hidden.val() || $select.val() || 'en';
+                    if ($select.find('option[value="' + value + '"]').length) {
+                        $select.val(value);
+                    }
+                }
                 $hidden.val(value);
                 $hidden.prop('disabled', false);
-                // If Select2 disabled the original control, still post via hidden.
                 $select.prop('disabled', false);
             }
 
@@ -2417,12 +2426,14 @@
                 $tab.val(active || 'general');
             }
 
-            $(document).on('change', '#setting_language', syncSettingLanguageHidden);
+            $(document).on('change', '#setting_language', function () {
+                syncSettingLanguageHidden(true);
+            });
             $('button[form="settings-main-form"], #settings-main-form').on('click submit', function () {
-                syncSettingLanguageHidden();
+                syncSettingLanguageHidden(true);
                 syncSettingsActiveTab();
             });
-            syncSettingLanguageHidden();
+            syncSettingLanguageHidden(false);
             syncSettingsActiveTab();
 
             // Tab switching functionality

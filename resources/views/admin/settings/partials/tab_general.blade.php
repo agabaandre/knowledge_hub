@@ -30,16 +30,17 @@
                         ?? $systemDefaultLocale;
                 @endphp
                 <label for="setting_language">Default language</label>
-                {{-- Hidden carries the value: native <select> inside display:contents forms / Select2 can be dropped from POST. --}}
+                {{-- Hidden carries the value: native <select> inside display:contents forms / Select2 can be dropped from POST.
+                     Use classic selected= (Laravel 8 has no @selected) — same pattern as permissions/profile lang select. --}}
                 <input type="hidden" name="language" id="setting_language_value" value="{{ $selectedLanguage }}" form="settings-main-form">
                 <select id="setting_language" class="form-control no-select2" form="settings-main-form"
                         data-sync-language-hidden="#setting_language_value">
                     @forelse($siteLanguageOptions as $code => $meta)
-                        <option value="{{ $code }}" @selected($selectedLanguage === $code)>
+                        <option value="{{ $code }}" {{ (string) $code === (string) $selectedLanguage ? 'selected' : '' }}>
                             {{ ($meta['flag'] ?? '') ? $meta['flag'].' ' : '' }}{{ $meta['name'] ?? $code }} ({{ strtoupper($code) }})
                         </option>
                     @empty
-                        <option value="en" @selected($selectedLanguage === 'en')>English (EN)</option>
+                        <option value="en" {{ (string) $selectedLanguage === 'en' ? 'selected' : '' }}>English (EN)</option>
                     @endforelse
                 </select>
                 <small class="info-text d-block">

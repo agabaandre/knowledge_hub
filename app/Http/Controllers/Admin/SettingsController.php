@@ -110,8 +110,8 @@ class SettingsController extends Controller
             }
         }
 
+        $savedLanguage = null;
         if($saved):
-            $savedLanguage = null;
             try {
                 $savedLanguage = \App\Models\SiteLanguage::normalizeLocaleCode(
                     is_string($saved->language ?? null) ? $saved->language : null
@@ -140,7 +140,77 @@ class SettingsController extends Controller
             $url .= '#'.$tab;
         }
 
-        return redirect()->to($url)->with($data);
+        $response = redirect()->to($url)->with($data);
+
+        // Same persistence path as permissions/profile + locale.apply: when Configure
+        // default language changes, update the saving admin's preference and locale cookie
+        // so the next page load actually switches UI translations.
+        if (is_string($savedLanguage ?? null) && $savedLanguage !== '') {
+            $this->applySavedDefaultLocale($request, $response, $savedLanguage);
+        }
+
+        return $response;
+    }
+
+    /**
+     * Mirror profile language persistence (users.langauge + khub_locale cookie).
+     */
+    private function applySavedDefaultLocale(Request $request, $response, string $locale): void
+    {
+        $supported = \App\Models\SiteLanguage::activeLocaleCodes();
+        if (! in_array($locale, $supported, true)) {
+            return;
+        }
+
+        try {
+            $user = $request->user();
+            if ($user !== null && ($user->langauge ?? null) !== $locale) {
+                $user->langauge = $locale;
+                $user->save();
+            }
+        } catch (\Throwable $e) {
+            // keep redirect even if profile sync fails
+        }
+
+        $map = \App\Models\SiteLanguage::selectorMap();
+        $googleCode = $map[$locale]['google_code'] ?? $locale;
+        $cookieName = (string) config('supported_locales.locale_cookie', 'khub_locale');
+        $cookieMinutes = (int) config('supported_locales.locale_cookie_minutes', 525600);
+        $cookiePath = (string) config('supported_locales.cookie_path', '/');
+        $basePath = $request->getBasePath();
+        if (is_string($basePath) && $basePath !== '' && $basePath !== '/') {
+            $cookiePath = rtrim($basePath, '/').'/';
+        }
+
+        $response->cookie(
+            $cookieName,
+            $locale,
+            $cookieMinutes,
+            $cookiePath,
+            null,
+            cookie_secure_flag(),
+            true,
+            false,
+            config('session.same_site', 'lax')
+        );
+
+        // Content stays English (pageLanguage); only set googtrans when UI locale ≠ content.
+        $contentLocale = \App\Models\SiteLanguage::contentLocale();
+        if ($locale === $contentLocale || $locale === 'en') {
+            $response->cookie('googtrans', '', -1, $cookiePath, null, cookie_secure_flag(), false, false, config('session.same_site', 'lax'));
+        } else {
+            $response->cookie(
+                'googtrans',
+                '/'.$contentLocale.'/'.$googleCode,
+                $cookieMinutes,
+                $cookiePath,
+                null,
+                cookie_secure_flag(),
+                false,
+                false,
+                config('session.same_site', 'lax')
+            );
+        }
     }
 
     public function generateFederationToken(Request $request)
