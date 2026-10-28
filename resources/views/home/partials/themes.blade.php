@@ -6,7 +6,7 @@
           <div class="card-body category">
           	<div class="row custom-row">
           	  	 <h5 class="custom-row-item">
-          	  	 	<i class="fa {{$row->icon}}"></i> 
+          	  	 	<i class="fa {{ \App\Models\ThemeticArea::normalizeIcon($row->icon ?? null) }}"></i> 
 				   {{truncate($row->description,410)}}
 				</h5>
 		 	</div>

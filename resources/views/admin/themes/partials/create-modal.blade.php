@@ -38,10 +38,11 @@
           <div class="col-md-12">
             <div class="mb-3">
               <label class="form-label" for="icon">Icon</label>
+              @php $defaultThemeIcon = \App\Models\ThemeticArea::DEFAULT_ICON; @endphp
               <select class="form-control select2-fa-icons" id="icon" name="icon" required>
                 <option value="">Select icon class</option>
                 @foreach(($faIconOptions ?? []) as $iconClass)
-                  <option value="{{ $iconClass }}">{{ $iconClass }}</option>
+                  <option value="{{ $iconClass }}" @if($iconClass === $defaultThemeIcon) selected @endif>{{ $iconClass }}</option>
                 @endforeach
               </select>
               <small class="text-muted d-block mt-1">
@@ -66,15 +67,22 @@
 
 @push('modal-scripts')
 <script>
+  var defaultThemeIcon = @json(\App\Models\ThemeticArea::DEFAULT_ICON);
+
   $('#create-modal').on('show.bs.modal', function () {
     $('#create-modal .select2-fa-icons').select2({
       placeholder: 'Select icon class',
       width: '100%',
       dir: 'ltr'
     });
+    var iconSelect = $('#create-modal #icon');
+    if (iconSelect.find('option[value="' + defaultThemeIcon + '"]').length === 0) {
+      iconSelect.append(new Option(defaultThemeIcon, defaultThemeIcon, true, true));
+    }
+    iconSelect.val(defaultThemeIcon).trigger('change');
   });
   $('#create-modal').on('hidden.bs.modal', function () {
-    $('#create-modal #icon').val('').trigger('change');
+    $('#create-modal #icon').val(defaultThemeIcon).trigger('change');
     $('#create-modal #display_order').val('0');
     $('#create-modal #theme_detailed_description').val('');
   });

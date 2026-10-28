@@ -89,7 +89,7 @@
         <div class="theme1-themes-grid">
             @foreach ($themes as $theme)
                 <a href="{{ url('records/subtheme') }}?subtheme={{ $theme->id }}" class="theme1-theme-card" title="{{ $theme->description }}">
-                    <i class="fa {{ $theme->icon }} theme1-theme-icon" aria-hidden="true"></i>
+                    <i class="fa {{ \App\Models\ThemeticArea::normalizeIcon($theme->icon ?? null) }} theme1-theme-icon" aria-hidden="true"></i>
                     <p class="theme1-theme-title">{{ truncate($theme->description, 24) }}</p>
                 </a>
             @endforeach

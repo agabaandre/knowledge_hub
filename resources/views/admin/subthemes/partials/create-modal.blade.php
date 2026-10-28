@@ -22,7 +22,7 @@
 
                     <div class="form-group">
                         <label for="icon">Icon</label>
-                        @php $defaultSubthemeIcon = 'fa-check-circle'; @endphp
+                        @php $defaultSubthemeIcon = \App\Models\SubThemeticArea::DEFAULT_ICON; @endphp
                         <select class="form-control select2-fa-icons" id="new_subtheme_icon" name="icon" required>
                             <option value="">Select icon class</option>
                             @foreach(($faIconOptions ?? []) as $iconClass)
@@ -56,7 +56,7 @@
 @push('modal-scripts')
     <script>
         // JavaScript for specific modal
-        var defaultSubthemeIcon = 'fa-check-circle';
+        var defaultSubthemeIcon = @json(\App\Models\SubThemeticArea::DEFAULT_ICON);
 
         $('#create-subtheme-modal').on('show.bs.modal', function(event) {
             // Initialize Select2 for thematic area select field

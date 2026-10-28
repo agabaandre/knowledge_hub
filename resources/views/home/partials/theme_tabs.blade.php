@@ -214,7 +214,7 @@
                 <div class="theme-item">
                     <a href="{{ thematic_area_records_url($theme) }}" class="theme-link">
                         <div class="theme-card">
-                            <i class="fa {{ $theme->icon }} theme-icon" aria-hidden="true"></i>
+                            <i class="fa {{ \App\Models\ThemeticArea::normalizeIcon($theme->icon ?? null) }} theme-icon" aria-hidden="true"></i>
                             <p class="theme-title" title="{{ $theme->description }}">
                                 {{ truncate($theme->description, 24) }}
                             </p>

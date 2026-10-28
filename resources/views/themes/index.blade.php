@@ -17,7 +17,7 @@
 					<div class="cats-box mlb-res rounded bg-white d-flex align-items-center justify-content-between px-3 py-3">
 						<div class="cats-box rounded bg-white d-flex align-items-center">
 							<div class="text-center">
-								<i class="fa {{$theme->icon}} fa-2x text-success"></i>
+								<i class="fa {{ \App\Models\ThemeticArea::normalizeIcon($theme->icon ?? null) }} fa-2x text-success"></i>
 						    </div>
 							<div class="cats-box-caption px-2">
 								<h4 class="fs-md mb-0 ft-medium">{!! truncate($theme->description,100) !!}</h4>
