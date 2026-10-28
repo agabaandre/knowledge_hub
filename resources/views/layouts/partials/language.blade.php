@@ -6,6 +6,7 @@
     use App\Models\SiteLanguage;
     $uiLocale = active_ui_locale();
     $systemDefaultLocale = SiteLanguage::systemDefaultLocale();
+    $contentLocale = SiteLanguage::contentLocale();
     $localeCookiePath = config('supported_locales.cookie_path', '/');
     $basePath = request()->getBasePath();
     if (is_string($basePath) && $basePath !== '' && $basePath !== '/') {
@@ -14,12 +15,14 @@
     $googleCodesByLocale = collect(SiteLanguage::selectorMap())
         ->mapWithKeys(fn ($row, $code) => [$code => $row['google_code'] ?? $code])
         ->all();
-    $pageLanguageGoogle = $googleCodesByLocale[$systemDefaultLocale] ?? $systemDefaultLocale;
+    // Google pageLanguage = authored HTML language (usually en), NOT the visitor default.
+    $pageLanguageGoogle = $googleCodesByLocale[$contentLocale] ?? $contentLocale;
 @endphp
 <script type="text/javascript">
     window.khubGoogleTranslateReady = false;
     window.khubPendingGoogleTranslate = null;
     window.khubSystemDefaultLocale = @json($systemDefaultLocale);
+    window.khubContentLocale = @json($contentLocale);
     window.khubPageLanguageGoogle = @json($pageLanguageGoogle);
 
     function googleTranslateElementInit() {
@@ -53,7 +56,7 @@
     var khubGoogleCodes = @json($googleCodesByLocale);
 
     function khubGoogleCodeForLocale(localeCode) {
-        if (!localeCode) return 'en';
+        if (!localeCode) return window.khubPageLanguageGoogle || 'en';
         return (khubGoogleCodes && khubGoogleCodes[localeCode]) ? khubGoogleCodes[localeCode] : localeCode;
     }
 
@@ -96,7 +99,7 @@
 
     function doGTranslate(lang_code) {
         var pageLang = window.khubPageLanguageGoogle || 'en';
-        var defaultLocale = window.khubSystemDefaultLocale || 'en';
+        var contentLocale = window.khubContentLocale || 'en';
         var lang = lang_code || pageLang;
 
         if (!window.khubGoogleTranslateReady) {
@@ -104,8 +107,8 @@
             return;
         }
 
-        // Source / default site language: clear Google Translate overlay.
-        if (lang === pageLang || lang === defaultLocale) {
+        // Only clear when showing the authored content language (untranslated HTML).
+        if (lang === pageLang || lang === contentLocale) {
             var clearDate = new Date();
             clearDate.setTime(clearDate.getTime() - 1);
             document.cookie = "googtrans=; expires=" + clearDate.toUTCString() + "; path={{ $localeCookiePath }}";
@@ -120,13 +123,13 @@
             }
 
             if (typeof window.khubApplyDocumentDirection === 'function') {
-                window.khubApplyDocumentDirection(defaultLocale);
+                window.khubApplyDocumentDirection(contentLocale);
             }
 
             var teComboEn = document.querySelector('select.goog-te-combo:not(.menu-language-menu-container select)');
             if (teComboEn) {
                 var enIndex = Array.from(teComboEn.options).findIndex(function(option) {
-                    return option.value === pageLang || option.value === '' || option.value === defaultLocale;
+                    return option.value === pageLang || option.value === '' || option.value === contentLocale;
                 });
                 if (enIndex !== -1) {
                     teComboEn.selectedIndex = enIndex;
@@ -159,8 +162,8 @@
             if (teCombo.selectedIndex !== langIndex) {
                 teCombo.selectedIndex = langIndex;
             }
-            var pageLang = GTranslateGetCurrentLang();
-            if (pageLang !== lang) {
+            var current = GTranslateGetCurrentLang();
+            if (current !== lang) {
                 khubFireComboChange(teCombo);
             }
         }, 400);
@@ -191,11 +194,12 @@
         function bootGoogleTranslateFromCookies() {
             var cookieLang = GTranslateGetCurrentLang();
             var userLang = @json($uiLocale);
-            var defaultLocale = window.khubSystemDefaultLocale || 'en';
+            var contentLocale = window.khubContentLocale || 'en';
             var pageLang = window.khubPageLanguageGoogle || 'en';
             var googleLang = khubGoogleCodeForLocale(userLang);
 
-            if (userLang && userLang !== defaultLocale) {
+            // Translate when the active UI locale differs from authored content language.
+            if (userLang && userLang !== contentLocale) {
                 if (cookieLang !== googleLang) {
                     var date = new Date();
                     date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
@@ -209,7 +213,7 @@
                 clearDate.setTime(clearDate.getTime() - 1);
                 document.cookie = "googtrans=; expires=" + clearDate.toUTCString() + "; path={{ $localeCookiePath }}";
                 if (typeof window.khubApplyDocumentDirection === 'function') {
-                    window.khubApplyDocumentDirection(defaultLocale);
+                    window.khubApplyDocumentDirection(userLang || contentLocale);
                 }
             }
         }

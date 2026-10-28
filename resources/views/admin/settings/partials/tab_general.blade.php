@@ -22,8 +22,11 @@
                 @php
                     $siteLanguageOptions = $siteLanguageOptions ?? \App\Models\SiteLanguage::selectorMap();
                     $systemDefaultLocale = \App\Models\SiteLanguage::systemDefaultLocale();
-                    $selectedLanguage = old('language', $settings->language ?? $systemDefaultLocale);
-                    $selectedLanguage = \App\Models\SiteLanguage::normalizeLocaleCode(is_string($selectedLanguage) ? $selectedLanguage : null)
+                    // DB is source of truth (never prefer flashed old() after a successful save).
+                    $selectedLanguage = \App\Models\SiteLanguage::storedSiteLanguage()
+                        ?? \App\Models\SiteLanguage::normalizeLocaleCode(
+                            is_string($settings->language ?? null) ? $settings->language : null
+                        )
                         ?? $systemDefaultLocale;
                 @endphp
                 <label for="setting_language">Default language</label>

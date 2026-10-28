@@ -14,6 +14,8 @@ class SiteLanguage extends Model
 
     public const CACHE_KEY_ALL_CODES = 'site_languages.all_locale_codes';
 
+    public const CACHE_KEY_SYSTEM_DEFAULT = 'site_languages.system_default_locale';
+
     protected $fillable = [
         'locale_code',
         'name',
@@ -43,6 +45,42 @@ class SiteLanguage extends Model
         Cache::forget(self::CACHE_KEY_SELECTOR);
         Cache::forget(self::CACHE_KEY_ACTIVE_CODES);
         Cache::forget(self::CACHE_KEY_ALL_CODES);
+        Cache::forget(self::CACHE_KEY_SYSTEM_DEFAULT);
+    }
+
+    /**
+     * Raw setting.language from the active settings row (bypasses settings() cache).
+     */
+    public static function storedDefaultLanguageRaw(): ?string
+    {
+        try {
+            if (! Schema::hasTable('setting') || ! Schema::hasColumn('setting', 'language')) {
+                return null;
+            }
+
+            $raw = \DB::table('setting')->where('status', 'active')->value('language');
+            if ($raw === null || $raw === '') {
+                $raw = \DB::table('setting')->orderByDesc('id')->value('language');
+            }
+
+            return is_string($raw) && $raw !== '' ? $raw : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Language the HTML body is authored in (Google Translate source / pageLanguage).
+     */
+    public static function contentLocale(): string
+    {
+        $configured = self::normalizeLocaleCode((string) config('supported_locales.content', 'en')) ?? 'en';
+        $codes = self::activeLocaleCodes();
+        if (in_array($configured, $codes, true)) {
+            return $configured;
+        }
+
+        return in_array('en', $codes, true) ? 'en' : ($codes[0] ?? 'en');
     }
 
     /**
@@ -185,46 +223,79 @@ class SiteLanguage extends Model
     }
 
     /**
-     * Site-wide default locale from Admin → Configure (setting.language),
-     * constrained to active Site Languages.
+     * Read setting.language from the DB (bypasses the long-lived settings() cache).
+     */
+    public static function storedSiteLanguage(): ?string
+    {
+        try {
+            if (! Schema::hasTable('setting') || ! Schema::hasColumn('setting', 'language')) {
+                return null;
+            }
+
+            $raw = \DB::table('setting')->where('status', 'active')->value('language');
+            if ($raw === null || $raw === '') {
+                $raw = \DB::table('setting')->orderByDesc('id')->value('language');
+            }
+
+            return self::normalizeLocaleCode(is_string($raw) ? $raw : null);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Site-wide default locale from Admin → Configure (setting.language).
+     * Reads DB directly so a stale settings() cache cannot keep showing EN.
      */
     public static function systemDefaultLocale(): string
     {
-        $codes = self::activeLocaleCodes();
-        $fallback = in_array('en', $codes, true) ? 'en' : ($codes[0] ?? config('supported_locales.default', 'en'));
+        return Cache::remember(self::CACHE_KEY_SYSTEM_DEFAULT, 3600, static function () {
+            $codes = self::activeLocaleCodes();
+            $fallback = in_array('en', $codes, true)
+                ? 'en'
+                : ($codes[0] ?? config('supported_locales.default', 'en'));
 
-        $raw = null;
-        try {
-            if (function_exists('settings')) {
-                $raw = settings()->language ?? null;
+            $normalized = self::storedSiteLanguage();
+            if ($normalized === null) {
+                try {
+                    if (function_exists('settings')) {
+                        $normalized = self::normalizeLocaleCode(
+                            is_string(settings()->language ?? null) ? settings()->language : null
+                        );
+                    }
+                } catch (\Throwable $e) {
+                    $normalized = null;
+                }
             }
-        } catch (\Throwable $e) {
-            $raw = null;
-        }
 
-        $normalized = self::normalizeLocaleCode(is_string($raw) ? $raw : null);
-        if ($normalized !== null && in_array($normalized, $codes, true)) {
-            return $normalized;
-        }
+            // Honour Configure → Default language even if active-locale cache is stale.
+            if ($normalized !== null) {
+                return $normalized;
+            }
 
-        $cfgDefault = self::normalizeLocaleCode((string) config('supported_locales.default', 'en'));
-        if ($cfgDefault !== null && in_array($cfgDefault, $codes, true)) {
-            return $cfgDefault;
-        }
+            $cfgDefault = self::normalizeLocaleCode((string) config('supported_locales.default', 'en'));
+            if ($cfgDefault !== null && in_array($cfgDefault, $codes, true)) {
+                return $cfgDefault;
+            }
 
-        return $fallback;
+            return $fallback;
+        });
     }
 
     /**
      * Resolve which locale is active for the UI (matches selector keys).
+     *
+     * Explicit app choice (cookie) and user profile win. Google Translate's
+     * googtrans cookie must not override the site default — that kept hubs on EN
+     * after Configure → Default language was set to another locale.
      */
     public static function resolveActiveLocale(?string $userLocale, ?string $googtransRaw, ?string $khubLocale): string
     {
         $map = self::selectorMap();
         $codes = array_keys($map);
         $default = self::systemDefaultLocale();
-        if (! in_array($default, $codes, true)) {
-            $default = in_array('en', $codes, true) ? 'en' : ($codes[0] ?? 'en');
+        if ($codes !== [] && ! in_array($default, $codes, true)) {
+            $default = in_array('en', $codes, true) ? 'en' : ($codes[0] ?? $default);
         }
 
         if (is_string($khubLocale) && $khubLocale !== '' && in_array($khubLocale, $codes, true)) {
@@ -233,19 +304,6 @@ class SiteLanguage extends Model
 
         if (is_string($userLocale) && $userLocale !== '' && in_array($userLocale, $codes, true)) {
             return $userLocale;
-        }
-
-        if (is_string($googtransRaw) && $googtransRaw !== '') {
-            $parts = explode('/', $googtransRaw);
-            $g = $parts[2] ?? '';
-            if ($g !== '') {
-                foreach ($map as $loc => $meta) {
-                    $gc = $meta['google_code'] ?? $loc;
-                    if (strcasecmp($gc, $g) === 0 || strcasecmp((string) $loc, $g) === 0) {
-                        return $loc;
-                    }
-                }
-            }
         }
 
         return $default;

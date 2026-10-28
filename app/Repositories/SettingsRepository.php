@@ -550,6 +550,7 @@ class SettingsRepository
             DB::table('setting')->update(['language' => $resolvedSiteLanguage]);
             $settings->setAttribute('language', $resolvedSiteLanguage);
             $settings->syncOriginalAttribute('language');
+            \App\Models\SiteLanguage::flushCache();
         }
 
         DisposableEmailChecker::forgetCache();

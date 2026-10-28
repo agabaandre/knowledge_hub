@@ -9,6 +9,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Content / source language of server-rendered HTML (Google Translate pageLanguage)
+    |--------------------------------------------------------------------------
+    | Configure → Default language is the visitor UI default and may differ (e.g. fr).
+    | Keep this as the language most page copy is authored in (usually en).
+    */
+    'content' => env('CONTENT_LOCALE', 'en'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Right-to-left UI locales (layout direction; Google Translate unchanged)
     |--------------------------------------------------------------------------
     */
