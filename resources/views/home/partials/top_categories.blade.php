@@ -157,13 +157,13 @@
                     </div>
                     <div class="kh-key-section-card__content">
                         <div class="kh-key-section-card__head">
-                            <h3 class="kh-key-section-card__title">{{ $category['title'] }}</h3>
+                            <h3 class="kh-key-section-card__title"><span class="khub-i18n-text notranslate" @if(!empty($category['title_key'])) data-khub-i18n="{{ $category['title_key'] }}" @endif>{{ $category['title'] }}</span></h3>
                             @if ($statCount !== null)
                                 <span class="kh-key-section-card__badge">{{ number_format($statCount) }}</span>
                             @endif
                         </div>
                         @if (! empty($category['description']))
-                            <p class="kh-key-section-card__desc">{{ $category['description'] }}</p>
+                            <p class="kh-key-section-card__desc"><span class="khub-i18n-text notranslate" @if(!empty($category['description_key'])) data-khub-i18n="{{ $category['description_key'] }}" @endif>{{ $category['description'] }}</span></p>
                         @endif
                         <span class="kh-key-section-card__cta">
                             <span class="notranslate" data-khub-i18n="home_sections.explore">{{ __('home_sections.explore') }}</span>

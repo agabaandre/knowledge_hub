@@ -207,18 +207,18 @@
 <div class="container">
         <header class="authors-header">
             <h1>
-                <i class="fa fa-users me-2" aria-hidden="true"></i>Contributors &amp; Authors
+                <i class="fa fa-users me-2" aria-hidden="true"></i>{{ ui_t('frontend_pages.authors_title', 'Contributors & Authors') }}
                 @if(isset($authorsTotal) && $authorsTotal > 0)
-                    <small class="text-muted">({{ number_format($authorsTotal) }} total)</small>
+                    <small class="text-muted">{{ ui_t('frontend_pages.authors_total', '(:count total)', ['count' => number_format($authorsTotal)]) }}</small>
                 @elseif(isset($authors) && method_exists($authors, 'total'))
-                    <small class="text-muted">({{ number_format($authors->total()) }} total)</small>
+                    <small class="text-muted">{{ ui_t('frontend_pages.authors_total', '(:count total)', ['count' => number_format($authors->total())]) }}</small>
                 @endif
             </h1>
             <p class="authors-lead">
                 @if(!empty($authorsSearchTerm))
-                    Showing contributors matching <strong class="notranslate">{{ $authorsSearchTerm }}</strong>.
+                    {!! ui_t('frontend_pages.authors_matching', 'Showing contributors matching :term.', ['term' => '<strong class="notranslate">'.e($authorsSearchTerm).'</strong>']) !!}
                 @else
-                    Discover researchers, clinicians, ministries, and institutions sharing verified public health publications, resources, and forum expertise across Africa.
+                    {{ ui_t('frontend_pages.authors_intro', 'Discover researchers, clinicians, ministries, and institutions sharing verified public health publications, resources, and forum expertise across Africa.') }}
                 @endif
             </p>
         </header>
@@ -240,15 +240,15 @@
             @php $loadedAuthorCount = (($authors->currentPage() - 1) * $authors->perPage()) + $authors->count(); @endphp
             <div class="authors-infinite-footer py-3 text-center" id="authors-infinite-footer">
                 <p class="text-muted small mb-2" id="authors-infinite-status">
-                    Showing {{ number_format($loadedAuthorCount) }} of {{ number_format($authors->total()) }} contributors
+                    {{ ui_t('frontend_pages.showing_of_contributors', 'Showing :loaded of :total contributors', ['loaded' => number_format($loadedAuthorCount), 'total' => number_format($authors->total())]) }}
                 </p>
                 @if($authors->hasMorePages())
                     <div id="authors-infinite-sentinel" class="authors-infinite-sentinel" aria-hidden="true" style="height:1px;"></div>
                     <div id="authors-infinite-loader" class="authors-infinite-loader d-none" aria-live="polite">
-                        <i class="fa fa-spinner fa-spin me-1"></i>Loading more contributors…
+                        <i class="fa fa-spinner fa-spin me-1"></i>{{ ui_t('frontend_pages.loading_more_contributors', 'Loading more contributors…') }}
                     </div>
                 @else
-                    <p class="text-muted small mb-0" id="authors-infinite-complete">All contributors loaded</p>
+                    <p class="text-muted small mb-0" id="authors-infinite-complete">{{ ui_t('frontend_pages.all_contributors_loaded', 'All contributors loaded') }}</p>
                 @endif
             </div>
         @elseif($authors instanceof \Illuminate\Pagination\AbstractPaginator && $authors->hasPages())
@@ -264,8 +264,8 @@
         @else
         <div class="no-results">
             <i class="fa fa-users"></i>
-            <h3>No Contributors Found</h3>
-            <p>No contributors match your search criteria.</p>
+            <h3>{{ ui_t('frontend_pages.no_contributors', 'No Contributors Found') }}</h3>
+            <p>{{ ui_t('frontend_pages.no_contributors_help', 'No contributors match your search criteria.') }}</p>
         </div>
         @endif
 </div>
@@ -278,8 +278,8 @@
         enabled: @json((bool) ($authorsInfiniteScroll ?? false)),
         pageUrl: @json(route('browse.authors.page'))
     };
-    window.AUTHORS_INFINITE_STATUS_COMPLETE = 'All contributors loaded';
-    window.AUTHORS_INFINITE_STATUS_ERROR = 'Could not load more contributors. Tap to retry.';
+    window.AUTHORS_INFINITE_STATUS_COMPLETE = @json(ui_t('frontend_pages.all_contributors_loaded', 'All contributors loaded'));
+    window.AUTHORS_INFINITE_STATUS_ERROR = @json(ui_t('frontend_pages.contributors_load_error', 'Could not load more contributors. Tap to retry.'));
 </script>
 <script src="{{ asset('js/authors-index-infinite.js') }}?v={{ @filemtime(public_path('js/authors-index-infinite.js')) }}"></script>
 @endsection

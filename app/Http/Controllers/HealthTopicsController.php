@@ -39,9 +39,12 @@ class HealthTopicsController extends Controller
         $siteName = settings()->site_name ?? 'Africa CDC Knowledge Hub';
         $siteUrl = rtrim((string) config('app.url'), '/') ?: url('/');
 
-        $pageTitle = 'Health Topics — '.$siteName;
+        $pageTitle = __('frontend_pages.health_topics_title').' — '.$siteName;
         $pageDescription = Str::limit(
-            'Browse '.$totalTopics.' health topics—emergencies, diseases, and public health themes. Find publications, resources, and community discussions on '.$siteName.'.',
+            __('frontend_pages.health_topics_seo_description', [
+                'count' => $totalTopics,
+                'site' => $siteName,
+            ]),
             160
         );
         $pageKeywords = trim(
@@ -77,7 +80,7 @@ class HealthTopicsController extends Controller
         $healthTopicsJsonLd = [
             '@context' => 'https://schema.org',
             '@type' => 'CollectionPage',
-            'name' => 'Health Topics',
+            'name' => __('frontend_pages.health_topics_title'),
             'description' => $pageDescription,
             'url' => $canonicalUrl,
             'isPartOf' => [
@@ -96,8 +99,8 @@ class HealthTopicsController extends Controller
             '@context' => 'https://schema.org',
             '@type' => 'BreadcrumbList',
             'itemListElement' => [
-                ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => url('/')],
-                ['@type' => 'ListItem', 'position' => 2, 'name' => 'Health Topics', 'item' => $canonicalUrl],
+                ['@type' => 'ListItem', 'position' => 1, 'name' => __('frontend_pages.home'), 'item' => url('/')],
+                ['@type' => 'ListItem', 'position' => 2, 'name' => __('frontend_pages.health_topics_title'), 'item' => $canonicalUrl],
             ],
         ];
 

@@ -79,10 +79,10 @@
                         $forumEngagementCount = (int) ($author->forum_engagement_total ?? 0);
                         $totalContributions = (int) ($author->total_contributions ?? ($publicationCount + $forumEngagementCount));
                     @endphp
-                    {{ $totalContributions }} {{ $totalContributions == 1 ? 'Contribution' : 'Contributions' }}
+                    {{ $totalContributions }} {{ $totalContributions == 1 ? ui_t('frontend_pages.contribution_singular', 'Contribution') : ui_t('frontend_pages.contribution_plural', 'Contributions') }}
                 </span>
                 <a href="{{ author_publications_url($author) }}" class="view-link" title="View all resources by {{ $author->name }}">
-                    View profile <i class="fa fa-arrow-right ms-1" aria-hidden="true"></i>
+                    {{ ui_t('frontend_pages.view_profile', 'View profile') }} <i class="fa fa-arrow-right ms-1" aria-hidden="true"></i>
                 </a>
             </div>
         </article>

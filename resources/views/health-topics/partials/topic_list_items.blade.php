@@ -18,7 +18,7 @@
         <div class="letter-group" id="letter-{{ $letter }}" data-letter="{{ $letter }}">
             <div class="letter-header">
                 <h2 class="letter-title">{{ $letter }}</h2>
-                <span class="letter-count">{{ $countForLetter }} {{ $countForLetter === 1 ? 'topic' : 'topics' }}</span>
+                <span class="letter-count">{{ $countForLetter }} {{ $countForLetter === 1 ? ui_t('frontend_pages.topic_singular', 'topic') : ui_t('frontend_pages.topic_plural', 'topics') }}</span>
             </div>
             <div class="topics-grid">
     @endif
@@ -35,13 +35,13 @@
                     </p>
                 @else
                     <p class="topic-description text-muted">
-                        Click to view resources and publications
+                        {{ ui_t('frontend_pages.click_to_view_resources', 'Click to view resources and publications') }}
                     </p>
                 @endif
             </div>
             <div class="topic-action">
                 <span class="action-btn">
-                    View <i class="fa fa-arrow-right"></i>
+                    {{ ui_t('frontend_pages.view', 'View') }} <i class="fa fa-arrow-right"></i>
                 </span>
             </div>
         </div>

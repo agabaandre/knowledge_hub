@@ -16,16 +16,16 @@ class ContributorsSeo
         $siteName = settings()->site_name ?? 'Africa Health Knowledge Hub';
 
         if ($searchTerm !== null && $searchTerm !== '') {
-            $base = 'Contributors matching "'.Str::limit($searchTerm, 40).'"';
+            $base = __('frontend_pages.authors_seo_matching', ['term' => Str::limit($searchTerm, 40)]);
         } else {
-            $base = 'Contributors & Authors Directory';
+            $base = __('frontend_pages.authors_seo_directory');
             if ($total > 0) {
-                $base .= ' | '.number_format($total).' Experts & Institutions';
+                $base .= ' | '.__('frontend_pages.authors_seo_experts', ['count' => number_format($total)]);
             }
         }
 
         if ($currentPage > 1) {
-            $base .= ' — Page '.$currentPage;
+            $base .= ' — '.__('frontend_pages.page_n', ['page' => $currentPage]);
         }
 
         return $base.' — '.$siteName;
@@ -37,20 +37,22 @@ class ContributorsSeo
 
         if ($searchTerm !== null && $searchTerm !== '') {
             return Str::limit(
-                'Search results for contributors named or affiliated with "'.$searchTerm.'" on '.$siteName.'. '
-                .'View publications, forum activity, and profiles.',
+                __('frontend_pages.authors_seo_matching_desc', [
+                    'term' => $searchTerm,
+                    'site' => $siteName,
+                ]),
                 160
             );
         }
 
         $parts = [
-            'Discover researchers, clinicians, ministries, and institutions contributing public health knowledge on '.$siteName,
+            __('frontend_pages.authors_seo_discover', ['site' => $siteName]),
         ];
         if ($total > 0) {
-            array_unshift($parts, number_format($total).' verified contributors sharing publications and forum expertise');
+            array_unshift($parts, __('frontend_pages.authors_seo_verified', ['count' => number_format($total)]));
         }
         if ($currentPage > 1) {
-            $parts[] = 'Page '.$currentPage;
+            $parts[] = __('frontend_pages.page_n', ['page' => $currentPage]);
         }
 
         return Str::limit(implode('. ', $parts).'.', 160);

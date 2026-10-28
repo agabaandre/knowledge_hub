@@ -156,31 +156,39 @@ class HomeController extends Controller
 	private function get_categories() {
 		return [
 			[
-				"title" => "Health Topics",
+				"title" => __('home_sections.card_health_topics'),
+				"title_key" => 'home_sections.card_health_topics',
 				"icon" => "fa fa-shield-alt",
 				"link" => "health-topics",
-				"description" => "Explore diseases, conditions, and key health issues.",
+				"description" => __('home_sections.card_health_topics_desc'),
+				"description_key" => 'home_sections.card_health_topics_desc',
 				"stats" => $this->themesRepo->count()
 			],
 			[
-				"title" => "Resource Contributing Sources",
+				"title" => __('home_sections.card_contributing_sources'),
+				"title_key" => 'home_sections.card_contributing_sources',
 				"icon" => "fa fa-pen-nib",
 				"link" => "browse/authors",
-				"description" => "Organizations and authors that provide verified resources.",
+				"description" => __('home_sections.card_contributing_sources_desc'),
+				"description_key" => 'home_sections.card_contributing_sources_desc',
 				"stats" => $this->authorsRepo->count()
 			],
 			[
-				"title" => "Geographical Coverage",
+				"title" => __('home_sections.card_geographical_coverage'),
+				"title_key" => 'home_sections.card_geographical_coverage',
 				"icon" => "fa fa-map-marker-alt",
 				"link" => "browse/areas",
-				"description" => "View data and documents by regions and countries.",
+				"description" => __('home_sections.card_geographical_coverage_desc'),
+				"description_key" => 'home_sections.card_geographical_coverage_desc',
 				"stats" => $this->areasRepo->count()
 			],
 			[
-				"title" => "Public Discussion Forums",
+				"title" => __('home_sections.card_discussion_forums'),
+				"title_key" => 'home_sections.card_discussion_forums',
 				"icon" => "fa fa-comments",
 				"link" => "forums",
-				"description" => "Join discussions on pressing health topics and challenges.",
+				"description" => __('home_sections.card_discussion_forums_desc'),
+				"description_key" => 'home_sections.card_discussion_forums_desc',
 				"stats" => $this->forumsRepo->count()
 			]
 		];

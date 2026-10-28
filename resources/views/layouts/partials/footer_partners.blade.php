@@ -56,7 +56,7 @@
 </style>
 <div class="footer-partners" id="khub-footer-partners">
     <div class="container">
-        <span class="footer-partners-label">{{ __('ui_body.footer_partners') }}</span>
+        <span class="footer-partners-label notranslate" data-khub-i18n="ui_body.footer_partners">{{ __('ui_body.footer_partners') }}</span>
         <div class="footer-partners-list">
             @foreach($footerPartners as $partner)
                 @if($partner['url'] !== '')

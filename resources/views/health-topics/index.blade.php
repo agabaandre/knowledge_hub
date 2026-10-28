@@ -14,13 +14,13 @@
         <div class="page-header">
             <div class="header-content">
                 <div class="header-title-section">
-                    <h1><i class="fa fa-stethoscope me-2"></i>Health Topics</h1>
-                    <p class="header-subtitle">Explore health emergency topics and access relevant resources and publications</p>
+                    <h1><i class="fa fa-stethoscope me-2"></i>{{ ui_t('frontend_pages.health_topics_title', 'Health Topics') }}</h1>
+                    <p class="header-subtitle">{{ ui_t('frontend_pages.health_topics_intro', 'Explore health emergency topics and access relevant resources and publications') }}</p>
                 </div>
                 <div class="header-stats">
                     <div class="stat-badge">
                         <span class="stat-number">{{ $totalTopics }}</span>
-                        <span class="stat-label">Topics</span>
+                        <span class="stat-label">{{ ui_t('frontend_pages.topics', 'Topics') }}</span>
                     </div>
             </div>
         </div>
@@ -33,7 +33,7 @@
                 <input type="text" 
                        id="topic-search" 
                        class="search-input" 
-                       placeholder="Search health topics by name...">
+                       placeholder="{{ ui_t('frontend_pages.search_health_topics_placeholder', 'Search health topics by name...') }}">
                 <button class="search-clear" id="clear-search" style="display: none;">
                     <i class="fa fa-times"></i>
                 </button>
@@ -43,7 +43,7 @@
         <!-- Alphabetical Filter -->
         @if(($availableLetters ?? collect())->count() > 0)
         <div class="alphabet-filter">
-            <div class="filter-label">Filter by letter:</div>
+            <div class="filter-label">{{ ui_t('frontend_pages.filter_by_letter', 'Filter by letter:') }}</div>
             <div class="filter-letters">
                 @foreach($availableLetters as $letter)
                     <a href="#letter-{{ $letter }}" class="filter-letter" data-letter="{{ $letter }}">
@@ -74,7 +74,7 @@
                     <div class="letter-group" id="letter-{{ $letter }}" data-letter="{{ $letter }}">
                         <div class="letter-header">
                             <h2 class="letter-title">{{ $letter }}</h2>
-                            <span class="letter-count">{{ $tags->count() }} {{ $tags->count() === 1 ? 'topic' : 'topics' }}</span>
+                            <span class="letter-count">{{ $tags->count() }} {{ $tags->count() === 1 ? ui_t('frontend_pages.topic_singular', 'topic') : ui_t('frontend_pages.topic_plural', 'topics') }}</span>
                         </div>
                         <div class="topics-grid">
                             @foreach($tags as $tag)
@@ -91,13 +91,13 @@
                                                 </p>
                                             @else
                                                 <p class="topic-description text-muted">
-                                                    Click to view resources and publications
+                                                    {{ ui_t('frontend_pages.click_to_view_resources', 'Click to view resources and publications') }}
                                                 </p>
                                             @endif
                                         </div>
                                         <div class="topic-action">
                                             <span class="action-btn">
-                                                View <i class="fa fa-arrow-right"></i>
+                                                {{ ui_t('frontend_pages.view', 'View') }} <i class="fa fa-arrow-right"></i>
                                             </span>
                                         </div>
                                     </div>
@@ -111,8 +111,8 @@
                     <div class="empty-icon">
                         <i class="fa fa-info-circle"></i>
                     </div>
-                    <h3>No Health Topics Available</h3>
-                    <p>There are currently no health emergency topics configured in the system.</p>
+                    <h3>{{ ui_t('frontend_pages.no_health_topics', 'No Health Topics Available') }}</h3>
+                    <p>{{ ui_t('frontend_pages.no_health_topics_help', 'There are currently no health emergency topics configured in the system.') }}</p>
                 </div>
             @endif
         </div>
@@ -120,15 +120,15 @@
         @if(($healthTopicsInfiniteScroll ?? false) && isset($topicsPaginator) && $topicsPaginator instanceof \Illuminate\Pagination\AbstractPaginator && $topicsPaginator->total() > 0)
             <div class="health-topics-infinite-footer py-3 text-center" id="health-topics-infinite-footer">
                 <p class="text-muted small mb-2" id="health-topics-infinite-status">
-                    Showing {{ number_format($loadedTopicCount ?? 0) }} of {{ number_format($topicsPaginator->total()) }} topics
+                    {{ ui_t('frontend_pages.showing_of_topics', 'Showing :loaded of :total topics', ['loaded' => number_format($loadedTopicCount ?? 0), 'total' => number_format($topicsPaginator->total())]) }}
                 </p>
                 @if($topicsPaginator->hasMorePages())
                     <div id="health-topics-infinite-sentinel" class="health-topics-infinite-sentinel" aria-hidden="true"></div>
                     <div id="health-topics-infinite-loader" class="health-topics-infinite-loader d-none" aria-live="polite">
-                        <i class="fa fa-spinner fa-spin me-1"></i>Loading more topics…
+                        <i class="fa fa-spinner fa-spin me-1"></i>{{ ui_t('frontend_pages.loading_more_topics', 'Loading more topics…') }}
                     </div>
                 @else
-                    <p class="text-muted small mb-0" id="health-topics-infinite-complete">All topics loaded</p>
+                    <p class="text-muted small mb-0" id="health-topics-infinite-complete">{{ ui_t('frontend_pages.all_topics_loaded', 'All topics loaded') }}</p>
                 @endif
             </div>
         @endif
@@ -493,8 +493,8 @@
         enabled: @json((bool) ($healthTopicsInfiniteScroll ?? false)),
         pageUrl: @json(route('health-topics.page'))
     };
-    window.HEALTH_TOPICS_INFINITE_STATUS_COMPLETE = 'All topics loaded';
-    window.HEALTH_TOPICS_INFINITE_STATUS_ERROR = 'Could not load more topics. Tap to retry.';
+    window.HEALTH_TOPICS_INFINITE_STATUS_COMPLETE = @json(ui_t('frontend_pages.all_topics_loaded', 'All topics loaded'));
+    window.HEALTH_TOPICS_INFINITE_STATUS_ERROR = @json(ui_t('frontend_pages.topics_load_error', 'Could not load more topics. Tap to retry.'));
 </script>
 <script src="{{ asset('js/health-topics-infinite.js') }}?v={{ @filemtime(public_path('js/health-topics-infinite.js')) }}"></script>
 <script>
