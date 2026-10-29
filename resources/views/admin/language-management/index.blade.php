@@ -56,6 +56,10 @@
                 <button type="button" class="btn btn-outline-danger btn-sm d-none" id="lm-bulk-cancel-btn">
                     <i class="fa fa-stop me-1"></i>{{ __('admin_language_management.bulk_cancel') }}
                 </button>
+                <button type="button" class="btn btn-outline-warning btn-sm" id="lm-clear-english-btn"
+                        title="{{ __('admin_language_management.clear_english_title') }}">
+                    <i class="fa fa-eraser me-1"></i>{{ __('admin_language_management.clear_english') }}
+                </button>
             </div>
             <div id="lm-bulk-progress" class="d-none mt-3">
                 <div class="d-flex justify-content-between small mb-1">
@@ -121,6 +125,7 @@
     var aiTranslateUrl = @json(route('admin.language-management.ai-translate'));
     var aiTranslateSaveUrl = @json(route('admin.language-management.ai-translate-save'));
     var bulkPlanUrl = @json(route('admin.language-management.bulk-plan'));
+    var clearEnglishUrl = @json(route('admin.language-management.clear-english-overrides'));
     var copyEnglishUrl = @json(route('admin.language-management.copy-english'));
     var csrfToken = @json(csrf_token());
     var i18n = {
@@ -152,7 +157,10 @@
         bulkFailed: @json(__('admin_language_management.bulk_failed')),
         bulkPlanFailed: @json(__('admin_language_management.bulk_plan_failed')),
         searchShowing: @json(__('admin_language_management.search_showing')),
-        searchNoResults: @json(__('admin_language_management.search_no_results'))
+        searchNoResults: @json(__('admin_language_management.search_no_results')),
+        confirmClearEnglish: @json(__('admin_language_management.confirm_clear_english')),
+        clearEnglishFailed: @json(__('admin_language_management.clear_english_failed')),
+        clearEnglish: @json(__('admin_language_management.clear_english'))
     };
 
     // Small AI payloads keep each request fast and avoid gateway / PHP timeouts.
@@ -511,10 +519,15 @@
             var filled = 0;
             inputs.forEach(function(inp) {
                 var key = inp.getAttribute('data-key');
-                if (key && Object.prototype.hasOwnProperty.call(map, key)) {
-                    inp.value = map[key];
-                    filled++;
-                }
+                if (!key || !Object.prototype.hasOwnProperty.call(map, key)) return;
+                var next = String(map[key] == null ? '' : map[key]).trim();
+                if (!next) return;
+                var row = inp.closest('tr');
+                var english = row ? String(row.getAttribute('data-english') || '').trim() : '';
+                // Skip English fallbacks so Save does not override packaged locale files.
+                if (english && next === english) return;
+                inp.value = next;
+                filled++;
             });
             return filled;
         }
@@ -818,6 +831,52 @@
             bulkCancelRequested = true;
             bulkCancelBtn.disabled = true;
             if (bulkStatus) bulkStatus.textContent = i18n.bulkCancelled;
+        });
+    }
+
+    var clearEnglishBtn = document.getElementById('lm-clear-english-btn');
+    if (clearEnglishBtn) {
+        clearEnglishBtn.addEventListener('click', function() {
+            var locale = localeEl.value;
+            if (!locale || locale === 'en') {
+                showFlash(i18n.selectNonEnglishAi, 'danger');
+                return;
+            }
+            if (!confirm(i18n.confirmClearEnglish)) {
+                return;
+            }
+
+            clearEnglishBtn.disabled = true;
+            var prevHtml = clearEnglishBtn.innerHTML;
+            clearEnglishBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i>' + i18n.clearEnglish;
+
+            fetch(clearEnglishUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ locale: locale, scope: 'locale' })
+            })
+            .then(parseJsonResponse)
+            .then(function(wrapped) {
+                var data = wrapped.data;
+                if (!wrapped.ok || !data || !data.ok) {
+                    throw new Error((data && data.message) || i18n.clearEnglishFailed);
+                }
+                showFlash(data.message || i18n.clearEnglish, 'success');
+                loadGrid();
+            })
+            .catch(function(err) {
+                showFlash((err && err.message) || i18n.clearEnglishFailed, 'danger');
+            })
+            .finally(function() {
+                clearEnglishBtn.disabled = false;
+                clearEnglishBtn.innerHTML = prevHtml;
+            });
         });
     }
 })();

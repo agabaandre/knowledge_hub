@@ -59,4 +59,10 @@ return [
     'search_showing' => 'Showing :visible of :total',
     'search_no_results' => 'No rows match your search.',
 
+    'clear_english' => 'Clear English overrides',
+    'clear_english_title' => 'Remove Language Management values that are still English for this locale. Packaged translations (e.g. French files) will show again.',
+    'confirm_clear_english' => 'Clear English storage overrides for this language across all sections? Packaged locale files will take over where overrides were still English. Real translations are kept.',
+    'clear_english_failed' => 'Could not clear English overrides.',
+    'clear_english_done' => 'Cleared :cleared English override(s). Packaged translations should appear again — hard-refresh the public site.',
+
 ];

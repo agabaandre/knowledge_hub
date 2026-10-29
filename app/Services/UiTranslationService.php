@@ -233,16 +233,51 @@ class UiTranslationService
     }
 
     /**
+     * Drop AI/copy values that are empty or still identical to English so they cannot
+     * override packaged locale files (common production failure after AI fallback).
+     *
+     * @param  array<string, string>  $partial
+     * @return array<string, string>
+     */
+    public function rejectEnglishIdentical(string $group, array $partial): array
+    {
+        $en = $this->loadEnglishGroup($group);
+        $out = [];
+        foreach ($partial as $key => $value) {
+            if (! is_string($key) || ! array_key_exists($key, $en)) {
+                continue;
+            }
+            if (! is_string($value)) {
+                $value = (string) $value;
+            }
+            $value = trim($value);
+            if ($value === '') {
+                continue;
+            }
+            if ($value === $en[$key]) {
+                continue;
+            }
+            $out[$key] = $value;
+        }
+
+        return $out;
+    }
+
+    /**
      * Merge partial translations into the stored locale group without wiping other keys.
      *
      * @param  array<string, string>  $partial
      * @return int Number of keys written from $partial
      */
-    public function mergeGroupTranslations(string $locale, string $group, array $partial): int
+    public function mergeGroupTranslations(string $locale, string $group, array $partial, bool $skipEnglishIdentical = true): int
     {
         $en = $this->loadEnglishGroup($group);
         if ($en === []) {
             throw new \RuntimeException('English source file missing for group: '.$group);
+        }
+
+        if ($skipEnglishIdentical) {
+            $partial = $this->rejectEnglishIdentical($group, $partial);
         }
 
         $raw = $this->loadRawLocaleGroup($locale, $group);
@@ -267,9 +302,109 @@ class UiTranslationService
             $written++;
         }
 
+        if ($written === 0) {
+            return 0;
+        }
+
         $this->saveGroup($locale, $group, $out);
 
         return $written;
+    }
+
+    /**
+     * Remove Language Management storage values that are still English (or empty).
+     * Packaged locale files then show again — fixes online sites where AI fallback
+     * wrote English stubs that overrode good packaged French/etc.
+     *
+     * @return array{cleared: int, files_updated: int, files_deleted: int}
+     */
+    public function clearEnglishOverrides(string $locale, ?string $group = null): array
+    {
+        if ($locale === 'en') {
+            return ['cleared' => 0, 'files_updated' => 0, 'files_deleted' => 0];
+        }
+
+        $groups = $group === null || $group === ''
+            ? array_keys($this->groups())
+            : [$group];
+
+        $cleared = 0;
+        $updated = 0;
+        $deleted = 0;
+
+        foreach ($groups as $name) {
+            if (! array_key_exists($name, $this->groups()) && $group !== null) {
+                continue;
+            }
+
+            $path = $this->storageLocalePath($locale, $name);
+            if (! File::exists($path)) {
+                continue;
+            }
+
+            $en = $this->loadEnglishGroup($name);
+            $raw = $this->loadRawLocaleGroup($locale, $name);
+            $kept = [];
+            $removed = 0;
+
+            foreach ($raw as $key => $value) {
+                if (! is_string($key)) {
+                    continue;
+                }
+                if (! is_string($value)) {
+                    $value = (string) $value;
+                }
+                $trim = trim($value);
+                if ($trim === '') {
+                    $removed++;
+                    continue;
+                }
+                if (array_key_exists($key, $en) && $trim === $en[$key]) {
+                    $removed++;
+                    continue;
+                }
+                $kept[$key] = $value;
+            }
+
+            if ($removed === 0) {
+                continue;
+            }
+
+            $cleared += $removed;
+
+            if ($kept === []) {
+                File::delete($path);
+                $deleted++;
+            } else {
+                $dir = dirname($path);
+                if (! File::isDirectory($dir)) {
+                    File::makeDirectory($dir, 0755, true);
+                }
+                $export = "<?php\n\nreturn ".var_export($kept, true).";\n";
+                if (File::put($path, $export) === false) {
+                    throw new \RuntimeException('Could not write translation file: '.$path);
+                }
+                if (function_exists('opcache_invalidate')) {
+                    @opcache_invalidate($path, true);
+                }
+                $updated++;
+            }
+
+            UiTranslationCache::invalidateAfterSave($locale, $name);
+        }
+
+        UiTranslationCache::flushAll();
+        try {
+            app('translator')->setLoaded([]);
+        } catch (\Throwable $e) {
+            // ignore
+        }
+
+        return [
+            'cleared' => $cleared,
+            'files_updated' => $updated,
+            'files_deleted' => $deleted,
+        ];
     }
 
     /**

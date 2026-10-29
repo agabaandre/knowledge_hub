@@ -85,11 +85,26 @@ class LanguageManagementController extends Controller
             || $request->expectsJson()
             || $request->header('X-Requested-With') === 'XMLHttpRequest';
 
+        $translations = $validated['translations'];
+        // Blank out values still identical to English so packaged locale files are not overridden.
+        if ($validated['locale'] !== 'en') {
+            $english = $this->uiTranslations->loadEnglishGroup($validated['group']);
+            foreach ($translations as $key => $value) {
+                if (! is_string($value)) {
+                    continue;
+                }
+                $en = $english[$key] ?? null;
+                if (is_string($en) && trim($value) === $en) {
+                    $translations[$key] = '';
+                }
+            }
+        }
+
         try {
             $this->uiTranslations->saveGroup(
                 $validated['locale'],
                 $validated['group'],
-                $validated['translations']
+                $translations
             );
         } catch (\Throwable $e) {
             report($e);
@@ -360,11 +375,29 @@ class LanguageManagementController extends Controller
         }
 
         $translations = $result['translations'] ?? [];
+        // Never persist English fallbacks — they override packaged locale files online.
+        $translations = $this->uiTranslations->rejectEnglishIdentical(
+            $validated['group'],
+            is_array($translations) ? $translations : []
+        );
+
+        if ($translations === []) {
+            return response()->json([
+                'ok' => true,
+                'skipped' => true,
+                'translated' => 0,
+                'saved' => 0,
+                'requested' => count($english),
+                'message' => __('admin_language_management.bulk_chunk_skipped'),
+            ]);
+        }
+
         try {
             $saved = $this->uiTranslations->mergeGroupTranslations(
                 $validated['locale'],
                 $validated['group'],
-                $translations
+                $translations,
+                true
             );
         } catch (\Throwable $e) {
             report($e);
@@ -384,6 +417,57 @@ class LanguageManagementController extends Controller
             'requested' => count($english),
             'locale' => $validated['locale'],
             'group' => $validated['group'],
+        ]);
+    }
+
+    /**
+     * Remove storage overrides that are still English so packaged locale files show again.
+     */
+    public function clearEnglishOverrides(Request $request)
+    {
+        $groups = array_keys($this->uiTranslations->groups());
+        $locales = $this->uiTranslations->supportedLocales();
+
+        $validated = $request->validate([
+            'locale' => ['required', 'string', Rule::in($locales)],
+            'scope' => ['sometimes', 'string', Rule::in(['group', 'locale'])],
+            'group' => ['nullable', 'string', Rule::in($groups)],
+        ]);
+
+        if ($validated['locale'] === 'en') {
+            return response()->json([
+                'ok' => false,
+                'message' => __('admin_language_management.select_non_english_ai'),
+            ], 422);
+        }
+
+        $scope = $validated['scope'] ?? 'locale';
+        $group = $scope === 'group' ? ($validated['group'] ?? null) : null;
+
+        try {
+            $result = $this->uiTranslations->clearEnglishOverrides(
+                $validated['locale'],
+                $group
+            );
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'ok' => false,
+                'message' => __('admin_language_management.clear_english_failed').' '.$e->getMessage(),
+            ], 500);
+        }
+
+        return response()->json([
+            'ok' => true,
+            'locale' => $validated['locale'],
+            'group' => $group,
+            'cleared' => $result['cleared'],
+            'files_updated' => $result['files_updated'],
+            'files_deleted' => $result['files_deleted'],
+            'message' => __('admin_language_management.clear_english_done', [
+                'cleared' => $result['cleared'],
+            ]),
         ]);
     }
 
