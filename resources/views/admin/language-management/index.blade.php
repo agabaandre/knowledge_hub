@@ -698,7 +698,56 @@
         var totalKeys = 0;
         var failed = false;
 
-        fetchBulkPlan(scope)
+        // Clear English storage stubs first so packaged FR/etc. are visible and AI only fills real gaps.
+        var clearPromise = Promise.resolve();
+        if (scope === 'sections' && localeEl.value && localeEl.value !== 'en') {
+            clearPromise = fetch(clearEnglishUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ locale: localeEl.value, scope: 'locale' })
+            }).then(parseJsonResponse).then(function(wrapped) {
+                var data = wrapped.data;
+                if (wrapped.ok && data && data.ok) {
+                    appendBulkLog(data.message || i18n.clearEnglish);
+                }
+            }).catch(function() { /* non-fatal */ });
+        } else if (scope === 'all_languages') {
+            var localesToClear = [];
+            Array.prototype.forEach.call(localeEl.options, function(opt) {
+                if (opt.value && opt.value !== 'en') localesToClear.push(opt.value);
+            });
+            clearPromise = localesToClear.reduce(function(chain, loc) {
+                return chain.then(function() {
+                    return fetch(clearEnglishUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({ locale: loc, scope: 'locale' })
+                    }).then(parseJsonResponse).then(function(wrapped) {
+                        var data = wrapped.data;
+                        if (wrapped.ok && data && data.ok) {
+                            appendBulkLog((loc.toUpperCase() + ': ') + (data.message || i18n.clearEnglish));
+                        }
+                    }).catch(function() { /* non-fatal */ });
+                });
+            }, Promise.resolve());
+        }
+
+        clearPromise
+            .then(function() {
+                return fetchBulkPlan(scope);
+            })
             .then(function(wrapped) {
                 var data = wrapped.data;
                 if (!wrapped.ok || !data || !data.ok) {

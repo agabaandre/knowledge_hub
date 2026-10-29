@@ -83,8 +83,21 @@ class MergingTranslationLoader extends FileLoader
                     if (! is_string($key)) {
                         continue;
                     }
-                    // Non-empty Language Management values always override packaged + DB seeds.
+                    // Non-empty Language Management values override packaged + DB seeds…
                     if (! is_string($value) || trim($value) === '') {
+                        continue;
+                    }
+
+                    // …except English stubs left by failed AI/copy. Those must not beat a
+                    // real packaged translation (common FR production failure: PT/AR OK, FR English).
+                    $englishVal = $english[$key] ?? null;
+                    $packagedVal = $localePackaged[$key] ?? null;
+                    if (is_string($englishVal)
+                        && $value === $englishVal
+                        && is_string($packagedVal)
+                        && trim($packagedVal) !== ''
+                        && $packagedVal !== $englishVal
+                    ) {
                         continue;
                     }
 

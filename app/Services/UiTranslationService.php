@@ -215,8 +215,15 @@ class UiTranslationService
             $packagedVal = $packaged[$key] ?? null;
 
             if (is_string($storageVal) && trim($storageVal) !== '') {
-                $out[$key] = $storageVal;
-                continue;
+                // Ignore English storage stubs when packaged locale already has a real translation.
+                $isEnglishStub = $storageVal === $default
+                    && is_string($packagedVal)
+                    && trim($packagedVal) !== ''
+                    && $packagedVal !== $default;
+                if (! $isEnglishStub) {
+                    $out[$key] = $storageVal;
+                    continue;
+                }
             }
 
             if (is_string($packagedVal) && trim($packagedVal) !== '') {
