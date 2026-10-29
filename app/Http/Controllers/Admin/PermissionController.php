@@ -47,13 +47,29 @@ class PermissionController extends Controller
     */
     public function users(Request $request)
     {
-        $data['roles'] = Role::all();
-        // Prefer unique level names so duplicate seeded rows (Viewer/Country/…) do not confuse the UI.
+        $data['roles'] = Role::query()->orderBy('name')->get();
+        // Prefer unique level names so duplicate seeded rows (Viewer/Country/…) do not confuse the UI,
+        // but keep every id that is still assigned to a user so Edit User can pre-select Access Level.
+        $assignedLevelIds = DB::table('users')
+            ->whereNotNull('access_level_id')
+            ->distinct()
+            ->pluck('access_level_id')
+            ->all();
         $data['levels'] = AccessLevel::query()
             ->orderBy('id')
             ->get()
-            ->unique(function ($level) {
-                return strtolower((string) $level->level_name);
+            ->filter(function ($level) use ($assignedLevelIds) {
+                static $seen = [];
+                $name = strtolower((string) $level->level_name);
+                if (in_array((int) $level->id, array_map('intval', $assignedLevelIds), true)) {
+                    return true;
+                }
+                if (isset($seen[$name])) {
+                    return false;
+                }
+                $seen[$name] = true;
+
+                return true;
             })
             ->values();
         
@@ -69,7 +85,8 @@ class PermissionController extends Controller
         $verifiedFilter = $request->input('verified');
 
         $accessLogSub = '(SELECT user_id, MAX(created_at) AS access_last_at FROM access_logs WHERE user_id IS NOT NULL AND user_id != \'\' GROUP BY user_id) AS al';
-        $spatieUserSql = 'App\\Models\\User';
+        // Match current and legacy morph types so existing roles still appear in Edit User.
+        $spatieUserTypes = "('App\\\\Models\\\\User','App\\\\User')";
 
         $usersQuery = DB::table('users')
             ->leftJoin('country', 'users.country_id', '=', 'country.id')
@@ -88,8 +105,8 @@ class PermissionController extends Controller
                 'access_levels.level_name as access_level_name',
                 'al.access_last_at',
                 'author.name as author_name',
-                DB::raw("(SELECT r.id FROM model_has_roles mhr INNER JOIN roles r ON r.id = mhr.role_id WHERE mhr.model_id = users.id AND mhr.model_type = '".$spatieUserSql."' ORDER BY r.id ASC LIMIT 1) AS role_id"),
-                DB::raw("(SELECT r.name FROM model_has_roles mhr INNER JOIN roles r ON r.id = mhr.role_id WHERE mhr.model_id = users.id AND mhr.model_type = '".$spatieUserSql."' ORDER BY r.id ASC LIMIT 1) AS role_name")
+                DB::raw("(SELECT r.id FROM model_has_roles mhr INNER JOIN roles r ON r.id = mhr.role_id WHERE mhr.model_id = users.id AND mhr.model_type IN {$spatieUserTypes} ORDER BY r.id ASC LIMIT 1) AS role_id"),
+                DB::raw("(SELECT r.name FROM model_has_roles mhr INNER JOIN roles r ON r.id = mhr.role_id WHERE mhr.model_id = users.id AND mhr.model_type IN {$spatieUserTypes} ORDER BY r.id ASC LIMIT 1) AS role_name")
             )
             ->when($phone, function ($query, $phone) {
                 return $query->where('users.phone_number', 'like', $phone.'%');
@@ -321,12 +338,22 @@ class PermissionController extends Controller
                 ]);
             }
 
-            $isViewer = $this->isViewerAccessLevel($request->level_id ?? null);
+            // Use the resolved access level (not raw empty level_id) so role assignment is consistent.
+            $isViewer = $this->isViewerAccessLevel($accessLevelId);
             if ($isViewer) {
                 $user->syncRoles([]);
-            } elseif ($roleId) {
-                $user->syncRoles([]);
-                $user->assignRole($roleId);
+            } elseif (! empty($roleId)) {
+                try {
+                    $role = Role::findById((int) $roleId);
+                    $user->syncRoles([$role]);
+                } catch (\Throwable $e) {
+                    \Log::error('Admin saveUser role assign failed', [
+                        'user_id' => $user->id,
+                        'role_id' => $roleId,
+                        'error' => $e->getMessage(),
+                    ]);
+                    notify()->error('User saved, but role could not be assigned. Check that the role still exists.');
+                }
             }
         }
 

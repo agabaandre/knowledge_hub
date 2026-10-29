@@ -333,7 +333,26 @@
 @section('scripts')
 <script>
     $(function(){
-        function viewerRoleVisibility($levelSelect) {
+        function destroySelect2($el) {
+            if ($el.length && $el.hasClass('select2-hidden-accessible')) {
+                $el.select2('destroy');
+            }
+        }
+
+        function initModalSelect2($modal) {
+            var $targets = $modal.find('select.js-user-role-select, select.js-access-level-select, select#edit_administrative_unit_id, select#edit_author_id, select#add_administrative_unit_id, select#add_author_id, select#edit_country_id, select#add_country_id');
+            $targets.each(function () {
+                var $el = $(this);
+                destroySelect2($el);
+                $el.select2({
+                    width: '100%',
+                    // Required so role/level dropdowns work inside Bootstrap modals.
+                    dropdownParent: $modal
+                });
+            });
+        }
+
+        function viewerRoleVisibility($levelSelect, preserveRoleId) {
             if (!$levelSelect || !$levelSelect.length) return;
             var $form = $levelSelect.closest('form');
             var $group = $form.find('.js-user-role-group');
@@ -348,10 +367,13 @@
             } else {
                 $group.show();
                 $role.prop('disabled', false);
-                if ($role.attr('id') === 'edit_role_id') {
+                if ($role.attr('id') === 'edit_role_id' || $role.attr('id') === 'add_role_id') {
                     $role.prop('required', true);
                 }
                 $form.find('.js-role-required-marker').show();
+                if (preserveRoleId !== undefined && preserveRoleId !== null && String(preserveRoleId) !== '') {
+                    $role.val(String(preserveRoleId)).trigger('change');
+                }
             }
         }
 
@@ -359,7 +381,25 @@
             viewerRoleVisibility($(this));
         });
 
+        // Disabled selects are omitted from POST — re-enable role before submit so role_id is saved.
+        $(document).on('submit', '#editUserModal form, #addUser form', function () {
+            var $role = $(this).find('.js-user-role-select');
+            $role.prop('disabled', false);
+            var $level = $(this).find('.js-access-level-select');
+            var levelName = ($level.find('option:selected').attr('data-level-name') || '').toLowerCase();
+            if (levelName !== 'viewer' && $role.prop('required') && !$role.val()) {
+                window.alert('Please choose a user role.');
+                if ($role.hasClass('select2-hidden-accessible')) {
+                    $role.select2('open');
+                } else {
+                    $role.trigger('focus');
+                }
+                return false;
+            }
+        });
+
         $('#addUser').on('shown.bs.modal', function () {
+            initModalSelect2($(this));
             viewerRoleVisibility($(this).find('.js-access-level-select'));
         });
 
@@ -370,11 +410,11 @@
             var name = $(this).data('name') || '';
             var email = $(this).data('email') || '';
             var phone = $(this).data('phone') || '';
-            var roleId = $(this).data('role-id') || '';
+            var roleId = $(this).attr('data-role-id') || $(this).data('role-id') || '';
             var countryId = $(this).data('country-id') || '';
             var administrativeUnitId = $(this).data('administrative-unit-id') || '';
             var authorId = $(this).data('author-id') || '';
-            var levelId = $(this).data('level-id') || '';
+            var levelId = $(this).attr('data-level-id') || $(this).data('level-id') || '';
             var verified = $(this).data('verified') || 0;
             var status = $(this).data('status') || 0;
 
@@ -389,51 +429,24 @@
             $('#edit_last_name').val(lastName);
             $('#edit_email').val(email);
             $('#edit_phone').val(phone);
-            $('#edit_country_id').val(countryId || $('#edit_country_id').val()).trigger('change');
-            $('#edit_administrative_unit_id').val(administrativeUnitId).trigger('change');
-            $('#edit_author_id').val(authorId).trigger('change');
             $('#edit_verified').prop('checked', !!verified);
             $('#edit_status').val(status);
 
-            if ($('#edit_role_id').hasClass('select2-hidden-accessible')) {
-                $('#edit_role_id').select2('destroy');
-            }
-            if ($('#edit_level_id').hasClass('select2-hidden-accessible')) {
-                $('#edit_level_id').select2('destroy');
-            }
-            if ($('#edit_country_id').is('select') && $('#edit_country_id').hasClass('select2-hidden-accessible')) {
-                $('#edit_country_id').select2('destroy');
-            }
-            if ($('#edit_administrative_unit_id').hasClass('select2-hidden-accessible')) {
-                $('#edit_administrative_unit_id').select2('destroy');
-            }
-            if ($('#edit_author_id').hasClass('select2-hidden-accessible')) {
-                $('#edit_author_id').select2('destroy');
-            }
+            var $modal = $('#editUserModal');
+            initModalSelect2($modal);
 
-            var $select2Targets = $('#edit_role_id, #edit_level_id, #edit_administrative_unit_id, #edit_author_id');
+            // Set values after Select2 init; keep role when access level is not Viewer.
+            $('#edit_level_id').val(levelId ? String(levelId) : '').trigger('change');
+            viewerRoleVisibility($modal.find('.js-access-level-select'), roleId);
             if ($('#edit_country_id').is('select')) {
-                $select2Targets = $select2Targets.add('#edit_country_id');
+                $('#edit_country_id').val(countryId ? String(countryId) : '').trigger('change');
+            } else if (countryId) {
+                $('#edit_country_id').val(countryId);
             }
-            $select2Targets.select2({
-                width: '100%'
-            });
+            $('#edit_administrative_unit_id').val(administrativeUnitId ? String(administrativeUnitId) : '').trigger('change');
+            $('#edit_author_id').val(authorId ? String(authorId) : '').trigger('change');
 
-            setTimeout(function() {
-                $('#edit_level_id').val(levelId).trigger('change');
-                var levelIsViewer = ($('#edit_level_id option:selected').attr('data-level-name') || '').toLowerCase() === 'viewer';
-                viewerRoleVisibility($('#editUserModal .js-access-level-select'));
-                if (!levelIsViewer) {
-                    $('#edit_role_id').val(roleId).trigger('change');
-                }
-                if ($('#edit_country_id').is('select')) {
-                    $('#edit_country_id').val(countryId).trigger('change');
-                }
-                $('#edit_administrative_unit_id').val(administrativeUnitId).trigger('change');
-                $('#edit_author_id').val(authorId).trigger('change');
-            }, 100);
-
-            $('#editUserModal').modal('show');
+            $modal.modal('show');
         });
 
         $(document).on('click', '.btn-reset-user', function(){
