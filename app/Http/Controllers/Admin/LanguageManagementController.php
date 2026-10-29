@@ -575,10 +575,15 @@ class LanguageManagementController extends Controller
      */
     private function resolveLocaleAndGroup(Request $request, array $locales, array $groups): array
     {
-        $defaultLocale = (string) ($locales[0] ?? 'en');
+        // Prefer Configure → Default language (e.g. FR on Gabon), not the first sorted locale (often EN).
+        $systemDefault = SiteLanguage::systemDefaultLocale();
+        $defaultLocale = in_array($systemDefault, $locales, true)
+            ? $systemDefault
+            : (string) ($locales[0] ?? 'en');
+
         $locale = (string) $request->query('locale', $defaultLocale);
         if (! in_array($locale, $locales, true)) {
-            $locale = in_array('en', $locales, true) ? 'en' : $defaultLocale;
+            $locale = $defaultLocale;
         }
 
         $firstGroup = array_key_first($groups) ?: 'frontend_nav';
