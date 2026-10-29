@@ -123,6 +123,17 @@
             if (row) row.remove();
         });
     }
+
+    document.querySelectorAll('[data-ai-model-picker]').forEach(function (wrap) {
+        var select = wrap.querySelector('.ai-model-select');
+        var custom = wrap.querySelector('.ai-model-custom');
+        if (!select || !custom) return;
+        select.addEventListener('change', function () {
+            if (select.value) {
+                custom.value = select.value;
+            }
+        });
+    });
 })();
 </script>
 @endif

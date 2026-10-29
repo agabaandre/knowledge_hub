@@ -93,6 +93,16 @@ class AiCompletionService
             );
         }
 
+        if ($credentials['driver'] === 'claude') {
+            return $this->completeClaude(
+                $model ?: $credentials['model'],
+                $messages,
+                $maxTokens,
+                $jsonMode,
+                $credentials['api_key']
+            );
+        }
+
         $baseUrl = rtrim($credentials['base_url'], '/');
         if ($baseUrl === '') {
             return ['ok' => false, 'error' => 'Base URL is not configured for '.$provider.'.'];
@@ -173,6 +183,82 @@ class AiCompletionService
         }
 
         return ['ok' => true, 'content' => $content, 'provider' => $provider];
+    }
+
+    /**
+     * @param  array<int, array{role: string, content: string}>  $messages
+     * @return array{ok: true, content: string, provider: string}|array{ok: false, error: string}
+     */
+    private function completeClaude(string $model, array $messages, int $maxTokens, bool $jsonMode, ?string $apiKey = null): array
+    {
+        $apiKey = $apiKey ?? AiConfig::claudeApiKey();
+        if (trim($apiKey) === '') {
+            return ['ok' => false, 'error' => 'Claude API key is not configured.'];
+        }
+
+        $systemParts = [];
+        $anthropicMessages = [];
+        foreach ($messages as $message) {
+            $role = (string) ($message['role'] ?? 'user');
+            $content = (string) ($message['content'] ?? '');
+            if ($role === 'system') {
+                $systemParts[] = $content;
+                continue;
+            }
+            $anthropicMessages[] = [
+                'role' => $role === 'assistant' ? 'assistant' : 'user',
+                'content' => $content,
+            ];
+        }
+
+        if ($jsonMode) {
+            $systemParts[] = 'Respond with valid JSON only. Do not wrap the response in markdown.';
+        }
+
+        $payload = [
+            'model' => $model,
+            'max_tokens' => max(256, min(8192, $maxTokens)),
+            'temperature' => 0.3,
+            'messages' => $anthropicMessages !== [] ? $anthropicMessages : [
+                ['role' => 'user', 'content' => ''],
+            ],
+        ];
+        if ($systemParts !== []) {
+            $payload['system'] = implode("\n\n", $systemParts);
+        }
+
+        $response = $this->postJson('https://api.anthropic.com/v1/messages', [
+            'Content-Type: application/json',
+            'x-api-key: '.$apiKey,
+            'anthropic-version: 2023-06-01',
+        ], $payload);
+
+        if (! ($response['ok'] ?? false)) {
+            return $response;
+        }
+
+        $body = $response['body'];
+        if (! is_object($body)) {
+            return ['ok' => false, 'error' => 'No response from Claude.'];
+        }
+        if (isset($body->error)) {
+            $msg = is_object($body->error) ? (string) ($body->error->message ?? 'API error') : (string) $body->error;
+
+            return ['ok' => false, 'error' => 'Claude API error: '.$msg];
+        }
+
+        $content = '';
+        foreach (($body->content ?? []) as $block) {
+            if (is_object($block) && ($block->type ?? '') === 'text') {
+                $content .= (string) ($block->text ?? '');
+            }
+        }
+        $content = trim($content);
+        if ($content === '') {
+            return ['ok' => false, 'error' => 'Empty response from Claude.'];
+        }
+
+        return ['ok' => true, 'content' => $content, 'provider' => 'claude'];
     }
 
     /**

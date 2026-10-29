@@ -341,7 +341,7 @@ class PdfChatController extends Controller
         }
 
         return response()->json([
-            'error' => 'AI is not configured for forum assistants. An administrator must enable a chat provider (OpenAI, Gemini, DeepSeek, or custom) under Admin → Settings → AI integrations.',
+            'error' => 'AI is not configured for forum assistants. An administrator must enable a chat provider (OpenAI, Claude, Gemini, DeepSeek, or custom) under Admin → Settings → AI integrations.',
         ], 503);
     }
 

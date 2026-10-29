@@ -124,6 +124,10 @@ class AiConfig
             'CHAT_PDF_API_KEY' => 'ai.chat_pdf_key',
             'GEMINI_API_KEY' => 'ai.gemini_api_key',
             'GEMINI_MODEL' => 'ai.gemini_model',
+            'CLAUDE_API_KEY' => 'ai.claude_api_key',
+            'ANTHROPIC_API_KEY' => 'ai.claude_api_key',
+            'CLAUDE_MODEL' => 'ai.claude_model',
+            'ANTHROPIC_MODEL' => 'ai.claude_model',
             'DEEPSEEK_API_KEY' => 'ai.deepseek_api_key',
             'DEEPSEEK_MODEL' => 'ai.deepseek_model',
             'AI_CUSTOM_BASE_URL' => 'ai.custom_base_url',
@@ -132,6 +136,31 @@ class AiConfig
             'SERPER_API_KEY' => 'ai.serper_api_key',
             default => null,
         };
+    }
+
+    /**
+     * Known model IDs for a provider dropdown (id => label).
+     *
+     * @return array<string, string>
+     */
+    public static function modelCatalog(string $provider): array
+    {
+        $catalog = config('ai.model_catalogs.'.$provider, []);
+
+        return is_array($catalog) ? $catalog : [];
+    }
+
+    /**
+     * Prefer non-empty select value; otherwise use the free-text model field.
+     */
+    public static function resolveSubmittedModel(string $selectValue, string $textValue): string
+    {
+        $select = trim($selectValue);
+        if ($select !== '') {
+            return $select;
+        }
+
+        return trim($textValue);
     }
 
     /**
@@ -424,6 +453,7 @@ class AiConfig
         $columns = match ($provider) {
             'openai' => ['ai_openai_api_key'],
             'chatpdf' => ['ai_chatpdf_api_key'],
+            'claude' => ['ai_claude_api_key'],
             'gemini' => ['ai_gemini_api_key'],
             'deepseek' => ['ai_deepseek_api_key'],
             'custom' => ['ai_custom_api_key', 'ai_custom_base_url'],
@@ -459,7 +489,7 @@ class AiConfig
             return false;
         }
 
-        if (($creds['driver'] ?? '') === 'gemini') {
+        if (in_array(($creds['driver'] ?? ''), ['gemini', 'claude'], true)) {
             return trim((string) ($creds['api_key'] ?? '')) !== ''
                 && trim((string) ($creds['model'] ?? '')) !== '';
         }
@@ -519,6 +549,7 @@ class AiConfig
         foreach ([
             'ai_openai_api_key',
             'ai_chatpdf_api_key',
+            'ai_claude_api_key',
             'ai_gemini_api_key',
             'ai_deepseek_api_key',
             'ai_custom_api_key',
@@ -538,6 +569,7 @@ class AiConfig
         $map = [
             'openai' => ['env' => 'OPEN_API_KEY', 'db' => 'ai_openai_api_key'],
             'chatpdf' => ['env' => 'CHAT_PDF_API_KEY', 'db' => 'ai_chatpdf_api_key'],
+            'claude' => ['env' => 'CLAUDE_API_KEY', 'db' => 'ai_claude_api_key'],
             'gemini' => ['env' => 'GEMINI_API_KEY', 'db' => 'ai_gemini_api_key'],
             'deepseek' => ['env' => 'DEEPSEEK_API_KEY', 'db' => 'ai_deepseek_api_key'],
             'custom' => ['env' => 'AI_CUSTOM_API_KEY', 'db' => 'ai_custom_api_key'],
@@ -582,6 +614,7 @@ class AiConfig
         return match ($provider) {
             'openai' => trim((string) self::openaiApiKey()) !== '',
             'chatpdf' => trim((string) self::chatPdfApiKey()) !== '',
+            'claude' => trim((string) self::claudeApiKey()) !== '',
             'gemini' => trim((string) self::geminiApiKey()) !== '',
             'deepseek' => trim((string) self::deepseekApiKey()) !== '',
             'custom' => trim((string) self::customBaseUrl()) !== ''
@@ -685,6 +718,26 @@ class AiConfig
     public static function chatPdfApiKey(): string
     {
         return (string) self::resolveForProvider('chatpdf', 'CHAT_PDF_API_KEY', 'ai_chatpdf_api_key', '');
+    }
+
+    public static function claudeApiKey(): string
+    {
+        $key = (string) self::resolveForProvider('claude', 'CLAUDE_API_KEY', 'ai_claude_api_key', '');
+        if (trim($key) !== '') {
+            return $key;
+        }
+
+        return (string) self::resolveForProvider('claude', 'ANTHROPIC_API_KEY', 'ai_claude_api_key', '');
+    }
+
+    public static function claudeModel(): string
+    {
+        $model = (string) self::resolveForProvider('claude', 'CLAUDE_MODEL', 'ai_claude_model', '');
+        if (trim($model) !== '') {
+            return $model;
+        }
+
+        return (string) self::resolveForProvider('claude', 'ANTHROPIC_MODEL', 'ai_claude_model', 'claude-sonnet-5-5');
     }
 
     public static function geminiApiKey(): string
@@ -835,6 +888,13 @@ class AiConfig
                 'base_url' => self::customBaseUrl(),
                 'label' => 'Custom endpoint',
             ],
+            'claude' => [
+                'driver' => 'claude',
+                'api_key' => self::claudeApiKey(),
+                'model' => trim((string) self::claudeModel()) !== '' ? self::claudeModel() : 'claude-sonnet-5-5',
+                'base_url' => 'https://api.anthropic.com/v1',
+                'label' => 'Anthropic Claude',
+            ],
             'gemini' => [
                 'driver' => 'gemini',
                 'api_key' => self::geminiApiKey(),
@@ -900,6 +960,7 @@ class AiConfig
         $map = [
             'openai' => ['OPEN_API_KEY', 'ai_openai_api_key'],
             'chatpdf' => ['CHAT_PDF_API_KEY', 'ai_chatpdf_api_key'],
+            'claude' => ['CLAUDE_API_KEY', 'ai_claude_api_key'],
             'gemini' => ['GEMINI_API_KEY', 'ai_gemini_api_key'],
             'deepseek' => ['DEEPSEEK_API_KEY', 'ai_deepseek_api_key'],
             'custom' => ['AI_CUSTOM_API_KEY', 'ai_custom_api_key'],
@@ -941,6 +1002,8 @@ class AiConfig
             'ai.open_api_key' => self::openaiApiKey(),
             'ai.openai_model' => self::openaiModel(),
             'ai.chat_pdf_key' => self::chatPdfApiKey(),
+            'ai.claude_api_key' => self::claudeApiKey(),
+            'ai.claude_model' => self::claudeModel(),
             'ai.gemini_api_key' => self::geminiApiKey(),
             'ai.gemini_model' => self::geminiModel(),
             'ai.deepseek_api_key' => self::deepseekApiKey(),
@@ -970,6 +1033,9 @@ class AiConfig
             'ai_openai_enabled' => ['db_column' => 'ai_openai_enabled', 'env_key' => '', 'default' => true, 'boolean' => true],
             'ai_chatpdf_api_key' => ['provider' => 'chatpdf', 'db_column' => 'ai_chatpdf_api_key', 'env_key' => 'CHAT_PDF_API_KEY', 'default' => '', 'secret' => true],
             'ai_chatpdf_enabled' => ['db_column' => 'ai_chatpdf_enabled', 'env_key' => '', 'default' => true, 'boolean' => true],
+            'ai_claude_api_key' => ['provider' => 'claude', 'db_column' => 'ai_claude_api_key', 'env_key' => 'CLAUDE_API_KEY', 'default' => '', 'secret' => true],
+            'ai_claude_model' => ['provider' => 'claude', 'db_column' => 'ai_claude_model', 'env_key' => 'CLAUDE_MODEL', 'default' => 'claude-sonnet-5-5'],
+            'ai_claude_enabled' => ['db_column' => 'ai_claude_enabled', 'env_key' => '', 'default' => false, 'boolean' => true],
             'ai_gemini_api_key' => ['provider' => 'gemini', 'db_column' => 'ai_gemini_api_key', 'env_key' => 'GEMINI_API_KEY', 'default' => '', 'secret' => true],
             'ai_gemini_model' => ['provider' => 'gemini', 'db_column' => 'ai_gemini_model', 'env_key' => 'GEMINI_MODEL', 'default' => 'gemini-1.5-flash'],
             'ai_gemini_enabled' => ['db_column' => 'ai_gemini_enabled', 'env_key' => '', 'default' => false, 'boolean' => true],

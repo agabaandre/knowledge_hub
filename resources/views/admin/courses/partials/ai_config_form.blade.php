@@ -112,9 +112,11 @@
                                 <small class="text-muted">Env: <code>OPEN_API_KEY</code></small>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label" for="ai_openai_model">Model</label>
-                                <input type="text" name="ai_openai_model" id="ai_openai_model" class="form-control form-control-sm"
-                                       value="{{ $fields['ai_openai_model']['form_value'] ?? 'gpt-3.5-turbo' }}">
+                                @include('admin.courses.partials.ai_model_picker', [
+                                    'name' => 'ai_openai_model',
+                                    'provider' => 'openai',
+                                    'current' => $fields['ai_openai_model']['form_value'] ?? 'gpt-3.5-turbo',
+                                ])
                             </div>
                         </div>
                     @elseif($provider['id'] === 'chatpdf')
@@ -126,17 +128,36 @@
                                 <small class="text-muted">Env: <code>CHAT_PDF_API_KEY</code></small>
                             </div>
                         </div>
+                    @elseif($provider['id'] === 'claude')
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="ai_claude_api_key">API key</label>
+                                <input type="password" name="ai_claude_api_key" id="ai_claude_api_key" class="form-control form-control-sm" autocomplete="new-password"
+                                       placeholder="{{ !empty($fields['ai_claude_api_key']['value']) ? '••••••••' : 'sk-ant-…' }}">
+                                <small class="text-muted">Env: <code>CLAUDE_API_KEY</code> / <code>ANTHROPIC_API_KEY</code></small>
+                            </div>
+                            <div class="col-md-6">
+                                @include('admin.courses.partials.ai_model_picker', [
+                                    'name' => 'ai_claude_model',
+                                    'provider' => 'claude',
+                                    'current' => $fields['ai_claude_model']['form_value'] ?? 'claude-sonnet-5-5',
+                                ])
+                            </div>
+                        </div>
                     @elseif($provider['id'] === 'gemini')
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label" for="ai_gemini_api_key">API key</label>
                                 <input type="password" name="ai_gemini_api_key" id="ai_gemini_api_key" class="form-control form-control-sm" autocomplete="new-password"
                                        placeholder="{{ !empty($fields['ai_gemini_api_key']['value']) ? '••••••••' : 'Paste key' }}">
+                                <small class="text-muted">Env: <code>GEMINI_API_KEY</code></small>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label" for="ai_gemini_model">Model</label>
-                                <input type="text" name="ai_gemini_model" id="ai_gemini_model" class="form-control form-control-sm"
-                                       value="{{ $fields['ai_gemini_model']['form_value'] ?? 'gemini-1.5-flash' }}">
+                                @include('admin.courses.partials.ai_model_picker', [
+                                    'name' => 'ai_gemini_model',
+                                    'provider' => 'gemini',
+                                    'current' => $fields['ai_gemini_model']['form_value'] ?? 'gemini-1.5-flash',
+                                ])
                             </div>
                         </div>
                     @elseif($provider['id'] === 'deepseek')
@@ -147,9 +168,11 @@
                                        placeholder="{{ !empty($fields['ai_deepseek_api_key']['value']) ? '••••••••' : 'Paste key' }}">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label" for="ai_deepseek_model">Model</label>
-                                <input type="text" name="ai_deepseek_model" id="ai_deepseek_model" class="form-control form-control-sm"
-                                       value="{{ $fields['ai_deepseek_model']['form_value'] ?? 'deepseek-chat' }}">
+                                @include('admin.courses.partials.ai_model_picker', [
+                                    'name' => 'ai_deepseek_model',
+                                    'provider' => 'deepseek',
+                                    'current' => $fields['ai_deepseek_model']['form_value'] ?? 'deepseek-chat',
+                                ])
                             </div>
                         </div>
                     @elseif($provider['id'] === 'custom')

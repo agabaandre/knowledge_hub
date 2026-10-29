@@ -887,24 +887,39 @@ class SettingsRepository
         foreach ([
             'ai_openai_api_key',
             'ai_chatpdf_api_key',
+            'ai_claude_api_key',
             'ai_gemini_api_key',
             'ai_deepseek_api_key',
             'ai_custom_api_key',
             'ai_serper_api_key',
         ] as $secretColumn) {
-            if ($request->filled($secretColumn)) {
+            if ($request->filled($secretColumn) && Schema::hasColumn('setting', $secretColumn)) {
                 $settings->{$secretColumn} = $request->input($secretColumn);
             }
         }
 
         foreach ([
             'ai_openai_model',
+            'ai_claude_model',
             'ai_gemini_model',
             'ai_deepseek_model',
+        ] as $modelColumn) {
+            if (
+                Schema::hasColumn('setting', $modelColumn)
+                && ($request->has($modelColumn) || $request->has($modelColumn.'_select'))
+            ) {
+                $settings->{$modelColumn} = \App\Support\AiConfig::resolveSubmittedModel(
+                    (string) $request->input($modelColumn.'_select', ''),
+                    (string) $request->input($modelColumn, '')
+                );
+            }
+        }
+
+        foreach ([
             'ai_custom_base_url',
             'ai_custom_model',
         ] as $column) {
-            if ($request->has($column)) {
+            if ($request->has($column) && Schema::hasColumn('setting', $column)) {
                 $settings->{$column} = trim((string) $request->input($column, ''));
             }
         }
@@ -912,12 +927,13 @@ class SettingsRepository
         foreach ([
             'ai_openai_enabled',
             'ai_chatpdf_enabled',
+            'ai_claude_enabled',
             'ai_gemini_enabled',
             'ai_deepseek_enabled',
             'ai_custom_enabled',
             'ai_serper_enabled',
         ] as $toggle) {
-            if ($request->has($toggle)) {
+            if ($request->has($toggle) && Schema::hasColumn('setting', $toggle)) {
                 $settings->{$toggle} = self::parseSubmittedBoolean($request, $toggle);
             }
         }

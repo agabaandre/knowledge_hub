@@ -117,7 +117,7 @@ class ChatGPTService implements AIModel{
             : $feature;
 
         return '<div class="alert alert-danger">AI is not configured for this feature. '
-            .'An administrator must enable a chat provider (OpenAI, Gemini, DeepSeek, or custom) '
+            .'An administrator must enable a chat provider (OpenAI, Claude, Gemini, DeepSeek, or custom) '
             .'under Admin → Settings → AI integrations and assign it to '.$features.'. '
             .'If keys are only in <code>.env</code>, run <code>php artisan config:cache</code> after updating them.</div>';
     }
