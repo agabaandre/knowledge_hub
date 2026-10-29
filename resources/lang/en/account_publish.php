@@ -69,6 +69,9 @@ return [
     'author_missing_hint' => '(If your source is missing, please contact the system admin)',
     'author_placeholder' => 'Select Corporate Source or Member State',
 
+    'public_availability_label' => 'Make available to other Knowledge Hubs (continental federation)',
+    'public_availability_help' => 'Uncheck to limit this content to this country hub only. Continental portals always publish publicly by default.',
+
     'step_2_heading' => 'Attachments & Additional Details',
 
     'ai_summary_language' => 'AI summary language',

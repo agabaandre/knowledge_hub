@@ -14,11 +14,11 @@
             <input type="hidden" name="public_availability" value="0">
             <input class="form-check-input" type="checkbox" name="public_availability" id="public_availability" value="1" {{ $isPublic ? 'checked' : '' }}>
             <label class="form-check-label" for="public_availability">
-                Make available to other Knowledge Hubs (continental federation)
+                {{ ui_t('account_publish.public_availability_label', 'Make available to other Knowledge Hubs (continental federation)') }}
             </label>
         </div>
         <small class="text-muted d-block mt-1">
-            Uncheck to limit this content to this country hub only. Continental portals always publish publicly by default.
+            {{ ui_t('account_publish.public_availability_help', 'Uncheck to limit this content to this country hub only. Continental portals always publish publicly by default.') }}
         </small>
     </div>
 @endif

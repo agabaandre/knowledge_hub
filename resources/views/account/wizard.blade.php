@@ -1741,6 +1741,10 @@
                 enableNavigation: true,
                 enableNavigationAlways: false,
             },
+            lang: {
+                next: @json(ui_t('general.next', 'Next')),
+                previous: @json(ui_t('general.previous', 'Previous')),
+            },
         });
 
         var publicationMinChars = {{ $publicationMinChars }};
