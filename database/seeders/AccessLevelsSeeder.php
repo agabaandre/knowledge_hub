@@ -13,11 +13,11 @@ class AccessLevelsSeeder extends Seeder
      */
     public function run()
     {
-         \App\Models\AccessLevel::insert([
-            ["level_name"=>"Viewer"],
-            ["level_name"=>"Country"],
-            ["level_name"=>"RCC"],
-            ["level_name"=>"Overall"]
-         ]);
+        foreach (['Viewer', 'Country', 'RCC', 'Overall'] as $levelName) {
+            \App\Models\AccessLevel::query()->firstOrCreate(
+                ['level_name' => $levelName],
+                ['level_name' => $levelName]
+            );
+        }
     }
 }

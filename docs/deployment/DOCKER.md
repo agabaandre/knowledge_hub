@@ -106,6 +106,17 @@ The **`queue`** service processes Scout index jobs when `SCOUT_QUEUE=true`, and 
 
 - Migrations plus `database/schema/mysql-schema.dump` for fast fresh installs.
 - Baseline **roles, permissions, and settings** from `database/install/baseline_seed.sql` when empty after migrate.
+- With `SEED_DEMO_USERS=true` (default in `.env.docker.example`) or `DOCKER=true`, install also runs `DemoUsersSeeder`:
+
+| Email | Role | Access level | Password |
+|-------|------|--------------|----------|
+| `admin@demo.local` | Admin | Overall | `Demo1234!` |
+| `rccadmin@demo.local` | RCC Admin | RCC | `Demo1234!` |
+| `manager@demo.local` | MS Manager | Country | `Demo1234!` |
+| `reviewer@demo.local` | Reviewer | Country | `Demo1234!` |
+| `overall@demo.local` / `rcc@demo.local` / `country@demo.local` / `viewer@demo.local` | — | matching level | `Demo1234!` |
+
+The installer admin is given **Overall** access (Viewer blocks `/admin`). Set `SEED_DEMO_USERS=false` for production.
 
 ---
 

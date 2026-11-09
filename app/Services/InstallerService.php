@@ -878,8 +878,21 @@ class InstallerService
         $user->verification_token = null;
         $user->email_verified_at = now();
         $user->status = 1;
+        $user->pwd_changed = 1;
         $user->photo = 'avatar.jpg';
         $user->is_photo_external = 0;
+
+        // Viewer access level blocks /admin even for Admin role (can_access_admin()).
+        if (Schema::hasTable('access_levels')) {
+            $overallId = DB::table('access_levels')
+                ->where('level_name', 'Overall')
+                ->orderBy('id')
+                ->value('id');
+            if ($overallId) {
+                $user->access_level_id = (int) $overallId;
+            }
+        }
+
         $user->save();
 
         $role = Role::query()->where('name', 'Admin')->first();
@@ -887,7 +900,33 @@ class InstallerService
             $user->assignRole($role);
         }
 
+        $this->seedDemoUsersIfEnabled();
+
         return $user;
+    }
+
+    /**
+     * Seed role/access-level demo accounts on local and Docker installs.
+     * Disable with SEED_DEMO_USERS=false (recommended for production).
+     */
+    public function seedDemoUsersIfEnabled(): void
+    {
+        $explicit = env('SEED_DEMO_USERS');
+        if ($explicit !== null && $explicit !== '') {
+            $enabled = filter_var($explicit, FILTER_VALIDATE_BOOLEAN);
+        } else {
+            $enabled = filter_var(env('DOCKER', false), FILTER_VALIDATE_BOOLEAN)
+                || app()->environment('local');
+        }
+
+        if (! $enabled || ! Schema::hasTable('users') || ! Schema::hasTable('roles')) {
+            return;
+        }
+
+        Artisan::call('db:seed', [
+            '--class' => 'Database\\Seeders\\DemoUsersSeeder',
+            '--force' => true,
+        ]);
     }
 
     public function finalize(string $appUrl = ''): void

@@ -4,10 +4,14 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN set -eux; \
     apt-get update -o Acquire::Retries=5; \
-    apt-get install -y --no-install-recommends \
+    apt-get install -y --no-install-recommends --fix-missing \
         git unzip curl default-mysql-client \
         libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
-        libicu-dev libxml2-dev libonig-dev; \
+        libicu-dev libxml2-dev libonig-dev \
+    || (apt-get update -o Acquire::Retries=5 && apt-get install -y --no-install-recommends \
+        git unzip curl default-mysql-client \
+        libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
+        libicu-dev libxml2-dev libonig-dev); \
     docker-php-ext-configure gd --with-freetype --with-jpeg; \
     docker-php-ext-install -j"$(nproc)" \
         bcmath exif gd intl mbstring opcache pcntl pdo_mysql zip; \
