@@ -1,0 +1,86 @@
+# Node stack in Docker: one database engine per app container.
+#   docker compose up -d mysql postgres
+#   docker compose up -d app-mysql app-pg
+# app-mysql → http://localhost:4001   app-pg → http://localhost:4002
+# Host Laravel data is mounted read/write at /var/khubdata (same layout as the Laravel hub).
+x-app-env: &app-env
+  NODE_ENV: production
+  APP_URL: ${APP_URL:-http://localhost:4001}
+  APP_SECRET: ${APP_SECRET:?set APP_SECRET in .env}
+  HUB_SITE_ID: ${HUB_SITE_ID:-localhost-8081}
+  HUB_DATA_ROOT: /var/khubdata
+  SITES_DIR: sites
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: khub_node_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: knowledge_hub
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    ports: ["${MYSQL_PORT_FORWARD:-3320}:3306"]
+    volumes: [khub_node_mysql:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: khub_node_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: khub
+    ports: ["${PG_PORT_FORWARD:-5440}:5432"]
+    volumes: [khub_node_pg:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d khub"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  app-mysql:
+    build: .
+    image: khub-node:latest
+    container_name: khub_node_app_mysql
+    restart: unless-stopped
+    depends_on:
+      mysql: { condition: service_healthy }
+    environment:
+      <<: *app-env
+      BACKEND_PORT: 4000
+      DB_CLIENT: mysql2
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: knowledge_hub
+      DB_USERNAME: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports: ["${APP_MYSQL_PORT:-4001}:4000"]
+    volumes: ["${KHUBDATA_DIR:-./khubdata}:/var/khubdata"]
+
+  app-pg:
+    image: khub-node:latest
+    container_name: khub_node_app_pg
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      <<: *app-env
+      BACKEND_PORT: 4000
+      DB_CLIENT: pg
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: khub
+      DB_USERNAME: postgres
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+    ports: ["${APP_PG_PORT:-4002}:4000"]
+    volumes: ["${KHUBDATA_DIR:-./khubdata}:/var/khubdata"]
+
+volumes:
+  khub_node_mysql:
+  khub_node_pg:

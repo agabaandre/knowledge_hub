@@ -1,0 +1,206 @@
+/**
+ * Knowledge Hub RTL layout overrides for Default + Theme1.
+ * Works alongside Google Translate: notranslate / translate="no" regions are untouched by GT.
+ * Layout direction follows html[dir]; Latin proper names stay LTR via translate="no" islands.
+ */
+
+[dir="rtl"] body {
+    text-align: right;
+}
+
+[dir="rtl"] .notranslate[translate="no"],
+[dir="rtl"] [translate="no"] {
+    direction: ltr;
+    unicode-bidi: isolate;
+    text-align: left;
+}
+
+/* Language selector */
+[dir="rtl"] .menu-language-menu-container {
+    justify-content: flex-start;
+}
+
+[dir="rtl"] .language-selector-wrapper {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+[dir="rtl"] .language-dropdown {
+    right: auto;
+    left: 0;
+}
+
+/* Default theme navigation */
+[dir="rtl"] .navigation,
+[dir="rtl"] .navigation-wrapper,
+[dir="rtl"] .nav-menu,
+[dir="rtl"] .nav-menus-wrapper {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .nav-dropdown {
+    text-align: right;
+}
+
+[dir="rtl"] .mega-menu-panel,
+[dir="rtl"] .mega-sidebar,
+[dir="rtl"] .mega-main {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Theme1 header / nav */
+[dir="rtl"] .kh-linkedin-nav {
+    direction: rtl;
+}
+
+[dir="rtl"] .kh-linkedin-nav .kh-nav-badge {
+    right: auto;
+    left: 0.35rem;
+}
+
+[dir="rtl"] #header .navbar-nav {
+    direction: rtl;
+}
+
+[dir="rtl"] .dropdown-menu {
+    text-align: right;
+}
+
+/* Secondary account nav */
+[dir="rtl"] .secondary-nav-container {
+    direction: rtl;
+    justify-content: flex-end;
+}
+
+/* Breadcrumbs & pagination */
+[dir="rtl"] .breadcrumb {
+    direction: rtl;
+}
+
+[dir="rtl"] .breadcrumb-item + .breadcrumb-item::before {
+    float: right;
+    padding-right: 0;
+    padding-left: 0.5rem;
+}
+
+[dir="rtl"] .pagination {
+    direction: rtl;
+}
+
+/* Bootstrap 4 physical utilities used across templates */
+[dir="rtl"] .text-left {
+    text-align: right !important;
+}
+
+[dir="rtl"] .text-right {
+    text-align: left !important;
+}
+
+[dir="rtl"] .float-left {
+    float: right !important;
+}
+
+[dir="rtl"] .float-right {
+    float: left !important;
+}
+
+[dir="rtl"] .mr-1 { margin-right: 0 !important; margin-left: 0.25rem !important; }
+[dir="rtl"] .mr-2 { margin-right: 0 !important; margin-left: 0.5rem !important; }
+[dir="rtl"] .mr-3 { margin-right: 0 !important; margin-left: 1rem !important; }
+[dir="rtl"] .mr-4 { margin-right: 0 !important; margin-left: 1.5rem !important; }
+[dir="rtl"] .mr-5 { margin-right: 0 !important; margin-left: 3rem !important; }
+[dir="rtl"] .ml-1 { margin-left: 0 !important; margin-right: 0.25rem !important; }
+[dir="rtl"] .ml-2 { margin-left: 0 !important; margin-right: 0.5rem !important; }
+[dir="rtl"] .ml-3 { margin-left: 0 !important; margin-right: 1rem !important; }
+[dir="rtl"] .ml-4 { margin-left: 0 !important; margin-right: 1.5rem !important; }
+[dir="rtl"] .ml-5 { margin-left: 0 !important; margin-right: 3rem !important; }
+[dir="rtl"] .pr-1 { padding-right: 0 !important; padding-left: 0.25rem !important; }
+[dir="rtl"] .pr-2 { padding-right: 0 !important; padding-left: 0.5rem !important; }
+[dir="rtl"] .pr-3 { padding-right: 0 !important; padding-left: 1rem !important; }
+[dir="rtl"] .pl-1 { padding-left: 0 !important; padding-right: 0.25rem !important; }
+[dir="rtl"] .pl-2 { padding-left: 0 !important; padding-right: 0.5rem !important; }
+[dir="rtl"] .pl-3 { padding-left: 0 !important; padding-right: 1rem !important; }
+
+/* Search inputs with left icon */
+[dir="rtl"] .left-ico,
+[dir="rtl"] input.left-ico,
+[dir="rtl"] .main-search.left-ico {
+    padding-left: 12px !important;
+    padding-right: 42px !important;
+    background-position: right 12px center !important;
+}
+
+[dir="rtl"] .main_search,
+[dir="rtl"] .main-search {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Forms & tables */
+[dir="rtl"] .form-control,
+[dir="rtl"] .form-select,
+[dir="rtl"] select.form-control,
+[dir="rtl"] textarea.form-control {
+    text-align: right;
+}
+
+[dir="rtl"] .select2-container {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .select2-container--default .select2-selection--single .select2-selection__arrow {
+    right: auto;
+    left: 1px;
+}
+
+[dir="rtl"] table th,
+[dir="rtl"] table td {
+    text-align: right;
+}
+
+/* Cards / publication lists */
+[dir="rtl"] .publication-list-card,
+[dir="rtl"] .forum-item,
+[dir="rtl"] .sidebar-content {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .sidebar-tag-pill,
+[dir="rtl"] .badge {
+    direction: rtl;
+}
+
+/* Footer */
+[dir="rtl"] footer,
+[dir="rtl"] .footer,
+[dir="rtl"] .footer-widget {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Theme1 mobile nav */
+@media (max-width: 991.98px) {
+    [dir="rtl"] .kh-linkedin-nav .kh-nav-item {
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+
+    [dir="rtl"] .kh-linkedin-nav .kh-nav-icon {
+        margin: 0 0 0 0.55rem;
+    }
+
+    [dir="rtl"] .kh-linkedin-nav .kh-nav-badge {
+        margin-left: 0;
+        margin-right: 0.35rem;
+    }
+}
+
+/* Keep Google Translate widget out of layout flow (existing behaviour) */
+.goog-te-banner-frame.skiptranslate,
+.goog-te-gadget {
+    direction: ltr;
+}

@@ -1,0 +1,60 @@
+import { Router } from 'express';
+import { adminNavFor } from '@khub/shared/admin-nav';
+import { requireAuth, requireModerator, requirePermission } from '../auth/middleware.js';
+import { dashboardRoutes } from './dashboard-routes.js';
+import { approvalsRoutes } from './approvals-routes.js';
+import { settingsRoutes } from './settings-routes.js';
+import { aiRoutes } from './ai-routes.js';
+import { badgesRoutes } from './badges-routes.js';
+import { usersRoutes } from './users-routes.js';
+import { rolesRoutes } from './roles-routes.js';
+import { languagesRoutes } from './languages-routes.js';
+import { listsRoutes } from './lists-routes.js';
+import { logsRoutes, mailingRoutes } from './logs-routes.js';
+import { securityRoutes } from '../security/ip-block.js';
+import { translationsRoutes } from './translations-routes.js';
+import { documentsRoutes } from './documents-routes.js';
+import { publicationsAdminRoutes } from './publications-routes.js';
+
+/** Approvals admit moderators and above; every other /api/admin route needs an overall administrator. */
+export const adminRouter = (context) => {
+  const router = Router();
+  // The admin navigation, filtered to the caller's permissions (shared definition).
+  router.get('/api/admin/nav', requireAuth, (req, res) => {
+    res.json({ groups: adminNavFor(req.user?.permissions ?? []) });
+  });
+  router.use('/api/admin/approvals', requireModerator, requirePermission('admin.approvals.view'));
+  router.use('/api/admin/approvals/review', requirePermission('admin.approvals.review'));
+  router.use('/api/admin', approvalsRoutes(context));
+  router.get('/api/admin/dashboard', requirePermission('admin.dashboard.view'));
+  router.get('/api/admin/analytics', requirePermission('admin.analytics.view'));
+  router.use('/api/admin/settings', requirePermission('admin.settings.view'));
+  router.put('/api/admin/settings', requirePermission('admin.settings.edit'));
+  router.use('/api/admin/ai', requirePermission('admin.ai.manage'));
+  router.use('/api/admin/badges', requirePermission('admin.badges.manage'));
+  router.use('/api/admin/users', requirePermission('admin.users.view'));
+  router.use('/api/admin/roles', requirePermission('admin.roles.view'));
+  router.use('/api/admin/languages', requirePermission('admin.languages.manage'));
+  router.use('/api/admin/translations', requirePermission('admin.languages.manage'));
+  router.use('/api/admin/lists', requirePermission('admin.lists.view'));
+  router.use('/api/admin/publications', requirePermission('admin.publications.view'));
+  router.use('/api/admin/documents', requirePermission('admin.documents.view'));
+  router.use('/api/admin/logs', requirePermission('admin.logs.view'));
+  router.use('/api/admin/security', requirePermission('admin.logs.view'));
+  router.use('/api/admin/mailing', requirePermission('admin.mailing.view'));
+  router.use('/api/admin', dashboardRoutes(context));
+  router.use('/api/admin', settingsRoutes(context));
+  router.use('/api/admin', aiRoutes(context));
+  router.use('/api/admin', badgesRoutes(context));
+  router.use('/api/admin', usersRoutes(context));
+  router.use('/api/admin', rolesRoutes(context));
+  router.use('/api/admin', languagesRoutes(context));
+  router.use('/api/admin', listsRoutes(context));
+  router.use('/api/admin', logsRoutes(context));
+  router.use('/api/admin', mailingRoutes(context));
+  router.use('/api/admin', publicationsAdminRoutes(context));
+  router.use('/api/admin', securityRoutes(context));
+  router.use('/api/admin', translationsRoutes(context));
+  router.use('/api/admin', documentsRoutes(context));
+  return router;
+};

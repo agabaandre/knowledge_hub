@@ -1,0 +1,168 @@
+/* Shared UI token: one corner radius for cards and tiles across the public site. */
+:root { --kh-ui-radius: 4px; }
+
+/*
+ * Small additions on top of the CSS lifted from the Laravel portal
+ * (laravel-inline.css + home-sections/publication-card/search-sidebar extracts).
+ * Everything here either replaces a Blade-computed value or covers a behaviour
+ * the old jQuery theme did with JavaScript.
+ */
+:root {
+  --theme-color-primary-rgb: 0, 98, 57;
+}
+
+/* React drives dropdowns with a class instead of jQuery slideDown. */
+.navigation .nav-menu > li.kh-open > .nav-dropdown { display: block; }
+.navigation-portrait .nav-menu > li.kh-open > .nav-dropdown { display: block; position: static; width: 100%; }
+
+/* Mobile menu panel: same behaviour as the theme's nav-menus-wrapper-open. */
+.navigation-portrait .nav-menus-wrapper { transition: left 0.3s ease; }
+
+.kh-nav-item-stack { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+
+/* Keep spotlight stage behind the search content (Blade sets this inline). */
+.home-spotlight { position: relative; }
+.home-spotlight__stage { position: absolute; inset: 0; z-index: 0; }
+.home-spotlight .search-container, .home-spotlight .theme-grid, .home-spotlight h1 { position: relative; z-index: 1; }
+
+/* Blade computed these from settings; fixed equivalents. */
+.themes-grid { opacity: 1; }
+
+.kh-page { min-height: 60vh; }
+.spinner-ring {
+  width: 2.5rem; height: 2.5rem; border-radius: 50%;
+  border: 3px solid rgba(0, 98, 57, 0.15); border-top-color: var(--theme-color-primary, #006239);
+  animation: kh-spin 0.72s linear infinite; margin: 4rem auto;
+}
+@keyframes kh-spin { to { transform: rotate(360deg); } }
+
+/* Bootstrap 5 utility names used by the React pages (theme ships Bootstrap 4). */
+.fw-bold { font-weight: 700 !important; }
+.fw-semibold { font-weight: 600 !important; }
+.mx-2 { margin-left: 0.5rem !important; margin-right: 0.5rem !important; }
+.me-2 { margin-right: 0.5rem !important; }
+
+/* Toggle switch for the admin Modules page. */
+.kh-switch { position: relative; display: inline-block; width: 46px; height: 24px; flex-shrink: 0; }
+.kh-switch input { opacity: 0; width: 0; height: 0; }
+.kh-switch .kh-slider {
+  position: absolute; cursor: pointer; inset: 0; background: #cbd5e1; border-radius: 24px; transition: background 0.2s ease;
+}
+.kh-switch .kh-slider::before {
+  content: ''; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px;
+  background: #fff; border-radius: 50%; transition: transform 0.2s ease;
+}
+.kh-switch input:checked + .kh-slider { background: var(--theme-color-primary, #006239); }
+.kh-switch input:checked + .kh-slider::before { transform: translateX(22px); }
+.kh-switch input:disabled + .kh-slider { opacity: 0.5; cursor: not-allowed; }
+.kh-switch input:focus-visible + .kh-slider { outline: 2px solid var(--theme-color-primary); outline-offset: 2px; }
+
+/* Breadcrumb separator (Bootstrap 4 default) */
+.breadcrumb-item + .breadcrumb-item::before { content: '/'; }
+
+/* Account dropdown (right-most nav item). The jQuery plugin re-anchored
+   submenus that would overflow the viewport; anchor the right-aligned menu's
+   dropdowns to the right edge instead. */
+.navigation-landscape .nav-menu.align-to-right .nav-dropdown { left: auto; right: 0; }
+.navigation-landscape .nav-menu.align-to-right .nav-dropdown:before { left: auto; right: 24px; }
+
+.kh-account-header {
+  padding: 12px 10px;
+  border-bottom: 1px solid #e4e8ec;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  white-space: normal;
+  max-width: 260px;
+}
+
+/* Buttons inside a dropdown look exactly like its links. */
+.nav-dropdown > li > .kh-dropdown-action {
+  width: 100%;
+  padding: 14px 20px 14px 10px;
+  border: 0;
+  border-bottom: 1px solid #e4e8ec;
+  display: inline-block;
+  text-align: left;
+  background: transparent;
+  color: #333c56;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+.nav-dropdown > li > .kh-dropdown-action:hover { color: var(--theme-color-primary, #006239); }
+.nav-dropdown > li:last-child > .kh-dropdown-action { border-bottom: 0; }
+
+/* The template redefines .h-100/.ht-100 as 580px-tall banner helpers; restore
+   Bootstrap's height utility, which our cards rely on. */
+.h-100 { min-height: 0 !important; height: 100% !important; }
+.ht-100 { min-height: 0 !important; }
+
+/* --- SearchSelect: Select2-style searchable pickers --------------------- */
+.kh-select { position: relative; }
+.kh-select-control {
+  width: 100%; min-height: 40px; text-align: left; background: #fff;
+  border: 1px solid #ced4da; border-radius: 0.25rem; padding: 6px 34px 6px 10px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 4px; cursor: pointer;
+  font: inherit; color: inherit; position: relative;
+}
+.kh-select-control:focus { outline: 2px solid var(--theme-color-primary, #006239); outline-offset: 1px; }
+.kh-select-control.is-invalid { border-color: #dc3545; }
+.kh-select-control.is-disabled { background: #f8fafc; cursor: not-allowed; }
+.kh-select-placeholder { color: #8a94a6; }
+.kh-select-caret { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #64748b; }
+.kh-select-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.kh-select-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(0, 98, 57, 0.1); color: var(--theme-color-primary, #006239);
+  border: 1px solid rgba(0, 98, 57, 0.25); border-radius: 3px; padding: 2px 8px; font-size: 0.82rem;
+}
+.kh-select-chip [role='button'] { cursor: pointer; font-weight: 700; line-height: 1; }
+.kh-select-chip [role='button']:hover { color: #b91c1c; }
+.kh-select-panel {
+  position: absolute; z-index: 1065; left: 0; right: 0; margin-top: 4px;
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 0.3rem;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+}
+.kh-select-search { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid #eef2f6; color: #64748b; }
+.kh-select-search input { border: 0; outline: 0; flex: 1; font: inherit; background: transparent; }
+.kh-select-list { list-style: none; margin: 0; padding: 4px 0; max-height: 240px; overflow-y: auto; }
+.kh-select-option { display: flex; align-items: center; gap: 6px; padding: 7px 12px; cursor: pointer; }
+.kh-select-option.is-highlighted { background: rgba(0, 98, 57, 0.08); }
+.kh-select-option.is-selected { color: var(--theme-color-primary, #006239); font-weight: 600; }
+.kh-select-empty { padding: 10px 12px; color: #8a94a6; }
+.kh-select-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 12px; border-top: 1px solid #eef2f6; font-size: 0.82rem; color: #64748b;
+}
+.kh-select-footer button { border: 0; background: none; color: #b91c1c; cursor: pointer; font-size: 0.82rem; }
+
+/* The theme groups `.btn-light:focus` with `.theme-btn-light:hover`, turning
+   light buttons green with white text on focus/hover. Restore sane states. */
+.btn-light:focus {
+  background: #e4e9ef;
+  border-color: #e4e9ef;
+  color: #51586e;
+}
+.btn-outline-secondary.bg-white:hover,
+.btn-outline-secondary.bg-white:focus {
+  color: #0f172a;
+  border-color: #c3cdd8;
+}
+
+/* Reusable Quill editor (kh-richtext) — match the portal's form controls. */
+.kh-richtext .ql-toolbar.ql-snow {
+  border: 1px solid #d6dee6;
+  border-radius: var(--kh-ui-radius, 4px) var(--kh-ui-radius, 4px) 0 0;
+  background: #f8fafc;
+}
+.kh-richtext .ql-container.ql-snow {
+  border: 1px solid #d6dee6;
+  border-top: 0;
+  border-radius: 0 0 var(--kh-ui-radius, 4px) var(--kh-ui-radius, 4px);
+  font-size: 0.92rem;
+  font-family: inherit;
+  background: #fff;
+}
+.kh-richtext .ql-editor { min-height: var(--kh-richtext-min, 160px); line-height: 1.6; }
+.kh-richtext .ql-editor.ql-blank::before { color: #9aa4b2; font-style: normal; }
+.kh-richtext.is-invalid .ql-toolbar.ql-snow,
+.kh-richtext.is-invalid .ql-container.ql-snow { border-color: #dc3545; }

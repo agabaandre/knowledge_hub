@@ -1,0 +1,30 @@
+{
+  "enabled": false,
+  "name": "Nigeria Knowledge Hub",
+  "pathPrefix": "nigeria",
+  "hosts": ["nigeria.khub.africacdc.org"],
+  "storageId": "khub-nigeria",
+  "database": {
+    "client": "pg",
+    "host": "127.0.0.1",
+    "port": 5432,
+    "database": "khub_nigeria",
+    "user": "khub",
+    "password": "${NIGERIA_DB_PASSWORD}"
+  },
+  "modules": {
+    "courses": false,
+    "federation": false,
+    "countries": false
+  },
+  "branding": {
+    "primaryColor": "#008751",
+    "secondaryColor": "#1f2937"
+  },
+  "locales": ["en"],
+  "features": {
+    "statesEnabled": false,
+    "adminUnitsEnabled": true,
+    "seoFriendlyUrls": true
+  }
+}

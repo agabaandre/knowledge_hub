@@ -1,0 +1,30 @@
+{
+  "name": "Africa CDC Knowledge Hub",
+  "pathPrefix": "",
+  "hosts": ["localhost", "khub.africacdc.org"],
+  "storageId": "",
+  "database": null,
+  "modules": {
+    "publications": true,
+    "health-topics": true,
+    "forums": true,
+    "communities": true,
+    "events": true,
+    "courses": true,
+    "countries": true,
+    "authors": true,
+    "faqs": true,
+    "federation": true,
+    "ai-search": true
+  },
+  "branding": {
+    "primaryColor": "#006239",
+    "secondaryColor": "#413C3C"
+  },
+  "locales": ["en", "fr", "ar", "pt", "es", "sw"],
+  "features": {
+    "statesEnabled": true,
+    "adminUnitsEnabled": false,
+    "seoFriendlyUrls": true
+  }
+}

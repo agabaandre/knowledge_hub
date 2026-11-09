@@ -1,0 +1,31 @@
+{
+  "name": "@khub/frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Knowledge Hub web app (React + Vite). Same look as the Laravel portal (Bootstrap 5, Africa CDC green).",
+  "scripts": {
+    "dev": "vite --port 3000",
+    "build": "vite build",
+    "start": "vite preview --port 3000 --host",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@khub/shared": "*",
+    "bootstrap": "5.3.3",
+    "quill": "^2.0.3",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-helmet-async": "2.0.5",
+    "react-router-dom": "6.28.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "16.1.0",
+    "@vitejs/plugin-react": "4.3.4",
+    "jsdom": "25.0.1",
+    "playwright-core": "^1.49.1",
+    "vite": "5.4.11",
+    "vitest": "2.1.8"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@khub/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Code shared by the Knowledge Hub backend and frontend: module catalogue, site config schema, slugs, SEO defaults.",
+  "exports": {
+    ".": "./src/index.js",
+    "./modules": "./src/modules.js",
+    "./site-config": "./src/site-config.js",
+    "./slug": "./src/slug.js",
+    "./seo": "./src/seo.js",
+    "./urls": "./src/urls.js",
+    "./publish-wizard": "./src/publish-wizard.js",
+    "./permissions": "./src/permissions.js",
+    "./admin-nav": "./src/admin-nav.js"
+  },
+  "scripts": {
+    "test": "node --test tests/"
+  }
+}

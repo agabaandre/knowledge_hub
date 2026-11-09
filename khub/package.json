@@ -1,0 +1,27 @@
+{
+  "name": "khub",
+  "private": true,
+  "description": "Africa CDC Knowledge Hub — Node/Express backend, React SSR frontend, shared core",
+  "workspaces": [
+    "shared",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=backend & npm run dev --workspace=frontend & wait",
+    "build": "npm run build --workspace=frontend",
+    "start": "npm run start --workspace=backend & npm run start --workspace=frontend & wait",
+    "test": "npm test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "migrate": "npm run migrate --workspace=backend",
+    "migrate:from-laravel": "npm run migrate:from-laravel --workspace=backend",
+    "seed:demo": "npm run seed:demo --workspace=backend --",
+    "verify:counts": "npm run verify:counts --workspace=backend --",
+    "smoke": "npm run smoke --workspace=backend --",
+    "move-to-docker": "scripts/move-to-docker.sh",
+    "admin:create": "npm run admin:create --workspace=backend --"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

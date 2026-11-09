@@ -27,3 +27,6 @@ yarn-error.log
 /HTML
 /public/.well-known/assets.json
 /public/.well-known/assetlinks.json
+# Node/React hub runtime data and OS cruft
+khubdata/
+.DS_Store
