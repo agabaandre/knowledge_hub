@@ -4,10 +4,13 @@ import { usePermission } from '../../core/site-context.jsx';
 import { AdminShell, AdminCard } from './AdminShell.jsx';
 import { DataTable } from '../../core/table.jsx';
 import { Modal, FormField, Flash, StatusBadge, Switch } from '../../core/ui.jsx';
+import { SearchSelect } from '../../core/SearchSelect.jsx';
+import { useApi } from '../../core/hooks.js';
 
 /** Hub Sites: the multi-site registry — create sites and switch them on/off. */
 export const SitesPage = () => {
   const canManage = usePermission('admin.sites.manage');
+  const languages = useApi('/api/admin/languages');
   const [sites, setSites] = useState(null);
   const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState(null);
@@ -73,7 +76,7 @@ export const SitesPage = () => {
         />
       )}
       {creating && (
-        <CreateSiteModal onClose={() => setCreating(false)}
+        <CreateSiteModal languages={languages.data?.languages ?? []} onClose={() => setCreating(false)}
           onCreated={async (result) => {
             setCreating(false);
             setMessage({ ok: `Site "${result.id}" created and serving at ${result.pathPrefix}. Point its database in sites/${result.id}/site.json when it needs its own.` });
@@ -85,8 +88,8 @@ export const SitesPage = () => {
 };
 
 /** Individual form: provision a new site (config + storage folders, live immediately). */
-const CreateSiteModal = ({ onClose, onCreated }) => {
-  const [draft, setDraft] = useState({ id: '', name: '', pathPrefix: '', locales: 'en' });
+const CreateSiteModal = ({ languages, onClose, onCreated }) => {
+  const [draft, setDraft] = useState({ id: '', name: '', pathPrefix: '', locales: ['en'] });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -100,7 +103,7 @@ const CreateSiteModal = ({ onClose, onCreated }) => {
           id: draft.id.trim(),
           name: draft.name.trim(),
           pathPrefix: draft.pathPrefix.trim() || undefined,
-          locales: draft.locales.split(',').map((code) => code.trim().toLowerCase()).filter(Boolean),
+          locales: draft.locales,
         },
       });
       onCreated(result);
@@ -130,8 +133,11 @@ const CreateSiteModal = ({ onClose, onCreated }) => {
       <FormField label="Path prefix" hint="Defaults to /<id>, e.g. /nigeria → khub.org/nigeria.">
         <input className="form-control" value={draft.pathPrefix} placeholder="/nigeria" onChange={(event) => setDraft({ ...draft, pathPrefix: event.target.value })} />
       </FormField>
-      <FormField label="Languages" hint="Comma-separated two-letter codes, e.g. en, fr.">
-        <input className="form-control" value={draft.locales} onChange={(event) => setDraft({ ...draft, locales: event.target.value })} />
+      <FormField label="Languages" hint="The site's available languages — the same list as Site Languages.">
+        <SearchSelect multiple
+          options={languages.map((lang) => ({ id: lang.locale_code, name: `${lang.flag_emoji ?? ''} ${lang.name} (${lang.locale_code})`.trim() }))}
+          value={draft.locales} placeholder="Select languages"
+          onChange={(next) => setDraft({ ...draft, locales: next.length ? next : ['en'] })} />
       </FormField>
     </Modal>
   );

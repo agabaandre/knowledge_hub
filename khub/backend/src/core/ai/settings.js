@@ -2,7 +2,7 @@ import { TtlCache, MINUTE } from '../cache.js';
 import { now } from '../db/helpers.js';
 import { SUPPORTED_TYPES, chatComplete } from './client.js';
 
-const cache = new TtlCache();
+const cache = new TtlCache({ name: 'ai-settings' });
 const MASK = '••••••••';
 
 /**

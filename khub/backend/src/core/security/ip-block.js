@@ -6,7 +6,7 @@ import { validate } from '../http/validate.js';
 import { requirePermission } from '../auth/middleware.js';
 import { now } from '../db/helpers.js';
 
-const cache = new TtlCache();
+const cache = new TtlCache({ name: 'blocked-ips' });
 const CACHE_MS = 30 * 1000;
 const cacheKey = (site) => `blocked:${site.id}`;
 

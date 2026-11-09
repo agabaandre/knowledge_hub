@@ -3,8 +3,8 @@ import path from 'node:path';
 import { TtlCache, HOUR, MINUTE } from '../cache.js';
 
 const baselines = new TtlCache();
-const languagesCache = new TtlCache();
-const overridesCache = new TtlCache();
+const languagesCache = new TtlCache({ name: 'i18n-languages' });
+const overridesCache = new TtlCache({ name: 'i18n-overrides' });
 
 const RTL_LOCALES = new Set(['ar']);
 export const DEFAULT_LOCALE = 'en';

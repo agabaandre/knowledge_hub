@@ -1,7 +1,7 @@
 import { TtlCache, MINUTE } from '../../core/cache.js';
 import { toBool } from '../../core/db/helpers.js';
 
-const cache = new TtlCache();
+const cache = new TtlCache({ name: 'badges' });
 
 /** Active badge tiers, lowest threshold first (admin-configurable in badge_types). */
 export const badgeTiers = (site) =>

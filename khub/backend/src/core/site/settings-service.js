@@ -14,7 +14,7 @@ const BOOLEAN_KEYS = [
 ];
 
 export class SettingsService {
-  #cache = new TtlCache();
+  #cache = new TtlCache({ name: 'settings' });
 
   constructor(mediaUrl) {
     this.mediaUrl = mediaUrl;

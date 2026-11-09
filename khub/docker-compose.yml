@@ -11,6 +11,7 @@ x-app-env: &app-env
   HUB_DATA_ROOT: /var/khubdata
   SITES_DIR: sites
   LOG_LEVEL: ${LOG_LEVEL:-info}
+  REDIS_URL: redis://redis:6379
 
 services:
   mysql:
@@ -44,6 +45,18 @@ services:
       timeout: 5s
       retries: 30
 
+  redis:
+    image: redis:7-alpine
+    container_name: khub_node_redis
+    restart: unless-stopped
+    command: ["redis-server", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+    ports: ["${REDIS_PORT_FORWARD:-6390}:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
   app-mysql:
     build: .
     image: khub-node:latest
@@ -51,6 +64,7 @@ services:
     restart: unless-stopped
     depends_on:
       mysql: { condition: service_healthy }
+      redis: { condition: service_healthy }
     environment:
       <<: *app-env
       BACKEND_PORT: 4000
@@ -60,6 +74,7 @@ services:
       DB_DATABASE: knowledge_hub
       DB_USERNAME: root
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      REDIS_PREFIX: khub-mysql
     ports: ["${APP_MYSQL_PORT:-4001}:4000"]
     volumes: ["${KHUBDATA_DIR:-./khubdata}:/var/khubdata"]
 
@@ -69,6 +84,7 @@ services:
     restart: unless-stopped
     depends_on:
       postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
     environment:
       <<: *app-env
       BACKEND_PORT: 4000
@@ -78,6 +94,7 @@ services:
       DB_DATABASE: khub
       DB_USERNAME: postgres
       DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_PREFIX: khub-pg
     ports: ["${APP_PG_PORT:-4002}:4000"]
     volumes: ["${KHUBDATA_DIR:-./khubdata}:/var/khubdata"]
 

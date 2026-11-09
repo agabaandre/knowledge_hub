@@ -44,6 +44,8 @@ export const loadEnv = (env = process.env) => {
     frontendDist: env.FRONTEND_DIST ? path.resolve(env.FRONTEND_DIST) : path.resolve(backendRoot, '..', 'frontend', 'dist'),
     siteResolution: env.SITE_RESOLUTION === 'host' ? 'host' : 'path',
     hubDataRoot: env.HUB_DATA_ROOT ?? (process.platform === 'win32' ? 'C:\\khubdata' : '/var/khubdata'),
+    redisUrl: env.REDIS_URL ?? '',
+    redisPrefix: env.REDIS_PREFIX ?? 'khub',
     hubSiteId: env.HUB_SITE_ID ?? '',
     database: Object.freeze({
       client: dbClientFromEnv(env.DB_CLIENT ?? 'mysql2'),

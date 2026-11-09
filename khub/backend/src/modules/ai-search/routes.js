@@ -20,7 +20,7 @@ const chatSchema = z.object({
 });
 
 const limiter = rateLimit({ windowMs: 60 * 1000, limit: 10, standardHeaders: true, legacyHeaders: false });
-const insightsCache = new TtlCache();
+const insightsCache = new TtlCache({ name: 'ai-insights' });
 
 const sourcesFor = async (req, term) => {
   const { rows } = await new PublicationsRepository(req.db).search({ term }, { page: 1, per_page: 6 }, req.user);

@@ -5,7 +5,7 @@ import { HubStorage } from '../storage/hub-storage.js';
 import { CONTENT_PREFIXES } from '../storage/paths.js';
 import { TtlCache, MINUTE } from '../cache.js';
 
-const snapshotCache = new TtlCache();
+const snapshotCache = new TtlCache({ name: 'metrics' });
 
 /**
  * GET /metrics            Prometheus text format (optional bearer token)

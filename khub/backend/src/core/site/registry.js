@@ -13,7 +13,7 @@ import { TtlCache, MINUTE } from '../cache.js';
  */
 export class SiteRegistry {
   #sites = new Map();
-  #cache = new TtlCache();
+  #cache = new TtlCache({ name: 'site-modules' });
 
   constructor({ env, connections, logger }) {
     this.env = env;

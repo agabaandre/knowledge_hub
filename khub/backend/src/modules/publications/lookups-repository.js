@@ -1,6 +1,6 @@
 import { TtlCache, HOUR } from '../../core/cache.js';
 
-const cache = new TtlCache();
+const cache = new TtlCache({ name: 'lookups' });
 
 /**
  * Taxonomy lookups shared by search filters, navigation and the home page.

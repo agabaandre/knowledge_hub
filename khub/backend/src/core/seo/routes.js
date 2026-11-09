@@ -5,7 +5,7 @@ import { SitemapService } from './sitemap-service.js';
 import { renderLlmsTxt } from './llms-txt.js';
 import { TtlCache, HOUR } from '../cache.js';
 
-const cache = new TtlCache();
+const cache = new TtlCache({ name: 'seo' });
 const SEO_TTL = 6 * HOUR;
 
 const send = (res, type, body) => {

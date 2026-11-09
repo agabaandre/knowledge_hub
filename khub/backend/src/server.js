@@ -10,12 +10,14 @@ import { I18nService } from './core/i18n/service.js';
 import { HubStorage, mediaUrl } from './core/storage/hub-storage.js';
 import { createApp } from './core/http/app.js';
 import { startRetentionSweeps } from './core/documents/service.js';
+import { configureRedis, disconnectRedis } from './core/redis-store.js';
 
 /** Wire every core service together; modules receive this context. */
 export const bootstrap = async (overrides = {}) => {
   const env = overrides.env ?? loadEnv();
   const logger = overrides.logger ?? createLogger(env);
   const connections = new ConnectionRegistry();
+  await configureRedis(env.redisUrl, logger, env.redisPrefix);
 
   const sites = new SiteRegistry({ env, connections, logger });
   await sites.load();
@@ -42,6 +44,7 @@ if (isMain) {
   const shutdown = async (signal) => {
     context.logger.info({ signal }, 'shutting down');
     server.close();
+    await disconnectRedis();
     await context.connections.destroyAll();
     process.exit(0);
   };
