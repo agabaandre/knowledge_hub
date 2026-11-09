@@ -226,17 +226,44 @@ if (args.email && args.password) {
     return `#${first.id} "${r.json.data.title.slice(0, 30)}" · ${r.json.data.comments.length} comment(s)`;
   });
   await check('document registry + retention sweep', async () => {
-    const r = await call('/api/admin/documents');
-    expect(r.status === 200 && Array.isArray(r.json?.documents), `status ${r.status}`);
+    const r = await call('/api/admin/documents?per_page=5');
+    expect(r.status === 200 && Array.isArray(r.json?.data) && typeof r.json?.meta?.total === 'number', `status ${r.status}`);
+    const dupes = await call('/api/admin/documents/duplicates');
+    expect(dupes.status === 200 && Array.isArray(dupes.json?.checksumGroups), `duplicates ${dupes.status}`);
     const sweep = await call('/api/admin/documents/sweep', { method: 'POST' });
     expect(sweep.status === 200 && typeof sweep.json?.disposed === 'number', `sweep ${sweep.status}`);
-    return `${r.json.documents.length} document(s); sweep disposed ${sweep.json.disposed}`;
+    return `${r.json.meta.total} document(s); sweep disposed ${sweep.json.disposed}, emptied ${sweep.json.emptied ?? 0}`;
   });
   await check('version chain on resource detail', async () => {
     const list = await call('/api/admin/publications?status=all&per_page=1');
     const r = await call(`/api/publications/${list.json.data[0].id}`);
     expect(r.status === 200 && Array.isArray(r.json?.versions) && r.json.versions.length >= 1, `status ${r.status}`);
     return `${r.json.versions.length} version(s) in chain`;
+  });
+  await check('storage, sites, maps, federation admin APIs', async () => {
+    const storage = await call('/api/admin/storage');
+    expect(storage.status === 200 && Array.isArray(storage.json?.sites), `storage ${storage.status}`);
+    const sites = await call('/api/admin/sites');
+    expect(sites.status === 200 && sites.json.sites.some((site) => site.id === 'default'), `sites ${sites.status}`);
+    const geo = await call('/api/admin/analytics/geo');
+    expect(geo.status === 200 && Array.isArray(geo.json?.publications), `geo ${geo.status}`);
+    const series = await call('/api/admin/analytics/series');
+    expect(series.status === 200 && series.json?.months?.length === 12, `series ${series.status}`);
+    const hubs = await call('/api/admin/federation/hubs');
+    expect(hubs.status === 200 && Array.isArray(hubs.json?.hubs), `federation ${hubs.status}`);
+    return `${sites.json.sites.length} site(s), ${hubs.json.hubs.length} federated hub(s)`;
+  });
+  await check('communities admin (COPs + participants)', async () => {
+    const stats = await call('/api/admin/communities/stats');
+    expect(stats.status === 200 && typeof stats.json?.total === 'number', `stats ${stats.status}`);
+    const members = await call('/api/admin/communities/participants?per_page=1');
+    expect(members.status === 200 && Array.isArray(members.json?.data), `participants ${members.status}`);
+    return `${stats.json.total} communities, ${stats.json.approvedMemberships} memberships`;
+  });
+  await check('forums admin management', async () => {
+    const r = await call('/api/admin/forums?per_page=1');
+    expect(r.status === 200 && Array.isArray(r.json?.data), `status ${r.status}`);
+    return `${r.json.meta.total} thread(s)`;
   });
   await check('publications CSV export', async () => {
     const r = await call('/api/admin/publications/export?status=all', { raw: true });

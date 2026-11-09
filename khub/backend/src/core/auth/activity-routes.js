@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import multer from 'multer';
 import { publicationPath, forumPath, slugify, validatePublishSubmission, DEFAULT_REQUIRED_FIELDS } from '@khub/shared';
 import { asyncHandler, HttpError } from '../http/errors.js';
@@ -206,6 +207,9 @@ export const activityRouter = () => {
         data_category_id: data.data_category_id ? Number(data.data_category_id) : null,
         publication_catgory_id: data.category_id ? Number(data.category_id) : 0,
         publication: storedFile,
+        file_checksum_sha256: mainFile ? crypto.createHash('sha256').update(mainFile.buffer).digest('hex') : null,
+        file_size_bytes: mainFile ? mainFile.size : null,
+        file_mime_type: mainFile ? mainFile.mimetype : null,
         cover: coverFile,
         citation_link: data.link || null,
         associated_authors: data.associated_authors || null,

@@ -36,11 +36,16 @@ export const RegisterPage = () => {
   const [error, setError] = useState('');
   const afterAuth = useAfterAuth();
 
+  const [notice, setNotice] = useState('');
   const submit = async (event) => {
     event.preventDefault();
     const form = Object.fromEntries(new FormData(event.currentTarget));
     try {
-      await apiFetch('/api/auth/register', { method: 'POST', body: form });
+      const result = await apiFetch('/api/auth/register', { method: 'POST', body: form });
+      if (result.verificationRequired) {
+        setNotice(result.message);
+        return;
+      }
       await afterAuth();
     } catch (err) {
       setError(err.message);
@@ -51,6 +56,7 @@ export const RegisterPage = () => {
     <AuthCard title="Create an Account">
       <Seo title="Create an account" path="/register" noindex />
       {error && <div role="alert" className="alert alert-danger">{error}</div>}
+      {notice && <div role="status" className="alert alert-success">{notice}</div>}
       <form onSubmit={submit}>
         <div className="row">
           <div className="col-6 form-group">

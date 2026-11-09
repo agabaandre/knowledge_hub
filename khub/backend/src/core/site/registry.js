@@ -22,6 +22,7 @@ export class SiteRegistry {
   }
 
   async load() {
+    this.#sites.clear();
     const entries = await fs.readdir(this.env.sitesDir, { withFileTypes: true });
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;

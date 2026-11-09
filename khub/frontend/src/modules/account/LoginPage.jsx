@@ -53,6 +53,7 @@ export const LoginPage = () => {
                 <p className="mb-0" style={{ opacity: 0.85 }}>Sign in to {settings.site_name}</p>
               </div>
               <div className="p-4">
+                {params.get('verified') === '1' && <div role="status" className="alert alert-success py-2">Email verified — you can sign in now.</div>}
                 {error && <div role="alert" className="alert alert-danger py-2">{error}</div>}
                 <form onSubmit={submit}>
                   <div className="form-group">

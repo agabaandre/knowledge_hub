@@ -7,7 +7,7 @@ import { HomePage } from './modules/home/HomePage.jsx';
 import { SearchPage } from './modules/publications/SearchPage.jsx';
 import { ResourcePage } from './modules/publications/ResourcePage.jsx';
 import { ForumsPage, ForumPage } from './modules/forums/ForumsPage.jsx';
-import { CommunitiesPage } from './modules/communities/CommunitiesPage.jsx';
+import { CommunitiesPage, CommunityPage } from './modules/communities/CommunitiesPage.jsx';
 import { FaqsPage } from './modules/faqs/FaqsPage.jsx';
 import { HealthTopicsPage, HealthTopicPage } from './modules/health-topics/HealthTopicsPage.jsx';
 import { EventsPage } from './modules/events/EventsPage.jsx';
@@ -29,6 +29,12 @@ import { LogsPage, MailingPage } from './modules/admin/LogsPage.jsx';
 import { PublicationsAdminPage } from './modules/admin/PublicationsAdminPage.jsx';
 import { PublicationAdminDetailsPage } from './modules/admin/PublicationAdminDetailsPage.jsx';
 import { DocumentsPage } from './modules/admin/DocumentsPage.jsx';
+import { CommunitiesAdminPage } from './modules/admin/CommunitiesAdminPage.jsx';
+import { ForumsAdminPage } from './modules/admin/ForumsAdminPage.jsx';
+import { StoragePage } from './modules/admin/StoragePage.jsx';
+import { MapsPage } from './modules/admin/MapsPage.jsx';
+import { SitesPage } from './modules/admin/SitesPage.jsx';
+import { FederationPage } from './modules/admin/FederationPage.jsx';
 import { MetricsPage } from './modules/admin/MetricsPage.jsx';
 import { RegisterPage } from './modules/account/AuthPages.jsx';
 import { LoginPage } from './modules/account/LoginPage.jsx';
@@ -60,6 +66,7 @@ const Routed = () => (
       <Route path="forums" element={<ModuleGate module="forums"><ForumsPage /></ModuleGate>} />
       <Route path="forums/:key" element={<ModuleGate module="forums"><ForumPage /></ModuleGate>} />
       <Route path="communities" element={<ModuleGate module="communities"><CommunitiesPage /></ModuleGate>} />
+      <Route path="communities/:key" element={<ModuleGate module="communities"><CommunityPage /></ModuleGate>} />
       <Route path="events" element={<ModuleGate module="events"><EventsPage /></ModuleGate>} />
       <Route path="faqs" element={<ModuleGate module="faqs"><FaqsPage /></ModuleGate>} />
       <Route path="authors" element={<ModuleGate module="authors"><AuthorsPage /></ModuleGate>} />
@@ -82,6 +89,12 @@ const Routed = () => (
       <Route path="publications" element={<AdminGate permission="admin.publications.view"><PublicationsAdminPage /></AdminGate>} />
       <Route path="publications/details" element={<AdminGate permission="admin.publications.view"><PublicationAdminDetailsPage /></AdminGate>} />
       <Route path="documents" element={<AdminGate permission="admin.documents.view"><DocumentsPage /></AdminGate>} />
+      <Route path="communities" element={<AdminGate permission="admin.communities.view"><CommunitiesAdminPage /></AdminGate>} />
+      <Route path="forums" element={<AdminGate permission="admin.forums.view"><ForumsAdminPage /></AdminGate>} />
+      <Route path="storage" element={<AdminGate permission="admin.storage.view"><StoragePage /></AdminGate>} />
+      <Route path="maps" element={<AdminGate permission="admin.maps.view"><MapsPage /></AdminGate>} />
+      <Route path="sites" element={<AdminGate permission="admin.sites.view"><SitesPage /></AdminGate>} />
+      <Route path="federation" element={<AdminGate permission="admin.federation.view"><FederationPage /></AdminGate>} />
       <Route path="configure" element={<AdminGate permission="admin.settings.view"><ConfigurePage /></AdminGate>} />
       <Route path="users" element={<AdminGate permission="admin.users.view"><UsersPage /></AdminGate>} />
       <Route path="roles" element={<AdminGate permission="admin.roles.view"><RolesPage /></AdminGate>} />

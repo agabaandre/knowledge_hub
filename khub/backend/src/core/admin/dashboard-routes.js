@@ -94,5 +94,78 @@ export const dashboardRoutes = () => {
     }),
   );
 
+
+  // Chart data: 12-month signups + publications, and themes distribution.
+  router.get(
+    '/analytics/series',
+    asyncHandler(async (req, res) => {
+      const db = req.db;
+      const since = new Date();
+      since.setMonth(since.getMonth() - 11);
+      since.setDate(1);
+      const monthOf = (value) => String(value ?? '').slice(0, 7);
+      const months = Array.from({ length: 12 }, (_, index) => {
+        const date = new Date(since.getFullYear(), since.getMonth() + index, 1);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      });
+      const [signups, publications, themes] = await Promise.all([
+        db('users').where('created_at', '>=', since).select('created_at'),
+        db('publication').where('created_at', '>=', since).where('is_version', false).whereNull('deleted_at').select('created_at'),
+        db('publication')
+          .join('sub_thematic_area', 'sub_thematic_area.id', 'publication.sub_thematic_area_id')
+          .join('thematic_area', 'thematic_area.id', 'sub_thematic_area.thematic_area_id')
+          .where({ 'publication.is_approved': true, 'publication.is_version': false })
+          .whereNull('publication.deleted_at')
+          .groupBy('thematic_area.id', 'thematic_area.description')
+          .select('thematic_area.description as theme')
+          .count({ total: 'publication.id' }),
+      ]);
+      const bucket = (rows) => {
+        const byMonth = Object.fromEntries(months.map((month) => [month, 0]));
+        for (const row of rows) {
+          const month = monthOf(row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at);
+          if (month in byMonth) byMonth[month] += 1;
+        }
+        return months.map((month) => byMonth[month]);
+      };
+      res.json({
+        months,
+        signups: bucket(signups),
+        publications: bucket(publications),
+        themes: themes.map((row) => ({ theme: row.theme, total: Number(row.total) })).sort((a, b) => b.total - a.total),
+      });
+    }),
+  );
+
+  // Map data: per member state publication + user counts (ISO codes for Highcharts).
+  router.get(
+    '/analytics/geo',
+    asyncHandler(async (req, res) => {
+      const db = req.db;
+      const [publications, users, countries] = await Promise.all([
+        db('publication_countries')
+          .join('country', 'country.id', 'publication_countries.country_id')
+          .join('publication', 'publication.id', 'publication_countries.publication_id')
+          .where({ 'publication.is_approved': true, 'publication.is_version': false })
+          .whereNull('publication.deleted_at')
+          .groupBy('country.id', 'country.name', 'country.iso_code')
+          .select('country.name', 'country.iso_code')
+          .count({ total: 'publication.id' }),
+        db('users')
+          .join('country', 'country.id', 'users.country_id')
+          .groupBy('country.id', 'country.name', 'country.iso_code')
+          .select('country.name', 'country.iso_code')
+          .count({ total: 'users.id' }),
+        db('country').select('name', 'iso_code'),
+      ]);
+      const entry = (row) => ({ name: row.name, iso: String(row.iso_code ?? '').toLowerCase(), total: Number(row.total) });
+      res.json({
+        publications: publications.map(entry).filter((row) => row.iso),
+        users: users.map(entry).filter((row) => row.iso),
+        memberStates: countries.length,
+      });
+    }),
+  );
+
   return router;
 };

@@ -14,6 +14,10 @@ import { logsRoutes, mailingRoutes } from './logs-routes.js';
 import { securityRoutes } from '../security/ip-block.js';
 import { translationsRoutes } from './translations-routes.js';
 import { documentsRoutes } from './documents-routes.js';
+import { communitiesAdminRoutes, forumsAdminRoutes } from './collab-routes.js';
+import { storageRoutes } from './storage-routes.js';
+import { sitesRoutes } from './sites-routes.js';
+import { federationAdminRoutes } from './federation-routes.js';
 import { publicationsAdminRoutes } from './publications-routes.js';
 
 /** Approvals admit moderators and above; every other /api/admin route needs an overall administrator. */
@@ -39,6 +43,11 @@ export const adminRouter = (context) => {
   router.use('/api/admin/lists', requirePermission('admin.lists.view'));
   router.use('/api/admin/publications', requirePermission('admin.publications.view'));
   router.use('/api/admin/documents', requirePermission('admin.documents.view'));
+  router.use('/api/admin/communities', requirePermission('admin.communities.view'));
+  router.use('/api/admin/forums', requirePermission('admin.forums.view'));
+  router.use('/api/admin/storage', requirePermission('admin.storage.view'));
+  router.use('/api/admin/sites', requirePermission('admin.sites.view'));
+  router.use('/api/admin/federation', requirePermission('admin.federation.view'));
   router.use('/api/admin/logs', requirePermission('admin.logs.view'));
   router.use('/api/admin/security', requirePermission('admin.logs.view'));
   router.use('/api/admin/mailing', requirePermission('admin.mailing.view'));
@@ -56,5 +65,10 @@ export const adminRouter = (context) => {
   router.use('/api/admin', securityRoutes(context));
   router.use('/api/admin', translationsRoutes(context));
   router.use('/api/admin', documentsRoutes(context));
+  router.use('/api/admin', communitiesAdminRoutes(context));
+  router.use('/api/admin', forumsAdminRoutes(context));
+  router.use('/api/admin', storageRoutes(context));
+  router.use('/api/admin', sitesRoutes(context));
+  router.use('/api/admin', federationAdminRoutes(context));
   return router;
 };

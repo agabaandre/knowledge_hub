@@ -7,6 +7,7 @@ import { withSitePrefix } from '@khub/shared/urls';
 import { AdminShell, AdminCard } from './AdminShell.jsx';
 import { SearchSelect } from '../../core/SearchSelect.jsx';
 import { StatCard, Skeleton } from '../../core/ui.jsx';
+import { Chart } from '../../core/Chart.jsx';
 import { formatNumber } from '../../core/format.js';
 
 const PERIODS = [['7d', '7 days'], ['30d', '30 days'], ['90d', '90 days'], ['ytd', 'YTD'], ['all', 'All time']];
@@ -31,6 +32,7 @@ export const DashboardPage = () => {
 
   const [filters, setFilters] = useState({ period: '30d', from: '', to: '', country_id: '' });
   const [analytics, setAnalytics] = useState(null);
+  const [series, setSeries] = useState(null);
   const [analyticsError, setAnalyticsError] = useState('');
 
   const loadAnalytics = (next = filters) => {
@@ -40,7 +42,10 @@ export const DashboardPage = () => {
     if (next.country_id) query.country_id = next.country_id;
     apiFetch('/api/admin/analytics', { query }).then(setAnalytics).catch((err) => setAnalyticsError(err.message));
   };
-  useEffect(() => { loadAnalytics(); }, []); // eslint-disable-line
+  useEffect(() => {
+    loadAnalytics();
+    apiFetch('/api/admin/analytics/series').then(setSeries).catch(() => {});
+  }, []); // eslint-disable-line
 
   const pendingTotal = data ? data.pending.publications + data.pending.forums + data.pending.comments : 0;
 
@@ -96,6 +101,40 @@ export const DashboardPage = () => {
               </div>
             )}
             {analytics && <small className="text-muted">Resource views, all time: {formatNumber(analytics.resourceViewsAllTime)}. Page-level visit tracking is not ported yet; "searches" reflect recorded search activity.</small>}
+            {series && (
+              <div className="row mt-3">
+                <div className="col-lg-7 mb-3">
+                  <Chart height={250} options={{
+                    chart: { type: 'line' },
+                    title: { text: 'Signups per month (12 months)' },
+                    xAxis: { categories: series.months },
+                    yAxis: { allowDecimals: false },
+                    legend: { enabled: false },
+                    series: [{ name: 'Signups', data: series.signups }],
+                  }} />
+                </div>
+                <div className="col-lg-5 mb-3">
+                  <Chart height={250} options={{
+                    chart: { type: 'bar' },
+                    title: { text: 'Approved resources by theme' },
+                    xAxis: { categories: series.themes.map((row) => row.theme) },
+                    yAxis: { allowDecimals: false },
+                    legend: { enabled: false },
+                    series: [{ name: 'Resources', data: series.themes.map((row) => row.total) }],
+                  }} />
+                </div>
+                <div className="col-12 mb-2">
+                  <Chart height={220} options={{
+                    chart: { type: 'column' },
+                    title: { text: 'New resources per month (12 months)' },
+                    xAxis: { categories: series.months },
+                    yAxis: { allowDecimals: false },
+                    legend: { enabled: false },
+                    series: [{ name: 'Resources', data: series.publications }],
+                  }} />
+                </div>
+              </div>
+            )}
           </AdminCard>
 
           <AdminCard title="Needs attention">

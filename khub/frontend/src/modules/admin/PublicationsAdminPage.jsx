@@ -9,7 +9,7 @@ import { Modal, StatusBadge, Flash, STATUS_TONE, Skeleton, Switch } from '../../
 import { ResourceCard, AttachmentsCard, CommentsCard, RejectModal } from './PublicationView.jsx';
 import { formatDate, formatNumber } from '../../core/format.js';
 
-const STATUSES = [['all', 'All'], ['approved', 'Approved'], ['pending', 'Pending'], ['rejected', 'Rejected'], ['inactive', 'Inactive']];
+const STATUSES = [['all', 'All'], ['approved', 'Approved'], ['pending', 'Pending'], ['rejected', 'Rejected'], ['inactive', 'Inactive'], ['trashed', 'Trash']];
 
 /** Manage Resources: search, filter, feature, activate, delete — preview stays inside the admin. */
 export const PublicationsAdminPage = () => {
@@ -51,8 +51,10 @@ export const PublicationsAdminPage = () => {
   };
 
   const toggle = (row, field, value) => act(() => apiFetch(`/api/admin/publications/${row.id}`, { method: 'PUT', body: { [field]: value } }));
-  const remove = (row) => window.confirm(`Permanently delete "${row.title}"? This cannot be undone.`)
-    && act(() => apiFetch(`/api/admin/publications/${row.id}`, { method: 'DELETE' }), 'Resource deleted.');
+  const remove = (row) => act(() => apiFetch(`/api/admin/publications/${row.id}`, { method: 'DELETE' }), `"${row.title}" moved to the trash.`);
+  const restore = (row) => act(() => apiFetch(`/api/admin/publications/${row.id}/restore`, { method: 'POST' }), `"${row.title}" restored.`);
+  const destroy = (row) => window.confirm(`Permanently destroy "${row.title}" and its files? This cannot be undone.`)
+    && act(() => apiFetch(`/api/admin/publications/${row.id}/destroy`, { method: 'DELETE' }), 'Resource destroyed.');
 
   const columns = [
     {
@@ -101,13 +103,25 @@ export const PublicationsAdminPage = () => {
       align: 'end',
       render: (row) => (
         <span className="kh-table-actions">
-          <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => setPreview(row)} aria-label={`Preview ${row.title}`}>
-            <i className="fa fa-eye" aria-hidden="true" /> Preview
-          </button>
-          {canEdit && (
-            <button type="button" className="btn btn-sm btn-outline-danger" disabled={busy} onClick={() => remove(row)} aria-label={`Delete ${row.title}`}>
+          {!row.trashed && (
+            <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => setPreview(row)} aria-label={`Preview ${row.title}`}>
+              <i className="fa fa-eye" aria-hidden="true" /> Preview
+            </button>
+          )}
+          {canEdit && !row.trashed && (
+            <button type="button" className="btn btn-sm btn-outline-danger" disabled={busy} onClick={() => remove(row)} title="Move to trash" aria-label={`Trash ${row.title}`}>
               <i className="fa fa-trash" aria-hidden="true" />
             </button>
+          )}
+          {canEdit && row.trashed && (
+            <>
+              <button type="button" className="btn btn-sm btn-outline-secondary" disabled={busy} onClick={() => restore(row)}>
+                <i className="fa fa-rotate-left mr-1" aria-hidden="true" /> Restore
+              </button>
+              <button type="button" className="btn btn-sm btn-outline-danger" disabled={busy} onClick={() => destroy(row)}>
+                <i className="fa fa-fire" aria-hidden="true" /> Destroy
+              </button>
+            </>
           )}
         </span>
       ),

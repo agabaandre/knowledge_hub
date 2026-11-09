@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { publicationPath } from '@khub/shared';
 import { PublicationsRepository } from '../../modules/publications/repository.js';
 import { publicationDetail, userPhotoUrl } from '../../modules/publications/serializer.js';
+import { DocumentsService } from '../documents/service.js';
 import { asyncHandler, HttpError } from '../http/errors.js';
 import { validate } from '../http/validate.js';
 import { requirePermission } from '../auth/middleware.js';
@@ -11,7 +12,7 @@ import { countOf, likePattern, toBool, now } from '../db/helpers.js';
 
 const listSchema = paginationSchema.extend({
   term: z.string().trim().max(200).optional(),
-  status: z.enum(['all', 'approved', 'pending', 'rejected', 'inactive']).optional().default('all'),
+  status: z.enum(['all', 'approved', 'pending', 'rejected', 'inactive', 'trashed']).optional().default('all'),
 });
 const updateSchema = z.object({
   is_featured: z.boolean().optional(),
@@ -33,6 +34,8 @@ export const publicationsAdminRoutes = () => {
         .leftJoin('users', 'users.id', 'publication.user_id')
         .where('publication.is_version', false);
       if (term) base.where((builder) => builder.whereILike('publication.title', likePattern(term)).orWhereILike('author.name', likePattern(term)));
+      if (status === 'trashed') base.whereNotNull('publication.deleted_at');
+      else base.whereNull('publication.deleted_at');
       if (status === 'approved') base.where({ 'publication.is_approved': true }).where('publication.is_active', 'Active');
       if (status === 'pending') base.where({ 'publication.is_approved': false, 'publication.is_rejected': false });
       if (status === 'rejected') base.where({ 'publication.is_rejected': true });
@@ -42,7 +45,7 @@ export const publicationsAdminRoutes = () => {
       const rows = await base
         .select('publication.id', 'publication.slug', 'publication.title', 'publication.created_at', 'publication.visits',
           'publication.is_approved', 'publication.is_rejected', 'publication.is_active', 'publication.is_featured',
-          'publication.rejected_reason', 'author.name as author_name', 'users.name as submitted_by')
+          'publication.rejected_reason', 'publication.deleted_at', 'author.name as author_name', 'users.name as submitted_by')
         .orderBy('publication.created_at', 'desc')
         .limit(perPage)
         .offset((page - 1) * perPage);
@@ -50,6 +53,7 @@ export const publicationsAdminRoutes = () => {
       res.json(paginate(rows.map((row) => ({
         id: row.id, title: row.title, author: row.author_name ?? '', submittedBy: row.submitted_by ?? '',
         createdAt: row.created_at, visits: Number(row.visits ?? 0), status: statusOf(row),
+        trashed: Boolean(row.deleted_at), trashedAt: row.deleted_at,
         featured: toBool(row.is_featured), active: String(row.is_active) === 'Active',
         rejectedReason: row.rejected_reason, path: publicationPath(row),
       })), total, { page, per_page: perPage }));
@@ -66,6 +70,8 @@ export const publicationsAdminRoutes = () => {
         .leftJoin('users', 'users.id', 'publication.user_id')
         .where('publication.is_version', false);
       if (term) query.where((builder) => builder.whereILike('publication.title', likePattern(term)).orWhereILike('author.name', likePattern(term)));
+      if (status === 'trashed') query.whereNotNull('publication.deleted_at');
+      else query.whereNull('publication.deleted_at');
       if (status === 'approved') query.where({ 'publication.is_approved': true }).where('publication.is_active', 'Active');
       if (status === 'pending') query.where({ 'publication.is_approved': false, 'publication.is_rejected': false });
       if (status === 'rejected') query.where({ 'publication.is_rejected': true });
@@ -147,23 +153,81 @@ export const publicationsAdminRoutes = () => {
     }),
   );
 
+  // Delete = move to trash (recoverable). The sweep destroys it after the retention policy.
   router.delete(
     '/publications/:id',
     requirePermission('admin.publications.edit'),
     asyncHandler(async (req, res) => {
-      const id = Number(req.params.id);
-      const related = [
-        ['publication_tags', 'publication_id'], ['publication_countries', 'publication_id'],
-        ['publication_community_of_practices', 'publication_id'], ['publication_attachments', 'publication_id'],
-        ['publication_comments', 'publication_id'], ['publication_views', 'publication_id'],
-        ['publication_summaries', 'resource_id'], ['favourites', 'publication_id'],
-      ];
-      for (const [table, column] of related) await req.db(table).where({ [column]: id }).del();
-      const changed = await req.db('publication').where({ id }).del();
-      if (!changed) throw new HttpError(404, 'Publication not found.');
+      const changed = await req.db('publication').where({ id: Number(req.params.id) }).whereNull('deleted_at').update({ deleted_at: now(), updated_at: now() });
+      if (!changed) throw new HttpError(404, 'Publication not found (or already in the trash).');
+      res.json({ ok: true, trashed: true });
+    }),
+  );
+
+  router.post(
+    '/publications/:id/restore',
+    requirePermission('admin.publications.edit'),
+    asyncHandler(async (req, res) => {
+      const changed = await req.db('publication').where({ id: Number(req.params.id) }).whereNotNull('deleted_at').update({ deleted_at: null, updated_at: now() });
+      if (!changed) throw new HttpError(404, 'Nothing to restore.');
+      res.json({ ok: true });
+    }),
+  );
+
+  // Destroy permanently: stored files, related rows, the publication itself.
+  router.delete(
+    '/publications/:id/destroy',
+    requirePermission('admin.publications.edit'),
+    asyncHandler(async (req, res) => {
+      const destroyed = await new DocumentsService(req.site).destroyPublication(Number(req.params.id));
+      if (!destroyed) throw new HttpError(404, 'Publication not found.');
       res.status(204).end();
     }),
   );
 
-  return router;
+  // Duplicate resolution: turn this publication into a version of another.
+  router.post(
+    '/publications/:id/make-version',
+    requirePermission('admin.publications.edit'),
+    validate(z.object({ parent_id: z.coerce.number().int().positive() })),
+    asyncHandler(async (req, res) => {
+      const id = Number(req.params.id);
+      const target = await req.db('publication').where({ id: req.body.parent_id }).whereNull('deleted_at').first();
+      if (!target) throw new HttpError(422, 'The target publication no longer exists.');
+      if (target.id === id) throw new HttpError(422, 'A publication cannot be a version of itself.');
+      const rootId = target.is_version && target.parent_id ? target.parent_id : target.id;
+      const repo = new PublicationsRepository(req.db);
+      const versionNo = await repo.nextVersionNo(rootId);
+      const changed = await req.db('publication').where({ id }).whereNull('deleted_at')
+        .update({ is_version: true, parent_id: rootId, version_no: versionNo, updated_at: now() });
+      if (!changed) throw new HttpError(404, 'Publication not found.');
+      res.json({ ok: true, parentId: rootId, versionNo });
+    }),
+  );
+
+  // Duplicate resolution: move this publication's content into another, then trash it.
+  router.post(
+    '/publications/:id/merge-into',
+    requirePermission('admin.publications.edit'),
+    validate(z.object({ target_id: z.coerce.number().int().positive() })),
+    asyncHandler(async (req, res) => {
+      const id = Number(req.params.id);
+      const targetId = Number(req.body.target_id);
+      if (targetId === id) throw new HttpError(422, 'A publication cannot be merged into itself.');
+      const [source, target] = await Promise.all([
+        req.db('publication').where({ id }).whereNull('deleted_at').first('id', 'visits'),
+        req.db('publication').where({ id: targetId }).whereNull('deleted_at').first('id'),
+      ]);
+      if (!source || !target) throw new HttpError(422, 'Both publications must exist and be out of the trash.');
+      // Re-point user-generated content, combine view counts, then trash the duplicate.
+      for (const [table, column] of [['publication_attachments', 'publication_id'], ['publication_comments', 'publication_id'], ['favourites', 'publication_id'], ['publication_views', 'publication_id']]) {
+        await req.db(table).where({ [column]: id }).update({ [column]: targetId });
+      }
+      await req.db('publication').where({ id: targetId }).increment('visits', Number(source.visits ?? 0));
+      await req.db('publication').where({ id }).update({ deleted_at: now(), updated_at: now() });
+      res.json({ ok: true, mergedInto: targetId });
+    }),
+  );
+
+    return router;
 };

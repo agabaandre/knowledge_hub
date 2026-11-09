@@ -6,6 +6,7 @@ import { asyncHandler, HttpError } from '../http/errors.js';
 import { validate } from '../http/validate.js';
 import { requirePermission } from '../auth/middleware.js';
 import { HubStorage, mediaUrl } from '../storage/hub-storage.js';
+import { Mailer } from '../mail/mailer.js';
 
 const color = z.string().trim().regex(/^#[0-9a-fA-F]{3,8}$/).or(z.literal(''));
 const text = (max) => z.string().trim().max(max);
@@ -130,6 +131,8 @@ const SETTING_SHAPE = {
   block_disposable_email_registration: toggle.optional(),
   blocked_email_domains: text(2000).optional(),
   analytics_script: text(5000).optional(),
+  trash_retention_days: text(5).regex(/^\d*$/).optional(),
+  federation_api_token: text(255).optional(),
 };
 
 const settingsSchema = z.object(SETTING_SHAPE).partial().refine((value) => Object.keys(value).length > 0, 'Nothing to update');
@@ -138,7 +141,7 @@ export const EDITABLE_SETTING_KEYS = Object.keys(SETTING_SHAPE);
 
 /** Secrets are editable from Configure but never echoed back: reads are masked. */
 export const SECRET_SETTING_KEYS = [
-  'mail_password', 'exchange_client_secret', 'mail_http_client_secret', 'mail_api_key', 'mail_api_secret',
+  'federation_api_token', 'mail_password', 'exchange_client_secret', 'mail_http_client_secret', 'mail_api_key', 'mail_api_secret',
   'google_client_secret', 'microsoft_client_secret', 'linkedin_client_secret',
 ];
 export const SECRET_MASK = '••••••••';
@@ -180,7 +183,24 @@ export const settingsRoutes = ({ settings }) => {
       if (row) await req.db('setting').where({ id: row.id }).update(updates);
       else await req.db('setting').insert({ timezone: 'Africa/Addis_Ababa', status: 'active', seo_keywords: '', site_description: '', ...updates });
       settings.forget(req.site);
+      Mailer.forgetHealth(req.site); // mail settings may have changed — re-test on next use
       res.json({ ok: true, updated: Object.keys(updates) });
+    }),
+  );
+
+  // Live check of the configured mail service (used by registration verification too).
+  router.post(
+    '/settings/mail-test',
+    requirePermission('admin.settings.edit'),
+    asyncHandler(async (req, res) => {
+      const mailer = new Mailer(req.site, settings);
+      Mailer.forgetHealth(req.site);
+      const working = await mailer.isWorking();
+      if (working && req.body?.to) {
+        await mailer.send({ to: String(req.body.to), subject: 'Knowledge Hub mail test', html: '<p>The mail service is configured and working.</p>' });
+        return res.json({ working: true, sent: true });
+      }
+      res.json({ working });
     }),
   );
 

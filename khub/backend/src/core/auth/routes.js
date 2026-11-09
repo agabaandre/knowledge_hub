@@ -6,7 +6,10 @@ import { asyncHandler, HttpError } from '../http/errors.js';
 import { requireAuth } from './middleware.js';
 import { hashPassword, verifyPassword } from './password.js';
 import { signSession, SESSION_COOKIE, SESSION_DAYS, REMEMBER_DAYS } from './jwt.js';
+import crypto from 'node:crypto';
 import { UsersRepository } from './users-repository.js';
+import { Mailer } from '../mail/mailer.js';
+import { now } from '../db/helpers.js';
 
 const loginSchema = z.object({ email: z.email(), password: z.string().min(1), remember: z.boolean().optional().default(false) });
 
@@ -34,7 +37,7 @@ const publicUser = (user) => ({
  * POST /api/auth/login, /register, /logout — GET /api/auth/me
  * Session = signed JWT in an httpOnly cookie (web) and returned in the body (apps).
  */
-export const authRouter = ({ env }) => {
+export const authRouter = ({ env, settings }) => {
   const router = Router();
 
   const issueSession = (req, res, user, remember = false) => {
@@ -57,6 +60,9 @@ export const authRouter = ({ env }) => {
         throw new HttpError(401, 'Invalid email or password');
       }
       if (Number(record.status) === 0) throw new HttpError(403, 'This account is inactive');
+      if (record.verification_token && !record.email_verified_at) {
+        throw new HttpError(403, 'Please verify your email first — we sent you a verification link.');
+      }
 
       await users.touchLogin(record.id);
       const user = await users.findForSession(record.id);
@@ -79,8 +85,37 @@ export const authRouter = ({ env }) => {
         organization: req.body.organization,
         passwordHash: await hashPassword(req.body.password),
       });
+      // Verification applies only when a mail service is configured AND answering;
+      // otherwise the account is auto-verified (the Laravel app's current behaviour).
+      const mailer = new Mailer(req.site, settings);
+      if (await mailer.isWorking()) {
+        const token = crypto.randomBytes(24).toString('hex');
+        await req.db('users').where({ id }).update({ verification_token: token, is_verified: 0 });
+        const link = `${req.site.publicUrl}/api/auth/verify-email?token=${token}`;
+        await mailer.send({
+          to: req.body.email,
+          subject: 'Verify your Knowledge Hub account',
+          html: `<p>Welcome to the Knowledge Hub, ${req.body.first_name}!</p><p>Please confirm your email address:</p><p><a href="${link}">${link}</a></p>`,
+        });
+        return res.status(201).json({ verificationRequired: true, message: 'Account created — check your email for the verification link before signing in.' });
+      }
+      await req.db('users').where({ id }).update({ email_verified_at: now(), is_verified: 1, verification_token: null });
+
       const user = await users.findForSession(id);
       res.status(201).json(issueSession(req, res, user));
+    }),
+  );
+
+  // The link from the verification email.
+  router.get(
+    '/verify-email',
+    asyncHandler(async (req, res) => {
+      const token = String(req.query.token ?? '').trim();
+      if (!token) throw new HttpError(422, 'Missing verification token.');
+      const record = await req.db('users').where({ verification_token: token }).first('id');
+      if (!record) throw new HttpError(404, 'This verification link is invalid or was already used.');
+      await req.db('users').where({ id: record.id }).update({ email_verified_at: now(), is_verified: 1, verification_token: null, updated_at: now() });
+      res.redirect(`${req.site.pathPrefix || ''}/login?verified=1`);
     }),
   );
 

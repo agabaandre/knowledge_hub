@@ -178,6 +178,8 @@ const TABS = [
       { key: 'block_disposable_email_registration', label: 'Block disposable email registration', type: 'boolean' },
       { key: 'blocked_email_domains', label: 'Blocked email domains', type: 'textarea', hint: 'One domain per line.' },
       { key: 'analytics_script', label: 'Analytics script', type: 'textarea', hint: 'Injected on every public page — administrators only.' },
+      { key: 'trash_retention_days', label: 'Trash retention (days)', type: 'text', hint: 'Trashed resources and documents are destroyed permanently after this many days (default 30).' },
+      { key: 'federation_api_token', label: 'Federation API token', type: 'password', hint: 'Partner hubs present this token to read from / write to this hub. Share it only with trusted hubs.' },
     ],
   },
 ];

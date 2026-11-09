@@ -16,6 +16,7 @@ export const UsersPage = () => {
   const [data, setData] = useState(null);
   const [roles, setRoles] = useState([]);
   const [editing, setEditing] = useState(null);
+  const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState(null);
   const lookups = useApi('/api/publications/lookups');
 
@@ -51,7 +52,12 @@ export const UsersPage = () => {
   ];
 
   return (
-    <AdminShell title="Manage users" subtitle="Accounts, statuses, roles, and geographic scopes.">
+    <AdminShell title="Manage users" subtitle="Accounts, statuses, roles, and geographic scopes."
+      actions={canEdit && (
+        <button type="button" className="btn btn-sm theme-bg text-white" onClick={() => setCreating(true)}>
+          <i className="fa fa-user-plus mr-1" aria-hidden="true" /> Create user
+        </button>
+      )}>
       <Flash message={message} />
       {!data && !message?.error && <p role="status">Loading…</p>}
       {data && (
@@ -77,6 +83,11 @@ export const UsersPage = () => {
           )}
         />
       )}
+      {creating && (
+        <UserCreateModal roles={roles} countries={lookups.data?.countries ?? []}
+          onClose={() => setCreating(false)}
+          onCreated={async (name) => { setCreating(false); setMessage({ ok: `${name} created (verified — admin-created accounts skip email verification).` }); await load(); }} />
+      )}
       {editing && (
         <UserEditModal
           user={editing}
@@ -94,36 +105,41 @@ export const UsersPage = () => {
   );
 };
 
-/** Individual edit form: status, role, and country scope in one dialog. */
+/** Full edit form: profile, contact, role, country, status, optional new password. */
 const UserEditModal = ({ user, roles, countries, onClose, onSaved }) => {
-  const [draft, setDraft] = useState({ status: user.active, role_id: user.roleId ?? '', country_id: user.countryId ?? '' });
+  const [draft, setDraft] = useState({
+    first_name: user.firstName, last_name: user.lastName, email: user.email,
+    phone_number: user.phone, organization_name: user.organisation, job_title: user.jobTitle,
+    gender: user.gender || '', status: user.active, role_id: user.roleId ?? '', country_id: user.countryId ?? '',
+    password: '',
+  });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const set = (key) => (event) => setDraft((previous) => ({ ...previous, [key]: event.target.value }));
 
   const save = async () => {
     setBusy(true);
     setError('');
     try {
-      await apiFetch(`/api/admin/users/${user.id}`, {
-        method: 'PUT',
-        body: {
-          status: draft.status,
-          role_id: draft.role_id ? Number(draft.role_id) : null,
-          country_id: draft.country_id ? Number(draft.country_id) : null,
-        },
-      });
+      const body = {
+        first_name: draft.first_name, last_name: draft.last_name, email: draft.email,
+        phone_number: draft.phone_number || null, organization_name: draft.organization_name || null,
+        job_title: draft.job_title || null, gender: draft.gender || null,
+        status: draft.status,
+        role_id: draft.role_id ? Number(draft.role_id) : null,
+        country_id: draft.country_id ? Number(draft.country_id) : null,
+      };
+      if (draft.password.trim()) body.password = draft.password.trim();
+      await apiFetch(`/api/admin/users/${user.id}`, { method: 'PUT', body });
       onSaved(user.name);
     } catch (err) {
-      setError(err.message);
+      setError(err.details ? err.details.map((detail) => `${detail.path}: ${detail.message}`).join('; ') : err.message);
       setBusy(false);
     }
   };
 
   return (
-    <Modal
-      title={`Edit ${user.name}`}
-      icon="fa-user-pen"
-      onClose={onClose}
+    <Modal title={`Edit ${user.name}`} icon="fa-user-pen" onClose={onClose}
       footer={(
         <>
           <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onClose}>Cancel</button>
@@ -131,18 +147,11 @@ const UserEditModal = ({ user, roles, countries, onClose, onSaved }) => {
             {busy ? 'Saving…' : 'Save changes'}
           </button>
         </>
-      )}
-    >
+      )}>
       {error && <div role="alert" className="alert alert-danger">{error}</div>}
       <div className="mb-3"><UserChip photo={user.photo} name={user.name} sub={user.email} size={40} /></div>
-      <FormField label="Role" hint="Determines the account's admin permissions and access level.">
-        <SearchSelect options={[{ id: '', name: '— Member (no role) —' }, ...roles.map((role) => ({ id: role.id, name: role.name }))]}
-          value={draft.role_id} placeholder="— Member —" onChange={(next) => setDraft({ ...draft, role_id: next })} />
-      </FormField>
-      <FormField label="Country" hint="Scopes country-level moderators to this member state.">
-        <SearchSelect options={[{ id: '', name: '— None —' }, ...countries.map((country) => ({ id: country.id, name: country.name }))]}
-          value={draft.country_id} placeholder="— None —" onChange={(next) => setDraft({ ...draft, country_id: next })} />
-      </FormField>
+      <UserFormFields draft={draft} set={set} setDraft={setDraft} roles={roles} countries={countries}
+        passwordHint="Leave blank to keep the current password." />
       <label className="mb-0 d-flex align-items-center" style={{ gap: 8, cursor: 'pointer', fontWeight: 500 }}>
         <input type="checkbox" checked={draft.status} onChange={(event) => setDraft({ ...draft, status: event.target.checked })} />
         Account active (may sign in)
@@ -150,3 +159,99 @@ const UserEditModal = ({ user, roles, countries, onClose, onSaved }) => {
     </Modal>
   );
 };
+
+/** Create user — the Laravel add-user form; admin-created accounts are verified immediately. */
+const UserCreateModal = ({ roles, countries, onClose, onCreated }) => {
+  const [draft, setDraft] = useState({
+    first_name: '', last_name: '', email: '', phone_number: '', organization_name: '',
+    job_title: '', gender: '', role_id: '', country_id: '', password: '',
+  });
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const set = (key) => (event) => setDraft((previous) => ({ ...previous, [key]: event.target.value }));
+
+  const create = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      await apiFetch('/api/admin/users', {
+        method: 'POST',
+        body: {
+          first_name: draft.first_name, last_name: draft.last_name, email: draft.email, password: draft.password,
+          phone_number: draft.phone_number || undefined, organization_name: draft.organization_name || undefined,
+          job_title: draft.job_title || undefined,
+          role_id: draft.role_id ? Number(draft.role_id) : undefined,
+          country_id: draft.country_id ? Number(draft.country_id) : undefined,
+        },
+      });
+      onCreated(`${draft.first_name} ${draft.last_name}`.trim());
+    } catch (err) {
+      setError(err.details ? err.details.map((detail) => `${detail.path}: ${detail.message}`).join('; ') : err.message);
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Modal title="Create a user" icon="fa-user-plus" onClose={onClose}
+      footer={(
+        <>
+          <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onClose}>Cancel</button>
+          <button type="button" className="btn btn-sm theme-bg text-white"
+            disabled={busy || !draft.first_name.trim() || !draft.last_name.trim() || !draft.email.trim() || draft.password.length < 8} onClick={create}>
+            {busy ? 'Creating…' : 'Create user'}
+          </button>
+        </>
+      )}>
+      {error && <div role="alert" className="alert alert-danger">{error}</div>}
+      <UserFormFields draft={draft} set={set} setDraft={setDraft} roles={roles} countries={countries}
+        passwordRequired passwordHint="At least 8 characters — share it with the user securely." />
+    </Modal>
+  );
+};
+
+/** The shared field grid both user dialogs render. */
+const UserFormFields = ({ draft, set, setDraft, roles, countries, passwordRequired = false, passwordHint }) => (
+  <>
+    <div className="row">
+      <div className="col-md-6"><FormField label="First name" required>
+        <input className="form-control" value={draft.first_name} onChange={set('first_name')} />
+      </FormField></div>
+      <div className="col-md-6"><FormField label="Last name" required>
+        <input className="form-control" value={draft.last_name} onChange={set('last_name')} />
+      </FormField></div>
+    </div>
+    <div className="row">
+      <div className="col-md-7"><FormField label="Email" required>
+        <input type="email" className="form-control" value={draft.email} onChange={set('email')} />
+      </FormField></div>
+      <div className="col-md-5"><FormField label="Phone">
+        <input className="form-control" value={draft.phone_number} onChange={set('phone_number')} />
+      </FormField></div>
+    </div>
+    <div className="row">
+      <div className="col-md-6"><FormField label="Organisation">
+        <input className="form-control" value={draft.organization_name} onChange={set('organization_name')} />
+      </FormField></div>
+      <div className="col-md-6"><FormField label="Job title">
+        <input className="form-control" value={draft.job_title} onChange={set('job_title')} />
+      </FormField></div>
+    </div>
+    <div className="row">
+      <div className="col-md-4"><FormField label="Gender">
+        <SearchSelect options={[{ id: '', name: '—' }, { id: 'Male', name: 'Male' }, { id: 'Female', name: 'Female' }, { id: 'Other', name: 'Other' }]}
+          value={draft.gender} placeholder="—" onChange={(next) => setDraft((previous) => ({ ...previous, gender: next }))} />
+      </FormField></div>
+      <div className="col-md-4"><FormField label="Role">
+        <SearchSelect options={[{ id: '', name: '— Member —' }, ...roles.map((role) => ({ id: role.id, name: role.name }))]}
+          value={draft.role_id} placeholder="— Member —" onChange={(next) => setDraft((previous) => ({ ...previous, role_id: next }))} />
+      </FormField></div>
+      <div className="col-md-4"><FormField label="Country">
+        <SearchSelect options={[{ id: '', name: '— None —' }, ...countries.map((country) => ({ id: country.id, name: country.name }))]}
+          value={draft.country_id} placeholder="— None —" onChange={(next) => setDraft((previous) => ({ ...previous, country_id: next }))} />
+      </FormField></div>
+    </div>
+    <FormField label={passwordRequired ? 'Password' : 'New password'} required={passwordRequired} hint={passwordHint}>
+      <input type="password" className="form-control" autoComplete="new-password" value={draft.password} onChange={set('password')} />
+    </FormField>
+  </>
+);

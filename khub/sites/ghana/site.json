@@ -1,0 +1,15 @@
+{
+  "id": "ghana",
+  "name": "Ghana Knowledge Hub",
+  "enabled": true,
+  "pathPrefix": "/ghana",
+  "hosts": [],
+  "storageId": "ghana",
+  "locales": [
+    "en",
+    "fr"
+  ],
+  "branding": {},
+  "modules": {},
+  "features": {}
+}

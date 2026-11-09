@@ -44,7 +44,8 @@ export class PublicationsRepository {
       .leftJoin('thematic_area', 'thematic_area.id', 'sub_thematic_area.thematic_area_id')
       .leftJoin('data_categories', 'data_categories.id', 'publication.data_category_id')
       .where('publication.is_active', 'Active')
-      .where('publication.is_approved', true);
+      .where('publication.is_approved', true)
+      .whereNull('publication.deleted_at');
     // Versions never appear in lists/search, but their detail pages are viewable.
     if (!includeVersions) query.where('publication.is_version', false);
     if (!includeAdminOnly) query.where('publication.is_admin_only_access', false);
@@ -129,6 +130,7 @@ export class PublicationsRepository {
       .where((builder) => builder.where('publication.id', rootId).orWhere('publication.parent_id', rootId))
       .where('publication.is_active', 'Active')
       .where('publication.is_approved', true)
+      .whereNull('publication.deleted_at')
       .select('id', 'slug', 'title', 'is_version', 'version_no', 'parent_id', 'created_at')
       .orderBy([{ column: 'is_version', order: 'asc' }, { column: 'version_no', order: 'asc' }]);
     return rows;
@@ -185,7 +187,7 @@ export class PublicationsRepository {
   }
 
   attachmentsOf(publicationId) {
-    return this.db('publication_attachments').where({ publication_id: publicationId }).select('id', 'file', 'description', 'original_filename');
+    return this.db('publication_attachments').where({ publication_id: publicationId }).whereNull('deleted_at').select('id', 'file', 'description', 'original_filename');
   }
 
   approvedCommentsOf(publicationId) {
