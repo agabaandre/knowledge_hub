@@ -24,6 +24,11 @@ class GeoAreasController extends Controller
 
     public function store(Request $request){
 
+        $request->validate([
+            'area_name' => 'required|string|max:255',
+            'flag' => 'nullable|file|mimes:'.\App\Support\SafeUpload::mimesRule(\App\Support\SafeUpload::IMAGES).'|max:5120',
+        ]);
+
         $saved = $this->areasRepo->save($request);
 
         if($saved):

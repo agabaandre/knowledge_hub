@@ -54,6 +54,7 @@ services:
     working_dir: /var/www/html
     volumes:
       - khub_app_storage:/var/www/html/storage
+      - ./khubdata:/var/khubdata
     env_file:
       - path: .env
         required: false
@@ -119,6 +120,7 @@ services:
     working_dir: /var/www/html
     volumes:
       - khub_app_storage:/var/www/html/storage
+      - ./khubdata:/var/khubdata
     env_file:
       - path: .env
         required: false
@@ -161,6 +163,7 @@ services:
     working_dir: /var/www/html
     volumes:
       - khub_app_storage:/var/www/html/storage
+      - ./khubdata:/var/khubdata
     env_file:
       - path: .env
         required: false

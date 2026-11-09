@@ -17,7 +17,9 @@ php artisan khub:install \
   --site-name='Knowledge Hub'
 ```
 
-The command runs migrations (unless skipped), configures storage, site settings, mail, creates the admin user, links `public/storage` to the hub files root, and locks the installer.
+The command runs migrations (unless skipped), configures storage, site settings, mail, creates the admin user (with **Overall** access level so `/admin` works), links `public/storage` to the hub files root, and locks the installer.
+
+When `SEED_DEMO_USERS=true`, `DOCKER=true`, or `APP_ENV=local`, it also seeds demo accounts for every role and access level (see [../deployment/DOCKER.md](../deployment/DOCKER.md)). Set `SEED_DEMO_USERS=false` to skip.
 
 After any manual storage path change:
 

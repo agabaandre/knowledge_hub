@@ -27,6 +27,7 @@ use App\Services\ContentRequestReferralNotifier;
 use App\Services\ForumThreadActivityNotifier;
 use App\Services\OfficeDocumentToPdfService;
 use App\Support\CommunityTargeting;
+use App\Support\SafeUpload;
 use App\Support\SeoSlugSync;
 
 class ForumsRepository extends SharedRepo{
@@ -434,15 +435,13 @@ class ForumsRepository extends SharedRepo{
         }
 
         if($request->hasFile('image')):
-
-            $file           = $request->file('image');  
-            $file_name   = md5_file($file->getRealPath());
-            $extension   = $file->guessExtension();
-            $file_path   = $file_name.'.'.$extension;
-           
-            $file->move(hub_storage_path('uploads/forums').'/',$file_path);
-            $forum->forum_image     = $file_path;
-
+            $file = $request->file('image');
+            $forum->forum_image = SafeUpload::move(
+                $file,
+                hub_storage_path('uploads/forums'),
+                SafeUpload::IMAGES,
+                'image'
+            );
         endif;
 
         $this->assignForumSlug($forum);
@@ -679,7 +678,24 @@ class ForumsRepository extends SharedRepo{
                 continue;
             }
 
-            $extension = strtolower($file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION));
+            $safeAllowed = array_values(array_unique(array_merge(
+                SafeUpload::IMAGES,
+                SafeUpload::DOCUMENTS,
+                SafeUpload::MEDIA,
+                $allowedExtensions
+            )));
+            if (! SafeUpload::isAllowed($file, $safeAllowed)) {
+                \Log::warning('File failed SafeUpload checks for forum comment', [
+                    'filename' => $file->getClientOriginalName(),
+                ]);
+                continue;
+            }
+
+            try {
+                $extension = SafeUpload::extension($file, $safeAllowed, 'attachments');
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                continue;
+            }
             $fileSize = $file->getSize();
 
             // Validate file
@@ -737,22 +753,12 @@ class ForumsRepository extends SharedRepo{
             try {
                 // Human-readable original filename + hashed storage basename
                 $original_filename = str_replace(["\0", "\r"], '', (string) $file->getClientOriginalName());
-                $file_name = md5_file($file->getRealPath());
-                $file_path = 'forum/'.$file_name.'.'.$extension;
-               
-                $storagePath = hub_storage_path('uploads/forum').'/';
-                if (!is_dir($storagePath)) {
-                    mkdir($storagePath, 0755, true);
-                    \Log::info('Created forum upload directory', ['path' => $storagePath]);
-                }
-                
-                $moved = $file->move($storagePath, $file_name.'.'.$extension);
-                
-                if (!$moved) {
-                    throw new \Exception('Failed to move uploaded file to ' . $storagePath);
-                }
-                
-                $finalPath = $storagePath . $file_name.'.'.$extension;
+                $storagePath = hub_storage_path('uploads/forum');
+                $basename = SafeUpload::move($file, $storagePath, $safeAllowed, 'attachments');
+                $file_name = pathinfo($basename, PATHINFO_FILENAME);
+                $extension = pathinfo($basename, PATHINFO_EXTENSION);
+                $file_path = 'forum/'.$basename;
+                $finalPath = $storagePath.DIRECTORY_SEPARATOR.$basename;
                 if (!file_exists($finalPath)) {
                     throw new \Exception('File does not exist after move: ' . $finalPath);
                 }
@@ -1005,11 +1011,12 @@ class ForumsRepository extends SharedRepo{
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $file_name = md5_file($file->getRealPath());
-            $extension = $file->guessExtension();
-            $file_path = $file_name . '.' . $extension;
-            $file->move(hub_storage_path('uploads/forums').'/', $file_path);
-            $forum->forum_image = $file_path;
+            $forum->forum_image = SafeUpload::move(
+                $file,
+                hub_storage_path('uploads/forums'),
+                SafeUpload::IMAGES,
+                'image'
+            );
         }
 
         $this->assignForumSlug($forum);
@@ -1236,24 +1243,26 @@ class ForumsRepository extends SharedRepo{
         $upfiles = (! is_array($files)) ? [$files] : $files;
         $lastPath = null;
         $dir = storage_path('app/public/uploads/' . $model);
-        if (! is_dir($dir)) {
-            mkdir($dir, 0755, true);
-        }
         $converter = app(OfficeDocumentToPdfService::class);
+        $allowed = array_values(array_unique(array_merge(
+            SafeUpload::IMAGES,
+            SafeUpload::DOCUMENTS,
+            SafeUpload::MEDIA
+        )));
 
         foreach ($upfiles as $file) {
-            if (! $file || ! $file->isValid()) {
+            if (! $file || ! $file->isValid() || ! SafeUpload::isAllowed($file, $allowed)) {
                 continue;
             }
 
             $description = str_replace(["\0", "\r"], '', (string) $file->getClientOriginalName());
-            $file_name = md5_file($file->getRealPath());
-            $extension = strtolower((string) ($file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION)));
-            $basename = $file_name . '.' . $extension;
-            $moved = $file->move($dir, $basename);
-            if (! $moved) {
+            try {
+                $basename = SafeUpload::move($file, $dir, $allowed, 'attachments');
+            } catch (\Illuminate\Validation\ValidationException $e) {
                 continue;
             }
+            $file_name = pathinfo($basename, PATHINFO_FILENAME);
+            $extension = pathinfo($basename, PATHINFO_EXTENSION);
 
             $finalPath = $dir . DIRECTORY_SEPARATOR . $basename;
             $file_path = $model . '/' . $basename;

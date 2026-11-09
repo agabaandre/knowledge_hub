@@ -221,7 +221,8 @@ class AccountController extends Controller
         $val_rules = [
             //'file_type'=>'required',
             'summary'  =>'required',
-            'title'    =>'required'
+            'title'    =>'required',
+            'file' => 'nullable|file|mimes:'.\App\Support\SafeUpload::mimesRule(\App\Support\SafeUpload::DOCUMENTS).'|max:10240',
         ];
 
         $request->validate($val_rules);

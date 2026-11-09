@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\FaqsRepository;
+use App\Support\SafeUpload;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 class CommonController extends Controller
 {
@@ -52,16 +52,15 @@ class CommonController extends Controller
     public function imageUpload(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:jpg,jpeg,png,gif,webp|max:5120',
+            'file' => 'required|file|mimes:'.SafeUpload::mimesRule(SafeUpload::IMAGES).'|max:5120',
         ]);
 
         $file = $request->file('file');
-        $filename = Str::uuid()->toString() . '.' . $file->getClientOriginalExtension();
-        $path = 'uploads/editor/' . $filename;
+        $dir = storage_path('app/public/uploads/editor');
+        $filename = SafeUpload::move($file, $dir, SafeUpload::IMAGES, 'file', Str::uuid()->toString());
+        $path = 'uploads/editor/'.$filename;
 
-        Storage::disk('public')->put($path, file_get_contents($file->getRealPath()));
-
-        $url = asset('storage/' . $path);
+        $url = asset('storage/'.$path);
 
         return response()->json(['url' => $url]);
     }

@@ -77,7 +77,7 @@ class AIApiController extends Controller
     public function summariseFile(Request $request): JsonResponse
     {
         $request->validate([
-            'file' => 'required|file|mimes:pdf,doc,docx,txt|max:10240',
+            'file' => 'required|file|mimes:'.\App\Support\SafeUpload::mimesRule(['pdf', 'doc', 'docx', 'txt']).'|max:10240',
             'language' => 'nullable|string|max:10',
             'prompt' => 'nullable|string|max:2000',
         ]);
@@ -88,8 +88,15 @@ class AIApiController extends Controller
             $language = (is_string($rawLanguage) && strtolower(trim($rawLanguage)) === 'document')
                 ? 'document'
                 : resolve_ai_locale(is_string($rawLanguage) ? $rawLanguage : null);
-            $tempPath = $file->storeAs('temp', uniqid().'_'.$file->getClientOriginalName(), 'public');
-            $fullPath = storage_path('app/public/'.$tempPath);
+            $tmpDir = storage_path('app/tmp');
+            $filename = \App\Support\SafeUpload::move(
+                $file,
+                $tmpDir,
+                ['pdf', 'doc', 'docx', 'txt'],
+                'file',
+                uniqid('ai_', true)
+            );
+            $fullPath = $tmpDir.DIRECTORY_SEPARATOR.$filename;
 
             $result = $this->aiService->summariseFile($fullPath, $language, $request->input('prompt'));
 

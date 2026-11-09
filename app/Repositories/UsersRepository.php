@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
 use Mail;
 use Laravel\Passport\Token;
 use App\Models\CommunityOfPracticeMembers;
+use App\Support\SafeUpload;
 
 class UsersRepository {
 
@@ -154,14 +155,8 @@ class UsersRepository {
         
         if($request->hasFile( 'photo')):
             $file = $request->file('photo');
-            $extension = strtolower((string) ($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'jpg'));
-            $file_name = md5_file($file->getRealPath());
-            $file_path = $file_name.'.'.$extension;
             $storagePath = hub_storage_path('uploads/users');
-            if (! is_dir($storagePath)) {
-                mkdir($storagePath, 0755, true);
-            }
-            $file->move($storagePath, $file_path);
+            $file_path = SafeUpload::move($file, $storagePath, SafeUpload::IMAGES, 'photo');
             $user->photo  = $file_path;
             $user->is_photo_external  = false;
         endif;

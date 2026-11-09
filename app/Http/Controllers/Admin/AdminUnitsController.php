@@ -48,7 +48,7 @@ class AdminUnitsController extends Controller
                 'exists:administrative_units,id',
                 Rule::notIn([(int) $request->input('id')]),
             ],
-            'logo' => ['nullable', 'image', 'max:4096'],
+            'logo' => ['nullable', 'file', 'mimes:'.\App\Support\SafeUpload::mimesRule(\App\Support\SafeUpload::IMAGES, \App\Support\SafeUpload::DOCUMENTS), 'max:4096'],
         ];
 
         if (Schema::hasColumn('administrative_units', 'country_id')) {

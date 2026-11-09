@@ -137,7 +137,7 @@ final class PublicationSubmissionValidation
             'journal_volume' => 'nullable|string|max:100',
             'journal_issue' => 'nullable|string|max:100',
             'journal_pages' => 'nullable|string|max:100',
-            'cover' => 'nullable|file|image|max:10240',
+            'cover' => 'nullable|file|mimes:'.\App\Support\SafeUpload::mimesRule(\App\Support\SafeUpload::IMAGES).'|max:10240',
             'cover_url' => 'nullable|string|max:2048',
             'files' => 'nullable',
             'files.*' => ['file', 'max:102400', new SafePublicationAttachment()],

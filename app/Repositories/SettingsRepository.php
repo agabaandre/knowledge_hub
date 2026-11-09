@@ -7,6 +7,7 @@ use App\Services\InstallerService;
 use App\Support\DisposableEmailChecker;
 use App\Support\EmailConfig;
 use App\Support\FederationApiToken;
+use App\Support\SafeUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -1013,14 +1014,12 @@ class SettingsRepository
         $configDir = function_exists('hub_storage_path')
             ? hub_storage_path('uploads/config')
             : storage_path('app/public/uploads/config');
-        if (! is_dir($configDir)) {
-            @mkdir($configDir, 0775, true);
-        }
+        $allowed = array_values(array_unique(array_merge(SafeUpload::IMAGES, ['ico'])));
         foreach ($upfiles as $file) {
-            $file_name   = md5_file($file->getRealPath());
-            $extension   = $file->guessExtension();
-            $file_path   = $file_name . '.' . $extension;
-            $file->move($configDir, $file_path);
+            if (! $file || ! $file->isValid()) {
+                continue;
+            }
+            $file_path = SafeUpload::move($file, $configDir, $allowed, 'logo');
         }
        return $file_path;
     }

@@ -2,6 +2,7 @@
 namespace App\Repositories;
 
 use App\Models\Quote;
+use App\Support\SafeUpload;
 use Illuminate\Http\Request;
 
 class QuotesRepository
@@ -26,13 +27,8 @@ class QuotesRepository
 
         if ($request->hasFile('image')) {
             $dir = storage_path('app/public/uploads/quotes');
-            if (!is_dir($dir)) {
-                @mkdir($dir, 0755, true);
-            }
             $file = $request->file('image');
-            $name = md5_file($file->getRealPath()) . '.' . $file->getClientOriginalExtension();
-            $file->move($dir, $name);
-            $quote->image = $name;
+            $quote->image = SafeUpload::move($file, $dir, SafeUpload::IMAGES, 'image');
         }
 
         ($request->id) ? $quote->update() : $quote->save();
