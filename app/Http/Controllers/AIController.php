@@ -59,7 +59,7 @@ class AIController extends Controller
     public function summariseFile(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:pdf,doc,docx,txt|max:10240', // 10MB max
+            'file' => 'required|file|mimes:'.\App\Support\SafeUpload::mimesRule(['pdf', 'doc', 'docx', 'txt']).'|max:10240',
             'language' => 'nullable|string|max:32',
         ]);
 
@@ -67,9 +67,15 @@ class AIController extends Controller
             $file = $request->file('file');
             $language = $request->input('language', 'document');
             
-            // Store file temporarily
-            $temp_path = $file->storeAs('temp', uniqid() . '_' . $file->getClientOriginalName(), 'public');
-            $full_path = storage_path('app/public/' . $temp_path);
+            $tmpDir = storage_path('app/tmp');
+            $filename = \App\Support\SafeUpload::move(
+                $file,
+                $tmpDir,
+                ['pdf', 'doc', 'docx', 'txt'],
+                'file',
+                uniqid('ai_', true)
+            );
+            $full_path = $tmpDir.DIRECTORY_SEPARATOR.$filename;
 
             // Extract summary
             $result = $this->aiService->summariseFile($full_path, $language);

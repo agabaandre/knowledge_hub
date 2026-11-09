@@ -72,6 +72,12 @@ class SettingsController extends Controller
   
     public function store(Request $request){
 
+        $request->validate([
+            'logo' => 'nullable|file|mimes:'.\App\Support\SafeUpload::mimesRule(\App\Support\SafeUpload::IMAGES, ['ico']).'|max:5120',
+            'favicon' => 'nullable|file|mimes:'.\App\Support\SafeUpload::mimesRule(\App\Support\SafeUpload::IMAGES, ['ico']).'|max:2048',
+            'spotlight_banner' => 'nullable|file|mimes:'.\App\Support\SafeUpload::mimesRule(\App\Support\SafeUpload::IMAGES).'|max:10240',
+        ]);
+
         $saved = $this->settingsRepo->save($request);
 
         // Update badge configurations if provided

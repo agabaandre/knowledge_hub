@@ -28,6 +28,7 @@ use App\Support\ContributorProfileContext;
 use App\Support\SeoSlugSync;
 use App\View\Composers\TagsViewComposer;
 use App\Support\DataCategoryAccess;
+use App\Support\SafeUpload;
 use App\Services\OfficeDocumentToPdfService;
 use App\Models\ContentRequest;
 use Illuminate\Http\Request;
@@ -636,19 +637,9 @@ public function getPublicationIds(Request $request, int $limit = 80): array
             if ($file && $file->isValid()) {
                 try {
                     $description = $file->getClientOriginalName();
-                    $file_name   = md5_file($file->getRealPath());
-                    $extension   = $file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
-                    $cover_filepath = $file_name.'.'.$extension;
-                    
-                    $storagePath = hub_storage_path('uploads/publications').'/';
-                    
-                    // Ensure directory exists
-                    if (!is_dir($storagePath)) {
-                        mkdir($storagePath, 0755, true);
-                    }
-                    
-                    $file->move($storagePath, $cover_filepath);
-                    
+                    $storagePath = hub_storage_path('uploads/publications');
+                    $cover_filepath = SafeUpload::move($file, $storagePath, SafeUpload::IMAGES, 'cover');
+
                     $pub->cover = $cover_filepath;
                     $pub->cover_is_exteranl = false; // Reset to local file
                     
@@ -657,6 +648,8 @@ public function getPublicationIds(Request $request, int $limit = 80): array
                         'cover_filepath' => $cover_filepath,
                         'file_name' => $description
                     ]);
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    throw $e;
                 } catch (\Exception $e) {
                     \Log::error('Error saving cover image: ' . $e->getMessage(), [
                         'publication_id' => $request->id ?? 'new',
@@ -1614,15 +1607,13 @@ public function getPublicationIds(Request $request, int $limit = 80): array
         $summary->author_id = $user->author_id;
 
         if($request->hasFile('file')):
-
-            //upload summary
-            $file        = $request->file('file');
-            $file_name   = md5_file($file->getRealPath());
-            $extension   = $file->guessExtension();
-            $file_path   = $file_name.'.'.$extension;
-            $file->move(hub_storage_path('uploads/publications/summaries').'/',$file_path);
-            $summary->file_path  = $file_path;
-
+            $file = $request->file('file');
+            $summary->file_path = SafeUpload::move(
+                $file,
+                hub_storage_path('uploads/publications/summaries'),
+                SafeUpload::DOCUMENTS,
+                'file'
+            );
         endif;
 
        return $summary->save();

@@ -543,7 +543,7 @@ class ForumsController extends Controller
         $request->validate([
             'title' => 'required|string|max:500',
             'description' => 'required|string|max:200000',
-            'image' => 'sometimes|file|image|max:10240',
+            'image' => 'sometimes|file|mimes:'.\App\Support\SafeUpload::mimesRule(\App\Support\SafeUpload::IMAGES).'|max:10240',
             'attachments' => 'sometimes|array',
             'attachments.*' => 'file|max:10240|mimes:' . self::FORUM_THREAD_ATTACHMENTS_MIMES,
         ]);

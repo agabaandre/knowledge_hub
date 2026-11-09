@@ -25,6 +25,12 @@ class QuotesController extends Controller
   
     public function store(Request $request){
 
+        $request->validate([
+            'quote' => 'required|string|max:5000',
+            'link_url' => 'nullable|string|max:2048',
+            'image' => 'nullable|file|mimes:'.\App\Support\SafeUpload::mimesRule(\App\Support\SafeUpload::IMAGES).'|max:5120',
+        ]);
+
         $saved = $this->quotesRepo->save($request);
 
         if($saved):

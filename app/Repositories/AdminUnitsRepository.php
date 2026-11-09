@@ -2,6 +2,7 @@
 namespace App\Repositories;
 
 use App\Models\AdministrativeUnit;
+use App\Support\SafeUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -112,15 +113,14 @@ class AdminUnitsRepository{
 
         $upfiles   = (!is_array($files))?[$files]:$files;
         $file_path = null;
-        
+        $allowed = array_values(array_unique(array_merge(SafeUpload::IMAGES, SafeUpload::DOCUMENTS)));
+        $dir = storage_path('app/public/uploads/adminunits');
+
         foreach ($upfiles as $file):
-
-            $file_name   = md5_file($file->getRealPath());
-            $extension   = $file->guessExtension();
-            $file_path   = $file_name.'.'.$extension;
-           
-            $file->move(storage_path().'/app/public/uploads/adminunits/',$file_path);
-
+            if (! $file || ! $file->isValid()) {
+                continue;
+            }
+            $file_path = SafeUpload::move($file, $dir, $allowed, 'logo');
         endforeach;
 
        return $file_path;

@@ -182,9 +182,9 @@ class ForumsApiController extends ApiController
         $request->validate([
             'title' => 'required|string|max:500',
             'description' => 'required|string|max:200000',
-            'image' => 'sometimes|file|image|max:10240',
+            'image' => 'sometimes|file|mimes:'.\App\Support\SafeUpload::mimesRule(\App\Support\SafeUpload::IMAGES).'|max:10240',
             'attachments' => 'sometimes|array',
-            'attachments.*' => 'file|max:10240|mimes:jpeg,jpg,png,gif,webp,pdf,mp4,m4v,mov,avi,webm,mkv,wmv,flv,3gp,3gpp,mpeg,mpg,mp3,m4a,wav,aac,ogg,oga,opus,flac,wma,doc,docx,xls,xlsx,ppt,pptx,odt,ods,odp,rtf',
+            'attachments.*' => 'file|max:10240|mimes:'.\App\Support\SafeUpload::mimesRule(\App\Support\SafeUpload::IMAGES, \App\Support\SafeUpload::DOCUMENTS, \App\Support\SafeUpload::MEDIA),
             'communities' => 'sometimes|array',
             'communities.*' => 'integer',
             'tags' => 'sometimes|array',

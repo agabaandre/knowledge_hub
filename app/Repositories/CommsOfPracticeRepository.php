@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use App\Services\OfficeDocumentToPdfService;
+use App\Support\SafeUpload;
 use App\Support\SeoSlugSync;
 use App\Support\ContentModeration;
 
@@ -2194,7 +2195,20 @@ class CommsOfPracticeRepository{
                 continue;
             }
 
-            $extension = strtolower($file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION));
+            $safeAllowed = array_values(array_unique(array_merge(
+                SafeUpload::IMAGES,
+                SafeUpload::DOCUMENTS,
+                SafeUpload::MEDIA,
+                $allowedExtensions
+            )));
+            if (! SafeUpload::isAllowed($file, $safeAllowed)) {
+                continue;
+            }
+            try {
+                $extension = SafeUpload::extension($file, $safeAllowed, 'attachments');
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                continue;
+            }
             $fileSize = $file->getSize();
 
             if (! in_array($extension, $allowedExtensions)) {
@@ -2224,20 +2238,12 @@ class CommsOfPracticeRepository{
 
             try {
                 $original_filename = str_replace(["\0", "\r"], '', (string) $file->getClientOriginalName());
-                $file_name = md5_file($file->getRealPath());
-                $file_path = 'community/'.$file_name.'.'.$extension;
-
-                $storagePath = hub_storage_path('uploads/community').'/';
-                if (! is_dir($storagePath)) {
-                    mkdir($storagePath, 0755, true);
-                }
-
-                $moved = $file->move($storagePath, $file_name.'.'.$extension);
-                if (! $moved) {
-                    throw new \Exception('Failed to move uploaded file to '.$storagePath);
-                }
-
-                $finalPath = $storagePath.$file_name.'.'.$extension;
+                $storagePath = hub_storage_path('uploads/community');
+                $basename = SafeUpload::move($file, $storagePath, $safeAllowed, 'attachments');
+                $file_name = pathinfo($basename, PATHINFO_FILENAME);
+                $extension = pathinfo($basename, PATHINFO_EXTENSION);
+                $file_path = 'community/'.$basename;
+                $finalPath = $storagePath.DIRECTORY_SEPARATOR.$basename;
                 if (! file_exists($finalPath)) {
                     throw new \Exception('File does not exist after move: '.$finalPath);
                 }

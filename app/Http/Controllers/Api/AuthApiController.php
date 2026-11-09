@@ -136,7 +136,7 @@ class AuthApiController extends ApiController
             'langauge' => ['nullable', 'string', 'max:32'],
             'subscribe' => ['sometimes'],
             'is_subscribed' => ['sometimes', 'boolean'],
-            'photo' => ['sometimes', 'file', 'image', 'max:5120'],
+            'photo' => ['sometimes', 'file', 'mimes:'.\App\Support\SafeUpload::mimesRule(\App\Support\SafeUpload::IMAGES), 'max:5120'],
         ]);
 
         if ($request->boolean('is_subscribed') || $request->boolean('subscribe')) {
@@ -604,7 +604,7 @@ class AuthApiController extends ApiController
             'preferences.*' => 'integer',
             'communities' => 'sometimes|array',
             'communities.*' => 'integer|exists:community_of_practices,id',
-            'photo' => 'sometimes|file|image|max:2048',
+            'photo' => 'sometimes|file|mimes:'.\App\Support\SafeUpload::mimesRule(\App\Support\SafeUpload::IMAGES).'|max:2048',
         ]);
 
         $request->merge(['id' => $userId]);

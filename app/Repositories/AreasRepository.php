@@ -7,6 +7,7 @@ use App\Models\GeoCoverage;
 use App\Models\Region;
 use App\Models\Forum;
 use App\Models\User;
+use App\Support\SafeUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -81,13 +82,13 @@ class AreasRepository{
         $area->is_app_supported = ($request->app_supported)?$request->app_supported:false;
 
         if($request->hasFile('flag')):
-            //upload photo
-            $file        = $request->file( 'flag');
-            $file_name   = md5_file($file->getRealPath());
-            $extension   = $file->guessExtension();
-            $file_path   = $file_name.'.'.$extension;
-            $file->move(public_path('assets/img/flags/'),$file_path);
-            $area->flag  = $file_path;
+            $file = $request->file('flag');
+            $area->flag = SafeUpload::move(
+                $file,
+                public_path('assets/img/flags'),
+                SafeUpload::IMAGES,
+                'flag'
+            );
         endif;
 
         $area->save();
