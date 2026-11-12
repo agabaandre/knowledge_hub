@@ -26,7 +26,7 @@
 
         @if(($federationBrowseEnabled ?? false) && !request()->filled('term'))
             <div class="alert alert-light border mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
-                <span><i class="fa fa-globe-africa me-2" style="color:var(--theme-color-primary,#119A48);"></i>{{ __('publications.search.browse_partner_hub_resources', 'Browse resources synced from partner country knowledge hubs.') }}</span>
+                <span><i class="fa fa-globe-africa me-2" style="color:var(--theme-color-primary,#119A48);"></i>{{ ui_t('publications.search.browse_partner_hub_resources', 'Browse resources synced from partner country knowledge hubs.') }}</span>
                 <a href="{{ route('federation.browse') }}" class="btn btn-sm theme-bg text-white">
                     <i class="fa fa-globe-africa me-1"></i>{{ __('frontend_nav.partner_hubs') }}
                 </a>
