@@ -9,7 +9,7 @@ class PublicationCategoryViewComposer
 {
     public function compose(View $view): void
     {
-        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
+        $minutes = (int) config('khub.cache_expiry_minutes', 60 * 24);
 
         $file_categories = cache()->remember('file_categories', $minutes, function () {
             return PublicationCategory::parentOnly()

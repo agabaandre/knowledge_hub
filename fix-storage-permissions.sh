@@ -37,12 +37,13 @@ mkdir -p \
 
 echo "Using owner: ${OWNER}:${GROUP}"
 sudo chown -R "${OWNER}:${GROUP}" storage bootstrap/cache public/uploads
-chmod -R ug+rwX,o+rwx storage bootstrap/cache public/uploads
+# Owner+group read/write/execute only — do not grant world (other) write access.
+chmod -R ug+rwX,o-rwx storage bootstrap/cache public/uploads
 
 if [[ -d /var/khubdata ]]; then
   echo "Setting permissions on host data paths (${FILES_ROOT}, ${SQL_ROOT})…"
   sudo chown -R "${OWNER}:${GROUP}" /var/khubdata
-  chmod -R ug+rwX /var/khubdata
+  chmod -R ug+rwX,o-rwx /var/khubdata
 fi
 
 if [[ -f artisan ]] && command -v php >/dev/null 2>&1; then

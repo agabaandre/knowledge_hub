@@ -2,6 +2,11 @@
 
 return [
 
+    'central_hub_url' => env('CENTRAL_HUB_URL', 'https://khub.africacdc.org'),
+    'central_hub_api_token' => env('CENTRAL_HUB_API_TOKEN', ''),
+    'api_token' => env('FEDERATION_API_TOKEN', ''),
+    'owner_country_id' => env('KHUB_OWNER_COUNTRY_ID', env('HUB_OWNER_COUNTRY_ID')),
+
     /*
     | Setting row keys exported/imported for mobile branding (GET /api/federation/lookup/settings).
     | Secrets and installer flags are excluded.

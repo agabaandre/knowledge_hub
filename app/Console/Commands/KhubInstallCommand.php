@@ -32,20 +32,20 @@ class KhubInstallCommand extends Command
         if (! $this->option('skip-migrate')) {
             $this->info('Running migrations...');
             $installer->runDatabaseSetup([
-                'host' => env('DB_HOST', '127.0.0.1'),
-                'port' => env('DB_PORT', '3306'),
-                'database' => env('DB_DATABASE', 'knowledge_hub'),
-                'username' => env('DB_USERNAME', 'root'),
-                'password' => env('DB_PASSWORD', ''),
+                'host' => config('database.connections.mysql.host', '127.0.0.1'),
+                'port' => config('database.connections.mysql.port', '3306'),
+                'database' => config('database.connections.mysql.database', 'knowledge_hub'),
+                'username' => config('database.connections.mysql.username', 'root'),
+                'password' => config('database.connections.mysql.password', ''),
             ]);
         } else {
             $this->info('Skipping migrations (existing database)...');
             $installer->configureDatabaseConnection([
-                'host' => env('DB_HOST', '127.0.0.1'),
-                'port' => env('DB_PORT', '3306'),
-                'database' => env('DB_DATABASE', 'knowledge_hub'),
-                'username' => env('DB_USERNAME', 'root'),
-                'password' => env('DB_PASSWORD', ''),
+                'host' => config('database.connections.mysql.host', '127.0.0.1'),
+                'port' => config('database.connections.mysql.port', '3306'),
+                'database' => config('database.connections.mysql.database', 'knowledge_hub'),
+                'username' => config('database.connections.mysql.username', 'root'),
+                'password' => config('database.connections.mysql.password', ''),
             ]);
         }
 
@@ -60,13 +60,13 @@ class KhubInstallCommand extends Command
 
         $installer->writeMailConfig([
             'mail_mailer' => (string) $this->option('mail-driver'),
-            'mail_from_address' => env('MAIL_FROM_ADDRESS', $email),
-            'mail_from_name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Knowledge Hub')),
-            'mail_host' => env('MAIL_HOST', ''),
-            'mail_port' => env('MAIL_PORT', '587'),
-            'mail_username' => env('MAIL_USERNAME', ''),
-            'mail_password' => env('MAIL_PASSWORD', ''),
-            'mail_encryption' => env('MAIL_ENCRYPTION', 'tls') ?: 'none',
+            'mail_from_address' => config('mail.from.address', $email),
+            'mail_from_name' => config('mail.from.name', config('app.name', 'Knowledge Hub')),
+            'mail_host' => config('mail.mailers.smtp.host', ''),
+            'mail_port' => config('mail.mailers.smtp.port', '587'),
+            'mail_username' => config('mail.mailers.smtp.username', ''),
+            'mail_password' => config('mail.mailers.smtp.password', ''),
+            'mail_encryption' => config('mail.mailers.smtp.encryption', 'tls') ?: 'none',
         ]);
 
         $storageDefaults = $installer->storageDefaults();
@@ -77,7 +77,7 @@ class KhubInstallCommand extends Command
             'auto_sql_backup' => true,
         ]);
 
-        $siteName = (string) ($this->option('site-name') ?: env('APP_NAME', 'Knowledge Hub'));
+        $siteName = (string) ($this->option('site-name') ?: config('app.name', 'Knowledge Hub'));
         $installer->saveSiteSettings([
             'site_name' => $siteName,
             'site_description' => 'Welcome to '.$siteName,
@@ -92,7 +92,7 @@ class KhubInstallCommand extends Command
             'last_name' => $this->option('last-name'),
         ]);
 
-        $installer->finalize(env('APP_URL', 'http://localhost'));
+        $installer->finalize(config('app.url', 'http://localhost'));
 
         $this->info('Installation complete.');
 

@@ -23,7 +23,7 @@ class FederatedHubService
 
         return [
             'api_version' => '1.0',
-            'site_id' => env('HUB_SITE_ID') ?: HubSiteIdentifier::fromAppUrl(),
+            'site_id' => config('hub_storage.site_id') ?: HubSiteIdentifier::fromAppUrl(),
             'app_url' => rtrim((string) config('app.url'), '/'),
             'hub_type' => hub_admin_units_enabled() ? 'country' : 'continental',
             'site_name' => $settings->site_name ?? config('app.name'),
@@ -109,7 +109,7 @@ class FederatedHubService
             return (string) $settings->federation_api_token;
         }
 
-        $envToken = env('FEDERATION_API_TOKEN');
+        $envToken = config('federation.api_token', config('deployment.federation_api_token'));
 
         return $envToken !== null && $envToken !== '' ? (string) $envToken : null;
     }

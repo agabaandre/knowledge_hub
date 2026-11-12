@@ -69,7 +69,7 @@ final class ContentModeration
             return true;
         }
 
-        $autoRoleIds = collect(explode(',', (string) env('AUTO_PUBLISH_ROLE_IDS', '')))
+        $autoRoleIds = collect(explode(',', (string) config('khub.auto_publish_role_ids', '')))
             ->filter(static fn ($value) => trim((string) $value) !== '')
             ->map(static fn ($value) => (int) trim((string) $value));
 

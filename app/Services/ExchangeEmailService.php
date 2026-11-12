@@ -36,14 +36,14 @@ class ExchangeEmailService
 
     public function __construct($tenantId = null, $clientId = null, $clientSecret = null, $redirectUri = null, $scope = null, $authMethod = null)
     {
-        $this->tenantId = $tenantId ?: env('EXCHANGE_TENANT_ID');
-        $this->clientId = $clientId ?: env('EXCHANGE_CLIENT_ID');
-        $this->clientSecret = $clientSecret ?: env('EXCHANGE_CLIENT_SECRET');
-        $this->redirectUri = $redirectUri ?: env('EXCHANGE_REDIRECT_URI');
-        $this->scope = $scope ?: env('EXCHANGE_SCOPE') ?: 'https://graph.microsoft.com/Mail.Send';
-        $this->authMethod = $authMethod ?: env('EXCHANGE_AUTH_METHOD') ?: self::AUTH_CLIENT_CREDENTIALS;
-        $this->fromEmail = env('MAIL_FROM_ADDRESS');
-        $this->fromName = env('MAIL_FROM_NAME', 'Africa CDC Knowledge Hub');
+        $this->tenantId = $tenantId ?: config('exchange-email.tenant_id');
+        $this->clientId = $clientId ?: config('exchange-email.client_id');
+        $this->clientSecret = $clientSecret ?: config('exchange-email.client_secret');
+        $this->redirectUri = $redirectUri ?: config('exchange-email.redirect_uri');
+        $this->scope = $scope ?: config('exchange-email.scope') ?: 'https://graph.microsoft.com/Mail.Send';
+        $this->authMethod = $authMethod ?: config('exchange-email.auth_method') ?: self::AUTH_CLIENT_CREDENTIALS;
+        $this->fromEmail = config('mail.from.address');
+        $this->fromName = config('mail.from.name', 'Africa CDC Knowledge Hub');
         
         // Set token file path
         $this->tokenFile = storage_path('app/tokens/oauth_tokens.json');

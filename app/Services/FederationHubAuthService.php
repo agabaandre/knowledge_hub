@@ -202,15 +202,15 @@ class FederationHubAuthService
         $settings = function_exists('settings') ? settings() : null;
 
         return [
-            'base_url' => (string) ($settings->central_hub_url ?? env('CENTRAL_HUB_URL', '')),
-            'access_token' => $settings->central_hub_api_token ?? env('CENTRAL_HUB_API_TOKEN') ?: null,
+            'base_url' => (string) ($settings->central_hub_url ?? config('federation.central_hub_url', '')),
+            'access_token' => $settings->central_hub_api_token ?? config('federation.central_hub_api_token') ?: null,
             'refresh_token' => Schema::hasColumn('setting', 'central_hub_refresh_token')
                 ? ($settings->central_hub_refresh_token ?? null)
                 : null,
             'expires_at' => Schema::hasColumn('setting', 'central_hub_token_expires_at')
                 ? ($settings->central_hub_token_expires_at ?? null)
                 : null,
-            'registration_token' => env('CENTRAL_HUB_API_TOKEN') ?: null,
+            'registration_token' => config('federation.central_hub_api_token') ?: null,
         ];
     }
 
@@ -479,7 +479,7 @@ class FederationHubAuthService
 
     protected function localSiteId(): string
     {
-        return env('HUB_SITE_ID') ?: HubSiteIdentifier::fromAppUrl();
+        return config('hub_storage.site_id') ?: HubSiteIdentifier::fromAppUrl();
     }
 
     protected function generateToken(): string

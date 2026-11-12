@@ -101,7 +101,7 @@ require 'vendor/autoload.php';
 $app = require 'bootstrap/app.php';
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 $kernel->bootstrap();
-$countryId = (int) getenv('KHUB_OWNER_COUNTRY_ID');
+$countryId = (int) getconfig('federation.owner_country_id');
 $seedFile = storage_path('app/federation_country_seed.json');
 if (is_file($seedFile)) {
     $seed = json_decode(file_get_contents($seedFile), true) ?: [];

@@ -14,7 +14,7 @@ class HubSiteIdentifier
 {
     public static function fromAppUrl(?string $appUrl = null): string
     {
-        $appUrl = trim((string) ($appUrl ?? env('APP_URL', 'http://localhost')));
+        $appUrl = trim((string) ($appUrl ?? config('app.url', 'http://localhost')));
         if ($appUrl === '') {
             return 'default';
         }

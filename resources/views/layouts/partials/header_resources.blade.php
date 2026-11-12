@@ -8,9 +8,20 @@
 
 @php
     $__seoTitleSection = trim($__env->yieldContent('title'));
+    // Ignore leaked "403 — Access Denied" / "404 — …" sections on normal pages only.
+    // Keep them on real error views (no $pageTitle, not the public homepage).
+    $__looksLikeHttpErrorTitle = $__seoTitleSection !== ''
+        && (bool) preg_match('/^\d{3}\s*[—–-]/u', $__seoTitleSection);
+    if ($__looksLikeHttpErrorTitle && (isset($pageTitle) || request()->is('/'))) {
+        $__seoTitleSection = '';
+    }
+    $__documentTitle = $pageTitle
+        ?? ($__seoTitleSection !== '' ? $__seoTitleSection : null)
+        ?? (request()->is('/') ? \App\Support\HomePageSeo::pageTitle() : null)
+        ?? (settings()->title ?? settings()->site_name ?? 'Africa CDC Knowledge Hub');
 @endphp
-<!-- Title: $pageTitle, @section('title'), or settings -->
-<title>{{ strip_tags($pageTitle ?? ($__seoTitleSection !== '' ? $__seoTitleSection : (settings()->title ?? 'Africa CDC Knowledge Hub'))) }}</title>
+<!-- Title: $pageTitle, @section('title'), HomePageSeo/settings (block leaked 403/404 on home) -->
+<title>{{ strip_tags($__documentTitle) }}</title>
 
 {!! @settings()->analytics_script !!}
 <!-- @notifyCss -->

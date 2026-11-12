@@ -10,7 +10,7 @@ class ThemesViewComposer{
 
     public function compose(View $view){
 
-        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+        $minutes = (int) config('khub.cache_expiry_minutes', 60 * 24);
 
         // Publication wizard & forms: A–Z. (Homepage uses HomeController + ThemesRepository::get → display order.)
         $subthemes = cache()->remember('themes_form_alphabetical', $minutes, function () {

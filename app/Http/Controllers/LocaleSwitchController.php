@@ -147,7 +147,7 @@ class LocaleSwitchController extends Controller
      */
     private function staticLinks()
     {
-        $minutes = (int) env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
+        $minutes = (int) config('khub.cache_expiry_minutes', 60 * 24);
 
         return cache()->remember('static_links.ordered', $minutes, static function () {
             return StaticLink::orderBy('order')->get();

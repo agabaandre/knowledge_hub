@@ -244,7 +244,7 @@ class HybridRecordsSearchService
             return (bool) $cached;
         }
 
-        $host = rtrim(trim((string) config('scout.meilisearch.host', env('MEILISEARCH_HOST', ''))), '/');
+        $host = rtrim(trim((string) config('scout.meilisearch.host', config('khub.meilisearch_host', ''))), '/');
         if ($host === '') {
             $cacheStore->put('meilisearch_health_ok', false, 30);
 

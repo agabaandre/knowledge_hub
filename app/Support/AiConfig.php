@@ -95,25 +95,23 @@ class AiConfig
     }
 
     /**
-     * Read env values with config-cache fallback (env() is empty when config is cached).
+     * Read integration values via config (config:cache safe), then .env file fallback.
      *
      * @return mixed
      */
     public static function envOrCachedConfig(string $envKey, ?string $configKey = null)
     {
-        $envValue = env($envKey);
-        if ($envValue !== null && $envValue !== '') {
-            return $envValue;
-        }
-
         $configKey = $configKey ?? self::configKeyForEnv($envKey);
-        if ($configKey === null) {
-            return null;
+        if ($configKey !== null) {
+            $cached = config($configKey);
+            if ($cached !== null && $cached !== '') {
+                return $cached;
+            }
         }
 
-        $cached = config($configKey);
+        $file = EnvFirstConfig::readEnvFile()[$envKey] ?? '';
 
-        return ($cached !== null && $cached !== '') ? $cached : null;
+        return $file !== '' ? $file : null;
     }
 
     private static function configKeyForEnv(string $envKey): ?string

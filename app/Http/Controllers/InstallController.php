@@ -153,8 +153,8 @@ class InstallController extends Controller
         return view('install.site', [
             'timezones' => config('install.timezones', ['UTC']),
             'defaults' => [
-                'site_name' => old('site_name', $active->site_name ?? env('APP_NAME', 'Knowledge Hub')),
-                'title' => old('title', $active->title ?? env('APP_NAME', 'Knowledge Hub')),
+                'site_name' => old('site_name', $active->site_name ?? config('app.name', 'Knowledge Hub')),
+                'title' => old('title', $active->title ?? config('app.name', 'Knowledge Hub')),
                 'slogan' => old('slogan', $active->slogan ?? 'Informing Health Decisions and Actions'),
                 'site_description' => old('site_description', $active->site_description ?? 'Welcome to the Knowledge Hub — your central platform for health knowledge and collaboration.'),
                 'seo_keywords' => old('seo_keywords', $active->seo_keywords ?? 'Knowledge Management Hub, Public Health'),
@@ -203,8 +203,8 @@ class InstallController extends Controller
 
         return view('install.central', [
             'defaults' => [
-                'central_hub_url' => old('central_hub_url', env('CENTRAL_HUB_URL', 'https://khub.africacdc.org')),
-                'central_hub_api_token' => old('central_hub_api_token', env('CENTRAL_HUB_API_TOKEN', '')),
+                'central_hub_url' => old('central_hub_url', config('federation.central_hub_url', 'https://khub.africacdc.org')),
+                'central_hub_api_token' => old('central_hub_api_token', config('federation.central_hub_api_token', '')),
             ],
         ]);
     }
@@ -291,20 +291,20 @@ class InstallController extends Controller
 
         return view('install.moodle', [
             'defaults' => [
-                'moodle_api_url' => old('moodle_api_url', $active->moodle_api_url ?? env('MOODLE_API_URL', '')),
-                'moodle_api_token' => old('moodle_api_token', $active->moodle_api_token ?? env('MOODLE_API_TOKEN', '')),
-                'moodle_base_url' => old('moodle_base_url', $active->moodle_base_url ?? env('MOODLE_URL', '')),
-                'moodle_sync_enabled' => old('moodle_sync_enabled', $active->moodle_sync_enabled ?? env('MOODLE_SYNC_ENABLED', true)),
-                'frappe_base_url' => old('frappe_base_url', $active->frappe_base_url ?? env('FRAPPE_BASE_URL', '')),
-                'frappe_api_key' => old('frappe_api_key', $active->frappe_api_key ?? env('FRAPPE_API_KEY', '')),
-                'frappe_api_secret' => old('frappe_api_secret', $active->frappe_api_secret ?? env('FRAPPE_API_SECRET', '')),
-                'frappe_course_doctype' => old('frappe_course_doctype', $active->frappe_course_doctype ?? env('FRAPPE_COURSE_DOCTYPE', 'LMS Course')),
-                'frappe_sync_enabled' => old('frappe_sync_enabled', $active->frappe_sync_enabled ?? env('FRAPPE_SYNC_ENABLED', false)),
-                'openedx_lms_url' => old('openedx_lms_url', $active->openedx_lms_url ?? env('OPENEDX_LMS_URL', '')),
-                'openedx_client_id' => old('openedx_client_id', $active->openedx_client_id ?? env('OPENEDX_CLIENT_ID', '')),
-                'openedx_client_secret' => old('openedx_client_secret', $active->openedx_client_secret ?? env('OPENEDX_CLIENT_SECRET', '')),
-                'openedx_token_url' => old('openedx_token_url', $active->openedx_token_url ?? env('OPENEDX_TOKEN_URL', '')),
-                'openedx_sync_enabled' => old('openedx_sync_enabled', $active->openedx_sync_enabled ?? env('OPENEDX_SYNC_ENABLED', false)),
+                'moodle_api_url' => old('moodle_api_url', $active->moodle_api_url ?? config('moodle.api_url', '')),
+                'moodle_api_token' => old('moodle_api_token', $active->moodle_api_token ?? config('moodle.api_token', '')),
+                'moodle_base_url' => old('moodle_base_url', $active->moodle_base_url ?? config('moodle.base_url', '')),
+                'moodle_sync_enabled' => old('moodle_sync_enabled', $active->moodle_sync_enabled ?? config('moodle.sync_enabled', true)),
+                'frappe_base_url' => old('frappe_base_url', $active->frappe_base_url ?? config('frappe.base_url', '')),
+                'frappe_api_key' => old('frappe_api_key', $active->frappe_api_key ?? config('frappe.api_key', '')),
+                'frappe_api_secret' => old('frappe_api_secret', $active->frappe_api_secret ?? config('frappe.api_secret', '')),
+                'frappe_course_doctype' => old('frappe_course_doctype', $active->frappe_course_doctype ?? config('frappe.course_doctype', 'LMS Course')),
+                'frappe_sync_enabled' => old('frappe_sync_enabled', $active->frappe_sync_enabled ?? config('frappe.sync_enabled', false)),
+                'openedx_lms_url' => old('openedx_lms_url', $active->openedx_lms_url ?? config('openedx.lms_url', '')),
+                'openedx_client_id' => old('openedx_client_id', $active->openedx_client_id ?? config('openedx.client_id', '')),
+                'openedx_client_secret' => old('openedx_client_secret', $active->openedx_client_secret ?? config('openedx.client_secret', '')),
+                'openedx_token_url' => old('openedx_token_url', $active->openedx_token_url ?? config('openedx.token_url', '')),
+                'openedx_sync_enabled' => old('openedx_sync_enabled', $active->openedx_sync_enabled ?? config('openedx.sync_enabled', false)),
             ],
         ]);
     }
@@ -418,34 +418,34 @@ class InstallController extends Controller
 
         $mailer = old('mail_mailer');
         if ($mailer === null) {
-            $mailer = env('MAIL_MAILER') === 'log' ? 'log' : ($active?->email_driver ?? 'exchange');
+            $mailer = config('mail.default') === 'log' ? 'log' : ($active?->email_driver ?? 'exchange');
         }
 
         return view('install.mail', [
             'defaults' => [
                 'mail_mailer' => $mailer,
-                'mail_host' => old('mail_host', $active?->mail_host ?? env('MAIL_HOST', '')),
-                'mail_port' => old('mail_port', $active?->mail_port ?? env('MAIL_PORT', '587')),
-                'mail_username' => old('mail_username', $active?->mail_username ?? env('MAIL_USERNAME', '')),
-                'mail_password' => old('mail_password', $active?->mail_password ?? env('MAIL_PASSWORD', '')),
-                'mail_encryption' => old('mail_encryption', $active?->mail_encryption ?? env('MAIL_ENCRYPTION', 'tls')) ?: 'none',
-                'mail_from_address' => old('mail_from_address', $active?->mail_from_address ?? env('MAIL_FROM_ADDRESS', 'noreply@localhost')),
-                'mail_from_name' => old('mail_from_name', $active?->mail_from_name ?? env('APP_NAME', 'Knowledge Hub')),
-                'exchange_tenant_id' => old('exchange_tenant_id', $active?->exchange_tenant_id ?? env('EXCHANGE_TENANT_ID', '')),
-                'exchange_client_id' => old('exchange_client_id', $active?->exchange_client_id ?? env('EXCHANGE_CLIENT_ID', '')),
+                'mail_host' => old('mail_host', $active?->mail_host ?? config('mail.mailers.smtp.host', '')),
+                'mail_port' => old('mail_port', $active?->mail_port ?? config('mail.mailers.smtp.port', '587')),
+                'mail_username' => old('mail_username', $active?->mail_username ?? config('mail.mailers.smtp.username', '')),
+                'mail_password' => old('mail_password', $active?->mail_password ?? config('mail.mailers.smtp.password', '')),
+                'mail_encryption' => old('mail_encryption', $active?->mail_encryption ?? config('mail.mailers.smtp.encryption', 'tls')) ?: 'none',
+                'mail_from_address' => old('mail_from_address', $active?->mail_from_address ?? config('mail.from.address', 'noreply@localhost')),
+                'mail_from_name' => old('mail_from_name', $active?->mail_from_name ?? config('app.name', 'Knowledge Hub')),
+                'exchange_tenant_id' => old('exchange_tenant_id', $active?->exchange_tenant_id ?? config('exchange-email.tenant_id', '')),
+                'exchange_client_id' => old('exchange_client_id', $active?->exchange_client_id ?? config('exchange-email.client_id', '')),
                 'exchange_client_secret' => old('exchange_client_secret', $active?->exchange_client_secret ?? ''),
-                'exchange_auth_method' => old('exchange_auth_method', $active?->exchange_auth_method ?? env('EXCHANGE_AUTH_METHOD', 'client_credentials')),
-                'exchange_redirect_uri' => old('exchange_redirect_uri', $active?->exchange_redirect_uri ?? env('EXCHANGE_REDIRECT_URI', '')),
-                'exchange_scope' => old('exchange_scope', $active?->exchange_scope ?? env('EXCHANGE_SCOPE', 'https://graph.microsoft.com/.default')),
+                'exchange_auth_method' => old('exchange_auth_method', $active?->exchange_auth_method ?? config('exchange-email.auth_method', 'client_credentials')),
+                'exchange_redirect_uri' => old('exchange_redirect_uri', $active?->exchange_redirect_uri ?? config('exchange-email.redirect_uri', '')),
+                'exchange_scope' => old('exchange_scope', $active?->exchange_scope ?? config('exchange-email.scope', 'https://graph.microsoft.com/.default')),
                 'mail_http_base_url' => old('mail_http_base_url', $active?->mail_http_base_url ?? \App\Support\EmailConfig::httpBaseUrlDefault()),
-                'mail_http_client_id' => old('mail_http_client_id', $active?->mail_http_client_id ?? env('MAIL_HTTP_CLIENT_ID', '')),
+                'mail_http_client_id' => old('mail_http_client_id', $active?->mail_http_client_id ?? config('emails.http.client_id', '')),
                 'mail_http_client_secret' => old('mail_http_client_secret', $active?->mail_http_client_secret ?? ''),
-                'mail_api_key' => old('mail_api_key', $active?->mail_api_key ?? env('MAIL_API_KEY', '')),
-                'mail_api_secret' => old('mail_api_secret', $active?->mail_api_secret ?? env('MAIL_API_SECRET', '')),
-                'mail_api_domain' => old('mail_api_domain', $active?->mail_api_domain ?? env('MAIL_API_DOMAIN', '')),
-                'mail_api_region' => old('mail_api_region', $active?->mail_api_region ?? env('MAIL_API_REGION', 'us')),
-                'mail_api_base_url' => old('mail_api_base_url', $active?->mail_api_base_url ?? env('MAIL_API_BASE_URL', '')),
-                'mail_api_message_stream' => old('mail_api_message_stream', $active?->mail_api_message_stream ?? env('MAIL_API_MESSAGE_STREAM', 'outbound')),
+                'mail_api_key' => old('mail_api_key', $active?->mail_api_key ?? config('emails.api.key', '')),
+                'mail_api_secret' => old('mail_api_secret', $active?->mail_api_secret ?? config('emails.api.secret', '')),
+                'mail_api_domain' => old('mail_api_domain', $active?->mail_api_domain ?? config('emails.api.domain', '')),
+                'mail_api_region' => old('mail_api_region', $active?->mail_api_region ?? config('emails.api.region', 'us')),
+                'mail_api_base_url' => old('mail_api_base_url', $active?->mail_api_base_url ?? config('emails.api.base_url', '')),
+                'mail_api_message_stream' => old('mail_api_message_stream', $active?->mail_api_message_stream ?? config('emails.api.message_stream', 'outbound')),
             ],
         ]);
     }

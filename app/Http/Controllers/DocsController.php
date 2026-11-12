@@ -36,7 +36,7 @@ class DocsController extends Controller
             return response()->json(['message' => 'OpenAPI spec is invalid JSON.'], 500);
         }
 
-        $serverUrl = env('L5_OPENAPI_SERVER_URL');
+        $serverUrl = config('khub.l5_openapi_server_url');
         if (!$serverUrl) {
             $serverUrl = rtrim((string) config('app.url', $request->getSchemeAndHttpHost()), '/');
         }

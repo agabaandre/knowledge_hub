@@ -669,7 +669,9 @@
 
         Object.keys(labels).forEach(function(fullKey) {
             var value = labels[fullKey];
-            if (value == null || value === '') return;
+            // Skip empty / unresolved keys (e.g. "frontend_nav.category_dashboards") so
+            // client refresh does not wipe server-rendered DB category names.
+            if (value == null || value === '' || value === fullKey) return;
 
             document.querySelectorAll('[data-khub-i18n="' + fullKey + '"]').forEach(function(el) {
                 if (el.tagName === 'INPUT') {

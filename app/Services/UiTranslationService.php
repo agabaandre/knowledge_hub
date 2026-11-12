@@ -153,6 +153,10 @@ class UiTranslationService
     }
 
     /**
+     * Seed Language Management catalog defaults from Admin → Settings.
+     * Live English display still prefers Settings via UiLocaleLabels::siteTitle()/siteTagline();
+     * saved English ui_body overrides remain editable here as translation fallbacks.
+     *
      * @return array<string, string>
      */
     private function dynamicSiteBrandingKeys(): array

@@ -57,14 +57,14 @@ class HubStorageSetting extends Model
             return self::$currentCache = $record;
         }
 
-        $siteId = trim((string) env('HUB_SITE_ID', ''));
+        $siteId = trim((string) config('hub_storage.site_id', ''));
         $siteId = $siteId !== '' ? HubSiteIdentifier::sanitize($siteId) : HubSiteIdentifier::fromAppUrl();
         $paths = HubSiteIdentifier::defaultPaths($siteId);
-        $filesRoot = trim((string) env('HUB_FILES_ROOT', ''));
+        $filesRoot = trim((string) config('hub_storage.files_root', ''));
         if ($filesRoot === '') {
             $filesRoot = $paths['files'];
         }
-        $sqlRoot = trim((string) env('HUB_SQL_BACKUP_ROOT', ''));
+        $sqlRoot = trim((string) config('hub_storage.sql_backup_root', ''));
         if ($sqlRoot === '') {
             $sqlRoot = $paths['sql_backups'];
         }

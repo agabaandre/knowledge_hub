@@ -153,7 +153,7 @@ class HubStorageMetricsService
      */
     protected function deploymentSnapshot(): array
     {
-        $override = trim((string) env('HUB_DEPLOYMENT_TYPE', ''));
+        $override = trim((string) config('khub.deployment_type', ''));
         if ($override !== '') {
             return [
                 'type' => 'custom',
@@ -165,7 +165,7 @@ class HubStorageMetricsService
         }
 
         $hints = [];
-        $inDocker = file_exists('/.dockerenv') || filter_var(env('DOCKER', false), FILTER_VALIDATE_BOOLEAN);
+        $inDocker = file_exists('/.dockerenv') || filter_var(config('install.docker', false), FILTER_VALIDATE_BOOLEAN);
         if ($inDocker) {
             $hints[] = '/.dockerenv or DOCKER=true';
 
@@ -320,7 +320,7 @@ class HubStorageMetricsService
         }
 
         $meilisearchOk = null;
-        $meilisearchHost = trim((string) config('scout.meilisearch.host', env('MEILISEARCH_HOST', '')));
+        $meilisearchHost = trim((string) config('scout.meilisearch.host', config('khub.meilisearch_host', '')));
         if ($scoutDriver === 'meilisearch' && $meilisearchHost !== '') {
             try {
                 $response = Http::timeout(2)->get(rtrim($meilisearchHost, '/').'/health');

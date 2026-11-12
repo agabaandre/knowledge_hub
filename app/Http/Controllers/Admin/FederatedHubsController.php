@@ -42,7 +42,7 @@ class FederatedHubsController extends Controller
             'countries' => Country::orderBy('name')->get(),
             'federationToken' => $federation->federationToken(),
             'federationApiBase' => url('/api/federation'),
-            'centralHubUrl' => $settings->central_hub_url ?? env('CENTRAL_HUB_URL'),
+            'centralHubUrl' => $settings->central_hub_url ?? config('federation.central_hub_url'),
             'centralHubSiteId' => $settings->central_hub_site_id ?? null,
             'centralHubConnectedAt' => $settings->central_hub_connected_at ?? null,
             'centralMetadataSyncedAt' => $settings->central_metadata_synced_at ?? null,

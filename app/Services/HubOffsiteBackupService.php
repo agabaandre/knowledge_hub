@@ -119,12 +119,12 @@ class HubOffsiteBackupService
         if ($driver === 's3') {
             Config::set('filesystems.disks.hub-offsite-backup', [
                 'driver' => 's3',
-                'key' => $config['key'] ?? env('AWS_ACCESS_KEY_ID'),
-                'secret' => $config['secret'] ?? env('AWS_SECRET_ACCESS_KEY'),
-                'region' => $config['region'] ?? env('AWS_DEFAULT_REGION'),
-                'bucket' => $config['bucket'] ?? env('AWS_BUCKET'),
-                'url' => $config['url'] ?? env('AWS_URL'),
-                'endpoint' => $config['endpoint'] ?? env('AWS_ENDPOINT'),
+                'key' => $config['key'] ?? config('filesystems.disks.s3.key'),
+                'secret' => $config['secret'] ?? config('filesystems.disks.s3.secret'),
+                'region' => $config['region'] ?? config('filesystems.disks.s3.region'),
+                'bucket' => $config['bucket'] ?? config('filesystems.disks.s3.bucket'),
+                'url' => $config['url'] ?? config('filesystems.disks.s3.url'),
+                'endpoint' => $config['endpoint'] ?? config('filesystems.disks.s3.endpoint'),
                 'use_path_style_endpoint' => (bool) ($config['use_path_style_endpoint'] ?? false),
                 'root' => $scopedPrefix,
             ]);
@@ -135,11 +135,11 @@ class HubOffsiteBackupService
         if ($driver === 'gcs') {
             Config::set('filesystems.disks.hub-offsite-backup', [
                 'driver' => 'gcs',
-                'project_id' => $config['project_id'] ?? env('GOOGLE_CLOUD_PROJECT_ID'),
-                'key_file_path' => $config['key_file_path'] ?? env('GOOGLE_CLOUD_KEY_FILE'),
-                'bucket' => $config['bucket'] ?? env('GOOGLE_CLOUD_STORAGE_BUCKET'),
+                'project_id' => $config['project_id'] ?? config('hub_storage.gcs.project_id'),
+                'key_file_path' => $config['key_file_path'] ?? config('hub_storage.gcs.key_file_path'),
+                'bucket' => $config['bucket'] ?? config('hub_storage.gcs.bucket'),
                 'path_prefix' => $scopedPrefix,
-                'storage_api_uri' => $config['storage_api_uri'] ?? env('GOOGLE_CLOUD_STORAGE_API_URI'),
+                'storage_api_uri' => $config['storage_api_uri'] ?? config('hub_storage.gcs.storage_api_uri'),
             ]);
 
             return;
@@ -148,11 +148,11 @@ class HubOffsiteBackupService
         if ($driver === 'azure') {
             Config::set('filesystems.disks.hub-offsite-backup', [
                 'driver' => 'azure-blob',
-                'connection_string' => $config['connection_string'] ?? env('AZURE_STORAGE_CONNECTION_STRING'),
-                'name' => $config['account_name'] ?? env('AZURE_STORAGE_NAME'),
-                'key' => $config['account_key'] ?? env('AZURE_STORAGE_KEY'),
-                'container' => $config['container'] ?? env('AZURE_STORAGE_CONTAINER'),
-                'url' => $config['url'] ?? env('AZURE_STORAGE_URL'),
+                'connection_string' => $config['connection_string'] ?? config('hub_storage.azure.connection_string'),
+                'name' => $config['account_name'] ?? config('hub_storage.azure.name'),
+                'key' => $config['account_key'] ?? config('hub_storage.azure.key'),
+                'container' => $config['container'] ?? config('hub_storage.azure.container'),
+                'url' => $config['url'] ?? config('hub_storage.azure.url'),
                 'prefix' => $scopedPrefix,
             ]);
 

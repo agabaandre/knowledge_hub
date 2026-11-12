@@ -72,8 +72,8 @@ class HttpNotificationsMailClient
 
     public function isConfigured(): bool
     {
-        $clientId = (string) config('emails.http.client_id', env('MAIL_HTTP_CLIENT_ID', ''));
-        $clientSecret = (string) config('emails.http.client_secret', env('MAIL_HTTP_CLIENT_SECRET', ''));
+        $clientId = (string) config('emails.http.client_id', config('emails.http.client_id', ''));
+        $clientSecret = (string) config('emails.http.client_secret', '');
 
         return $clientId !== '' && $clientSecret !== '';
     }
@@ -222,8 +222,8 @@ class HttpNotificationsMailClient
 
     private function bearerToken(string $base): string
     {
-        $clientId = (string) config('emails.http.client_id', env('MAIL_HTTP_CLIENT_ID', ''));
-        $clientSecret = (string) config('emails.http.client_secret', env('MAIL_HTTP_CLIENT_SECRET', ''));
+        $clientId = (string) config('emails.http.client_id', config('emails.http.client_id', ''));
+        $clientSecret = (string) config('emails.http.client_secret', '');
         if ($clientId === '' || $clientSecret === '') {
             throw new RuntimeException(
                 'HTTP mail is not configured. Set MAIL_HTTP_CLIENT_ID and MAIL_HTTP_CLIENT_SECRET (or Admin → Configure → Email).'

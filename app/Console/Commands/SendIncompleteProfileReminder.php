@@ -16,7 +16,7 @@ class SendIncompleteProfileReminder extends Command
     {
         $usesAdministrativeUnits = function_exists('admin_units_enabled')
             ? (bool) admin_units_enabled()
-            : (bool) env('ADMIN_UNITS_ENABLED', false);
+            : (bool) config('deployment.admin_units_enabled', false);
 
         $geoField = $usesAdministrativeUnits ? 'administrative_unit_id' : 'country_id';
         $geoLabel = $usesAdministrativeUnits ? 'administrative unit' : 'country';

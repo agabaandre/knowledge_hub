@@ -72,7 +72,7 @@ Use when reconnecting an imported or restored database.
 
 ## Installer lock & existing deployments
 
-The installer returns **403** when Composer packages exist **and** the database already has data — protecting live sites from accidental re-install.
+The installer returns **404** when `INSTALLER_DISABLED=true`, the app is marked installed, or Composer packages exist **and** the database already has data — protecting live sites from accidental re-install.
 
 See [EXISTING_DEPLOYMENTS.md](EXISTING_DEPLOYMENTS.md) for `khub:mark-installed` and recovery options.
 

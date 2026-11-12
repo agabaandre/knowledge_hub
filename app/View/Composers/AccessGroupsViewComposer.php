@@ -10,7 +10,7 @@ class AccessGroupsViewComposer{
 
     public function compose(View $view){
 
-        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+        $minutes = (int) config('khub.cache_expiry_minutes', 60 * 24);
 
         $groups  = cache()->remember('accessgroups',$minutes, function () {
             return   UserAccessGroup::all();

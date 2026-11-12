@@ -8,7 +8,7 @@ class AssetTypesViewComposer{
 
     public function compose(View $view){
 
-        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+        $minutes = (int) config('khub.cache_expiry_minutes', 60 * 24);
 
         $asset_types = cache()->remember('asset_types',$minutes, function () {
             return  AssetType::all();

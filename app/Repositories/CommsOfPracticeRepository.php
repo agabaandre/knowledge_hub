@@ -1641,7 +1641,7 @@ class CommsOfPracticeRepository{
     {
         $usesAdministrativeUnits = function_exists('admin_units_enabled')
             ? (bool) admin_units_enabled()
-            : (bool) env('ADMIN_UNITS_ENABLED', false);
+            : (bool) config('deployment.admin_units_enabled', false);
 
         return [
             'usesAdministrativeUnits' => $usesAdministrativeUnits,

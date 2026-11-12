@@ -14,8 +14,7 @@ if (! function_exists('hub_admin_units_enabled')) {
      */
     function hub_admin_units_enabled(): bool
     {
-        $envOrConfig = filter_var(env('ADMIN_UNITS_ENABLED', false), FILTER_VALIDATE_BOOLEAN)
-            || (bool) config('deployment.admin_units_enabled', false);
+        $envOrConfig = (bool) config('deployment.admin_units_enabled', false);
 
         $statesOff = ! (bool) config('deployment.states_enabled', true);
 
@@ -63,7 +62,7 @@ if (! function_exists('hub_owner_country_id')) {
             return (int) $fromConfig;
         }
 
-        $fromEnv = env('HUB_OWNER_COUNTRY_ID');
+        $fromEnv = config('deployment.hub_owner_country_id');
         if ($fromEnv !== null && $fromEnv !== '') {
             return (int) $fromEnv;
         }
@@ -89,7 +88,7 @@ if (! function_exists('hub_owner_region_id')) {
             return (int) $fromConfig;
         }
 
-        $fromEnv = env('HUB_OWNER_REGION_ID');
+        $fromEnv = config('deployment.hub_owner_region_id');
         if ($fromEnv !== null && $fromEnv !== '') {
             return (int) $fromEnv;
         }

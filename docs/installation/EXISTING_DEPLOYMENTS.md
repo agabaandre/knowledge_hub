@@ -6,12 +6,14 @@ Use this guide when the Knowledge Hub is **already running** or when you are **r
 
 ## When the web installer is blocked
 
-Visiting `/install` returns **403 Forbidden** when **both** are true:
+Visiting `/install` returns **404 Not Found** when any of these are true:
 
-1. `vendor/autoload.php` exists (Composer dependencies installed)
-2. The configured database has tables with data
+1. `INSTALLER_DISABLED=true` in `.env` / config
+2. `APP_INSTALLED=true` or `storage/app/installed.lock` exists
+3. Composer dependencies are present **and** the database already has data
+4. The active `setting` row has `installer_locked=1`
 
-This prevents accidental re-installation on production.
+This prevents accidental re-installation on production. A brief database outage no longer redirects live traffic to the installer.
 
 ### Mark the application as installed
 

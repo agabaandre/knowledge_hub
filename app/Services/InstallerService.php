@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\Models\Role;
 
@@ -18,28 +19,98 @@ class InstallerService
 {
     public function isInstalled(): bool
     {
-        if (filter_var(env('APP_INSTALLED', false), FILTER_VALIDATE_BOOLEAN)) {
+        if ($this->hasNonDatabaseInstallSignal()) {
             return true;
         }
 
-        if (File::exists(config('install.lock_file'))) {
+        try {
+            if ($this->isLockedInSettings()) {
+                $this->ensureLockFileExists();
+
+                return true;
+            }
+
+            // Populated database ⇒ already installed; never show the web installer.
+            if ($this->hasVendorPackages() && $this->databaseHasExistingData()) {
+                $this->ensureLockFileExists();
+
+                return true;
+            }
+        } catch (\Throwable $e) {
+            // Brief DB outage must not send live traffic to /install.
+            Log::warning('InstallerService::isInstalled database check failed; not redirecting to installer.', [
+                'message' => $e->getMessage(),
+            ]);
+
+            // vendor/ present ⇒ deployed app (open /install explicitly for greenfield setup).
+            return $this->hasNonDatabaseInstallSignal() || $this->hasVendorPackages();
+        }
+
+        return false;
+    }
+
+    public function ensureLockFileExists(): void
+    {
+        $lock = config('install.lock_file');
+        if (is_string($lock) && $lock !== '' && ! File::exists($lock)) {
+            try {
+                File::ensureDirectoryExists(dirname($lock));
+                File::put($lock, now()->toIso8601String());
+            } catch (\Throwable) {
+                // Storage may be read-only; non-fatal.
+            }
+        }
+    }
+
+    /**
+     * True when .env can be updated. Uses permission bits so root (e.g. Docker)
+     * still respects a deliberately read-only .env after install.
+     */
+    public function isEnvFileWritable(?string $envPath = null): bool
+    {
+        $envPath ??= base_path('.env');
+        if (! File::exists($envPath)) {
+            return is_writable(dirname($envPath));
+        }
+
+        $perms = @fileperms($envPath);
+        if ($perms === false) {
+            return is_writable($envPath);
+        }
+
+        // Owner-write bit must be set (chmod u+w). Root can write 0444 files;
+        // treat missing owner-write as intentionally read-only.
+        return ($perms & 0200) === 0200;
+    }
+
+    /**
+     * Signals that do not require a live database connection.
+     */
+    public function hasNonDatabaseInstallSignal(): bool
+    {
+        if (filter_var(config('install.app_installed', false), FILTER_VALIDATE_BOOLEAN)) {
             return true;
         }
 
-        return $this->isLockedInSettings();
+        if (filter_var(config('install.disabled', false), FILTER_VALIDATE_BOOLEAN)) {
+            return true;
+        }
+
+        return File::exists(config('install.lock_file'));
+    }
+
+    public function isInstallerDisabled(): bool
+    {
+        return filter_var(config('install.disabled', false), FILTER_VALIDATE_BOOLEAN);
     }
 
     public function isLockedInSettings(): bool
     {
-        try {
-            if (! Schema::hasTable('setting') || ! Schema::hasColumn('setting', 'installer_locked')) {
-                return false;
-            }
-
-            return Setting::query()->where('installer_locked', 1)->exists();
-        } catch (\Throwable) {
+        if (! Schema::hasTable('setting') || ! Schema::hasColumn('setting', 'installer_locked')) {
             return false;
         }
+
+        return Setting::query()->where('installer_locked', 1)->exists();
     }
 
     public function hasVendorPackages(): bool
@@ -93,20 +164,20 @@ class InstallerService
     public function runtimeEnvironment(): string
     {
         if (PHP_OS_FAMILY === 'Windows') {
-            if (filter_var(env('DOCKER', false), FILTER_VALIDATE_BOOLEAN)) {
+            if (filter_var(config('install.docker', false), FILTER_VALIDATE_BOOLEAN)) {
                 return 'docker';
             }
 
             return 'windows';
         }
 
-        if (filter_var(env('DOCKER', false), FILTER_VALIDATE_BOOLEAN)) {
+        if (filter_var(config('install.docker', false), FILTER_VALIDATE_BOOLEAN)) {
             return 'docker';
         }
         if (file_exists('/.dockerenv')) {
             return 'docker';
         }
-        if (in_array((string) env('DB_HOST', ''), ['mysql', 'db', 'mariadb'], true)) {
+        if (in_array((string) config('database.connections.mysql.host', ''), ['mysql', 'db', 'mariadb'], true)) {
             return 'docker';
         }
 
@@ -121,12 +192,14 @@ class InstallerService
         $env = $this->runtimeEnvironment();
         $configured = config("install.database_defaults.{$env}", config('install.database_defaults.local'));
 
+        $mysql = config('database.connections.mysql', []);
+
         return [
-            'host' => env('DB_HOST', $configured['host']),
-            'port' => (string) env('DB_PORT', $configured['port']),
-            'database' => env('DB_DATABASE', $configured['database']),
-            'username' => env('DB_USERNAME', $configured['username']),
-            'password' => env('DB_PASSWORD', $configured['password']),
+            'host' => $mysql['host'] ?? $configured['host'],
+            'port' => (string) ($mysql['port'] ?? $configured['port']),
+            'database' => $mysql['database'] ?? $configured['database'],
+            'username' => $mysql['username'] ?? $configured['username'],
+            'password' => $mysql['password'] ?? $configured['password'],
         ];
     }
 
@@ -140,8 +213,8 @@ class InstallerService
         $storage = app(HubStorageService::class);
 
         return [
-            'files_root' => env('HUB_FILES_ROOT', $configured['files_root'] ?? $storage->defaultInternalRoot()),
-            'sql_backup_root' => env('HUB_SQL_BACKUP_ROOT', $configured['sql_backup_root'] ?? $storage->defaultSqlBackupRoot()),
+            'files_root' => config('hub_storage.files_root') ?: ($configured['files_root'] ?? $storage->defaultInternalRoot()),
+            'sql_backup_root' => config('hub_storage.sql_backup_root') ?: ($configured['sql_backup_root'] ?? $storage->defaultSqlBackupRoot()),
         ];
     }
 
@@ -191,11 +264,15 @@ class InstallerService
         }
 
         $envPath = base_path('.env');
-        $envWritable = File::exists($envPath) ? is_writable($envPath) : is_writable(base_path());
+        $envWritable = File::exists($envPath)
+            ? $this->isEnvFileWritable($envPath)
+            : is_writable(base_path());
         $checks[] = [
-            'label' => '.env writable',
+            'label' => '.env writable (first install only)',
             'ok' => $envWritable,
-            'message' => $envWritable ? 'OK' : 'Cannot write .env — fix permissions on project root',
+            'message' => $envWritable
+                ? 'OK — after install you can make .env read-only'
+                : 'Cannot write .env — fix permissions on project root for first install',
             'required' => true,
         ];
 
@@ -207,7 +284,8 @@ class InstallerService
             'required' => true,
         ];
 
-        $keyOk = ! empty(env('APP_KEY')) && str_starts_with((string) env('APP_KEY'), 'base64:');
+        $appKey = (string) config('app.key', '');
+        $keyOk = $appKey !== '' && str_starts_with($appKey, 'base64:');
         $checks[] = [
             'label' => 'Application key (APP_KEY)',
             'ok' => $keyOk,
@@ -395,6 +473,14 @@ class InstallerService
     {
         $envPath = base_path('.env');
         if (! File::exists($envPath)) {
+            if (! is_writable(base_path())) {
+                Log::warning('.env is missing and project root is not writable; skipping env update. Values remain in the database/config.', [
+                    'keys' => array_keys($values),
+                ]);
+
+                return;
+            }
+
             foreach ([base_path('.env.docker.example'), base_path('.env.example')] as $example) {
                 if (File::exists($example)) {
                     File::copy($example, $envPath);
@@ -404,7 +490,25 @@ class InstallerService
         }
 
         if (! File::exists($envPath)) {
-            File::put($envPath, "APP_NAME=\"Knowledge Hub\"\nAPP_KEY=\nAPP_INSTALLED=false\n");
+            try {
+                File::put($envPath, "APP_NAME=\"Knowledge Hub\"\nAPP_KEY=\nAPP_INSTALLED=false\n");
+            } catch (\Throwable $e) {
+                Log::warning('Could not create .env; skipping env update.', [
+                    'keys' => array_keys($values),
+                    'message' => $e->getMessage(),
+                ]);
+
+                return;
+            }
+        }
+
+        if (! $this->isEnvFileWritable($envPath)) {
+            // Post-install .env is often read-only; admin settings live in the database.
+            Log::warning('.env is not writable; skipping env update. Values remain in the database/config.', [
+                'keys' => array_keys($values),
+            ]);
+
+            return;
         }
 
         $contents = File::get($envPath);
@@ -419,6 +523,7 @@ class InstallerService
             }
         }
         File::put($envPath, rtrim($contents).PHP_EOL);
+        \App\Support\EnvFirstConfig::clearEnvFileCache();
     }
 
     /**
@@ -800,7 +905,7 @@ class InstallerService
 
         $payload = [
             'mail_from_address' => $mail['mail_from_address'] ?? 'noreply@localhost',
-            'mail_from_name' => $mail['mail_from_name'] ?? env('APP_NAME', 'Knowledge Hub'),
+            'mail_from_name' => $mail['mail_from_name'] ?? config('app.name', 'Knowledge Hub'),
         ];
 
         if (Schema::hasColumn('setting', 'email_driver')) {
@@ -937,11 +1042,11 @@ class InstallerService
      */
     public function seedDemoUsersIfEnabled(): void
     {
-        $explicit = env('SEED_DEMO_USERS');
+        $explicit = config('install.seed_demo_users');
         if ($explicit !== null && $explicit !== '') {
             $enabled = filter_var($explicit, FILTER_VALIDATE_BOOLEAN);
         } else {
-            $enabled = filter_var(env('DOCKER', false), FILTER_VALIDATE_BOOLEAN)
+            $enabled = filter_var(config('install.docker', false), FILTER_VALIDATE_BOOLEAN)
                 || app()->environment('local');
         }
 
@@ -988,7 +1093,7 @@ class InstallerService
         if (! config('app.debug')) {
             Artisan::call('config:cache');
             // Subdirectory installs (e.g. /ghana) often break with route:cache (405s).
-            if (! $this->appUrlHasPath(env('APP_URL', $appUrl))) {
+            if (! $this->appUrlHasPath((string) config('app.url', $appUrl))) {
                 try {
                     Artisan::call('route:cache');
                 } catch (\Throwable) {
@@ -1028,7 +1133,7 @@ class InstallerService
 
         Setting::query()->create([
             'status' => 'active',
-            'site_name' => env('APP_NAME', 'Knowledge Hub'),
+            'site_name' => config('app.name', 'Knowledge Hub'),
             'seo_keywords' => '',
             'site_description' => '',
             'timezone' => 'UTC',

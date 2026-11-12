@@ -316,7 +316,7 @@ if (!function_exists('format_title_with_ai_fallback')) {
         }
 
         $local = normalize_title_case_local($source);
-        $useAi = filter_var(env('TITLE_CASE_AI_ENABLED', false), FILTER_VALIDATE_BOOLEAN);
+        $useAi = filter_var(config('khub.title_case_ai_enabled', false), FILTER_VALIDATE_BOOLEAN);
         if (!$useAi) {
             return $local;
         }

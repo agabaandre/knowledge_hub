@@ -259,16 +259,7 @@ class EnvFirstConfig
 
     private static function envValue(string $key): string
     {
-        $value = env($key);
-        if ($value !== null && $value !== '') {
-            return trim((string) $value);
-        }
-
-        $getenv = getenv($key);
-        if ($getenv !== false && $getenv !== '') {
-            return trim((string) $getenv);
-        }
-
+        // Read the .env file directly — do not call env() (empty under config:cache).
         $file = self::readEnvFile()[$key] ?? '';
 
         return trim((string) $file);

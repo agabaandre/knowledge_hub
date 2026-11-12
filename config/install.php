@@ -3,6 +3,25 @@
 return [
     'lock_file' => storage_path('app/installed.lock'),
 
+    /*
+    | When true, /install routes return 404 and the app is treated as installed
+    | for routing purposes. Prefer setting this after a successful install.
+    */
+    'disabled' => filter_var(env('INSTALLER_DISABLED', false), FILTER_VALIDATE_BOOLEAN),
+
+    /*
+    | Explicit install flag written to .env on finalize / khub:mark-installed.
+    | Prefer config() over env() so config:cache keeps working.
+    */
+    'app_installed' => filter_var(env('APP_INSTALLED', false), FILTER_VALIDATE_BOOLEAN),
+
+    'docker' => filter_var(env('DOCKER', false), FILTER_VALIDATE_BOOLEAN),
+
+    /*
+    | null/empty = auto (enabled on Docker or local). Explicit true/false overrides.
+    */
+    'seed_demo_users' => env('SEED_DEMO_USERS'),
+
     'required_php' => '8.0.0',
 
     'required_extensions' => [

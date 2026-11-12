@@ -16,7 +16,7 @@ class CountriesViewComposer{
 
     public function compose(View $view){
 
-        $minutes = (int) env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
+        $minutes = (int) config('khub.cache_expiry_minutes', 60 * 24);
 
         $isCountryHub = (function_exists('hub_is_country_portal') && hub_is_country_portal())
             || (function_exists('hub_admin_units_enabled') && hub_admin_units_enabled())

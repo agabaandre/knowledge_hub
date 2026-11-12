@@ -13,6 +13,25 @@ return [
     'host_data_root' => '/var/khubdata',
     'host_data_root_windows' => 'C:\\khubdata',
 
+    'site_id' => env('HUB_SITE_ID', ''),
+    'files_root' => env('HUB_FILES_ROOT', ''),
+    'sql_backup_root' => env('HUB_SQL_BACKUP_ROOT', ''),
+
+    'gcs' => [
+        'project_id' => env('GOOGLE_CLOUD_PROJECT_ID'),
+        'key_file_path' => env('GOOGLE_CLOUD_KEY_FILE'),
+        'bucket' => env('GOOGLE_CLOUD_STORAGE_BUCKET'),
+        'storage_api_uri' => env('GOOGLE_CLOUD_STORAGE_API_URI'),
+    ],
+
+    'azure' => [
+        'connection_string' => env('AZURE_STORAGE_CONNECTION_STRING'),
+        'name' => env('AZURE_STORAGE_NAME'),
+        'key' => env('AZURE_STORAGE_KEY'),
+        'container' => env('AZURE_STORAGE_CONTAINER'),
+        'url' => env('AZURE_STORAGE_URL'),
+    ],
+
     'drivers' => [
         'internal' => 'Internal (application or host path)',
         's3' => 'Amazon S3 (or S3-compatible)',

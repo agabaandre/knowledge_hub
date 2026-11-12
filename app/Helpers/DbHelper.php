@@ -4,7 +4,7 @@ use App\Models\PublicationTag;
 
 function get_tag_ublications($tag){
 	
-	    $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+	    $minutes = (int) config('khub.cache_expiry_minutes', 60 * 24);
 
         $publications = cache()->remember('tag_pubs'.$tag->id,$minutes, function () use ($tag){
             $taggedpubs = PublicationTag::whereHas('tag', function ($query) use ($tag){

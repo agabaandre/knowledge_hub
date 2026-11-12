@@ -9,7 +9,7 @@ class AdminUnitsViewComposer
 {
     public function compose(View $view)
     {
-        $minutes = (int) env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
+        $minutes = (int) config('khub.cache_expiry_minutes', 60 * 24);
 
         $allAdminUnits = cache()->remember('administrative_units.all', $minutes, function () {
             return AdministrativeUnit::query()

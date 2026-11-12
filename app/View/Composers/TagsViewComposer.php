@@ -14,7 +14,7 @@ class TagsViewComposer
 
     public function compose(View $view)
     {
-        $minutes = (int) env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
+        $minutes = (int) config('khub.cache_expiry_minutes', 60 * 24);
 
         $tags = cache()->remember(self::CACHE_KEY_TAGS_ALPHABETICAL, $minutes, function () {
             return Tag::query()->orderBy('tag_text', 'asc')->orderBy('id', 'asc')->get();

@@ -20,7 +20,7 @@ class ExpertsRepository extends SharedRepo{
 
     private function jobTitlesCacheTtlMinutes(): int
     {
-        return (int) env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
+        return (int) config('khub.cache_expiry_minutes', 60 * 24);
     }
 
     public static function jobTitlesByIscoCacheKey(string $iscoId): string

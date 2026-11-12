@@ -12,7 +12,7 @@ class Access
 
     public function handle(Request $request, Closure $next)
     {
-        $ip = env('APP_DEBUG')?'127:0:0:1':$request->ip();
+        $ip = config('app.debug')?'127:0:0:1':$request->ip();
         
         // Create a unique session key based on IP and user ID (if authenticated)
         $userId = auth()->id();

@@ -28,7 +28,7 @@ class ProvisionEnvWriter
             $federationToken = (string) (settings()->federation_api_token ?? '');
         }
         if ($federationToken === '') {
-            $federationToken = (string) env('FEDERATION_API_TOKEN', '');
+            $federationToken = (string) config('federation.api_token', config('deployment.federation_api_token', ''));
         }
 
         $appKey = 'base64:'.base64_encode(random_bytes(32));
@@ -59,9 +59,9 @@ class ProvisionEnvWriter
             'CENTRAL_HUB_URL' => $centralUrl,
             'CENTRAL_HUB_API_TOKEN' => $federationToken,
             'FEDERATION_API_TOKEN' => Str::random(40),
-            'QUEUE_CONNECTION' => env('QUEUE_CONNECTION', 'database'),
-            'CACHE_DRIVER' => env('CACHE_DRIVER', 'file'),
-            'SESSION_DRIVER' => env('SESSION_DRIVER', 'file'),
+            'QUEUE_CONNECTION' => config('queue.default', 'database'),
+            'CACHE_DRIVER' => config('cache.default', 'file'),
+            'SESSION_DRIVER' => config('session.driver', 'file'),
             'MAIL_MAILER' => 'log',
             'LOG_CHANNEL' => 'stack',
             'LOG_LEVEL' => 'error',

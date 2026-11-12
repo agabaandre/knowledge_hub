@@ -21,7 +21,7 @@ final class RecordsSearchFilterSchema
 {
     public static function build(Request $request, PublicationsRepository $publicationsRepo): array
     {
-        $minutes = (int) env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
+        $minutes = (int) config('khub.cache_expiry_minutes', 60 * 24);
 
         $dataCategories = cache()->remember('categories', $minutes, function () {
             return DataCategory::with(['sub_categories' => function ($q) {

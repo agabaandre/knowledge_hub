@@ -212,7 +212,7 @@ class FederatedHubProvisionService
             $token = (string) (settings()->federation_api_token ?? '');
         }
         if ($token === '') {
-            $token = (string) env('FEDERATION_API_TOKEN', '');
+            $token = (string) config('federation.api_token', config('deployment.federation_api_token', ''));
         }
 
         return FederatedKnowledgeHub::query()->updateOrCreate(

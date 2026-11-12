@@ -239,9 +239,9 @@ class EmailConfig
             ]);
         } else {
             config([
-                'emails.http.base_url' => self::httpBaseUrlDefault() ?: env('MAIL_HTTP_BASE_URL'),
-                'emails.http.client_id' => env('MAIL_HTTP_CLIENT_ID'),
-                'emails.http.client_secret' => env('MAIL_HTTP_CLIENT_SECRET'),
+                'emails.http.base_url' => self::httpBaseUrlDefault() ?: config('emails.http.base_url'),
+                'emails.http.client_id' => config('emails.http.client_id'),
+                'emails.http.client_secret' => config('emails.http.client_secret'),
             ]);
         }
 
@@ -256,12 +256,12 @@ class EmailConfig
             ]);
         } else {
             config([
-                'emails.api.key' => env('MAIL_API_KEY'),
-                'emails.api.secret' => env('MAIL_API_SECRET'),
-                'emails.api.domain' => env('MAIL_API_DOMAIN'),
-                'emails.api.region' => env('MAIL_API_REGION', 'us'),
-                'emails.api.base_url' => env('MAIL_API_BASE_URL'),
-                'emails.api.message_stream' => env('MAIL_API_MESSAGE_STREAM', 'outbound'),
+                'emails.api.key' => config('emails.api.key'),
+                'emails.api.secret' => config('emails.api.secret'),
+                'emails.api.domain' => config('emails.api.domain'),
+                'emails.api.region' => config('emails.api.region', 'us'),
+                'emails.api.base_url' => config('emails.api.base_url'),
+                'emails.api.message_stream' => config('emails.api.message_stream', 'outbound'),
             ]);
         }
 

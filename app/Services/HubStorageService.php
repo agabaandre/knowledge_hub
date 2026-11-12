@@ -71,7 +71,7 @@ class HubStorageService
 
     public function siteStorageId(): string
     {
-        $override = trim((string) env('HUB_SITE_ID', ''));
+        $override = trim((string) config('hub_storage.site_id', ''));
         if ($override !== '') {
             return HubSiteIdentifier::sanitize($override);
         }
@@ -149,7 +149,7 @@ class HubStorageService
 
     public function defaultInternalRoot(): string
     {
-        $env = trim((string) env('HUB_FILES_ROOT', ''));
+        $env = trim((string) config('hub_storage.files_root', ''));
         if ($env !== '') {
             return rtrim($env, '/\\');
         }
@@ -159,7 +159,7 @@ class HubStorageService
 
     public function defaultSqlBackupRoot(): string
     {
-        $env = trim((string) env('HUB_SQL_BACKUP_ROOT', ''));
+        $env = trim((string) config('hub_storage.sql_backup_root', ''));
         if ($env !== '') {
             return rtrim($env, '/\\');
         }
@@ -182,7 +182,7 @@ class HubStorageService
             return rtrim($root, '/\\');
         }
 
-        $envRoot = trim((string) env('HUB_FILES_ROOT', ''));
+        $envRoot = trim((string) config('hub_storage.files_root', ''));
         if ($envRoot !== '') {
             return rtrim($envRoot, '/\\');
         }
@@ -625,7 +625,7 @@ class HubStorageService
             Config::set('filesystems.disks.hub', [
                 'driver' => 'local',
                 'root' => $this->filesRoot(),
-                'url' => env('APP_URL').'/hub-media',
+                'url' => config('app.url').'/hub-media',
                 'visibility' => 'public',
             ]);
 
@@ -638,12 +638,12 @@ class HubStorageService
         if ($driver === 's3') {
             Config::set('filesystems.disks.hub', [
                 'driver' => 's3',
-                'key' => $cloud['key'] ?? env('AWS_ACCESS_KEY_ID'),
-                'secret' => $cloud['secret'] ?? env('AWS_SECRET_ACCESS_KEY'),
-                'region' => $cloud['region'] ?? env('AWS_DEFAULT_REGION'),
-                'bucket' => $cloud['bucket'] ?? env('AWS_BUCKET'),
-                'url' => $cloud['url'] ?? env('AWS_URL'),
-                'endpoint' => $cloud['endpoint'] ?? env('AWS_ENDPOINT'),
+                'key' => $cloud['key'] ?? config('filesystems.disks.s3.key'),
+                'secret' => $cloud['secret'] ?? config('filesystems.disks.s3.secret'),
+                'region' => $cloud['region'] ?? config('filesystems.disks.s3.region'),
+                'bucket' => $cloud['bucket'] ?? config('filesystems.disks.s3.bucket'),
+                'url' => $cloud['url'] ?? config('filesystems.disks.s3.url'),
+                'endpoint' => $cloud['endpoint'] ?? config('filesystems.disks.s3.endpoint'),
                 'use_path_style_endpoint' => (bool) ($cloud['use_path_style_endpoint'] ?? false),
                 'root' => $scopedPrefix,
                 'visibility' => 'public',
@@ -655,11 +655,11 @@ class HubStorageService
         if ($driver === 'gcs') {
             Config::set('filesystems.disks.hub', [
                 'driver' => 'gcs',
-                'project_id' => $cloud['project_id'] ?? env('GOOGLE_CLOUD_PROJECT_ID'),
-                'key_file_path' => $cloud['key_file_path'] ?? env('GOOGLE_CLOUD_KEY_FILE'),
-                'bucket' => $cloud['bucket'] ?? env('GOOGLE_CLOUD_STORAGE_BUCKET'),
+                'project_id' => $cloud['project_id'] ?? config('hub_storage.gcs.project_id'),
+                'key_file_path' => $cloud['key_file_path'] ?? config('hub_storage.gcs.key_file_path'),
+                'bucket' => $cloud['bucket'] ?? config('hub_storage.gcs.bucket'),
                 'path_prefix' => $scopedPrefix,
-                'storage_api_uri' => $cloud['storage_api_uri'] ?? env('GOOGLE_CLOUD_STORAGE_API_URI'),
+                'storage_api_uri' => $cloud['storage_api_uri'] ?? config('hub_storage.gcs.storage_api_uri'),
             ]);
 
             return;
@@ -668,11 +668,11 @@ class HubStorageService
         if ($driver === 'azure') {
             Config::set('filesystems.disks.hub', [
                 'driver' => 'azure-blob',
-                'connection_string' => $cloud['connection_string'] ?? env('AZURE_STORAGE_CONNECTION_STRING'),
-                'name' => $cloud['account_name'] ?? env('AZURE_STORAGE_NAME'),
-                'key' => $cloud['account_key'] ?? env('AZURE_STORAGE_KEY'),
-                'container' => $cloud['container'] ?? env('AZURE_STORAGE_CONTAINER'),
-                'url' => $cloud['url'] ?? env('AZURE_STORAGE_URL'),
+                'connection_string' => $cloud['connection_string'] ?? config('hub_storage.azure.connection_string'),
+                'name' => $cloud['account_name'] ?? config('hub_storage.azure.name'),
+                'key' => $cloud['account_key'] ?? config('hub_storage.azure.key'),
+                'container' => $cloud['container'] ?? config('hub_storage.azure.container'),
+                'url' => $cloud['url'] ?? config('hub_storage.azure.url'),
                 'prefix' => $scopedPrefix,
             ]);
 
