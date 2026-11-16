@@ -95,6 +95,12 @@
                                 <i class="fa fa-times-circle mr-1"></i> {{ ui_t('general.reject_selected', 'Reject selected') }}
                             </button>
                             @endcan
+                            @if((int) (current_user()->access_level_id ?? 0) >= 4)
+                            <button type="button" class="btn btn-sm btn-danger" id="bulkPurgeBtn" disabled
+                                    title="Permanently removes the selected publications, their files and all related rows">
+                                <i class="fa fa-biohazard mr-1"></i> Delete as spam/malicious
+                            </button>
+                            @endif
                             <span class="text-muted small" id="bulkSelectionCount"></span>
                         </div>
 
@@ -179,7 +185,7 @@ function scheduleFilterReload() {
 
 function updateBulkState() {
     const n = $('#publicationTable .pending-pub-cb:checked').length;
-    $('#bulkApproveBtn, #bulkRejectBtn').prop('disabled', n === 0);
+    $('#bulkApproveBtn, #bulkRejectBtn, #bulkPurgeBtn').prop('disabled', n === 0);
     $('#bulkSelectionCount').text(n > 0 ? pubI18n.selectedCount.replace(':count', String(n)) : '');
     const total = $('#publicationTable .pending-pub-cb').length;
     $('#selectAllPending').prop('checked', n > 0 && n === total).prop('indeterminate', n > 0 && n < total);
@@ -242,6 +248,20 @@ $(function () {
         $('#bulkRejectReasonHidden').val($('#bulkRejectReason').val() || '');
         $('#bulkRejectModal').modal('hide');
         $('#bulk-approval-form').submit();
+    });
+
+    $('#bulkPurgeBtn').on('click', function () {
+        const checked = $('#publicationTable .pending-pub-cb:checked');
+        if (!checked.length) return;
+        const reason = prompt('Purge ' + checked.length + ' publication(s) permanently (rows + files)?\nReason for the audit trail:', 'Spam/malicious content');
+        if (reason === null) return;
+        const form = $('<form>', { method: 'POST', action: '{{ route('admin.publications.purge') }}' });
+        form.append($('<input>', { type: 'hidden', name: '_token', value: '{{ csrf_token() }}' }));
+        form.append($('<input>', { type: 'hidden', name: 'reason', value: reason }));
+        checked.each(function () {
+            form.append($('<input>', { type: 'hidden', name: 'publication_ids[]', value: $(this).val() }));
+        });
+        form.appendTo('body').submit();
     });
 });
 </script>

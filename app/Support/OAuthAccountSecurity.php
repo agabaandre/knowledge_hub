@@ -14,19 +14,20 @@ final class OAuthAccountSecurity
 {
     /**
      * Whether password-registered accounts are allowed to switch to social sign-in.
-     * Defaults to true when setting is unavailable.
+     * Fail-closed: defaults to FALSE when the setting is unavailable, because
+     * auto-linking was the pivot of the Nov 2026 account-takeover incident.
      */
     public static function allowPasswordAccountsToUseSocialLogin(): bool
     {
         try {
             $settings = settings();
             if (! $settings || ! isset($settings->allow_email_password_accounts_social_login)) {
-                return true;
+                return false;
             }
 
             return (bool) $settings->allow_email_password_accounts_social_login;
         } catch (\Throwable $e) {
-            return true;
+            return false;
         }
     }
 
@@ -145,6 +146,15 @@ final class OAuthAccountSecurity
     {
         if ($user === null) {
             return null;
+        }
+
+        // Privileged accounts never sign in socially — password (+2FA) only.
+        if ((int) ($user->access_level_id ?? 0) > 1) {
+            return 'Administrator accounts must sign in with their password (and two-factor authentication where enabled).';
+        }
+
+        if ((int) ($user->status ?? 1) === 0) {
+            return 'This account has been deactivated. Contact the hub administrators.';
         }
 
         if (! $user->is_social_login) {

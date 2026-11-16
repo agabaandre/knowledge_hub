@@ -57,7 +57,11 @@ class SafeUploadTest extends TestCase
     public function test_accepts_documents(): void
     {
         $cases = [
-            'pdf' => "%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n",
+            // A real one-page PDF: zero-page decoys are rejected since the Nov 2026 incident.
+            'pdf' => "%PDF-1.4\n1 0 obj<</Type /Catalog /Pages 2 0 R>>endobj\n"
+                ."2 0 obj<</Type /Pages /Kids [3 0 R] /Count 1>>endobj\n"
+                ."3 0 obj<</Type /Page /Parent 2 0 R /MediaBox [0 0 612 792]>>endobj\n"
+                ."trailer<</Size 4 /Root 1 0 R>>\n%%EOF\n",
             'csv' => "a,b,c\n1,2,3\n",
             'txt' => "plain text summary\n",
         ];

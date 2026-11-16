@@ -172,6 +172,12 @@
         <div class="modal-body">
             <input type="hidden" name="id" id="delete_user_id"/>
             <p>Are you sure you want to delete this user?</p>
+            <p class="small text-muted mb-2">This revokes all their sessions and API tokens and permanently removes their publications, forum posts, comments, memberships and uploaded files. A snapshot is kept in <code>storage/incidents/</code>.</p>
+            <div class="custom-control custom-checkbox mb-2">
+                <input type="checkbox" class="custom-control-input" id="delete_user_ban" name="ban" value="1">
+                <label class="custom-control-label" for="delete_user_ban">Ban this email (keeps a deactivated account; the address can never re-register)</label>
+            </div>
+            <input type="text" name="reason" class="form-control form-control-sm" maxlength="500" placeholder="Reason (audit trail)">
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ ui_t('general.cancel', 'Cancel') }}</button>

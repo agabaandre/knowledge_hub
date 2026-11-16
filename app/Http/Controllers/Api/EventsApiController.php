@@ -70,7 +70,15 @@ class EventsApiController extends Controller
             'contact_person' => 'required|string|max:255',
         ]);
 
-        $event = $this->eventsRepo->create($request->all());
+        // Only the validated fields; ownership fields come from the session.
+        $event = $this->eventsRepo->create(array_merge(
+            $request->only([
+                'title', 'description', 'venue', 'startdate', 'enddate', 'organized_by',
+                'status', 'is_online', 'contact_person', 'fee', 'event_link',
+                'registration_link', 'orcid', 'country_id', 'event_category',
+            ]),
+            ['created_by' => $request->user()->id]
+        ));
 
         return response()->json([
             "status" => 201,
@@ -174,7 +182,15 @@ class EventsApiController extends Controller
             'contact_person' => 'required|string|max:255',
         ]);
 
-        $this->eventsRepo->update($event, $request->all());
+        if ((int) $event->created_by !== (int) $request->user()->id && ! is_admin()) {
+            return response()->json(['status' => 403, 'message' => 'You may only edit your own events.'], 403);
+        }
+
+        $this->eventsRepo->update($event, $request->only([
+            'title', 'description', 'venue', 'startdate', 'enddate', 'organized_by',
+            'status', 'is_online', 'contact_person', 'fee', 'event_link',
+            'registration_link', 'orcid', 'country_id', 'event_category',
+        ]));
 
         return response()->json([
             "status" => 200,

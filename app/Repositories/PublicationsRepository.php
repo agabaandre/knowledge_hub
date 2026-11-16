@@ -565,8 +565,14 @@ public function getPublicationIds(Request $request, int $limit = 80): array
         $pub->data_category_id          = $request->category_id;
         $pub->publication_sub_category_id = $request->publication_sub_category_id ?: null;
         $pub->is_embedded               = $request->is_embedded ?? false;
-        $pub->is_default_in_category    = $request->is_default ?? false;
-        $pub->is_admin_only_access      = $request->admin_only ?? false;
+        // Placement and visibility flags are moderation decisions: admins only.
+        if (is_admin()) {
+            $pub->is_default_in_category = $request->is_default ?? false;
+            $pub->is_admin_only_access   = $request->admin_only ?? false;
+        } elseif (! $request->id) {
+            $pub->is_default_in_category = false;
+            $pub->is_admin_only_access   = false;
+        }
         $pub->show_disclaimer            = $request->show_disclaimer ?? false;
 
         CommunityTargeting::mergeTagAllIntoRequest($request);
@@ -1518,13 +1524,15 @@ public function getPublicationIds(Request $request, int $limit = 80): array
                 }
                 $clientOriginal = \Illuminate\Support\Str::limit($clientOriginal, 255, '');
 
-                $file_path = $file->hashName();
-                if (file_exists($storagePath . $file_path)) {
-                    $ext = pathinfo($file_path, PATHINFO_EXTENSION);
-                    $file_path = \Illuminate\Support\Str::uuid()->toString() . ($ext !== '' ? '.' . $ext : '');
-                }
-
-                $file->move($storagePath, $file_path);
+                // Content-derived extension + sanity checks (XXE scan, double
+                // extensions, decode checks) — never the client's spelling.
+                $file_path = SafeUpload::move(
+                    $file,
+                    rtrim($storagePath, '/'),
+                    \App\Support\PublicationAttachmentSecurity::allowedExtensions(),
+                    'files',
+                    \Illuminate\Support\Str::uuid()->toString()
+                );
 
                 $finalPath = $storagePath.$file_path;
                 $extension = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));

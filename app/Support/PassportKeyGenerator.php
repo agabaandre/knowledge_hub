@@ -46,6 +46,32 @@ class PassportKeyGenerator
         return self::isReadablePemFile($private) && self::isReadablePemFile($public);
     }
 
+    /**
+     * Every directory persistKeysBestEffort may have written to. Scanning them
+     * before touching cache or generating is what guarantees existing keys are
+     * REUSED, never rewritten (mtime churn) or regenerated (which would
+     * invalidate every issued token).
+     *
+     * @return array{dir: string, private: string, public: string}|null
+     */
+    public static function findExistingKeyPair(): ?array
+    {
+        $candidates = [dirname(self::privateKeyPath())];
+        foreach ([storage_path(), storage_path('app'), storage_path('framework'), storage_path('framework/cache')] as $dir) {
+            $candidates[] = $dir;
+        }
+
+        foreach (array_values(array_unique($candidates)) as $dir) {
+            $private = rtrim($dir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'oauth-private.key';
+            $public = rtrim($dir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'oauth-public.key';
+            if (self::keysAreValid($private, $public)) {
+                return ['dir' => $dir, 'private' => $private, 'public' => $public];
+            }
+        }
+
+        return null;
+    }
+
     public static function ensureKeysExist(int $bits = 4096): bool
     {
         try {
@@ -56,15 +82,19 @@ class PassportKeyGenerator
                 return true;
             }
 
-            // 2) Existing key files
-            $privatePath = self::privateKeyPath();
-            $publicPath = self::publicKeyPath();
-            if (self::keysAreValid($privatePath, $publicPath)) {
-                self::securePermissions($privatePath, $publicPath);
+            // 2) Existing key files — in the Passport dir OR any fallback dir a
+            //    previous boot persisted to. Found keys are only read, never
+            //    rewritten, so their mtime stays put and tokens stay valid.
+            $existing = self::findExistingKeyPair();
+            if ($existing !== null) {
+                self::securePermissions($existing['private'], $existing['public']);
                 self::applyToConfig(
-                    (string) file_get_contents($privatePath),
-                    (string) file_get_contents($publicPath)
+                    (string) file_get_contents($existing['private']),
+                    (string) file_get_contents($existing['public'])
                 );
+                if ($existing['dir'] !== dirname(self::privateKeyPath()) && class_exists(Passport::class)) {
+                    Passport::loadKeysFrom($existing['dir']);
+                }
 
                 return true;
             }
@@ -79,7 +109,9 @@ class PassportKeyGenerator
                 return true;
             }
 
-            // 4) Generate fresh material
+            // 4) Generate fresh material — install time only. Regenerating on a
+            //    live hub invalidates every issued token, hence the loud log.
+            Log::warning('Passport OAuth keys not found anywhere (files or cache); generating a NEW key pair. All previously issued tokens become invalid.');
             [$privatePem, $publicPem] = self::createKeyPair($bits);
             if (! self::isPemString($privatePem) || ! self::isPemString($publicPem)) {
                 throw new \RuntimeException('Generated empty OAuth key material.');

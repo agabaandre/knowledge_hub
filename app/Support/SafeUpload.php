@@ -80,6 +80,9 @@ final class SafeUpload
         }
 
         if ($contentExt !== '' && in_array($contentExt, $allowed, true)) {
+            self::assertOfficeXmlSafe($file, $contentExt, $field);
+            self::assertContentSane($file, $contentExt, $field);
+
             return $contentExt;
         }
 
@@ -102,6 +105,9 @@ final class SafeUpload
         if (in_array($clientExt, self::IMAGES, true)) {
             self::reject($field, 'The uploaded image type is not allowed.', $name);
         }
+
+        self::assertOfficeXmlSafe($file, $clientExt, $field);
+        self::assertContentSane($file, $clientExt, $field);
 
         return $clientExt;
     }
@@ -181,12 +187,71 @@ final class SafeUpload
             self::reject($field, 'This file type is not allowed.', $name);
         }
 
+        // Double extensions that masquerade a document as something else
+        // (briefing.docx.jpg) are deception, never a legitimate filename.
+        if (preg_match('/\.(docx?|xlsx?|pptx?|pdf|odt|ods|odp|rtf|csv)\.[a-z0-9]{1,5}$/i', $base)) {
+            self::reject($field, 'File names with double extensions are not allowed.', $name);
+        }
+
         if (str_contains($name, '%00') || str_contains($name, "\0")) {
             self::reject($field, 'This file type is not allowed.', $name);
         }
 
         if (preg_match('/[\x00-\x1F\x7F]/', $name)) {
             self::reject($field, 'This file type is not allowed.', $name);
+        }
+    }
+
+    private static function assertOfficeXmlSafe(UploadedFile $file, string $ext, string $field): void
+    {
+        if (! OfficeXmlSecurity::appliesTo($ext)) {
+            return;
+        }
+
+        $path = (string) $file->getRealPath();
+        if ($path === '' || ! OfficeXmlSecurity::isSafe($path, $ext)) {
+            self::reject($field, 'This document contains disallowed XML content.', (string) $file->getClientOriginalName());
+        }
+    }
+
+    /**
+     * Content sanity: no near-empty decoys, images must actually decode,
+     * PDFs must be real PDFs with at least one page.
+     */
+    private static function assertContentSane(UploadedFile $file, string $ext, string $field): void
+    {
+        $path = (string) $file->getRealPath();
+        $name = (string) $file->getClientOriginalName();
+        $size = (int) ($file->getSize() ?: 0);
+
+        // Decoy-prone binary types can never be this small; tiny txt/csv are legitimate.
+        $minSized = in_array($ext, self::IMAGES, true) || $ext === 'pdf' || OfficeXmlSecurity::appliesTo($ext);
+        if ($minSized && $size < 64) {
+            self::reject($field, 'The uploaded file is too small to be a valid document or image.', $name);
+        }
+
+        if (in_array($ext, self::IMAGES, true)) {
+            if (@getimagesize($path) === false) {
+                self::reject($field, 'The uploaded image could not be read as an image.', $name);
+            }
+            if (function_exists('imagecreatefromstring') && $size <= 20971520) {
+                $decoded = @imagecreatefromstring((string) file_get_contents($path));
+                if ($decoded === false) {
+                    self::reject($field, 'The uploaded image could not be decoded.', $name);
+                }
+                imagedestroy($decoded);
+            }
+        }
+
+        if ($ext === 'pdf') {
+            $head = (string) @file_get_contents($path, false, null, 0, 1024);
+            if (! str_starts_with(ltrim($head), '%PDF-')) {
+                self::reject($field, 'The uploaded file is not a valid PDF.', $name);
+            }
+            $body = (string) @file_get_contents($path, false, null, 0, self::MAX_SCAN_BYTES);
+            if (! preg_match('/\/Type\s*\/Page[^s]/', $body) && ! str_contains($body, '/Pages')) {
+                self::reject($field, 'The uploaded PDF has no readable pages.', $name);
+            }
         }
     }
 

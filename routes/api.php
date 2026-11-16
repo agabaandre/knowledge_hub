@@ -42,11 +42,13 @@ Route::prefix('federation')->group(function () {
     Route::get('/public/forums', [FederatedHubApiController::class, 'publicForums']);
 });
 
-Route::post('login', [AuthApiController::class, 'login']);
-Route::post('register', [AuthApiController::class, 'register']);
-Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword']);
-Route::get('/refresh', [AuthApiController::class, 'refresh']);
-Route::post('/social-login', [AuthApiController::class, 'socialLogin']);
+Route::middleware('throttle:auth')->group(function () {
+    Route::post('login', [AuthApiController::class, 'login']);
+    Route::post('register', [AuthApiController::class, 'register']);
+    Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword']);
+    Route::get('/refresh', [AuthApiController::class, 'refresh']);
+    Route::post('/social-login', [AuthApiController::class, 'socialLogin']);
+});
 
 
 Route::get('/users/{id}', [UsersApiController::class, 'show'])->whereNumber('id');

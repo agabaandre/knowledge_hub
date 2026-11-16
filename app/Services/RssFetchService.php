@@ -81,6 +81,11 @@ class RssFetchService
     {
         $items = [];
         try {
+            // Feed URLs are admin-configured, but SSRF rules apply all the same.
+            if (\App\Support\SafeUrlFetcher::validate($url) === null) {
+                return $items;
+            }
+
             $response = Http::timeout(25)->get($url);
             if (!$response->successful()) {
                 return $items;

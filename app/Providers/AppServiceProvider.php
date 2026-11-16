@@ -34,6 +34,11 @@ class AppServiceProvider extends ServiceProvider
             //$this->app->register(TelescopeServiceProvider::class);
         }
 
+        $this->app->bind(
+            \App\Support\Social\SocialTokenVerifierInterface::class,
+            \App\Support\Social\SocialTokenVerifier::class
+        );
+
         App::singleton('chatgpt', function ($app) {
             return new ChatGPTService();
         });

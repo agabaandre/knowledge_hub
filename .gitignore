@@ -27,3 +27,6 @@ yarn-error.log
 /HTML
 /public/.well-known/assets.json
 /public/.well-known/assetlinks.json
+# Passport RSA keys must never enter the repo, wherever they get persisted
+oauth-private.key
+oauth-public.key

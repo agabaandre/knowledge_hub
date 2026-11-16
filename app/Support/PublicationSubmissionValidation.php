@@ -125,7 +125,7 @@ final class PublicationSubmissionValidation
             }],
             'communities' => 'nullable|array',
             'upload_type' => 'nullable|in:upload,link',
-            'link' => 'nullable|string|max:2048',
+            'link' => ['nullable', 'string', 'max:2048', new \App\Rules\SafePublicUrl()],
             'is_embedded' => 'nullable|boolean',
             'is_default' => 'nullable|boolean',
             'admin_only' => 'nullable|boolean',
@@ -138,7 +138,7 @@ final class PublicationSubmissionValidation
             'journal_issue' => 'nullable|string|max:100',
             'journal_pages' => 'nullable|string|max:100',
             'cover' => 'nullable|file|mimes:'.\App\Support\SafeUpload::mimesRule(\App\Support\SafeUpload::IMAGES).'|max:10240',
-            'cover_url' => 'nullable|string|max:2048',
+            'cover_url' => ['nullable', 'string', 'max:2048', new \App\Rules\SafePublicUrl()],
             'files' => 'nullable',
             'files.*' => ['file', 'max:102400', new SafePublicationAttachment()],
             'remove_attachments' => 'nullable|array',
@@ -146,7 +146,7 @@ final class PublicationSubmissionValidation
         ];
 
         if ($request->upload_type == 'link') {
-            $val_rules['link'] = 'required|url';
+            $val_rules['link'] = ['required', 'url', new \App\Rules\SafePublicUrl()];
         }
 
         if ($request->original_id) {

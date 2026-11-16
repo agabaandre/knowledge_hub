@@ -44,8 +44,18 @@ class AuthController extends Controller
             //'g-recaptcha-response.captcha' => 'Captcha verification failed, please try again.',
         ]);
 
+        if (\App\Models\BannedEmail::isBanned($request->input('email'))) {
+            return back()->with([
+                'alert_class' => 'danger',
+                'alert' => 'This email address cannot be used to register.',
+            ]);
+        }
+
         $saved = $this->usersRepo->save($request);
-        
+        if ($saved) {
+            \App\Support\AuthEventLogger::trackAccountCreation($request, $saved);
+        }
+
         $message = ($saved)?'Registration successful! Your account has been activated. You can now login.':'Request failed try again';
         $data['alert_class'] = ($saved)?'success':'danger';
         $data['alert']       = $message;
@@ -270,6 +280,7 @@ class AuthController extends Controller
                 ]);
             endif;
 
+            $this->rememberSocialSubject($user, 'microsoft', $socialUser);
             Auth::login($user, false);
             $request->session()->regenerate();
 
@@ -373,6 +384,7 @@ class AuthController extends Controller
                 }
             }
 
+            $this->rememberSocialSubject($user, 'google', $socialUser);
             Auth::login($user, false);
             $request->session()->regenerate();
 
@@ -520,6 +532,7 @@ class AuthController extends Controller
                 ]);
             endif;
 
+            $this->rememberSocialSubject($user, 'linkedin', $socialUser);
             Auth::login($user, false);
             $request->session()->regenerate();
 
@@ -549,4 +562,23 @@ class AuthController extends Controller
         }
     }
 
+
+    /**
+     * Persist the provider subject so future sign-ins match on it, not on email.
+     */
+    private function rememberSocialSubject(User $user, string $provider, $socialUser): void
+    {
+        try {
+            $subject = (string) (method_exists($socialUser, 'getId') ? $socialUser->getId() : '');
+            if ($subject === '' || ! $user->id) {
+                return;
+            }
+            \App\Models\SocialAccount::updateOrCreate(
+                ['provider' => $provider, 'provider_user_id' => $subject],
+                ['user_id' => $user->id, 'email' => (string) $user->email, 'last_login_at' => \Carbon\Carbon::now()]
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('Could not record social account subject', ['provider' => $provider, 'error' => $e->getMessage()]);
+        }
+    }
 }
