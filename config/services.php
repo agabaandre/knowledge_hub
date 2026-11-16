@@ -46,12 +46,16 @@ return [
         'client_secret' => env('MICROSOFT_CLIENT_SECRET', env('EXCHANGE_CLIENT_SECRET')),
         'redirect'      => env('MICROSOFT_REDIRECT_URI', env('APP_URL') . '/auth/microsoft/callback'),
         'tenant'        => env('MICROSOFT_TENANT_ID', env('EXCHANGE_TENANT_ID', 'common')),
+        // Extra audiences accepted on id_tokens (comma-separated), e.g. the mobile app registration.
+        'allowed_client_ids' => env('MICROSOFT_ALLOWED_CLIENT_IDS', ''),
     ],
 
     'google' => [
     'client_id' => env('GOOGLE_CLIENT_ID'),
     'client_secret' => env('GOOGLE_CLIENT_SECRET'),
     'redirect' => env('GOOGLE_REDIRECT_URI'),
+    // Extra audiences accepted on id_tokens (comma-separated), e.g. the Android/iOS OAuth client IDs.
+    'allowed_client_ids' => env('GOOGLE_ALLOWED_CLIENT_IDS', ''),
     ],
 
     'linkedin' => [

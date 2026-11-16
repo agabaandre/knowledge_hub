@@ -10,6 +10,7 @@ use App\Rules\InternationalPhoneKnownCallingCode;
 use App\Rules\NotDisposableEmail;
 use App\Services\SocialLoginService;
 use App\Support\ApiUserDetails;
+use App\Support\AuthEventLogger;
 use App\Support\OAuthAccountSecurity;
 use Auth;
 use Carbon\Carbon;
@@ -111,6 +112,12 @@ class AuthApiController extends ApiController
     {
         $this->normalizeRegistrationRequest($request);
 
+        if (\App\Models\BannedEmail::isBanned($request->input('email'))) {
+            AuthEventLogger::log($request, 'auth.register', 'blocked', ['email' => (string) $request->input('email')]);
+
+            return response()->json(['message' => 'This email address cannot be used to register.'], 403);
+        }
+
         $request->validate([
             'firstname' => ['required', 'string', 'max:255'],
             'lastname' => ['required', 'string', 'max:255'],
@@ -120,13 +127,10 @@ class AuthApiController extends ApiController
             'country_id' => ['required', 'integer', 'exists:country,id'],
             'preferences' => ['required', 'array', 'min:1'],
             'preferences.*' => ['integer', 'exists:sub_thematic_area,id'],
-            'job' => [
-                Rule::excludeIf(fn () => $request->boolean('job_missing')),
-                'required_without:job_title_custom',
-                'nullable',
-                'string',
-                'max:255',
-            ],
+            // Rule::excludeIf needs Laravel 9+; build the equivalent on 8.x.
+            'job' => $request->boolean('job_missing')
+                ? ['nullable', 'string', 'max:255']
+                : ['required_without:job_title_custom', 'nullable', 'string', 'max:255'],
             'job_title_custom' => ['nullable', 'string', 'max:255'],
             'job_missing' => ['sometimes', 'boolean'],
             'communities' => ['sometimes', 'array'],
@@ -144,6 +148,7 @@ class AuthApiController extends ApiController
         }
 
         $user   = $this->usersRepo->save($request);
+        AuthEventLogger::trackAccountCreation($request, $user);
         $client = \Laravel\Passport\Client::where('password_client', 1)->first();
         $token  = $user->createToken( 'KhubApp', ['*'], $client->id)->accessToken;
 
@@ -212,12 +217,23 @@ class AuthApiController extends ApiController
         $loginEmail = $request->input('email');
 
         if (!Auth::attempt(['email' => $loginEmail, 'password' => $request->password])) {
+            AuthEventLogger::log($request, 'auth.login', 'failed', ['email' => (string) $loginEmail]);
+
             return response()->json([
                 'message' => 'Invalid login details'
             ], 401);
         }
 
         $user = Auth::user();
+
+        if ((int) ($user->status ?? 1) === 0 || \App\Models\BannedEmail::isBanned($user->email)) {
+            Auth::logout();
+            AuthEventLogger::log($request, 'auth.login', 'blocked', ['email' => (string) $loginEmail]);
+
+            return response()->json([
+                'message' => 'This account has been deactivated. Contact the hub administrators.',
+            ], 403);
+        }
 
         if ($user->is_social_login) {
             Auth::logout();
@@ -247,8 +263,7 @@ class AuthApiController extends ApiController
         $tokenExpiration = $tokenResult->token->expires_at;
 
         updateUserPushToken($request,$user);
-        //sendPushNotification( "Happy to see you again", "Welcome back ".$user->firstname, [$user->fcm_token]);
-
+        AuthEventLogger::log($request, 'auth.login', 'success', ['user_id' => $user->id]);
 
         return response()->json([
             'token' => $token,
@@ -631,15 +646,15 @@ class AuthApiController extends ApiController
      *     path="/api/social-login",
      *     operationId="SocialLogin",
      *     tags={"Authentication"},
-     *     summary="Social login (Google, Microsoft, LinkedIn)",
-     *     description="Exchange a verified identity from your mobile or web OAuth flow for a **Passport bearer token**.\n\n**How it works**\n1. In your app, complete sign-in with the provider SDK (Google Sign-In, Microsoft MSAL, LinkedIn OpenID Connect).\n2. Read **email** and **display name** from the IdP user profile (and ideally **subject id** + **photo URL**).\n3. `POST` JSON to this endpoint with `provider` set to `google`, `microsoft`, `linkedin`, or `linkedin-openid`.\n4. Use the returned `token` as `Authorization: Bearer <token>` on other `/api/*` routes.\n\n**Providers**\n- **Google** — `provider`: `google`. Use the email and name from Google Sign-In / OAuth userinfo.\n- **Microsoft** — `provider`: `microsoft`. Use Entra ID / Microsoft account email and display name from MSAL / Graph.\n- **LinkedIn** — `provider`: `linkedin` or `linkedin-openid` (both are treated as LinkedIn).\n\n**Notes**\n- `email` must be the verified address from the IdP. If the email already exists as a **password-only** account, the API returns **403**.\n- If the email exists under a **different** social provider, the API returns **403** with a message to use the original provider.\n- New users are created on first successful call; existing social users receive a new token.\n\nTry the **Examples** dropdown in Swagger UI (`google_signin`, `microsoft_msal`, `linkedin_openid`).",
+     *     summary="Social login (Google, Microsoft, LinkedIn) — v2, token-verified",
+     *     description="**Contract v2 (breaking change).** Exchange a **provider credential** for a Passport bearer token. The server verifies the credential with the provider and derives the identity (email, name, subject) exclusively from it — `email`/`name` request fields are no longer accepted.\n\n**How it works**\n1. Complete sign-in with the provider SDK (Google Sign-In, Microsoft MSAL, LinkedIn OIDC).\n2. Send the credential:\n- **Google** — `idToken` (the Google ID token). Verified against Google JWKS; `aud` must be one of this hub's client IDs and the Google account email must be verified.\n- **Microsoft** — `idToken` (Entra ID token, verified against Microsoft JWKS, tenant-checked) **or** `accessToken` (validated server-side via Microsoft Graph `/me`).\n- **LinkedIn** — `accessToken` (validated server-side via LinkedIn OIDC userinfo).\n3. Use the returned `token` as `Authorization: Bearer <token>`.\n\n**Account matching**\n- Users are matched on the provider subject (`sub`/`oid`), stored in `social_accounts` — not on email alone.\n- A social identity links to an existing **password** account only when the IdP email is verified **and** the hub setting allows it (off by default).\n- **Administrator accounts never sign in socially** — password (+2FA) only.\n- New users are created at the lowest access level; their publications require approval.",
      *     @OA\RequestBody(
      *         required=true,
-     *         description="Payload built from your OAuth / OIDC user profile after successful provider sign-in.",
+     *         description="Provider credential obtained by your app from the provider SDK.",
      *         @OA\MediaType(
      *             mediaType="application/json",
      *             @OA\Schema(
-     *                 required={"provider", "email", "name"},
+     *                 required={"provider"},
      *                 @OA\Property(
      *                     property="provider",
      *                     type="string",
@@ -647,28 +662,23 @@ class AuthApiController extends ApiController
      *                     example="google",
      *                     description="Identity provider key accepted by the API."
      *                 ),
-     *                 @OA\Property(property="email", type="string", format="email", example="jane.doe@gmail.com", description="Verified email from the IdP."),
-     *                 @OA\Property(property="name", type="string", example="Jane Doe", description="Full display name; server splits into first/last when creating a user."),
-     *                 @OA\Property(property="photoUrl", type="string", format="uri", nullable=true, description="Optional profile image URL (https recommended; localhost blocked in production)."),
-     *                 @OA\Property(property="providerId", type="string", nullable=true, description="Optional stable subject from the IdP (Google `sub`, Microsoft `oid`, LinkedIn person URN, etc.).")
+     *                 @OA\Property(property="idToken", type="string", nullable=true, description="OIDC ID token (required for Google; Microsoft accepts idToken or accessToken)."),
+     *                 @OA\Property(property="accessToken", type="string", nullable=true, description="OAuth access token (required for LinkedIn; alternative for Microsoft).")
      *             ),
      *             @OA\Examples(
      *                 example="google_signin",
      *                 summary="Google Sign-In",
-     *                 description="After Google OAuth / Google Sign-In for Android, iOS, or web — send email, name, and optional sub + picture from userinfo.",
-     *                 value={"provider":"google","email":"jane.doe@gmail.com","name":"Jane Doe","providerId":"109876543210987654321","photoUrl":"https://lh3.googleusercontent.com/a-/AOh14GgExampleProfilePhoto"}
+     *                 value={"provider":"google","idToken":"eyJhbGciOiJSUzI1NiIsImtpZCI6..."}
      *             ),
      *             @OA\Examples(
      *                 example="microsoft_msal",
      *                 summary="Microsoft (MSAL / Entra)",
-     *                 description="After Microsoft sign-in — use mail and displayName from Microsoft Graph / token claims; oid as providerId when available.",
-     *                 value={"provider":"microsoft","email":"jane.doe@contoso.com","name":"Jane Doe","providerId":"a1b2c3d4-e5f6-7890-abcd-ef1234567890","photoUrl":"https://graph.microsoft.com/v1.0/me/photo/$value"}
+     *                 value={"provider":"microsoft","idToken":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIs..."}
      *             ),
      *             @OA\Examples(
      *                 example="linkedin_openid",
      *                 summary="LinkedIn (OIDC)",
-     *                 description="Use `linkedin` or `linkedin-openid`. Send email and name from LinkedIn's OpenID Connect userinfo; person id or URN as providerId if available.",
-     *                 value={"provider":"linkedin-openid","email":"jane.doe@company.org","name":"Jane Doe","providerId":"urn:li:person:AbCdEfGhIj","photoUrl":"https://media.licdn.com/dms/image/v2/example-profile-photo-endpoint"}
+     *                 value={"provider":"linkedin-openid","accessToken":"AQXdSP8qjRnVVIPq..."}
      *             )
      *         )
      *     ),
@@ -711,118 +721,78 @@ class AuthApiController extends ApiController
 
         $request->validate([
             'provider' => 'required|string|in:google,microsoft,linkedin,linkedin-openid',
-            'email' => 'required|string|email',
-            'name' => 'required|string',
-            'photoUrl' => 'nullable|string|max:2048',
-            'providerId' => 'nullable|string|max:255',
+            'idToken' => 'nullable|string|max:8192',
+            'accessToken' => 'nullable|string|max:8192',
         ]);
 
-        $email = OAuthAccountSecurity::normalizedProviderEmail($request->email);
-        if (! $email) {
-            return response()->json(['message' => 'Invalid email address.'], 422);
-        }
-
         $canonical = OAuthAccountSecurity::canonicalOAuthProvider($request->provider);
+        $verifier = app(\App\Support\Social\SocialTokenVerifierInterface::class);
+        $linker = app(\App\Services\SocialAccountLinker::class);
 
-        $existing = User::where('email', $email)->first();
-        if ($existing) {
-            if ($msg = OAuthAccountSecurity::oauthLoginDeniedMessage($existing, $canonical)) {
-                return response()->json(['message' => $msg], 403);
-            }
-            if (! $existing->is_social_login) {
-                $existing->is_social_login = 1;
-                $existing->social_provider = $canonical;
-            } elseif (empty($existing->social_provider)) {
-                $existing->social_provider = $canonical;
-            }
-            if (! $existing->email_verified_at) {
-                $existing->email_verified_at = Carbon::now();
-            }
-            if (! $existing->is_verified) {
-                $existing->is_verified = 1;
-            }
-            if ($existing->status != 1) {
-                $existing->status = 1;
-            }
-            $existing->save();
-
-            $user = $existing;
-            Auth::login($user);
-            $user->load('communities');
-            $user->load('preferences');
-            $tokenResult = $user->createToken('Personal Access Token');
-            updateUserPushToken($request, $user);
-
-            return response()->json([
-                'token' => $tokenResult->accessToken,
-                'token_type' => 'Bearer',
-                'expires_at' => $tokenResult->token->expires_at,
-                'is_first_time' => $this->socialLoginNeedsProfileCompletion($user),
-                'user' => $user,
+        try {
+            $identity = $verifier->verify(
+                $canonical,
+                $request->input('idToken'),
+                $request->input('accessToken')
+            );
+        } catch (\App\Support\Social\SocialTokenVerificationException $e) {
+            AuthEventLogger::log($request, 'auth.social_login', 'token_rejected', [
+                'provider' => $canonical,
+                'reason' => $e->getMessage(),
             ]);
+
+            return response()->json(['message' => 'The provider credential could not be verified.'], 401);
         }
 
-        $nameParts = preg_split('/\s+/', trim((string) $request->name), 2, PREG_SPLIT_NO_EMPTY);
-        $firstName = $nameParts[0] ?? '';
-        $lastName = $nameParts[1] ?? '';
-
-        $safePicture = OAuthAccountSecurity::sanitizeStoredAvatarUrl($request->photoUrl);
-
-        $userData = (object) [
-            'user' => (object) [
-                'email' => $email,
-                'givenName' => $firstName,
-                'surname' => $lastName,
-                'given_name' => $firstName,
-                'family_name' => $lastName,
-                'mail' => $email,
-                'jobTitle' => null,
-                'picture' => $safePicture,
-            ],
-            'providerId' => $request->providerId,
-            'social_provider' => $canonical,
-        ];
-
-        if ($canonical === 'google') {
-            $savedUser = $this->socialLoginService->googleCallback($userData);
-        } elseif ($canonical === 'microsoft') {
-            $savedUser = $this->socialLoginService->microsoftCallback($userData);
-        } elseif ($canonical === 'linkedin') {
-            $linkedinPayload = (object) [
-                'user' => (object) [
-                    'email' => $email,
-                    'firstName' => $firstName,
-                    'lastName' => $lastName,
-                    'localizedFirstName' => $firstName,
-                    'localizedLastName' => $lastName,
-                    'headline' => null,
-                    'profilePicture' => $safePicture,
-                    'picture' => $safePicture,
-                ],
-            ];
-            $savedUser = $this->socialLoginService->linkedinCallback($linkedinPayload);
-        } else {
-            return response()->json(['message' => 'Unsupported provider'], 400);
-        }
-
-        if ($savedUser) {
-            $user = $savedUser;
-            Auth::login($user);
-            $user->load('communities');
-            $user->load('preferences');
-            $tokenResult = $user->createToken('Personal Access Token');
-            updateUserPushToken($request, $user);
-
-            return response()->json([
-                'token' => $tokenResult->accessToken,
-                'token_type' => 'Bearer',
-                'expires_at' => $tokenResult->token->expires_at,
-                'is_first_time' => $this->socialLoginNeedsProfileCompletion($user),
-                'user' => $user,
+        try {
+            $user = $linker->resolveUser($identity);
+        } catch (\App\Support\Social\SocialLoginDeniedException $e) {
+            AuthEventLogger::log($request, 'auth.social_login', 'denied', [
+                'provider' => $canonical,
+                'email' => $identity->email,
+                'reason' => $e->getMessage(),
             ]);
+
+            return response()->json(['message' => $e->getMessage()], $e->status);
         }
 
-        return response()->json(['message' => 'Unable to log you in'], 400);
+        $wasCreated = $user->wasRecentlyCreated || $user->created_at?->gt(Carbon::now()->subMinute());
+
+        if (! $user->email_verified_at) {
+            $user->email_verified_at = Carbon::now();
+        }
+        $user->is_verified = 1;
+        if (! $user->is_social_login) {
+            // Linked password account keeps its password; it simply gains social sign-in.
+            $user->is_social_login = 1;
+        }
+        if (empty($user->social_provider)) {
+            $user->social_provider = $canonical;
+        }
+        $user->save();
+
+        Auth::login($user);
+        $user->load('communities');
+        $user->load('preferences');
+        $tokenResult = $user->createToken('Personal Access Token');
+        updateUserPushToken($request, $user);
+
+        AuthEventLogger::log($request, 'auth.social_login', 'success', [
+            'provider' => $canonical,
+            'user_id' => $user->id,
+            'email' => $identity->email,
+        ]);
+        if ($wasCreated) {
+            AuthEventLogger::trackAccountCreation($request, $user);
+        }
+
+        return response()->json([
+            'token' => $tokenResult->accessToken,
+            'token_type' => 'Bearer',
+            'expires_at' => $tokenResult->token->expires_at,
+            'is_first_time' => $this->socialLoginNeedsProfileCompletion($user),
+            'user' => $user,
+        ]);
     }
 
     /**

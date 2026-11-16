@@ -84,4 +84,7 @@ return [
     'spamfree24.eu',
     'spamfree24.info',
     'spamfree24.net',
+
+    // Domains used in the Nov 2026 account-creation incident
+    'fldubai.com',
 ];

@@ -223,7 +223,12 @@
                             <div class="user-card-meta">ID: {{ $u->id }} @if($u->email)<span class="mx-1">·</span> {{ $u->email }}@endif</div>
                         </div>
                     </div>
-                    <div>
+                    <div class="d-flex align-items-center">
+                        @if((int) (current_user()->access_level_id ?? 0) >= 4 && (int) ($u->access_level_id ?? 0) < 4)
+                            <label class="mb-0 mr-3 small text-muted" title="Select for bulk purge">
+                                <input type="checkbox" class="purge-select" value="{{ $u->id }}"> select
+                            </label>
+                        @endif
                         <span class="badge {{ $statusClass }} px-3 py-2" style="border-radius: 999px;">{{ $statusLabel }}</span>
                     </div>
                 </div>
@@ -305,6 +310,46 @@
                 </div>
             </div>
         @endforeach
+
+        @if((int) (current_user()->access_level_id ?? 0) >= 4)
+            <form method="POST" action="{{ route('permissions.purge-users') }}" id="bulkPurgeForm"
+                  class="border rounded p-3 mb-3 d-none align-items-center" style="gap: 12px; background: #fff5f5;"
+                  onsubmit="return confirm('Purge the selected users? This permanently removes their content and files.');">
+                @csrf
+                <div id="bulkPurgeIds"></div>
+                <strong class="text-danger mr-2"><span id="purgeCount">0</span> selected</strong>
+                <div class="custom-control custom-checkbox mr-2">
+                    <input type="checkbox" class="custom-control-input" id="bulk_purge_ban" name="ban" value="1" checked>
+                    <label class="custom-control-label" for="bulk_purge_ban">Ban emails</label>
+                </div>
+                <input type="text" name="reason" class="form-control form-control-sm w-auto flex-grow-1" maxlength="500" placeholder="Reason (audit trail)" value="Spam/malicious accounts">
+                <button type="submit" class="btn btn-danger btn-sm"><i class="fa fa-user-slash mr-1"></i> Purge selected as spam</button>
+            </form>
+            <script>
+                (function () {
+                    var form = document.getElementById('bulkPurgeForm');
+                    var idsBox = document.getElementById('bulkPurgeIds');
+                    var count = document.getElementById('purgeCount');
+                    function refresh() {
+                        var checked = document.querySelectorAll('.purge-select:checked');
+                        idsBox.innerHTML = '';
+                        checked.forEach(function (box) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'user_ids[]';
+                            input.value = box.value;
+                            idsBox.appendChild(input);
+                        });
+                        count.textContent = checked.length;
+                        form.classList.toggle('d-none', checked.length === 0);
+                        form.classList.toggle('d-flex', checked.length > 0);
+                    }
+                    document.querySelectorAll('.purge-select').forEach(function (box) {
+                        box.addEventListener('change', refresh);
+                    });
+                })();
+            </script>
+        @endif
 
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center pt-2 pb-4">
             <div class="text-muted small mb-2 mb-md-0">

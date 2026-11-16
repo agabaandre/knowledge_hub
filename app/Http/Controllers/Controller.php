@@ -10,7 +10,7 @@ use Illuminate\Routing\Controller as BaseController;
 /**
  * @OA\Info(
  *     title="Africa CDC KnowledgeHub API",
- *     version="1.0.0",
+ *     version="2.0.0",
  *     description="HTTP API for the Africa CDC Knowledge Hub (web and mobile clients). **URL base:** routes in this specification are rooted at `/api` (example: `GET /api/publications` → `{server}/api/publications`). **Auth:** call `POST /api/login` with email and password to receive a Laravel Passport access token; send `Authorization: Bearer {access_token}` on protected operations. **Optional Bearer** on some public GET routes enables personalised results (e.g. recommended publications). **Errors:** Laravel validation typically returns `422` with `message` and/or `errors`; many success payloads use `status` and `data` at the top level."
  * )
  *

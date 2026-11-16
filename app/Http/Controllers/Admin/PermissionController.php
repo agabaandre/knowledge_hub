@@ -617,16 +617,82 @@ class PermissionController extends Controller
 
     public function deleteUser(Request $request){
 
+        if (! current_user() || (int) (current_user()->access_level_id ?? 0) < 4) {
+            abort(403, 'Only overall administrators can delete users.');
+        }
+
         // Accept either 'id' (from modal) or 'user_id'
         $user_id = $request->input('id', $request->input('user_id'));
         $user    = User::find($user_id);
-        $deleted = $user ? $user->delete() : false;
+
+        if ($user && (int) $user->id === (int) current_user()->id) {
+            notify()->error('You cannot delete your own account.');
+            return back();
+        }
+
+        $deleted = false;
+        if ($user) {
+            // Full purge: tokens, sessions, content, files — never a bare row delete.
+            app(\App\Services\Purge\UserPurgeService::class)->purge($user, [
+                'ban' => $request->boolean('ban'),
+                'actorId' => current_user()->id,
+                'reason' => (string) ($request->input('reason') ?: 'Deleted from admin user list'),
+            ]);
+            $deleted = true;
+        }
 
         $msg = (!$deleted)?"Operation failed, try again":"User <b> $user->name </b>, with username <b>$user->email</b> has been  <b> deleted</b>";
         $alert_class = ($deleted)?'success':'danger';
         $alert = ['alert-'.$alert_class=>$msg];
         if($deleted){ notify()->success('User deleted successfully'); } else { notify()->error('Delete failed'); }
         return back()->with($alert);
+    }
+
+    /**
+     * Incident tool: purge one or many users as spam/malicious (bulk-select).
+     * Snapshots to storage/incidents/, revokes tokens, removes content + files,
+     * and optionally bans the email so it cannot re-register.
+     */
+    public function purgeUsers(Request $request){
+
+        if (! current_user() || (int) (current_user()->access_level_id ?? 0) < 4) {
+            abort(403, 'Only overall administrators can purge users.');
+        }
+
+        $request->validate([
+            'user_ids' => 'required|array|min:1|max:200',
+            'user_ids.*' => 'integer|exists:users,id',
+            'ban' => 'nullable|boolean',
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        $service = app(\App\Services\Purge\UserPurgeService::class);
+        $purged = 0;
+        $skipped = [];
+
+        foreach ($request->input('user_ids') as $userId) {
+            $user = User::find((int) $userId);
+            if (! $user || (int) $user->id === (int) current_user()->id) {
+                $skipped[] = $userId;
+                continue;
+            }
+            if ((int) ($user->access_level_id ?? 0) >= 4) {
+                $skipped[] = $user->email; // never bulk-purge another overall admin
+                continue;
+            }
+
+            $service->purge($user, [
+                'ban' => $request->boolean('ban', true),
+                'actorId' => current_user()->id,
+                'reason' => (string) ($request->input('reason') ?: 'Purged as spam/malicious'),
+            ]);
+            $purged++;
+        }
+
+        $message = "Purged {$purged} user(s)".($skipped ? '; skipped '.count($skipped) : '');
+        notify()->success($message);
+
+        return back()->with(['alert-success' => $message]);
     }
 
     public function profile(Request $request){

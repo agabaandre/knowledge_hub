@@ -95,6 +95,15 @@ class OfficeDocumentToPdfService
                 return null;
             }
 
+            // XXE guard: refuse any office archive whose XML parts declare a DTD or entity.
+            if (! \App\Support\OfficeXmlSecurity::isSafe($sourceAbsolutePath, $ext)) {
+                Log::warning('OfficeDocumentToPdfService: document rejected by XML security scan', [
+                    'source' => $sourceAbsolutePath,
+                ]);
+
+                return null;
+            }
+
             $outDir = dirname($sourceAbsolutePath);
             $stem = pathinfo($sourceAbsolutePath, PATHINFO_FILENAME);
             $targetPdf = $outDir . DIRECTORY_SEPARATOR . $stem . '.pdf';
@@ -138,12 +147,21 @@ class OfficeDocumentToPdfService
             return false;
         }
 
+        // Fresh throwaway profile per conversion: no shared state, no macros,
+        // and LibreOffice cannot read another conversion's documents. Network
+        // egress for soffice should additionally be blocked at deploy level
+        // (systemd IPAddressDeny / container without network).
+        $profileDir = rtrim(sys_get_temp_dir(), '/').'/lo_profile_'.bin2hex(random_bytes(8));
+
         try {
             $process = new Process([
                 $binary,
                 '--headless',
                 '--nologo',
+                '--norestore',
+                '--nolockcheck',
                 '--nofirststartwizard',
+                '-env:UserInstallation=file://'.$profileDir,
                 '--convert-to',
                 'pdf',
                 '--outdir',
@@ -165,6 +183,28 @@ class OfficeDocumentToPdfService
             Log::warning('LibreOffice process failed: ' . $e->getMessage());
 
             return false;
+        } finally {
+            $this->removeThrowawayProfile($profileDir);
+        }
+    }
+
+    private function removeThrowawayProfile(string $profileDir): void
+    {
+        if (! str_contains($profileDir, '/lo_profile_') || ! is_dir($profileDir)) {
+            return;
+        }
+
+        try {
+            $items = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($profileDir, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ($items as $item) {
+                $item->isDir() ? @rmdir($item->getPathname()) : @unlink($item->getPathname());
+            }
+            @rmdir($profileDir);
+        } catch (\Throwable $e) {
+            Log::debug('Could not remove LibreOffice throwaway profile', ['dir' => $profileDir]);
         }
     }
 

@@ -220,6 +220,52 @@ class ResourcesController extends Controller
         return $this->publicationsRepo->delete($request->id);
     }
 
+    /**
+     * Incident tool: purge publications as spam/malicious (single or bulk):
+     * every child row and stored file is removed, and the action is audited.
+     */
+    public function purge(Request $request){
+
+        if (! current_user() || (int) (current_user()->access_level_id ?? 0) < 4) {
+            abort(403, 'Only overall administrators can purge publications.');
+        }
+
+        $request->validate([
+            'publication_ids' => 'required|array|min:1|max:200',
+            'publication_ids.*' => 'integer|exists:publication,id',
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        $purger = app(\App\Services\Purge\PublicationPurger::class);
+        $removedRows = 0;
+        $removedFiles = 0;
+
+        foreach ($request->input('publication_ids') as $publicationId) {
+            $result = $purger->purge((int) $publicationId);
+            $removedRows += array_sum($result['rows']);
+            $removedFiles += count($result['files']);
+        }
+
+        try {
+            log_user_trail(
+                'admin.purge_publications',
+                json_encode([
+                    'publication_ids' => $request->input('publication_ids'),
+                    'reason' => (string) ($request->input('reason') ?: 'Purged as spam/malicious'),
+                    'rows' => $removedRows,
+                    'files' => $removedFiles,
+                ])
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('Could not audit publication purge: '.$e->getMessage());
+        }
+
+        $message = 'Purged '.count($request->input('publication_ids'))." publication(s): {$removedRows} rows, {$removedFiles} files.";
+        notify()->success($message);
+
+        return back()->with(['alert-success' => $message]);
+    }
+
     public function approve_comment(Request $request){
         return $this->publicationsRepo->approve_comment($request->id);
     }

@@ -14,6 +14,34 @@ class SocialLoginService {
         $this->usersRepo = $usersRepository;
     }
 
+    /**
+     * Create (or fetch) a user from a server-verified provider identity.
+     * This is the only creation path the token-based API flow uses; the
+     * display name and picture come from the verified token claims.
+     */
+    public function createFromVerifiedIdentity(\App\Support\Social\VerifiedSocialIdentity $identity): ?\App\Models\User
+    {
+        $email = OAuthAccountSecurity::normalizedProviderEmail($identity->email);
+        if (! $email) {
+            return null;
+        }
+
+        $nameParts = preg_split('/\s+/', trim($identity->name), 2, PREG_SPLIT_NO_EMPTY) ?: [];
+        $photoUrl = OAuthAccountSecurity::sanitizeStoredAvatarUrl($identity->pictureUrl);
+
+        $request = new Request();
+        $request->merge(array_filter([
+            'firstname' => $nameParts[0] ?? '',
+            'lastname' => $nameParts[1] ?? '',
+            'email' => $email,
+            'photo' => $photoUrl,
+            'is_photo_external' => $photoUrl ? 1 : null,
+            'social_provider' => $identity->provider,
+        ], static fn ($value) => $value !== null));
+
+        return $this->usersRepo->save($request, true);
+    }
+
     public function microsoftCallback($socialUser) {
     
         try {

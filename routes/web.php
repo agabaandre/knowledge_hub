@@ -135,7 +135,7 @@ Route::get('password/reset', function (\Illuminate\Http\Request $request) {
     return app(ForgotPasswordController::class)->showLinkRequestForm($request);
 })->name('password.request');
 
-Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->middleware('throttle:auth')->name('password.email');
 Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
@@ -184,7 +184,7 @@ else:
 endif;
 
 
-Route::post('/registration', [AuthController::class, 'register'])->name('registration');
+Route::post('/registration', [AuthController::class, 'register'])->middleware('throttle:auth')->name('registration');
 Route::get('/privacy', [CommonController::class, 'privacy'])->name('privacy');
 Route::get('/user_manual', [CommonController::class, 'userManual'])->name('user_manual');
 Route::get('/user-guide', [CommonController::class, 'userManual']);
@@ -436,6 +436,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web', 'admin.access
         Route::post("/approval", [ResourcesController::class, 'approval']);
         Route::post("/bulk-approval", [ResourcesController::class, 'bulkApproval'])->name('admin.publications.bulk-approval');
         Route::post("/wipe-content", [ResourcesController::class, 'wipeContent'])->name('admin.publications.wipe-content');
+        Route::post("/purge", [ResourcesController::class, 'purge'])->name('admin.publications.purge');
         Route::get("/moderate", [ResourcesController::class, 'moderate']);
         Route::get("/delete", [ResourcesController::class, 'destroy']);
         Route::get("/approve_comment", [ResourcesController::class, 'approve_comment']);
@@ -825,6 +826,7 @@ Route::group(['prefix' => 'permissions', 'middleware' => ['auth', 'web', 'admin.
     Route::post('/reset',  [PermissionController::class, 'resetUser'])->name('permissions.reset');
 
     Route::post('/delete',  [PermissionController::class, 'deleteUser'])->name('permissions.delete');
+    Route::post('/purge-users',  [PermissionController::class, 'purgeUsers'])->name('permissions.purge-users');
     Route::post('/send-verification',  [PermissionController::class, 'sendVerification'])->name('permissions.sendverification');
     Route::post('/verify-user',  [PermissionController::class, 'verifyUser'])->name('permissions.verifyuser');
     Route::any('/trail',  [PermissionController::class, 'trail'])->name('permissions.trail');

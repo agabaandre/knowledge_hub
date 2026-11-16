@@ -90,5 +90,19 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('oauth', function (Request $request) {
             return Limit::perMinute(30)->by($request->ip());
         });
+
+        // Credential endpoints (login, register, social-login, forgot-password,
+        // refresh): 5/min per IP, and 5/min per target email when one is sent,
+        // so an attacker cannot hammer one account from many IPs either.
+        RateLimiter::for('auth', function (Request $request) {
+            $limits = [Limit::perMinute(5)->by('auth-ip:'.$request->ip())];
+
+            $email = strtolower(trim((string) $request->input('email', '')));
+            if ($email !== '') {
+                $limits[] = Limit::perMinute(5)->by('auth-email:'.sha1($email));
+            }
+
+            return $limits;
+        });
     }
 }
